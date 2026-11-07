@@ -20,3 +20,5 @@
 
 - 第一组 RED `8456593`：`-Dtest=ContentApplicationTest -Pintegration -Dit.test=ProductionFeedIT verify`，源码编译、真实MySQL/Redis预检通过，HTTP关注路由缺失404导致1 assertion failure、0 errors。
 - 第一组 GREEN：主库候选/权威判定、关注/取关及固定历史集、基础HTTP与内部签名游标。`mvn -B -ntp -Pintegration -Dit.test=ProductionFeedIT,MySqlMigrationIT verify` BUILD SUCCESS；44 unit +4 IT（迁移3、生产HTTP链1），0失败/错误/跳过。V4仅新增控制行及排序索引，V1–V3不变。日志target/batch-read-verified.log；尚非本批完整验收。
+- 第二组 RED `eedf8a6`：真实MySQL/Redis正常，3个令牌单元通过，合法签名Bearer未接入Principal导致HTTP401（预期200），1 failure/0 errors；日志target/batch-http-red.log。
+- 第二组 GREEN：身份HMAC适配、独立用途/密钥、游标绑定与可配置扫描预算；第一轮47 unit+7 IT通过；修正过滤器只捕获认证阶段异常并补游标过期断言后，`-Dtest=FeedTokensTest -Pintegration -Dit.test=ProductionFeedIT verify` 3 unit+7 IT再次通过。PowerShell签发命令的JSON/签名通过独立Python HMAC核对。目标日志target/batch-http-verified.log。未进行登录业务开发，运维密钥持有者为临时身份信任根。

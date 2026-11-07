@@ -1,6 +1,7 @@
 package io.github.xiiiiimu.content.infrastructure;
 
 import io.github.xiiiiimu.content.domain.*;
+import io.github.xiiiiimu.content.api.FeedIdentityFilter;
 import io.lettuce.core.*;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.resource.DefaultClientResources;
@@ -22,5 +23,7 @@ public class FeedConfiguration {
  @Bean TransactionTemplate feedTransactions(PlatformTransactionManager manager){var t=new TransactionTemplate(manager);t.setIsolationLevel(org.springframework.transaction.TransactionDefinition.ISOLATION_READ_COMMITTED);t.setTimeout(5);return t;}
  @Bean FeedTokens cursorTokens(@Value("${content.feed.cursor-key}")String key){return new FeedTokens(key,"CURSOR");}
  @Bean RelationshipService relationships(FeedMapper db,TransactionTemplate tx,ObjectMapper json,@Value("${content.feed.history-limit:20}")int n,@Value("${content.feed.window-millis:2592000000}")long window){return new RelationshipService(db,tx,json,n,window);}
- @Bean FollowingFeed followingFeed(FeedMapper db,ExecutorService executor,FeedTokens tokens,@Value("${content.feed.window-millis:2592000000}")long window,StatefulRedisConnection<String,String> redis){return new FollowingFeed(db,executor,tokens,window,redis);}
+ @Bean FeedIdentityFilter feedIdentityFilter(@Value("${content.feed.identity-key}")String key,@Value("${content.feed.cursor-key}")String cursorKey){if(key.equals(cursorKey))throw new IllegalArgumentException("Identity and cursor keys must differ");return new FeedIdentityFilter(key);}
+ @Bean FeedMerger.Budget feedBudget(@Value("${content.feed.batch-size:32}")int batch,@Value("${content.feed.max-scanned:256}")int scans,@Value("${content.feed.max-reads:64}")int reads){return new FeedMerger.Budget(batch,scans,reads,256,Duration.ofSeconds(2));}
+ @Bean FollowingFeed followingFeed(FeedMapper db,ExecutorService executor,FeedTokens tokens,@Value("${content.feed.window-millis:2592000000}")long window,StatefulRedisConnection<String,String> redis,FeedMerger.Budget budget){return new FollowingFeed(db,executor,tokens,window,redis,budget);}
 }

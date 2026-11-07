@@ -93,6 +93,9 @@ class ProductionFeedIT {
  @Test void cursorBindsReaderLimitGraphAndExpiry()throws Exception {
   long a=author("PULL");http.perform(put("/api/follows/"+a).principal(()->"201")).andExpect(status().isOk());seed(a,4);
   String cursor=page(201,1,null).get("nextCursor").asText();
+  var signer=new FeedTokens("cursor-test-key-32-bytes-minimum-00001","CURSOR");var c=signer.verify(cursor,FollowingFeed.Cursor.class);
+  String expired=signer.sign(new FollowingFeed.Cursor(c.version(),c.reader(),c.limit(),c.snapshot(),c.since(),c.globalBoundary(),c.consumedBoundary(),c.graph(),c.generation(),now()-1));
+  http.perform(get("/api/feed/following").param("limit","1").param("cursor",expired).principal(()->"201")).andExpect(status().isBadRequest());
   http.perform(get("/api/feed/following").param("limit","1").param("cursor",cursor).principal(()->"202")).andExpect(status().isBadRequest());
   http.perform(get("/api/feed/following").param("limit","2").param("cursor",cursor).principal(()->"201")).andExpect(status().isBadRequest());
   http.perform(get("/api/feed/following").param("limit","1").param("cursor",cursor+"x").principal(()->"201")).andExpect(status().isBadRequest());
