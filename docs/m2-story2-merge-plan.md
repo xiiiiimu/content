@@ -85,3 +85,11 @@
 - GREEN 定向：`mvn -B -ntp -Dtest=FeedMergerTest -Pintegration -Dit.test=FeedMergeIT verify` BUILD SUCCESS，19 个单元 + 9 个真实集成，0 失败/错误/跳过。T02 实际分 72 页遍历 501 项，与全量 SQL DESC 和独立 ID 501..1 两份预期逐项对照；每页记录 G/C、P、scanned、fetched、sourceReads 和 items。真实 SQL 故障为 `SELECT SLEEP(5)` + JDBC 1 秒语句超时，以及不存在表查询；真实 Redis 故障用 Docker pause/unpause，错误栈和重试恢复结果写入证据。
 - 完整回归：`mvn -B -ntp -Pintegration verify` BUILD SUCCESS（14:05），44 个单元、75 个真实集成（归并 9、迁移 3、发布 23、Relay 22、Redis 存储 18），总计 119 项，0 失败/错误/跳过。本地完整日志 `target/m2-story2-full.log`。既有发布/Relay 实现及其测试未改。
 - GREEN 提交包含本说明；远端实际最终状态以 PR #4 检查为准。CI artifact 增加 `target/feed-merge-evidence/**`，包括预检、遍历轨迹、SQL/Redis 故障栈和组件日志，沿用现有 7 天保留期。未执行的测试不标为通过。
+
+## PR #4 审查补充：预算及夹具证据的精确范围
+
+- 默认最多 64 次来源回调、每批最多 32 项，因此接受的拉取项最多 2048（含跨来源重复）；当前缓冲最多 8×32=256 项，请求内身份核对表最多 2048 项；最多消费/权威检查 256 个唯一元组，返回最多 100 项。页满后的队首确认也计入来源读取次数；失败没有成功页，不能使用部分结果的边界。
+- 这些是内核层工作量约束，不是数据库物理扫描行数、任意回调内部 SQL 次数或总请求时延的保证。内置 Redis 适配器使用有界 ZRANGE 和 ZCARD/ZCOUNT 元数据检查，不读取全键成员；SQL 测试来源虽有 LIMIT，MySQL 为过滤/排序实际检查多少行仍取决于执行计划。生产适配器必须另外约束内部查询、超时、线程/连接队列并验收执行计划；不能以 Future.cancel 已调用当作底层 I/O 已终止。
+- 单元测试的内存来源会对固定小夹具全量过滤/排序；集成测试的全量 SQL 查询只用于 501 项等固定夹具的排序 oracle。它们不是生产候选来源，也不提供生产容量或无全表扫描的证据。
+- 真实 SQL 权威夹具实际只核对帖子 canonical 元组及 status=PUBLISHED，没有读取 follows、follow_history 或 follow_graph_version。单元测试中“关注代次拒绝”用例仅注入一个 false 判定来验证过滤后的归并行为，不证明真实关注/重关注/回填权限协议已实现。ADR-003 的完整读取谓词、图版本和 M3 生命周期尚待后续 Story。
+- EXHAUSTED 是调用者已证明覆盖的来源集合在当前范围正常耗尽；当前夹具的完整覆盖由种入集合证明。任意生产 Redis 空键、单独的 PULL 来源或当前作者模式都不能替代 PUSH 历史、旧 PULL 历史及缺失缓存的覆盖证明。
