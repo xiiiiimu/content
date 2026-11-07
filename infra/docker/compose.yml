@@ -1,0 +1,100 @@
+name: content
+services:
+  mysql:
+    image: mysql:8.4
+    restart: "no"
+    environment:
+      MYSQL_DATABASE: content
+      MYSQL_USER: ${CONTENT_MYSQL_USER:-content}
+      MYSQL_PASSWORD: ${CONTENT_MYSQL_PASSWORD:?Set CONTENT_MYSQL_PASSWORD in infra/docker/.env}
+      MYSQL_ROOT_PASSWORD: ${CONTENT_MYSQL_ROOT_PASSWORD:?Set CONTENT_MYSQL_ROOT_PASSWORD in infra/docker/.env}
+    ports:
+      - "127.0.0.1:${CONTENT_MYSQL_PORT:-23306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_PASSWORD\" mysql --protocol=TCP -h 127.0.0.1 -u \"$$MYSQL_USER\" \"$$MYSQL_DATABASE\" -e 'SELECT 1'"]
+      interval: 5s
+      timeout: 4s
+      retries: 20
+      start_period: 30s
+
+  redis:
+    image: redis:7.4
+    restart: "no"
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    ports:
+      - "127.0.0.1:${CONTENT_REDIS_PORT:-26379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  namesrv:
+    image: apache/rocketmq:5.3.2
+    restart: "no"
+    command: ["sh", "mqnamesrv"]
+    environment:
+      JAVA_OPT_EXT: "-Xms128m -Xmx256m"
+    ports:
+      - "127.0.0.1:${CONTENT_NAMESRV_PORT:-29876}:9876"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/9876"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
+
+  broker:
+    image: apache/rocketmq:5.3.2
+    restart: "no"
+    command: ["sh", "mqbroker", "-c", "/home/rocketmq/content-broker.conf"]
+    environment:
+      NAMESRV_ADDR: namesrv:9876
+      JAVA_OPT_EXT: "-Xms256m -Xmx512m -Xmn128m"
+    depends_on:
+      namesrv:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:30911:30911"
+    volumes:
+      - ./broker.conf:/home/rocketmq/content-broker.conf:ro
+      - rocketmq-data:/home/rocketmq/store
+    healthcheck:
+      test: ["CMD-SHELL", "sh mqadmin clusterList -n namesrv:9876 | grep -q content-broker"]
+      interval: 10s
+      timeout: 8s
+      retries: 15
+      start_period: 25s
+
+  minio:
+    profiles: [media]
+    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    restart: "no"
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${CONTENT_MINIO_USER:-contentadmin}
+      MINIO_ROOT_PASSWORD: ${CONTENT_MINIO_PASSWORD:-}
+    ports:
+      - "127.0.0.1:${CONTENT_MINIO_API_PORT:-29000}:9000"
+      - "127.0.0.1:${CONTENT_MINIO_CONSOLE_PORT:-29001}:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/minio/health/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+networks:
+  default:
+    name: content_network
+
+volumes:
+  mysql-data:
+  redis-data:
+  rocketmq-data:
+  minio-data:
