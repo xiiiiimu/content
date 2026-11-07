@@ -8,6 +8,7 @@ permissions:
 jobs:
   maven:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -16,3 +17,12 @@ jobs:
           java-version: '17'
           cache: maven
       - run: mvn --batch-mode --no-transfer-progress -Pintegration verify
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mysql-rocketmq-test-evidence
+          retention-days: 7
+          path: |
+            target/surefire-reports/**
+            target/failsafe-reports/**
+            target/relay-evidence/**
