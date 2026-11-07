@@ -39,8 +39,8 @@ Use `.\infra\docker\stop.ps1` for daily shutdown. Services are scoped to project
 
 ## Build and tests
 
-- `mvn -B verify` compiles, runs JUnit 5 tests and packages the app. This is the GitHub Actions command for PRs and pushes to `main`.
-- `mvn -B -Pintegration verify` additionally runs the MySQL Flyway smoke test using a disposable Testcontainers instance. It requires Docker access and fails visibly when Docker is unavailable.
+- `mvn -B verify` compiles, runs JUnit 5 tests and packages the app.
+- `mvn -B -Pintegration verify` additionally runs Flyway migration and M1 publication integration tests using disposable Testcontainers MySQL 8.4 instances. PR CI runs this command. It requires Docker access and fails visibly when Docker is unavailable.
 - Add real MySQL, Redis and RocketMQ integration scenarios as M1–M3 land. Run longer fault injection and performance experiments separately.
 
 ## Code boundaries and TDD
@@ -48,3 +48,9 @@ Use `.\infra\docker\stop.ps1` for daily shutdown. Services are scoped to project
 `api` contains HTTP adapters, `domain` contains rules and use cases, `infrastructure` contains database and middleware adapters, and `worker` contains asynchronous entry points. At M0 these packages mark the intended boundaries.
 
 For each business story, commit the RED test first. Verify that it compiles, the environment is healthy and the assertion fails for the missing behavior. Commit the smallest GREEN implementation separately and refactor in a follow-up commit when useful. Exercise transaction, retry and concurrency behavior against real services. Use the [acceptance matrix](docs/m0-m3-test-matrix.md) to determine what counts as complete.
+
+## M1 Story 1: publish an existing text draft
+
+`POST /api/posts/{postId}/publish` requires `Idempotency-Key` and `{"expectedVersion":4}`. The author id comes exclusively from the trusted servlet `Principal` name (positive numeric user id). Authentication integration remains outside this Story; without a Principal the endpoint returns 401. Tests supply a Principal directly, never a production author header. The endpoint publishes the stored body and rejects additional body fields.
+
+The [Story protocol and verification record](docs/m1-story1-publish.md) define replay, conflicts and response fields. Publication locks the author mode row, increments the author sequence, and atomically saves the post, `PostPublished` Outbox event and successful request snapshot. Replays return that snapshot. Outbox rows remain `NEW`; Relay is a subsequent Story.

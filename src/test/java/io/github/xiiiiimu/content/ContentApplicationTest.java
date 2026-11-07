@@ -10,6 +10,8 @@ class ContentApplicationTest {
     @Test
     void loadsApplicationWiringWithoutMiddleware() {
         new WebApplicationContextRunner()
+                .withBean(io.github.xiiiiimu.content.domain.PublishRepository.class,
+                        () -> org.mockito.Mockito.mock(io.github.xiiiiimu.content.domain.PublishRepository.class))
                 .withUserConfiguration(ContentApplication.class)
                 .withPropertyValues(
                         "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration",
