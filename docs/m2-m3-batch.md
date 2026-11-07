@@ -15,3 +15,8 @@
 ## 测试/提交纪律
 
 分内部行为组 RED→GREEN→必要REFACTOR，全部在codex/m2-m3-production，禁止将编译或连接故障算RED。真实MySQL/Redis/RocketMQ，关键故障用屏障/进程终止，保留证据。最终逐项记录T01–T09/T13–T18，T10分阶段沿ADR004，M4–M9不提前实现。未完成项不标通过；本文件持续补充实际提交、日志和风险。
+
+## 实际进展
+
+- 第一组 RED `8456593`：`-Dtest=ContentApplicationTest -Pintegration -Dit.test=ProductionFeedIT verify`，源码编译、真实MySQL/Redis预检通过，HTTP关注路由缺失404导致1 assertion failure、0 errors。
+- 第一组 GREEN：主库候选/权威判定、关注/取关及固定历史集、基础HTTP与内部签名游标。`mvn -B -ntp -Pintegration -Dit.test=ProductionFeedIT,MySqlMigrationIT verify` BUILD SUCCESS；44 unit +4 IT（迁移3、生产HTTP链1），0失败/错误/跳过。V4仅新增控制行及排序索引，V1–V3不变。日志target/batch-read-verified.log；尚非本批完整验收。
