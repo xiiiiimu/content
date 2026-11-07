@@ -37,6 +37,9 @@ import static org.awaitility.Awaitility.await;
 class OutboxRelayIT {
     @Container static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8.4");
     static final AtomicLong IDS=new AtomicLong(10000);
+    // Cold JVM/bootstrap/connection warmup is setup, not a business lease deadline.
+    // Windows startup was observed at 112s before the independent canary send.
+    static final int CHILD_BOOTSTRAP_SECONDS=180;
     static boolean senderWarmed;
     @DynamicPropertySource static void properties(DynamicPropertyRegistry r) {
         r.add("spring.datasource.url",MYSQL::getJdbcUrl); r.add("spring.datasource.username",MYSQL::getUsername); r.add("spring.datasource.password",MYSQL::getPassword);
@@ -210,7 +213,7 @@ class OutboxRelayIT {
         command.environment().put("CONTENT_DB_URL",MYSQL.getJdbcUrl());command.environment().put("CONTENT_MYSQL_USER",MYSQL.getUsername());command.environment().put("CONTENT_MYSQL_PASSWORD",MYSQL.getPassword());
         command.environment().put("CONTENT_RELAY_SCAN_ENABLED","true");command.environment().put("CONTENT_RELAY_PRODUCER_ENABLED","true");
         var child=command.redirectErrorStream(true).redirectOutput(log.toFile()).start();
-        try {assertThat(child.waitFor(120,TimeUnit.SECONDS)).as(log.toString()).isTrue();assertThat(child.exitValue()).isZero();}
+        try {assertThat(child.waitFor(CHILD_BOOTSTRAP_SECONDS,TimeUnit.SECONDS)).as(log.toString()).isTrue();assertThat(child.exitValue()).isZero();}
         finally {if(child.isAlive())child.destroyForcibly();}
         assertThat(state()).isEqualTo("NEW");assertThat(attempt()).isZero();
         assertThat(db.queryForObject("SELECT operator FROM outbox_replay_audit WHERE event_id=?",String.class,id)).isNotBlank();
@@ -247,7 +250,7 @@ class OutboxRelayIT {
         builder.redirectErrorStream(true).redirectOutput(signal.resolveSibling(signal.getFileName()+".log").toFile());return builder.start();
     }
     void kill(Process child,Path signal) throws Exception {
-        await().atMost(Duration.ofSeconds(120)).until(() -> {assertThat(child.isAlive()).as("child log: "+signal+".log").isTrue();return Files.exists(signal);});
+        await().atMost(Duration.ofSeconds(CHILD_BOOTSTRAP_SECONDS)).until(() -> {assertThat(child.isAlive()).as("child log: "+signal+".log").isTrue();return Files.exists(signal);});
         child.destroyForcibly();assertThat(child.waitFor(15,TimeUnit.SECONDS)).isTrue();
         Files.writeString(signal.resolveSibling(signal.getFileName()+".killed"),"eventId="+id+" attempt="+attempt()+" state="+state()+" exit="+child.exitValue());
     }
@@ -262,7 +265,7 @@ class OutboxRelayIT {
         try {kill(child,signal);}finally {if(child.isAlive())child.destroyForcibly();}
         messages(1);assertThat(state()).isEqualTo("RUNNING");awaitExpiry();
         var recovery=process("ONCE",Path.of("target","relay-evidence","recovery-"+id));
-        try {assertThat(recovery.waitFor(120,TimeUnit.SECONDS)).isTrue();assertThat(recovery.exitValue()).isZero();}finally {if(recovery.isAlive())recovery.destroyForcibly();}
+        try {assertThat(recovery.waitFor(CHILD_BOOTSTRAP_SECONDS,TimeUnit.SECONDS)).isTrue();assertThat(recovery.exitValue()).isZero();}finally {if(recovery.isAlive())recovery.destroyForcibly();}
         messages(2);assertThat(state()).isEqualTo("SENT");assertThat(attempt()).isEqualTo(2);
     }
     @Test void lastClaimKilledBeforeSendIsReapedDead() throws Exception {
@@ -274,7 +277,7 @@ class OutboxRelayIT {
     @Test void restartedScannerFindsNewEventsWithoutMemoryQueue() throws Exception {
         control();var signal=Path.of("target","relay-evidence","scanner-"+id);var child=process("SCAN",signal);
         try {
-            await().atMost(Duration.ofSeconds(120)).until(() -> state().equals("SENT"));
+            await().atMost(Duration.ofSeconds(CHILD_BOOTSTRAP_SECONDS)).until(() -> state().equals("SENT"));
             await().atMost(Duration.ofSeconds(20)).ignoreExceptions().until(() -> !RelayMqFixture.received(Long.toString(id)).isEmpty());
             long later=IDS.incrementAndGet();
             db.update("INSERT INTO outbox_events(id,event_type,aggregate_id,payload) SELECT ?,'PostPublished',?,JSON_SET(payload,'$.eventId',?,'$.postId',?) FROM outbox_events WHERE id=?",later,later,later,later,id);

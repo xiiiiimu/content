@@ -40,7 +40,7 @@ Use `.\infra\docker\stop.ps1` for daily shutdown. Services are scoped to project
 ## Build and tests
 
 - `mvn -B verify` compiles, runs JUnit 5 tests and packages the app.
-- `mvn -B -Pintegration verify` additionally runs Flyway migration and M1 publication integration tests using disposable Testcontainers MySQL 8.4 instances. PR CI runs this command. It requires Docker access and fails visibly when Docker is unavailable.
+- `mvn -B -Pintegration verify` additionally runs migration, publication, Relay and Redis candidate integration tests using disposable Testcontainers MySQL 8.4, RocketMQ 5.3.2 and Redis 7.4 instances. PR CI runs this command. It requires Docker access, including a free host port 30921 for the isolated test Broker, and fails visibly when dependencies are unavailable.
 - Add real MySQL, Redis and RocketMQ integration scenarios as M1–M3 land. Run longer fault injection and performance experiments separately.
 
 ## Code boundaries and TDD
@@ -76,3 +76,13 @@ Replay is a local operator command, with database credentials and OS access as i
 ```
 
 `mvn -B -Pintegration verify` now also executes real MySQL/RocketMQ Relay tests, including independent JVM termination at committed-claim and real-ACK barriers. They require Docker access and a free local port 30921. CI runs the same suite and uploads `mysql-rocketmq-test-evidence`, containing JUnit/Failsafe reports and Relay process/Broker logs. Three non-success ACK variants are RPC response fault injections after actual Broker sends; they do not simulate physical disk or replica loss. Broker pause/stop cases use only isolated test containers.
+
+## M2 Story 1: ordered Redis candidates
+
+The [candidate adapter contract](docs/m2-story1-feed-candidates.md) implements ADR-001 on the separate key `feed:v2:{uid}:inbox`. Every score is zero; members are fixed-width ASCII `(UTC milliseconds, post id)` tuples. Reads use `BYLEX REV` with a snapshot upper bound, an exclusive continuation boundary, and `LIMIT 0 n`. Read and write batches are each capped at 200.
+
+`RedisFeedCandidateStore` is a plain adapter over a caller-owned Lettuce connection with a finite command timeout. This Story adds no Redis Spring auto-configuration, Worker, HTTP endpoint, user-follow logic or MQ distribution. Writes require the immutable publication timestamp from the authoritative post. Replaying the same tuple is idempotent.
+
+Wrong key types, nonzero scores and malformed returned members mark the index untrusted and raise an error. Connection/timeout failures also raise an error; neither condition becomes an empty successful read. Normal operations cannot clear the untrusted marker. Authoritative rebuilding and recovery readiness remain future work. CI includes the real Redis tests and uploads the Redis log alongside the existing integration evidence.
+
+`CandidateSlice.lastReadBoundary` describes this source read only. It is not a signed client cursor or ADR-002's complete merge/visibility pagination state. An empty Redis read does not prove the entire Feed is exhausted, or that the cache is complete.
