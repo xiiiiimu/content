@@ -1,0 +1,17 @@
+# M2 剩余 + M3 批量实施记录
+
+状态：开发中；最终只提交一个批量 PR，不自动合并。基线 main 8435d41，PR #4 已合并，main run 42419149640 成功（44 unit +75 IT）。V2.1 PDF 只读保留，四份 ADR 优先；M0–M9 路线不变。
+
+## 内部依赖与实施参数
+
+1. 主库读取与关系生命周期：共享 gate→作者模式行→读者图版本→关系行锁；状态 FOLLOWING/UNFOLLOWED，首次关系 epoch=1，图版本从0初始化；重复操作不增代次。默认回填20，最大100；历史及Feed保留窗口默认30天可配置，快照固定窗口参数。窗口/N是部署配置，不在读时扩大已物化历史。作者须已存在（不自动创建账号）。
+2. 内部可信 Principal 沿用M1；生产 HTTP 配置额外的运维签发 HMAC bearer 适配，身份与游标使用独立>=32字节密钥、独立用途、有效期校验，不接受用户ID头。实现令牌适配，不开发登录业务。GET /api/feed/following 返回 items,nextCursor,pageState,scanned；游标绑定用户、版本、limit、snapshot、窗口、G/C、图版本、恢复generation、过期时间，默认15分钟。
+3. 主库有界候选及权威谓词：每源<=32，整页<=256消费/检查、<=64来源读，线程/连接队列有界；每次权威查询按主键联查当前关系与白名单。生产类完成判定，测试仅准备数据。Redis + 持久化PULL SQL + PUSH主库兜底组成混合来源，后两路按帖子不可变 delivery_mode 分区，不按作者最新模式改判。始终保留PUSH主库兜底，暂不声称减少主库读取的性能收益。
+4. Inbox+Task：MQ接收与任务同事务，提交后ACK。PostPublished按持久化payload及帖子核对；PUSH创建任务、PULL持久化NO_FANOUT决定。FollowChanged用于固定历史集合回填，取消不盲删member；FeedModeChanged受理后不改变旧帖子归属。保持原eventId/payload，冲突拒绝并告警。
+5. Worker：数据库时间，租约30秒、无续租、每次成功领取计尝试，最多5次，退避 min(60s,1s*2^(attempt-1))；批次最多100人/100历史ID，首次领取固定粉丝ID上界；每次claim递增token，成功/进度/失败校验RUNNING、token及lease_until>NOW，过期边界<=NOW；最后一次过期可DEAD。Redis写在短SQL事务之外，整批成功才推进；DEAD可受控本地命令重放并审计，不更改事件内容。
+6. 双向模式切换：与发布/关注共用作者锁，递增epoch、记录迁移及ModeChanged Outbox；旧代次始终由相同权威读取谓词覆盖，DONE必须记录主库覆盖策略/窗口并通过实际故障矩阵，不以仅增加epoch宣称完成。
+7. Redis恢复：采用ADR允许的受控维护窗口，不实现未经冻结的无停机追平。持久化维护/generation状态，写入gate等待已有SQL写事务退出，再隔离Redis旧Worker、暂停新发布/关系/迁移/分发写入。基于权威帖子+当前代次谓词重建（包含DONE任务所覆盖帖子），验证覆盖后才切READY；故障/重启保持主库读取。Redis标记丢失、错generation或未就绪不启用缓存；旧会话覆盖无法证明时CURSOR_STALE。独立单节点Redis为本地部署基线，不宣称Cluster跨槽脚本兼容。
+
+## 测试/提交纪律
+
+分内部行为组 RED→GREEN→必要REFACTOR，全部在codex/m2-m3-production，禁止将编译或连接故障算RED。真实MySQL/Redis/RocketMQ，关键故障用屏障/进程终止，保留证据。最终逐项记录T01–T09/T13–T18，T10分阶段沿ADR004，M4–M9不提前实现。未完成项不标通过；本文件持续补充实际提交、日志和风险。
