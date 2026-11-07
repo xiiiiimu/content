@@ -26,3 +26,4 @@ jobs:
             target/surefire-reports/**
             target/failsafe-reports/**
             target/relay-evidence/**
+            target/redis-candidate-evidence/**
