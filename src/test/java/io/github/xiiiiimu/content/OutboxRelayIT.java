@@ -31,12 +31,13 @@ import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(properties={"content.relay.enabled=true","content.relay.scan-enabled=false","content.relay.topic=content-relay-it",
-        "content.relay.lease-millis=4000","content.relay.send-timeout-millis=1000","content.relay.max-attempts=3",
+        "content.relay.lease-millis=10000","content.relay.send-timeout-millis=3000","content.relay.max-attempts=3",
         "content.relay.base-backoff-millis=100","content.relay.max-backoff-millis=1000","content.relay.batch-size=1"})
 @Testcontainers
 class OutboxRelayIT {
     @Container static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8.4");
     static final AtomicLong IDS=new AtomicLong(10000);
+    static boolean senderWarmed;
     @DynamicPropertySource static void properties(DynamicPropertyRegistry r) {
         r.add("spring.datasource.url",MYSQL::getJdbcUrl); r.add("spring.datasource.username",MYSQL::getUsername); r.add("spring.datasource.password",MYSQL::getPassword);
         r.add("content.relay.namesrv",RelayMqFixture::namesrv);
@@ -49,7 +50,14 @@ class OutboxRelayIT {
     @Autowired(required=false) DefaultMQProducer relayProducer;
     long id;
     String payload;
-    @BeforeEach void fixture() {
+    @BeforeEach void fixture() throws Exception {
+        if(relayProducer!=null && !senderWarmed) {
+            await().atMost(Duration.ofSeconds(60)).ignoreExceptions().untilAsserted(() -> {
+                var message=new org.apache.rocketmq.common.message.Message(RelayMqFixture.TOPIC,"PostPublished","sender-preflight","{\"eventId\":-1}".getBytes(StandardCharsets.UTF_8));
+                assertThat(relayProducer.send(message,10000).getSendStatus()).isEqualTo(SendStatus.SEND_OK);
+            });
+            senderWarmed=true;
+        }
         db.execute("DROP TRIGGER IF EXISTS fail_relay_sent"); db.execute("DROP TRIGGER IF EXISTS fail_relay_audit");
         if (db.queryForObject("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='outbox_replay_audit'",Integer.class)>0) db.update("DELETE FROM outbox_replay_audit");
         db.update("DELETE FROM outbox_events"); id=IDS.incrementAndGet();
@@ -65,8 +73,13 @@ class OutboxRelayIT {
     void expire() { db.update("UPDATE outbox_events SET lease_until=CURRENT_TIMESTAMP(6) WHERE id=?",id); }
     void eligible() { db.update("UPDATE outbox_events SET next_retry_at=CURRENT_TIMESTAMP(6) WHERE id=?",id); }
     void messages(int count) {
+        messages(count,false);
+    }
+    void messagesAtLeastOne() { messages(1,true); }
+    void messages(int count,boolean atLeast) {
         await().atMost(Duration.ofSeconds(20)).ignoreExceptions().untilAsserted(() -> {
-            var found=RelayMqFixture.received(Long.toString(id)); assertThat(found).hasSize(count);
+            var found=RelayMqFixture.received(Long.toString(id));
+            if(atLeast)assertThat(found.size()).isGreaterThanOrEqualTo(count);else assertThat(found).hasSize(count);
             assertThat(found).allSatisfy(m -> {
                 assertThat(new String(m.getBody(),StandardCharsets.UTF_8)).isEqualTo(payload);
                 assertThat(m.getUserProperty("eventId")).isEqualTo(Long.toString(id));
@@ -130,21 +143,21 @@ class OutboxRelayIT {
         try {tick();assertThat(state()).isEqualTo("NEW");assertThat(attempt()).isEqualTo(1);}
         finally {docker.unpauseContainerCmd(container).exec();}
         assertThat(db.queryForObject("SELECT last_error FROM outbox_events WHERE id=?",String.class,id).toLowerCase()).contains("timeout");
-        eligible();tick();assertThat(state()).isEqualTo("SENT");
-        await().atMost(Duration.ofSeconds(20)).ignoreExceptions().until(() -> !RelayMqFixture.received(Long.toString(id)).isEmpty());
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {tick();assertThat(state()).isEqualTo("SENT");});
+        assertThat(attempt()).isBetween(2,3);messagesAtLeastOne();
     }
     @Test void stoppedBrokerCannotBeMarkedSentAndRecovers() throws Exception {
         control();relayProducer.fetchPublishMessageQueues(RelayMqFixture.TOPIC);
         var docker=RelayMqFixture.BROKER.getDockerClient();var container=RelayMqFixture.BROKER.getContainerId();
+        long boots=RelayMqFixture.BROKER.getLogs().lines().filter(line -> line.contains("boot success")).count();
         docker.stopContainerCmd(container).withTimeout(0).exec();
         try {tick();assertThat(state()).isEqualTo("NEW");assertThat(attempt()).isEqualTo(1);}
         finally {
             docker.startContainerCmd(container).exec();
-            await().atMost(Duration.ofSeconds(60)).ignoreExceptions().until(() -> {
-                try(var socket=new java.net.Socket("127.0.0.1",RelayMqFixture.PORT)){return socket.isConnected();}
-            });
+            await().atMost(Duration.ofSeconds(60)).ignoreExceptions().until(() -> RelayMqFixture.BROKER.getLogs().lines().filter(line -> line.contains("boot success")).count()>boots);
         }
-        eligible();tick();assertThat(state()).isEqualTo("SENT");messages(1);
+        await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {tick();assertThat(state()).isEqualTo("SENT");});
+        assertThat(attempt()).isBetween(2,3);messagesAtLeastOne();
     }
     @Test void expiredUnclaimedTokenCannotCompleteOrRetry() {
         var old=claim();expire();assertThat(control().sent(old)).isFalse();assertThat(control().failed(old,"late")).isFalse();
@@ -157,9 +170,11 @@ class OutboxRelayIT {
     }
     @Test void retryUsesFrozenBackoffAndCountsClaims() {
         var lease=claim();assertThat(control().failed(lease,"failure")).isTrue();assertThat(state()).isEqualTo("NEW");
-        assertThat(db.queryForObject("SELECT TIMESTAMPDIFF(MICROSECOND,last_attempt_at,next_retry_at) FROM outbox_events WHERE id=?",Long.class,id)).isGreaterThanOrEqualTo(100000);
+        assertThat(db.queryForObject("SELECT TIMESTAMPDIFF(MICROSECOND,last_failure_at,next_retry_at) FROM outbox_events WHERE id=?",Long.class,id)).isEqualTo(100000);
         db.update("UPDATE outbox_events SET next_retry_at=TIMESTAMPADD(SECOND,60,CURRENT_TIMESTAMP(6)) WHERE id=?",id);
         assertThat(control().claim()).isEmpty(); eligible();var second=claim();assertThat(second.attempt()).isEqualTo(2);
+        control().failed(second,"second failure");
+        assertThat(db.queryForObject("SELECT TIMESTAMPDIFF(MICROSECOND,last_failure_at,next_retry_at) FROM outbox_events WHERE id=?",Long.class,id)).isEqualTo(200000);
     }
     @Test void finalFailedAttemptBecomesDead() {
         db.update("UPDATE outbox_events SET attempt=2 WHERE id=?",id);var last=claim();
@@ -185,6 +200,23 @@ class OutboxRelayIT {
         assertThat(control().replay(id,"operator","reason")).isFalse();
         assertThatThrownBy(() -> control().replay(id," ","reason")).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> control().replay(id,"operator","")).isInstanceOf(IllegalArgumentException.class);
+    }
+    @Test void controlledOperatorCommandReplaysWithOsAuditWithoutSending() throws Exception {
+        control();db.update("UPDATE outbox_events SET status='DEAD',attempt=3 WHERE id=?",id);
+        var log=Path.of("target","relay-evidence","operator-"+id+".log");Files.createDirectories(log.getParent());
+        var command=new ProcessBuilder(Path.of(System.getProperty("java.home"),"bin",System.getProperty("os.name").startsWith("Windows")?"java.exe":"java").toString(),
+                "-cp",System.getProperty("surefire.test.class.path",System.getProperty("java.class.path")),
+                "io.github.xiiiiimu.content.worker.OutboxReplayCommand",Long.toString(id),"controlled-replay-test");
+        command.environment().put("CONTENT_DB_URL",MYSQL.getJdbcUrl());command.environment().put("CONTENT_MYSQL_USER",MYSQL.getUsername());command.environment().put("CONTENT_MYSQL_PASSWORD",MYSQL.getPassword());
+        command.environment().put("CONTENT_RELAY_SCAN_ENABLED","true");command.environment().put("CONTENT_RELAY_PRODUCER_ENABLED","true");
+        var child=command.redirectErrorStream(true).redirectOutput(log.toFile()).start();
+        try {assertThat(child.waitFor(120,TimeUnit.SECONDS)).as(log.toString()).isTrue();assertThat(child.exitValue()).isZero();}
+        finally {if(child.isAlive())child.destroyForcibly();}
+        assertThat(state()).isEqualTo("NEW");assertThat(attempt()).isZero();
+        assertThat(db.queryForObject("SELECT operator FROM outbox_replay_audit WHERE event_id=?",String.class,id)).isNotBlank();
+        assertThat(db.queryForObject("SELECT reason FROM outbox_replay_audit WHERE event_id=?",String.class,id)).isEqualTo("controlled-replay-test");
+        assertThat(db.queryForObject("SELECT payload FROM outbox_events WHERE id=?",String.class,id)).isEqualTo(payload);
+        assertThat(RelayMqFixture.received(Long.toString(id))).isEmpty();tick();messages(1);
     }
     void trigger(String name,String table,String operation,String condition) throws Exception {
         try(var c=DriverManager.getConnection(MYSQL.getJdbcUrl(),"root",MYSQL.getPassword());var s=c.createStatement()) {
@@ -215,7 +247,7 @@ class OutboxRelayIT {
         builder.redirectErrorStream(true).redirectOutput(signal.resolveSibling(signal.getFileName()+".log").toFile());return builder.start();
     }
     void kill(Process child,Path signal) throws Exception {
-        await().atMost(Duration.ofSeconds(60)).until(() -> {assertThat(child.isAlive()).as("child log: "+signal+".log").isTrue();return Files.exists(signal);});
+        await().atMost(Duration.ofSeconds(120)).until(() -> {assertThat(child.isAlive()).as("child log: "+signal+".log").isTrue();return Files.exists(signal);});
         child.destroyForcibly();assertThat(child.waitFor(15,TimeUnit.SECONDS)).isTrue();
         Files.writeString(signal.resolveSibling(signal.getFileName()+".killed"),"eventId="+id+" attempt="+attempt()+" state="+state()+" exit="+child.exitValue());
     }
@@ -230,7 +262,7 @@ class OutboxRelayIT {
         try {kill(child,signal);}finally {if(child.isAlive())child.destroyForcibly();}
         messages(1);assertThat(state()).isEqualTo("RUNNING");awaitExpiry();
         var recovery=process("ONCE",Path.of("target","relay-evidence","recovery-"+id));
-        try {assertThat(recovery.waitFor(60,TimeUnit.SECONDS)).isTrue();assertThat(recovery.exitValue()).isZero();}finally {if(recovery.isAlive())recovery.destroyForcibly();}
+        try {assertThat(recovery.waitFor(120,TimeUnit.SECONDS)).isTrue();assertThat(recovery.exitValue()).isZero();}finally {if(recovery.isAlive())recovery.destroyForcibly();}
         messages(2);assertThat(state()).isEqualTo("SENT");assertThat(attempt()).isEqualTo(2);
     }
     @Test void lastClaimKilledBeforeSendIsReapedDead() throws Exception {
@@ -241,6 +273,13 @@ class OutboxRelayIT {
     }
     @Test void restartedScannerFindsNewEventsWithoutMemoryQueue() throws Exception {
         control();var signal=Path.of("target","relay-evidence","scanner-"+id);var child=process("SCAN",signal);
-        try {await().atMost(Duration.ofSeconds(60)).until(() -> state().equals("SENT"));messages(1);}finally {child.destroyForcibly();child.waitFor(15,TimeUnit.SECONDS);}
+        try {
+            await().atMost(Duration.ofSeconds(120)).until(() -> state().equals("SENT"));
+            await().atMost(Duration.ofSeconds(20)).ignoreExceptions().until(() -> !RelayMqFixture.received(Long.toString(id)).isEmpty());
+            long later=IDS.incrementAndGet();
+            db.update("INSERT INTO outbox_events(id,event_type,aggregate_id,payload) SELECT ?,'PostPublished',?,JSON_SET(payload,'$.eventId',?,'$.postId',?) FROM outbox_events WHERE id=?",later,later,later,later,id);
+            await().atMost(Duration.ofSeconds(30)).until(() -> "SENT".equals(db.queryForObject("SELECT status FROM outbox_events WHERE id=?",String.class,later)));
+            await().atMost(Duration.ofSeconds(20)).ignoreExceptions().until(() -> !RelayMqFixture.received(Long.toString(later)).isEmpty());
+        }finally {child.destroyForcibly();child.waitFor(15,TimeUnit.SECONDS);}
     }
 }

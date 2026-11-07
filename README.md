@@ -54,3 +54,25 @@ For each business story, commit the RED test first. Verify that it compiles, the
 `POST /api/posts/{postId}/publish` requires `Idempotency-Key` and `{"expectedVersion":4}`. The author id comes exclusively from the trusted servlet `Principal` name (positive numeric user id). Authentication integration remains outside this Story; without a Principal the endpoint returns 401. Tests supply a Principal directly, never a production author header. The endpoint publishes the stored body and rejects additional body fields.
 
 The [Story protocol and verification record](docs/m1-story1-publish.md) define replay, conflicts and response fields. Publication locks the author mode row, increments the author sequence, and atomically saves the post, `PostPublished` Outbox event and successful request snapshot. Replays return that snapshot. Outbox rows remain `NEW`; Relay is a subsequent Story.
+
+## M1 Story 2: Outbox Relay
+
+The [Relay protocol and evidence](docs/m1-story2-outbox-relay.md) freeze routing, leases, retry limits, fencing, replay and durability boundaries. Relay is disabled by default. With the MySQL credentials from Windows setup already configured, explicitly provision the Topic, then enable the worker in the application process:
+
+```powershell
+.\infra\docker\create-relay-topic.ps1
+$env:CONTENT_RELAY_ENABLED = 'true'
+mvn spring-boot:run
+```
+
+The RocketMQ 5.3.2 remoting client uses NameServer `127.0.0.1:29876`, the advertised Broker `127.0.0.1:30911`, and no VIP channel. Topic `content-post-published-v1` uses Tag `PostPublished`. Only `SEND_OK` permits a fenced transition to `SENT`. The current single Broker uses asynchronous flush and has no replica; ACK does not promise survival of a host power loss or disk loss. Duplicates are expected after ambiguous sends and crashes; consumers need the later Inbox contract.
+
+Defaults: 30-second lease, 3-second client send timeout, no renewal, at most five successful claims, capped exponential retry starting at one second, and a one-second scan interval. Set `content.relay.*` Spring properties for other environments. Each scan reaps exhausted expired leases and claims at most ten events sequentially. Unknown event types remain untouched until a routing contract is implemented.
+
+Replay is a local operator command, with database credentials and OS access as its trust boundary. It accepts only DEAD PostPublished, preserves identity/payload, resets the attempt counter, increments the token and atomically inserts OS operator/reason audit data. The command forces both scanning and the MQ producer off, regardless of environment flags. Build the executable JAR and use Java 17 (the script honors `JAVA_HOME`):
+
+```powershell
+.\infra\docker\replay-outbox.ps1 -EventId 123 -Reason 'Incident review approved replay'
+```
+
+`mvn -B -Pintegration verify` now also executes real MySQL/RocketMQ Relay tests, including independent JVM termination at committed-claim and real-ACK barriers. They require Docker access and a free local port 30921. CI runs the same suite and uploads `mysql-rocketmq-test-evidence`, containing JUnit/Failsafe reports and Relay process/Broker logs. Three non-success ACK variants are RPC response fault injections after actual Broker sends; they do not simulate physical disk or replica loss. Broker pause/stop cases use only isolated test containers.

@@ -16,6 +16,9 @@ class ContentApplicationTest {
                 .withPropertyValues(
                         "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration",
                         "management.endpoint.health.probes.enabled=true")
-                .run(context -> assertThat(context).hasSingleBean(ContentApplication.class));
+                .run(context -> {
+                    assertThat(context).hasSingleBean(ContentApplication.class);
+                    assertThat(context).doesNotHaveBean(io.github.xiiiiimu.content.domain.RelayRunner.class);
+                });
     }
 }
