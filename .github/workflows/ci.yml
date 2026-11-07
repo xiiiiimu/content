@@ -27,3 +27,4 @@ jobs:
             target/failsafe-reports/**
             target/relay-evidence/**
             target/redis-candidate-evidence/**
+            target/feed-merge-evidence/**

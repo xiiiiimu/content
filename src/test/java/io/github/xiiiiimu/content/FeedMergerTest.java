@@ -161,4 +161,25 @@ class FeedMergerTest {
         assertThat(merger.read(sources,VISIBLE,new Continuation(FeedMemberCodec.MAX_TIME_MS,null,null),2,Budget.defaults()).items()).containsExactly(max,min);
         assertThat(merger.read(Map.of("A",ids(10,9,8,7)),VISIBLE,new Continuation(1000,k(10),k(8)),2,Budget.defaults()).items()).containsExactly(k(7));
     }
+    @Test void duplicateHeadsWithinAndAcrossSourcesConsumeOneCheckAndScan() {
+        var p=merger.read(Map.of("A",ids(9,9,8),"B",ids(9,9,7)),VISIBLE,start(),1,Budget.defaults());
+        assertThat(p.items()).containsExactly(k(9));assertThat(p.scanned()).isEqualTo(1);assertThat(p.checks()).isEqualTo(1);
+        assertThat(p.sourcePositions()).containsEntry("A",k(9)).containsEntry("B",k(9));
+        assertThat(merger.read(Map.of("A",ids(9,9,8),"B",ids(9,9,7)),VISIBLE,p.next(),2,Budget.defaults()).items()).containsExactly(k(8),k(7));
+    }
+    @Test void authorityTimeoutAndRejectedExecutorCannotReturnPartialSuccess() {
+        var gate=new CountDownLatch(1);
+        try {
+            assertThatThrownBy(() -> merger.read(Map.of("A",ids(9)),c -> {gate.await();return new Decision(c,true);},start(),1,
+                    new Budget(1,1,1,1,Duration.ofMillis(40)))).isInstanceOf(Unavailable.class);
+        }finally {gate.countDown();}
+        executor.shutdownNow();assertThatThrownBy(() -> merger.read(Map.of("A",ids(9)),VISIBLE,start(),1,Budget.defaults())).isInstanceOf(Unavailable.class);
+    }
+    @Test void invalidContinuationAndAdditionalBudgetBoundsAreRejectedBeforeSourceCalls() {
+        Source never=(s,b,n) -> {throw new AssertionError("must not read");};
+        for(var input:List.of(new Continuation(-1,null,null),new Continuation(1000,k(8),k(9)),new Continuation(1000,k(9),null),new Continuation(999,null,k(9))))
+            assertThatThrownBy(() -> merger.read(Map.of("A",never),VISIBLE,input,1,Budget.defaults())).isInstanceOf(IllegalArgumentException.class);
+        for(var b:List.of(new Budget(1,1,1,257,Duration.ofSeconds(1)),new Budget(1,1,1,1,Duration.ofSeconds(3))))
+            assertThatThrownBy(() -> merger.read(Map.of("A",never),VISIBLE,start(),1,b)).isInstanceOf(IllegalArgumentException.class);
+    }
 }

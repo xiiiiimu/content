@@ -9,7 +9,7 @@ import io.lettuce.core.resource.DefaultClientResources;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.*;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import com.zaxxer.hikari.HikariDataSource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.*;
@@ -27,7 +27,7 @@ class FeedMergeIT {
     @Container static final MySQLContainer<?> MYSQL=new MySQLContainer<>("mysql:8.4");
     @Container static final GenericContainer<?> REDIS=new GenericContainer<>(DockerImageName.parse("redis:7.4")).withExposedPorts(6379);
     static DefaultClientResources resources;static RedisClient client;static StatefulRedisConnection<String,String> connection;
-    static JdbcTemplate sql;static RedisFeedCandidateStore store;
+    static JdbcTemplate sql;static HikariDataSource pool;static RedisFeedCandidateStore store;
     ExecutorService executor;FeedMerger merger;
     static final long TIME=1_794_000_000_000L;
     static final Path EVIDENCE=Path.of("target","feed-merge-evidence");
@@ -35,7 +35,9 @@ class FeedMergeIT {
         Files.createDirectories(EVIDENCE);
         Flyway.configure().dataSource(MYSQL.getJdbcUrl(),MYSQL.getUsername(),MYSQL.getPassword()).load().migrate();
         String url=MYSQL.getJdbcUrl();
-        sql=new JdbcTemplate(new DriverManagerDataSource(url+(url.contains("?")?"&":"?")+"connectTimeout=2000&socketTimeout=2000",MYSQL.getUsername(),MYSQL.getPassword()));sql.setQueryTimeout(1);
+        pool=new HikariDataSource();pool.setJdbcUrl(url+(url.contains("?")?"&":"?")+"connectTimeout=2000&socketTimeout=2000");
+        pool.setUsername(MYSQL.getUsername());pool.setPassword(MYSQL.getPassword());pool.setMaximumPoolSize(4);pool.setConnectionTimeout(2000);
+        sql=new JdbcTemplate(pool);sql.setQueryTimeout(1);
         assertThat(sql.queryForObject("SELECT 1",Integer.class)).isEqualTo(1);
         resources=DefaultClientResources.builder().ioThreadPoolSize(2).computationThreadPoolSize(2).build();
         client=RedisClient.create(resources,RedisURI.Builder.redis(REDIS.getHost(),REDIS.getMappedPort(6379)).withTimeout(Duration.ofSeconds(2)).build());
@@ -49,7 +51,7 @@ class FeedMergeIT {
     @AfterEach void stop() {executor.shutdownNow();}
     @AfterAll static void logs() throws Exception {
         Files.writeString(EVIDENCE.resolve("redis.log"),REDIS.getLogs());Files.writeString(EVIDENCE.resolve("mysql.log"),MYSQL.getLogs());
-        if(connection!=null)connection.close();if(client!=null)client.shutdown();if(resources!=null)resources.shutdown();
+        if(connection!=null)connection.close();if(client!=null)client.shutdown();if(resources!=null)resources.shutdown();if(pool!=null)pool.close();
     }
     void post(long time,long id) {sql.update("INSERT INTO posts(id,author_id,status,body,published_at_ms) VALUES(?,1,'PUBLISHED','fixture',?)",id,time);}
     Source redis() {return new RedisCandidateSource(store,7);}
@@ -120,7 +122,10 @@ class FeedMergeIT {
     }
     @Test void actualRedisPauseIsAnErrorAndOriginalInputRecovers() throws Exception {
         post(TIME,1);store.add(7,List.of(new FeedCandidate(TIME,1)));var docker=REDIS.getDockerClient();docker.pauseContainerCmd(REDIS.getContainerId()).exec();
-        try {assertThatThrownBy(() -> merger.read(Map.of("redis",redis()),authority(),start(),1,Budget.defaults())).isInstanceOf(Unavailable.class);}
+        try {
+            var failure=catchThrowable(() -> merger.read(Map.of("redis",redis()),authority(),start(),1,Budget.defaults()));
+            assertThat(failure).isInstanceOf(Unavailable.class);failureEvidence("redis-pause-error.txt",failure);
+        }
         finally {docker.unpauseContainerCmd(REDIS.getContainerId()).exec();}
         org.awaitility.Awaitility.await().atMost(Duration.ofSeconds(10)).ignoreExceptions().untilAsserted(() -> assertThat(merger.read(Map.of("redis",redis()),authority(),start(),1,Budget.defaults()).items()).containsExactly(new FeedCandidate(TIME,1)));
         Files.writeString(EVIDENCE.resolve("redis-pause.txt"),"Real Docker pause: merge failed instead of EXHAUSTED; unpause + same continuation recovered\n");
@@ -128,9 +133,14 @@ class FeedMergeIT {
     @Test void realSqlTimeoutAndInvalidQueryCannotBecomeExhaustion() throws Exception {
         Source slow=(s,b,n) -> {sql.queryForObject("SELECT SLEEP(5)",Integer.class);return new Batch(List.of(),true);};
         Source bad=(s,b,n) -> {sql.queryForList("SELECT * FROM missing_feed_fixture");return new Batch(List.of(),true);};
-        assertThatThrownBy(() -> merger.read(Map.of("sql",slow),authority(),start(),1,Budget.defaults())).isInstanceOf(Unavailable.class);
-        assertThatThrownBy(() -> merger.read(Map.of("sql",bad),authority(),start(),1,Budget.defaults())).isInstanceOf(Unavailable.class);
+        var timeout=catchThrowable(() -> merger.read(Map.of("sql",slow),authority(),start(),1,Budget.defaults()));
+        assertThat(timeout).isInstanceOf(Unavailable.class);failureEvidence("sql-timeout-error.txt",timeout);
+        var invalid=catchThrowable(() -> merger.read(Map.of("sql",bad),authority(),start(),1,Budget.defaults()));
+        assertThat(invalid).isInstanceOf(Unavailable.class).hasRootCauseInstanceOf(java.sql.SQLSyntaxErrorException.class);failureEvidence("sql-query-error.txt",invalid);
         Files.writeString(EVIDENCE.resolve("sql-faults.txt"),"Real MySQL SLEEP with one-second JDBC query timeout and missing-table query both rejected\n");
+    }
+    static void failureEvidence(String name,Throwable failure) throws Exception {
+        var text=new java.io.StringWriter();failure.printStackTrace(new java.io.PrintWriter(text));Files.writeString(EVIDENCE.resolve(name),text.toString());
     }
     @Test void canonicalTimestampMismatchIsRejectedEvenAcrossReconstructedRequests() {
         post(TIME-1,1);store.add(7,List.of(new FeedCandidate(TIME,1)));

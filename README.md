@@ -86,3 +86,13 @@ The [candidate adapter contract](docs/m2-story1-feed-candidates.md) implements A
 Wrong key types, nonzero scores and malformed returned members mark the index untrusted and raise an error. Connection/timeout failures also raise an error; neither condition becomes an empty successful read. Normal operations cannot clear the untrusted marker. Authoritative rebuilding and recovery readiness remain future work. CI includes the real Redis tests and uploads the Redis log alongside the existing integration evidence.
 
 `CandidateSlice.lastReadBoundary` describes this source read only. It is not a signed client cursor or ADR-002's complete merge/visibility pagination state. An empty Redis read does not prove the entire Feed is exhausted, or that the cache is complete.
+
+## M2 Story 2: bounded multi-source merge
+
+The [merge contract](docs/m2-story2-merge-plan.md) defines `FeedMerger`, a request-local kernel over caller-provided ordered sources and an authoritative tuple/visibility check. `RedisCandidateSource` adapts the existing Redis store; the SQL source and visibility/follow-epoch decisions in tests remain fixtures. No production Feed endpoint or source composition is registered.
+
+Prefetch never advances consumed positions. All sources must confirm a head or normal range exhaustion before the greatest candidate can be consumed; equal heads are consumed together. Each new request reconstructs sources below shared global/consumed boundaries and safely rereads unconsumed prefetch. The structured continuation is internal, unsigned, and must not be accepted directly from an HTTP client.
+
+Defaults: at most eight sources, page size 1..100, source batches up to 32, 256 consumed candidates/checks and 64 source reads per request. Each read/check has a two-second maximum wait; this is not a two-second total request deadline. Callers own a bounded executor, finite connection/query timeouts and resource shutdown. Missing source coverage/readiness and production authorization remain deployment blockers.
+
+`HAS_MORE` proves another candidate is known, not that it is visible; `UNKNOWN` means bounded work ended before exhaustion could be established; empty `UNKNOWN` must advance the consumed boundary. `EXHAUSTED` requires normal exhaustion of every configured source and no buffered candidates. Source/authority failures fail the whole request, preserving the caller's input continuation for retry. CI runs the real Redis/MySQL merge suite under `mvn -Pintegration verify` and retains `target/feed-merge-evidence` traces and component logs with the existing integration artifact.

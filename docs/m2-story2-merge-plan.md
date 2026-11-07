@@ -1,6 +1,6 @@
-# M2 Story 2 — 多来源有序归并与有界扫描（待确认计划）
+# M2 Story 2 — 多来源有序归并与有界扫描
 
-依据 ADR-001、ADR-002 和 T02/T03/T13–T15。本文为实施计划与测试契约，尚未实现或执行测试，不修改 ADR、V2.1 或 M0–M9 路线。PR #3 已以 merge commit 18e899edfa7c776202e758d6b74300dbf8a7387c 合并，RED/GREEN 历史保留。
+依据 ADR-001、ADR-002 和 T02/T03/T13–T15。用户已确认在 PR #4 原分支实施此计划；实现证据见文末，不修改 ADR、V2.1 或 M0–M9 路线。PR #3 已以 merge commit 18e899edfa7c776202e758d6b74300dbf8a7387c 合并，RED/GREEN 历史保留。
 
 ## 范围与依赖
 
@@ -32,7 +32,7 @@
 
 ## 预算和三态
 
-拟定初值（待确认）：最多 8 个逻辑来源，pageSize 1..100，每源批次 32（始终不超过适配器 200 上限），每请求最多消费 256 个唯一元组、最多 64 次来源读取，每次来源超时 2 秒。总预取缓冲最多 8×32 项。每源操作串行或并发有上限，禁止按作者无限增加逻辑来源；大作者集合未来由单一 SQL 有序来源聚合。上述是归并层初值，不声称容量验证完成。
+采用初值：最多 8 个逻辑来源，pageSize 1..100，每源批次 32（始终不超过适配器 200 上限），每请求最多消费 256 个唯一元组、最多 64 次来源读取，每次来源超时 2 秒。总预取缓冲最多 8×32 项。每源操作串行或并发有上限，禁止按作者无限增加逻辑来源；大作者集合未来由单一 SQL 有序来源聚合。上述是归并层初值，不声称容量验证完成。
 
 预算分开统计 scanned（完成处理的唯一元组）、fetched（含重复的实际拉取条目）和 sourceReads（含空读/失败调用）；返回 scanned 只表示本请求完成处理的候选。读次数与批次长度共同限制预取工作；权威查询也必须分批、有次数和超时上限，计入单独明确的校验预算，不能隐藏无界补查。拟定每请求最多 256 次唯一元组校验，批量不超过 32。
 
@@ -52,7 +52,7 @@
 
 空页推进示例：G=null，前 100 个元组均被过滤，扫描预算 16；各空 UNKNOWN 消费至新的 C，下一页严格小于 C，最终读到可见项或所有来源耗尽。不得让 globalBoundary=null 导致每次从头扫描。
 
-## RED 测试契约（待确认后开始）
+## RED 测试契约
 
 | 用例 | 夹具/故障与断言 |
 | --- | --- |
@@ -73,4 +73,15 @@
 
 ## ADR 对照与待确认
 
-没有发现与 ADR-002 必须冲突的实现要求。本文将“边界之前/之后”明确为数值比较，不改变 L1；将内部三态和消费位置与未来签名令牌分开。参数是本计划的建议值，不修改 ADR。上线前来源覆盖证明和生产权威校验接线仍是依赖；本轮仅提交计划，等待用户确认后再写 RED 与实现。
+没有发现与 ADR-002 冲突的实现要求。本文将“边界之前/之后”明确为数值比较，不改变 L1；将内部三态和消费位置与未来签名令牌分开。参数不修改 ADR。上线前来源覆盖证明和生产权威校验接线仍是依赖。
+
+## 实现边界与实际证据
+
+- `FeedMerger` 为无 Spring 接线的内核，`RedisCandidateSource` 组合已有 Redis 适配器；SQL 来源及权威可见性读取位于 `FeedMergeIT` 夹具。没有新增 SQL 迁移、HTTP、身份、签名或生产关注/分发实现。
+- 调用者提供受控的有限线程池、有限 I/O 超时与绑定读者上下文的权威校验。内核逐次等待来源/校验至多 2 秒；超时取消 Future，迟到任务不能修改请求内消费状态。取消不保证外部 JDBC/网络操作物理终止，连接超时及资源生命周期仍由调用者负责；拒绝执行也返回可重试失败。没有承诺整个请求仅耗时 2 秒，工作总量由读取/消费/校验次数分别限制。
+- 当前权威校验逐个执行（批大小 1），最多 256 次，单次最多 2 秒。可见项必须返回完全一致的 canonical 元组；缺失帖子仅允许 `(null,false)`。隐藏/关系代次不符仍需核对已有帖子的 canonical 元组。实现对本请求预取的同 ID 不同元组直接拒绝；跨请求不保留 ID 集，依靠不可变发布契约及每次权威核对防止错误重现，不能以恒真校验器作为生产接线。
+- 实际边界始终取共享 G/C 与来源消费位置的较小值，来源返回超快照、非排他、乱序、超批次或空且未确认耗尽的结果都失败。来源耗尽仅限本次读取范围，Redis 空范围不提供覆盖/恢复就绪证明。
+- RED：`8dcc0954cf2a5bcdb7ae59540442e7f939d1d1c0`。Java 17 / Maven 3.9.9；`mvn -B -ntp -Dtest=ContentApplicationTest -Pintegration -Dit.test=FeedMergeIT#t02All501AcrossRealRedisAndSqlMatchFullSqlOrder verify`。源码编译、启动冒烟、真实 MySQL Flyway/SELECT 1 和 Redis PING 通过，目标断言失败 1、错误 0、跳过 0，原因为 `Ordered merge behavior is not implemented`。早先编译导入与测试 JDBC URL 拼接问题已修正，不算作有效 RED。所有本机 Maven 命令另用 `-Dmaven.repo.local=E:/content/m2/repository`。
+- GREEN 定向：`mvn -B -ntp -Dtest=FeedMergerTest -Pintegration -Dit.test=FeedMergeIT verify` BUILD SUCCESS，19 个单元 + 9 个真实集成，0 失败/错误/跳过。T02 实际分 72 页遍历 501 项，与全量 SQL DESC 和独立 ID 501..1 两份预期逐项对照；每页记录 G/C、P、scanned、fetched、sourceReads 和 items。真实 SQL 故障为 `SELECT SLEEP(5)` + JDBC 1 秒语句超时，以及不存在表查询；真实 Redis 故障用 Docker pause/unpause，错误栈和重试恢复结果写入证据。
+- 完整回归：`mvn -B -ntp -Pintegration verify` BUILD SUCCESS（14:05），44 个单元、75 个真实集成（归并 9、迁移 3、发布 23、Relay 22、Redis 存储 18），总计 119 项，0 失败/错误/跳过。本地完整日志 `target/m2-story2-full.log`。既有发布/Relay 实现及其测试未改。
+- GREEN 提交包含本说明；远端实际最终状态以 PR #4 检查为准。CI artifact 增加 `target/feed-merge-evidence/**`，包括预检、遍历轨迹、SQL/Redis 故障栈和组件日志，沿用现有 7 天保留期。未执行的测试不标为通过。

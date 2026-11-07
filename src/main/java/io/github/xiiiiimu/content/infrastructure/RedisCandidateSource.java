@@ -4,8 +4,15 @@ import io.github.xiiiiimu.content.domain.*;
 
 /** Source coverage/readiness must be established by the caller, independently of an empty Redis range. */
 public final class RedisCandidateSource implements FeedMerger.Source {
-    public RedisCandidateSource(RedisFeedCandidateStore store, long readerId) {}
+    private final RedisFeedCandidateStore store;
+    private final long readerId;
+    public RedisCandidateSource(RedisFeedCandidateStore store, long readerId) {
+        this.store=java.util.Objects.requireNonNull(store);
+        if(readerId<=0)throw new IllegalArgumentException("Reader id must be positive");
+        this.readerId=readerId;
+    }
     @Override public FeedMerger.Batch read(long snapshotTime, FeedCandidate boundary, int limit) {
-        throw new UnsupportedOperationException("Redis merge source behavior is not implemented");
+        var slice=store.read(readerId,snapshotTime,boundary==null?null:FeedMemberCodec.encode(boundary),limit);
+        return new FeedMerger.Batch(slice.items(),slice.items().size()<limit);
     }
 }
