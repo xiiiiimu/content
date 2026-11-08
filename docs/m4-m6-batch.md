@@ -44,3 +44,27 @@
 - 点赞关系唯一键幂等；stats 可对账
 - 热点事件 ledger 去重；净增量 ≠ 有效点赞数
 - 媒体私有对象；短期签名；签发前查权威状态
+
+## 本批验收矩阵
+
+| 能力 | 结论 | 证据 |
+| --- | --- | --- |
+| M4 统一可见性 / 下架 / 缓存一致性 | 通过 | VisibilityAndOfflineIT；AuthoritativeVisibility；CachedPostDetails |
+| M5 点赞/取消点赞幂等 | 通过 | InteractionsAndTrendingIT；`post_likes` PK；重复 like 计数不变 |
+| M5 评论幂等 | 通过 | `uq_comment_idem(user_id,idempotency_key)`；replay=true |
+| M5 计数对账 | 通过 | `InteractionService.reconcile` → `post_stats` |
+| M5 热点 ledger / 分钟桶 / 滚动榜 / 重建 | 通过 | `topic_event_ledger` + `topic_minute_buckets`；`TrendingService.rebuild`；HTTP `/api/topics/trending` |
+| M5 下架后互动拒绝 | 通过 | OFFLINE 后 `visibility.read` 空；like 抛 `FeedFailure` |
+| M6 上传 + 异步媒体任务 | 通过 | MediaPipelineIT；`media_tasks` NEW→RUNNING→DONE；S3 put/get |
+| M6 租约接管 | 通过 | MediaPipelineIT 强制过期 lease 后 tick 可接管 |
+| M6 媒体鉴权 / 下架阻断签名 | 通过 | sign 前查 VisibilityService；offline 后 sign 失败 |
+| M6 官方 MinIO | **阻塞** | 社区镜像/二进制不可用；IT 用 `adobe/s3mock`；FFmpeg 主机缺失时用派生占位 + 镜像名记录 |
+
+不宣称：真实 FFmpeg 容器内转码产物校验、MinIO 官方发行版健康、热点性能 SLA、Cluster Redis。
+
+## 本地验证摘录
+
+- `InteractionsAndTrendingIT`：通过（MySQL 8.4 + Redis 7.4）
+- `MediaPipelineIT`：通过（MySQL + Redis + adobe/s3mock:3.12.0）
+- `VisibilityAndOfflineIT` / `MySqlMigrationIT`（V1→V7）：通过
+- 全量 `mvn -Pintegration verify`：见 PR CI / 本地日志 `target/m4-m6-batch/`
