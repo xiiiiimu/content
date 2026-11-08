@@ -1,0 +1,8 @@
+time=2026-11-09T07:09:53.8664679+08:00
+health=200
+unsigned_put=403
+sigv4_put_get_ok=true
+endpoint=http://127.0.0.1:29000
+image=content-minio:RELEASE.2025-04-22T22-12-26Z
+volume=content_minio-data
+video_minio_data_reused=false

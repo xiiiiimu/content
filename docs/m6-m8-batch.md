@@ -8,13 +8,13 @@
 | --- | --- |
 | M4 统一可见性 / 下架 / 缓存 | **通过** |
 | M5 互动幂等 / stats / 热点重建 | **通过** |
-| M6 S3 兼容上传、网关验签、租约 fencing | **部分通过**（S3Mock） |
-| M6 官方 MinIO | **阻塞 / 待完成** |
+| M6 S3 兼容上传、网关验签、租约 fencing | **通过**（S3Mock IT 仍保留） |
+| M6 官方 MinIO | **通过**（源码构建 `content-minio` + `MediaMinioIT`） |
 | M6 真实 FFmpeg 产物 | **通过**（审查修复后重验） |
 
 ## MinIO
 
-仍阻塞。IT 继续 `adobe/s3mock`。**不得因替身关闭 MinIO 待完成项。** S3Mock 边界不回退。
+官方镜像 Hub/Quay 不可拉取；本批从 `github.com/minio/minio` `RELEASE.2025-04-22T22-12-26Z` 源码构建 `content-minio`（见 `infra/docker/minio/SOURCE.md`）。`HttpS3ObjectStore` 使用 AWS SigV4 path-style。S3Mock IT 不回退、不替代 MinIO 验收。证据：`docs/minio-evidence/ACCEPTANCE.md`。本地开关：`-Dcontent.minio.it=true`（默认 CI skip ≠ 通过）。
 
 ## M6 补验
 
@@ -49,6 +49,6 @@
 
 ## 未执行 / 仍阻塞
 
-- 官方 MinIO
 - 100×50×200 全量配额（本机时长）
 - M9 TrendGuard
+- CI 内构建/跑官方 MinIO（镜像需本机构建；`MediaMinioIT` 默认 skip）

@@ -1,0 +1,6 @@
+tag=RELEASE.2025-04-22T22-12-26Z
+commit=0d7408fc9969caf07de6a8c3a84f9fbb10a6739e
+sourceDir=E:\content\target\minio-src-RELEASE.2025-04-22T22-12-26Z
+golangDigest=golang@sha256:1a6d4452c65dea36aac2e2d606b01b4a029ec90cc1ae53890540ce6173ea77ac
+alpineDigest=alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
+started=2026-11-09T07:01:17.0651042+08:00
