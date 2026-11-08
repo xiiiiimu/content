@@ -23,6 +23,9 @@ readers=$Readers
 followsPerReader=$FollowsPerReader
 commit=$commit
 javaXmx=512m
+seedOrder=rebuild,modes,follow-first,drain,publish+accept+worker,warmup,steady
+ops=feed_read,like_write
+skippedVsPassed=PerfHarnessIT requires -Dcontent.perf.enabled=true; default CI skip is not a pass
 started=$(Get-Date -Format o)
 "@ | Set-Content (Join-Path $out 'config.txt')
 git rev-parse HEAD | Set-Content (Join-Path $out 'commit.txt')
@@ -33,6 +36,7 @@ $env:CONTENT_PERF_AUTHORS = "$Authors"
 $env:CONTENT_PERF_POSTS = "$PostsPerAuthor"
 $env:CONTENT_PERF_READERS = "$Readers"
 $env:CONTENT_PERF_FOLLOWS = "$FollowsPerReader"
+$env:GIT_COMMIT = $commit
 $mvn = Join-Path $env:USERPROFILE '.m2\wrapper\dists\apache-maven-3.9.12\59fe215c0ad6947fea90184bf7add084544567b927287592651fda3782e0e798\bin\mvn.cmd'
 if (-not (Test-Path $mvn)) { $mvn = 'mvn' }
 $env:JAVA_TOOL_OPTIONS = '-Xms512m -Xmx512m'
@@ -42,4 +46,6 @@ $env:JAVA_TOOL_OPTIONS = '-Xms512m -Xmx512m'
   "-Dit.test=PerfHarnessIT" `
   "-DfailIfNoTests=false" `
   verify 2>&1 | Tee-Object (Join-Path $out 'harness.log')
-Write-Host "PERF_OUT=$out"
+$exit = $LASTEXITCODE
+Write-Host "PERF_OUT=$out exit=$exit"
+exit $exit
