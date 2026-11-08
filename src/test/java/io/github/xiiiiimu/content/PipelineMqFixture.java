@@ -40,6 +40,8 @@ final class PipelineMqFixture {
         }
     }
     static void preflight() throws Exception {
+        // JVM kill leftovers can keep the fixed Windows-advertised broker port allocated.
+        FixedHostPortGuard.reclaimOrphans(PORT, "DistributionIT broker");
         NAMESRV.start(); BROKER.start();
         var created = BROKER.execInContainer("sh","mqadmin","updateTopic","-n","pipeline-namesrv:9876","-b","127.0.0.1:"+PORT,"-t",TOPIC,"-r","1","-w","1");
         java.nio.file.Files.createDirectories(java.nio.file.Path.of("target","pipeline-evidence"));

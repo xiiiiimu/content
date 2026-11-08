@@ -21,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest @AutoConfigureMockMvc @Testcontainers @org.springframework.test.annotation.DirtiesContext(classMode=org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class RecoveryAndModesIT {
+ static { FixedHostPortGuard.reclaimOrphans(30923, "RecoveryAndModesIT redis"); }
  @Container static final MySQLContainer<?> MYSQL=new MySQLContainer<>("mysql:8.4");
  static class RecoveryRedis extends GenericContainer<RecoveryRedis>{RecoveryRedis(){super("redis:7.4");addFixedExposedPort(30923,6379);withCommand("redis-server","--save","","--appendonly","no","--maxmemory-policy","noeviction");}}
  @Container static final RecoveryRedis REDIS=new RecoveryRedis();
