@@ -69,3 +69,4 @@
 - `VisibilityAndOfflineIT` / `MySqlMigrationIT`（V1→V7）：通过
 - 全量 `mvn -Pintegration verify`：**124 tests, Failures: 0, Errors: 0, BUILD SUCCESS**（`target/m4-m6-batch/full-verify-002442.log`）
 - PR：https://github.com/xiiiiimu/content/pull/7 （不自动合并）
+- PR CI：run `42502949725` success（head `408ede9`，124 tests）
