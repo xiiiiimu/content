@@ -6,10 +6,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.*;
 
 public final class RelationshipService {
- private final FeedMapper db;private final TransactionTemplate tx;private final ObjectMapper json;private final int historyLimit;private final long window;
- public RelationshipService(FeedMapper db,TransactionTemplate tx,ObjectMapper json,int historyLimit,long window){
+ private final FeedMapper db;private final TransactionTemplate tx;private final ObjectMapper json;private final int historyLimit;private final long window;private final PostDetailService details;
+ public RelationshipService(FeedMapper db,TransactionTemplate tx,ObjectMapper json,int historyLimit,long window,PostDetailService details){
   if(historyLimit<0 || historyLimit>100 || window<=0)throw new IllegalArgumentException("Invalid history bounds");
-  this.db=db;this.tx=tx;this.json=json;this.historyLimit=historyLimit;this.window=window;
+  this.db=db;this.tx=tx;this.json=json;this.historyLimit=historyLimit;this.window=window;this.details=details;
  }
  public record Result(boolean following,long epoch,long graphVersion) {}
  public Result change(long reader,long author,boolean following){
@@ -35,6 +35,8 @@ public final class RelationshipService {
    if(db.offline(author,post,version)!=1)throw new FeedFailure(409,"POST_STATE_CONFLICT");
    emit("PostOfflined",post,Map.of("postId",post,"authorId",author,"postVersion",Math.addExact(version,1)));
   });
+  // Invalidation accelerates cache drop but never authorizes; authority already flipped in MySQL.
+  details.invalidate(post);
  }
  public long emit(String type,long aggregate,Map<String,?> fields){
   db.event(type,aggregate);long id=db.insertedId();var payload=new LinkedHashMap<String,Object>(fields);payload.put("eventId",id);payload.put("eventType",type);
