@@ -36,6 +36,7 @@ class DistributionIT {
   r.add("content.feed.cursor-key",()->"cursor-test-key-32-bytes-minimum-00001");r.add("content.feed.identity-key",()->"identity-test-key-32-bytes-minimum-0001");
   r.add("content.relay.enabled",()->"true");r.add("content.relay.scan-enabled",()->"false");r.add("content.relay.namesrv",PipelineMqFixture::namesrv);r.add("content.relay.topic",()->PipelineMqFixture.TOPIC);
   r.add("content.pipeline.enabled",()->"true");r.add("content.pipeline.scan-enabled",()->"false");
+  r.add("content.test.hooks",()->"inbox");
  }
  @Autowired JdbcTemplate db;@Autowired PublishService publish;@Autowired RelationshipService follows;@Autowired RelayRunner relay;@Autowired DefaultMQProducer producer;
  @Autowired DistributionInbox inbox;@Autowired ObjectMapper json;@Autowired Faults faults;
@@ -44,7 +45,7 @@ class DistributionIT {
   final AtomicLong failAfter=new AtomicLong();
   @Override public void afterInboxCommit(long id){if(failAfter.compareAndSet(id,0))throw new IllegalStateException("Injected failure after durable Inbox commit before ACK");}
  }
- @TestConfiguration static class Hooks {@Bean @Primary Faults faults(){return new Faults();}}
+ @TestConfiguration @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="content.test.hooks",havingValue="inbox") static class Hooks {@Bean @Primary Faults faults(){return new Faults();}}
  Publication publication(String mode){long a=IDS.incrementAndGet();db.update("INSERT INTO author_feed_mode(author_id,mode) VALUES(?,?)",a,mode);follows.change(a+10000,a,true);
   long post=a*10000;db.update("INSERT INTO posts(id,author_id,status,body) VALUES(?,?,'DRAFT','dispatch')",post,a);return publish.publish(a,post,UUID.randomUUID().toString(),0);}
  String payload(long event){return db.queryForObject("SELECT payload FROM outbox_events WHERE id=?",String.class,event);}

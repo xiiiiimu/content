@@ -27,3 +27,6 @@
 - 调试失败不计通过：修复MyBatis方法重名；MQ预检改为单探针有界读取；新消费者启动元数据RPC10秒、最多3次，失败清理资源并拒绝启动（不修改Relay发送3秒/租约30秒协议）。扫描业务测试尚待后续组完成。
 
 - M3任务续租为本组实施选择：同一有效领取内允许完成任意有限上界的多批次，续租与进度同一CAS；过期或旧token不能续租。只在重新领取时计attempt，5次上限及最后一次崩溃DEAD仍生效。M1 Relay无续租协议保持原样。
+- Worker组 RED `7ec36ad`：真实MySQL/Redis和Inbox成功后任务NEW，预期DONE，1 assertion failure/0 errors。
+- Worker组 GREEN：领取/固定粉丝上界、100人批次、SQL状态/token/有效租约/generation CAS、成功批次续租、退避/DEAD及审计重放。`mvn -B -ntp -Pintegration -Dit.test=DeliveryWorkerIT verify` BUILD SUCCESS，47 unit+10 IT，0失败/错误/跳过。实际含101接收者两批一次领取、并发领取、过期两种旧token、最后一次崩溃DEAD、真实Redis暂停/部分成功、Redis后SQL失败、旧代次回填与旧Worker迟到I/O/重关注可见性。日志target/batch-worker-current.log。这里的进程故障尚以屏障与SQL故障注入覆盖；独立JVM kill尚待本批后续验收，不能提前算通过。
+- 默认关闭启动回归修复了测试Hook隔离；扫描器仅经启用的外层配置导入。全局锁顺序为gate→task，状态提交不使用可能反向锁control的UPDATE JOIN。

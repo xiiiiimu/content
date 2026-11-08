@@ -60,6 +60,17 @@ public final class RedisFeedCandidateStore {
             end
             return result
             """;
+    private static final String FENCED_WRITE="""
+            if redis.call('GET', KEYS[3]) ~= ARGV[1] then return {'FENCED'} end
+            """+GUARD+"""
+            local values = {}
+            for i = 2, #ARGV do
+                values[#values + 1] = '0'
+                values[#values + 1] = ARGV[i]
+            end
+            redis.call('ZADD', KEYS[1], unpack(values))
+            return {'OK'}
+            """;
 
     public RedisFeedCandidateStore(StatefulRedisConnection<String,String> connection) {
         if(connection==null)throw new IllegalArgumentException("Redis connection is required");
@@ -74,6 +85,14 @@ public final class RedisFeedCandidateStore {
         // Validate the complete batch before any Redis command can mutate the index.
         for(var candidate:candidates)encoded.add(FeedMemberCodec.encode(candidate));
         execute(WRITE,key,encoded.toArray(String[]::new));
+    }
+    /** Single-node deployment: recovery generation fencing, not a guarantee against same-generation late lease writes. */
+    public void addFenced(long readerId,List<FeedCandidate> candidates,long generation) {
+        if(org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive())throw new IllegalStateException("Redis write inside SQL transaction");
+        String key=key(readerId);
+        if(generation<=0 || candidates==null || candidates.isEmpty() || candidates.size()>MAX_WRITE_SIZE)throw new IllegalArgumentException("Invalid fenced write");
+        var encoded=new ArrayList<String>();encoded.add(Long.toString(generation));for(var candidate:candidates)encoded.add(FeedMemberCodec.encode(candidate));
+        executeKeys(FENCED_WRITE,key,new String[]{key,key+":untrusted","feed:write-generation"},encoded.toArray(String[]::new));
     }
 
     public CandidateSlice read(long readerId,long snapshotMs,String exclusiveBoundary,int limit) {
@@ -97,9 +116,13 @@ public final class RedisFeedCandidateStore {
     }
 
     private List<String> execute(String script,String key,String... arguments) {
+        return executeKeys(script,key,new String[]{key,key+":untrusted"},arguments);
+    }
+    private List<String> executeKeys(String script,String key,String[] keys,String... arguments) {
         try {
-            List<?> response=commands.eval(script,ScriptOutputType.MULTI,new String[]{key,key+":untrusted"},arguments);
+            List<?> response=commands.eval(script,ScriptOutputType.MULTI,keys,arguments);
             if(response==null || response.isEmpty())throw unavailable("Missing Redis script result",null);
+            if("FENCED".equals(response.get(0)))throw unavailable("Redis recovery generation changed; old writer fenced",null);
             if("UNTRUSTED".equals(response.get(0))) {
                 String detail=response.size()>1?String.valueOf(response.get(1)):"UNKNOWN";
                 LOG.error("Feed candidate index untrusted key={} reason={}; authoritative recovery required",key,detail);
