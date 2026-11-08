@@ -15,4 +15,8 @@ public interface PipelineObserver {
  default void beforeFeedReturn(long reader) {}
  default void beforeCacheInvalidate(long postId) {}
  default void beforeMediaProcess(long taskId) {}
+ /** Fired once per frozen inbox gap before DistributionInbox.accept during reconcile.repair(). */
+ default void beforeReconcileInbox(long eventId) {}
+ /** Fired once per frozen task gap before createTaskIgnore during reconcile.repair(). */
+ default void beforeReconcileTask(long eventId) {}
 }

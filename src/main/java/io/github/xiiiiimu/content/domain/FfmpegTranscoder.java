@@ -42,6 +42,19 @@ public final class FfmpegTranscoder {
   }catch(Exception e){throw new IllegalStateException("ffmpeg failed: "+e.getMessage(),e);}
   finally{cleanup(dir);}
  }
+ /** Re-probe derived bytes to prove the stored object is still a decodable media container. */
+ public String verifyDecodable(byte[] derived){
+  if(derived==null || derived.length==0)throw new IllegalStateException("empty derived media");
+  Path dir=null;
+  try{
+   dir=Files.createTempDirectory("content-ffmpeg-verify-");
+   Path in=dir.resolve("check.bin");Files.write(in,derived);
+   String json=probe(dir,in.getFileName().toString());
+   if(!json.contains("\"format\"") || !json.contains("streams"))throw new IllegalStateException("derived media not probeable");
+   return json;
+  }catch(Exception e){throw new IllegalStateException("verifyDecodable failed: "+e.getMessage(),e);}
+  finally{cleanup(dir);}
+ }
  private static String dockerBin(){
   String override=System.getenv("DOCKER_BIN");if(override!=null && !override.isBlank())return override;
   Path win=Path.of("C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe");
