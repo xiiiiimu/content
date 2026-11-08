@@ -19,7 +19,9 @@ public class RocketMqRelaySender implements RelaySender {
         if(eventId==null || !eventId.isIntegralNumber() || !eventId.canConvertToLong() || eventId.longValue()!=lease.eventId())
             throw new IllegalArgumentException("Outbox payload eventId does not match its immutable identity");
         String key=Long.toString(lease.eventId());
-        var message=new Message(settings.topic(),"PostPublished",key,lease.payload().getBytes(StandardCharsets.UTF_8));
+        String type=body.has("eventType")?body.get("eventType").asText():"PostPublished";
+        if(!java.util.Set.of("PostPublished","FollowChanged","FeedModeChanged","PostOfflined").contains(type))throw new IllegalArgumentException("Unsupported Outbox routing type");
+        var message=new Message(settings.topic(),type,key,lease.payload().getBytes(StandardCharsets.UTF_8));
         message.putUserProperty("eventId",key);
         var result=producer.send(message,settings.sendTimeoutMillis());
         return result==null ? new Receipt("NO_RESULT",null) : new Receipt(result.getSendStatus()==null?"NO_STATUS":result.getSendStatus().name(),result.getMsgId());

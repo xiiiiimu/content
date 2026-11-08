@@ -69,7 +69,7 @@ The RocketMQ 5.3.2 remoting client uses NameServer `127.0.0.1:29876`, the advert
 
 Defaults: 30-second lease, 3-second client send timeout, no renewal, at most five successful claims, capped exponential retry starting at one second, and a one-second scan interval. Set `content.relay.*` Spring properties for other environments. Each scan reaps exhausted expired leases and claims at most ten events sequentially. Unknown event types remain untouched until a routing contract is implemented.
 
-Replay is a local operator command, with database credentials and OS access as its trust boundary. It accepts only DEAD PostPublished, preserves identity/payload, resets the attempt counter, increments the token and atomically inserts OS operator/reason audit data. The command forces both scanning and the MQ producer off, regardless of environment flags. Build the executable JAR and use Java 17 (the script honors `JAVA_HOME`):
+Replay is a local operator command, with database credentials and OS access as its trust boundary. It accepts only DEAD supported feed events (PostPublished, FollowChanged, FeedModeChanged, PostOfflined), preserves identity/payload, resets the attempt counter, increments the token and atomically inserts OS operator/reason audit data. The command forces both scanning and the MQ producer off, regardless of environment flags. Build the executable JAR and use Java 17 (the script honors `JAVA_HOME`):
 
 ```powershell
 .\infra\docker\replay-outbox.ps1 -EventId 123 -Reason 'Incident review approved replay'
@@ -83,16 +83,64 @@ The [candidate adapter contract](docs/m2-story1-feed-candidates.md) implements A
 
 `RedisFeedCandidateStore` is a plain adapter over a caller-owned Lettuce connection with a finite command timeout. This Story adds no Redis Spring auto-configuration, Worker, HTTP endpoint, user-follow logic or MQ distribution. Writes require the immutable publication timestamp from the authoritative post. Replaying the same tuple is idempotent.
 
-Wrong key types, nonzero scores and malformed returned members mark the index untrusted and raise an error. Connection/timeout failures also raise an error; neither condition becomes an empty successful read. Normal operations cannot clear the untrusted marker. Authoritative rebuilding and recovery readiness remain future work. CI includes the real Redis tests and uploads the Redis log alongside the existing integration evidence.
+Wrong key types, nonzero scores and malformed returned members mark the index untrusted and raise an error. Connection/timeout failures also raise an error; neither condition becomes an empty successful read. Normal operations cannot clear the untrusted marker. The M2/M3 composition below supplies authoritative rebuilding and recovery readiness. CI includes the real Redis tests and uploads the Redis log alongside the existing integration evidence.
 
 `CandidateSlice.lastReadBoundary` describes this source read only. It is not a signed client cursor or ADR-002's complete merge/visibility pagination state. An empty Redis read does not prove the entire Feed is exhausted, or that the cache is complete.
 
 ## M2 Story 2: bounded multi-source merge
 
-The [merge contract](docs/m2-story2-merge-plan.md) defines `FeedMerger`, a request-local kernel over caller-provided ordered sources and an authoritative tuple/visibility check. `RedisCandidateSource` adapts the existing Redis store; the SQL source and visibility/follow-epoch decisions in tests remain fixtures. No production Feed endpoint or source composition is registered.
+The [merge contract](docs/m2-story2-merge-plan.md) defines `FeedMerger`, a request-local kernel over caller-provided ordered sources and an authoritative tuple/visibility check. `RedisCandidateSource` adapts the existing Redis store; at that Story 2 checkpoint, SQL sources and visibility/follow-epoch decisions were test fixtures. The production composition is provided in the M2/M3 section below.
 
 Prefetch never advances consumed positions. All sources must confirm a head or normal range exhaustion before the greatest candidate can be consumed; equal heads are consumed together. Each new request reconstructs sources below shared global/consumed boundaries and safely rereads unconsumed prefetch. The structured continuation is internal, unsigned, and must not be accepted directly from an HTTP client.
 
-Defaults: at most eight sources, page size 1..100, source batches up to 32, 256 consumed candidates/checks and 64 source reads per request. Each read/check has a two-second maximum wait; this is not a two-second total request deadline. Callers own a bounded executor, finite connection/query timeouts and resource shutdown. Missing source coverage/readiness and production authorization remain deployment blockers.
+Defaults: at most eight sources, page size 1..100, source batches up to 32, 256 consumed candidates/checks and 64 source reads per request. Each read/check has a two-second maximum wait; this is not a two-second total request deadline. Callers own a bounded executor, finite connection/query timeouts and resource shutdown. The Story 2 checkpoint required source coverage and production authorization; the M2/M3 composition below supplies the primary fallback and current-epoch authority checks.
 
 `HAS_MORE` proves another candidate is known, not that it is visible; `UNKNOWN` means bounded work ended before exhaustion could be established; empty `UNKNOWN` must advance the consumed boundary. `EXHAUSTED` requires normal exhaustion of every configured source and no buffered candidates. Source/authority failures fail the whole request, preserving the caller's input continuation for retry. CI runs the real Redis/MySQL merge suite under `mvn -Pintegration verify` and retains `target/feed-merge-evidence` traces and component logs with the existing integration artifact.
+
+## M2/M3 production pipeline (explicit opt-in)
+
+The batch contract and validation ledger are in [docs/m2-m3-batch.md](docs/m2-m3-batch.md). M0–M9 remains the complete roadmap. This batch adds real MyBatis candidate/authority queries, relationship transactions, signed continuations, HTTP, MQ Inbox and persistent delivery, mode transitions and controlled Redis recovery. Fixtures prepare input data; they do not supply the production authorization or dispatch implementations.
+
+`pipeline` enables the complete composition. Provide `CONTENT_MYSQL_PASSWORD`, two distinct signing secrets `CONTENT_CURSOR_KEY` and `CONTENT_IDENTITY_KEY` (at least 32 UTF-8 bytes each), and optionally `CONTENT_REDIS_URI`. Store secrets outside Git. There is no default signing secret. Existing authors and drafts remain prerequisites; account registration, login and draft creation are outside this batch.
+
+Before starting workers for a new or lost Redis index, build the executable JAR and run the controlled bootstrap:
+
+```powershell
+# Stop incompatible old writers/workers; use the upgraded binary for every writer.
+.\infra\docker\feed-ops.ps1 -Action rebuild -Reason 'Initial or incident-reviewed authoritative rebuild'
+java -jar target/content-0.1.0-SNAPSHOT.jar --spring.profiles.active=pipeline
+```
+
+The operator command forces all producers, consumers and scheduled workers off, including when environment flags enable them. Its trust boundary is OS execution plus database/Redis credentials; it records the OS operator and reason. Rebuild first persists maintenance, drains compatible SQL writers, fences old Redis generations, rebuilds and compares the complete retained candidate range, then publishes READY. A crash leaves primary reads active and cache readiness false; an expired recovery lease can be taken over by another reviewed rebuild. It never reconstructs only unfinished jobs: DONE events and current follow history are included. Only the owned `feed:v2:{uid}:inbox` and untrusted keys are cleared; unrelated Redis data is preserved. Local deployment is single-node Redis with `noeviction`, not Redis Cluster.
+
+API and workers can run as separate processes. An API-only process uses `--spring.profiles.active=pipeline --content.pipeline.enabled=false --content.relay.enabled=false`; a worker process adds `--spring.main.web-application-type=none` while retaining the profile's worker flags. A Redis outage does not prevent the lazy Redis adapter from starting the primary-read API. MQ-enabled workers require the Broker/NameServer; metadata RPCs use a configurable 60-second limit (content.pipeline.metadata-timeout-millis, 1..120 seconds) and three cleaned-up startup attempts; this accommodates the observed Windows SDK connection setup and is independent of Relay sends or task leases. The Broker's existing asynchronous flush/single-master ACK durability boundary is unchanged.
+
+Mint a short-lived local identity token with `infra/docker/mint-identity.ps1 -UserId <id>` and send `Authorization: Bearer <token>`. The operator holding `CONTENT_IDENTITY_KEY` is the temporary issuer. The filter verifies purpose, MAC, subject, issuance/expiry and lifetime before creating Principal; an ID header cannot authenticate a request. A trusted container Principal is still accepted. This is an identity adapter, not a login system.
+
+| API | Input/behavior |
+| --- | --- |
+| `PUT /api/follows/{author}` | Principal is the reader; repeated following keeps epoch/version unchanged. |
+| `DELETE /api/follows/{author}` | Current relation becomes UNFOLLOWED; reads stop authorizing it immediately. |
+| `GET /api/feed/following?limit=20&cursor=...` | Returns items, nextCursor, pageState and scanned; limit 1..100. |
+| `PUT /api/authors/me/feed-mode` | `{mode: PUSH or PULL, expectedEpoch: integer}`; the author owns the change. |
+| `POST /api/posts/{id}/offline` | `{expectedVersion: integer}`; author-only versioned state change plus Outbox. |
+
+Cursor HMAC binds schema, reader, limit, fixed snapshot/window, returned/consumed boundaries, graph version, recovery generation and 15-minute expiry. Invalid tokens return 400, changed graph/generation returns 409 CURSOR_STALE, and source/authority failures return a retryable 503 without a new continuation. Empty UNKNOWN advances the consumed boundary. HAS_MORE confirms a remaining candidate, not necessarily a visible post. EXHAUSTED requires normal exhaustion of the configured range. Signing/expiry does not upgrade the L1 late-arrival contract to a frozen snapshot.
+
+The primary sources select current followed authors and split by each post's immutable PUSH/PULL mode. A ready inbox is an additional source; the complete PUSH primary fallback is always retained. Old epochs remain covered across either direction of mode change, Redis loss or delayed fanout. Every candidate is checked against the primary post state and the current relation: sequence strictly above cutoff, or membership of the current epoch's fixed whitelist. History defaults to 20 (maximum 100) within a configurable 30-day window. Hiding a historical post does not refill the whitelist. A new follow epoch creates a new fixed set. No blind old-epoch inbox deletion is used.
+
+Source batches default to 32, at most 64 source calls and 256 checks/consumptions per page, with a bounded eight-thread/16-queue executor. Page context adds six SQL calls and, when READY, up to two Redis readiness reads. SQL statements and merge callbacks have two-second limits; connection establishment/pool waits and database network reads are bounded at five seconds, with a ten-second pool initialization failure window. Redis connects lazily with a five-second initialization limit, then uses two-second command timeouts. These are individual limits, not a total request deadline. LIMIT and callback counts do not guarantee a physical database rows-examined bound; the real SQL plans/counters are retained in CI and do not constitute a capacity benchmark. Retained Redis reads have the same lower/upper time window as SQL. Low-priority trimming checks at most 100 readers and removes at most 100 expired members per reader per scan, with generation fencing; its restartable in-memory position is not a delivery watermark.
+
+Relay routing now includes FollowChanged, FeedModeChanged and PostOfflined on the existing Topic with explicit tags, preserving PostPublished identity and payload. Inbox compares the original immutable event, hash and any existing task before acknowledging. PUSH creates a PUBLISH task, PULL records NO_FANOUT, active FollowChanged creates BACKFILL, and cancellation/control events record their durable decision. Conflicts enter `feed_event_conflicts` and are not silently acknowledged.
+
+Delivery claims commit before Redis I/O, increment token/attempt, fix a follower-ID upper bound and use database time. Each follower/history batch is at most 100. Complete Redis success precedes a fenced progress update; only an unexpired owner can advance and renew its 30-second lease. Retries keep event/payload and use capped exponential backoff (1s to 60s), with at most five claims. The final expired claim is reaped DEAD. An old lease can have late immutable Redis side effects; it cannot commit state, and current authoritative permissions still apply. Recovery additionally fences old Redis generations. Controlled task replay preserves event content and committed scan positions, resets attempts, increments the token and audits the operator:
+
+```powershell
+.\infra\docker\feed-ops.ps1 -Action replay -TaskId 123 -Reason 'Reviewed and repaired incident cause'
+```
+
+Outbox replay remains available through the existing replay command and now accepts the supported feed event types. Unknown types remain untouched for an explicit routing contract. Task/Outbox DEAD and conflict records require operational attention; this batch does not silently discard them.
+
+CI uses `mvn -Pintegration verify` against actual MySQL 8.4, Redis 7.4 and RocketMQ 5.3.2. Fault processes run separate Java 17 JVMs; their bounded startup watchdog is separate from leases. Evidence includes transaction/token barriers, force-kill records, real Broker redelivery, Redis generation fencing, per-page traces, query plans/counters, recovery audit timings and component logs. Test ports 30921/30922 are Broker endpoints; 30923 is an explicitly bound volatile Redis used for kill/start fault injection. Recovery timing is fixture evidence, not a production performance claim.
+
+Remaining beyond this batch: full M4 entry-point/media visibility, M5 interactions/trending, M6 media, M7 broad shutdown/reconciliation, M8 capacity/performance and M9 TrendGuard. Private media URLs, L2/L3 and strict publication-time follower snapshots remain governed by their later contracts.

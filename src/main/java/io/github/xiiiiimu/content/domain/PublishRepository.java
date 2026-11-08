@@ -1,6 +1,7 @@
 package io.github.xiiiiimu.content.domain;
 
 public interface PublishRepository {
+    String gate();
     record AuthorMode(String mode, long epoch, long sequence) {}
     record Draft(long authorId, String status, long version) {}
     record Receipt(long postId, long expectedVersion, String snapshot) {}

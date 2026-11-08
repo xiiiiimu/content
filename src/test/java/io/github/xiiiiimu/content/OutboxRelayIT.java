@@ -31,22 +31,25 @@ import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(properties={"content.relay.enabled=true","content.relay.scan-enabled=false","content.relay.topic=content-relay-it",
-        "content.relay.lease-millis=10000","content.relay.send-timeout-millis=3000","content.relay.max-attempts=3",
+        "content.relay.lease-millis=30000","content.relay.send-timeout-millis=3000","content.relay.max-attempts=3",
         "content.relay.base-backoff-millis=100","content.relay.max-backoff-millis=1000","content.relay.batch-size=1"})
 @Testcontainers
+@org.springframework.test.annotation.DirtiesContext(classMode=org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class OutboxRelayIT {
     @Container static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8.4");
     static final AtomicLong IDS=new AtomicLong(10000);
     // Cold JVM/bootstrap/connection warmup is setup, not a business lease deadline.
-    // Windows startup was observed at 112s before the independent canary send.
-    static final int CHILD_BOOTSTRAP_SECONDS=180;
+    // Windows startup was observed at 94s plus a failed 30s canary; thread dumps
+    // show native adapter enumeration on new SDK sockets. Real SEND_OK is still mandatory.
+    // This setup guard includes the separate 120s connection warmup, never a business lease.
+    static final int CHILD_BOOTSTRAP_SECONDS=300;
     static boolean senderWarmed;
     @DynamicPropertySource static void properties(DynamicPropertyRegistry r) {
         r.add("spring.datasource.url",MYSQL::getJdbcUrl); r.add("spring.datasource.username",MYSQL::getUsername); r.add("spring.datasource.password",MYSQL::getPassword);
         r.add("content.relay.namesrv",RelayMqFixture::namesrv);
     }
     @BeforeAll static void preflight() throws Exception { RelayMqFixture.preflight(); }
-    @AfterAll static void close() throws Exception { RelayMqFixture.close(); }
+    @AfterAll static void close(@Autowired DefaultMQProducer producer) throws Exception { producer.shutdown();RelayMqFixture.close(); }
     @Autowired JdbcTemplate db;
     @Autowired(required=false) RelayRunner runner;
     @Autowired(required=false) RelayStore store;
@@ -55,10 +58,7 @@ class OutboxRelayIT {
     String payload;
     @BeforeEach void fixture() throws Exception {
         if(relayProducer!=null && !senderWarmed) {
-            await().atMost(Duration.ofSeconds(60)).ignoreExceptions().untilAsserted(() -> {
-                var message=new org.apache.rocketmq.common.message.Message(RelayMqFixture.TOPIC,"PostPublished","sender-preflight","{\"eventId\":-1}".getBytes(StandardCharsets.UTF_8));
-                assertThat(relayProducer.send(message,10000).getSendStatus()).isEqualTo(SendStatus.SEND_OK);
-            });
+            confirmSenderConnection();
             senderWarmed=true;
         }
         db.execute("DROP TRIGGER IF EXISTS fail_relay_sent"); db.execute("DROP TRIGGER IF EXISTS fail_relay_audit");
@@ -67,6 +67,12 @@ class OutboxRelayIT {
         db.update("INSERT INTO outbox_events(id,event_type,aggregate_id,payload) VALUES (?,'PostPublished',?,?)",id,id,
                 "{\"eventId\":"+id+",\"postId\":"+id+",\"authorId\":1,\"publishedAtMs\":1794000000000,\"deliveryMode\":\"PUSH\",\"deliveryEpoch\":7,\"postVersion\":1,\"publishSeq\":1}");
         payload=db.queryForObject("SELECT payload FROM outbox_events WHERE id=?",String.class,id);
+    }
+    void confirmSenderConnection() {
+        await().atMost(Duration.ofSeconds(60)).ignoreExceptions().untilAsserted(() -> {
+            var message=new org.apache.rocketmq.common.message.Message(RelayMqFixture.TOPIC,"PostPublished","sender-preflight","{\"eventId\":-1}".getBytes(StandardCharsets.UTF_8));
+            assertThat(relayProducer.send(message,10000).getSendStatus()).isEqualTo(SendStatus.SEND_OK);
+        });
     }
     RelayStore control() { assertThat(store).as("Persistent Relay implementation is required after real MySQL/MQ preflight").isNotNull(); return store; }
     void tick() { assertThat(runner).as("Relay missing; real MQ SEND_OK and consumer preflight succeeded").isNotNull(); runner.tick(); }
@@ -159,6 +165,9 @@ class OutboxRelayIT {
             docker.startContainerCmd(container).exec();
             await().atMost(Duration.ofSeconds(60)).ignoreExceptions().until(() -> RelayMqFixture.BROKER.getLogs().lines().filter(line -> line.contains("boot success")).count()>boots);
         }
+        // Broker boot does not prove the Windows SDK's replacement TCP channel is ready.
+        // Confirm real transport recovery before spending the remaining finite business attempts.
+        confirmSenderConnection();
         await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {tick();assertThat(state()).isEqualTo("SENT");});
         assertThat(attempt()).isBetween(2,3);messagesAtLeastOne();
     }
@@ -212,6 +221,7 @@ class OutboxRelayIT {
                 "io.github.xiiiiimu.content.worker.OutboxReplayCommand",Long.toString(id),"controlled-replay-test");
         command.environment().put("CONTENT_DB_URL",MYSQL.getJdbcUrl());command.environment().put("CONTENT_MYSQL_USER",MYSQL.getUsername());command.environment().put("CONTENT_MYSQL_PASSWORD",MYSQL.getPassword());
         command.environment().put("CONTENT_RELAY_SCAN_ENABLED","true");command.environment().put("CONTENT_RELAY_PRODUCER_ENABLED","true");
+        command.environment().put("CONTENT_FEED_ENABLED","true");command.environment().put("CONTENT_PIPELINE_ENABLED","true");command.environment().put("CONTENT_PIPELINE_CONSUMER_ENABLED","true");
         var child=command.redirectErrorStream(true).redirectOutput(log.toFile()).start();
         try {assertThat(child.waitFor(CHILD_BOOTSTRAP_SECONDS,TimeUnit.SECONDS)).as(log.toString()).isTrue();assertThat(child.exitValue()).isZero();}
         finally {if(child.isAlive())child.destroyForcibly();}

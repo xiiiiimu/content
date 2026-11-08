@@ -13,6 +13,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @RestControllerAdvice(assignableTypes = PublishController.class)
 public class PublishExceptionHandler {
+    @ExceptionHandler(io.github.xiiiiimu.content.domain.FeedFailure.class)
+    ResponseEntity<Error> maintenance(io.github.xiiiiimu.content.domain.FeedFailure e) { return ResponseEntity.status(e.status).body(new Error(e.code)); }
     private static final Logger LOG = LoggerFactory.getLogger(PublishExceptionHandler.class);
     public record Error(String code) {}
     @ExceptionHandler(PublishFailure.class)

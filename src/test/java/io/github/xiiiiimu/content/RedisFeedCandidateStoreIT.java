@@ -153,4 +153,16 @@ class RedisFeedCandidateStoreIT {
                     .satisfies(e -> assertThat(((CandidateIndexUnavailableException)e).reason()).isEqualTo(CandidateIndexUnavailableException.Reason.REDIS_UNAVAILABLE));
         }
     }
+    @Test void rangeLowerBoundaryIsInclusiveAndTrimIsBoundedAndGenerationFenced() {
+        store.add(UID,List.of(new FeedCandidate(999,1),new FeedCandidate(999,2),new FeedCandidate(1000,1),new FeedCandidate(1000,2),new FeedCandidate(1001,1)));
+        assertThat(store.readRange(UID,1000,null,10,1000).items()).containsExactly(new FeedCandidate(1000,2),new FeedCandidate(1000,1));
+        assertThat(store.readRange(UID,1000,FeedMemberCodec.encode(new FeedCandidate(1000,1)),10,1000).items()).isEmpty();
+        raw.set("feed:write-generation","2");
+        assertThatThrownBy(()->store.trimFenced(UID,1000,1,1)).isInstanceOf(CandidateIndexUnavailableException.class);
+        assertThat(raw.zcard(KEY)).isEqualTo(5);assertThat(store.trimFenced(UID,1000,1,2)).isEqualTo(1);assertThat(raw.zcard(KEY)).isEqualTo(4);
+        assertThat(store.trimFenced(UID,1000,100,2)).isEqualTo(1);assertThat(raw.zcard(KEY)).isEqualTo(3);
+        assertThat(store.readRange(UID,1001,null,10,1000).items()).containsExactly(new FeedCandidate(1001,1),new FeedCandidate(1000,2),new FeedCandidate(1000,1));
+        assertThatThrownBy(()->store.readRange(UID,1000,null,1,1001)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(()->store.trimFenced(UID,1000,201,2)).isInstanceOf(IllegalArgumentException.class);
+    }
 }

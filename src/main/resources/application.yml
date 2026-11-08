@@ -18,3 +18,9 @@ management:
       group:
         readiness:
           include: readinessState,db
+content:
+  feed:
+    enabled: false
+    redis-uri: ${CONTENT_REDIS_URI:redis://127.0.0.1:26379}
+    cursor-key: ${CONTENT_CURSOR_KEY:}
+    identity-key: ${CONTENT_IDENTITY_KEY:}

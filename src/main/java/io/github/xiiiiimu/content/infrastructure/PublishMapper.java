@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.*;
 
 @Mapper
 public interface PublishMapper extends PublishRepository {
+    @Override @Select("SELECT CASE WHEN generation>0 AND state IN('PRIMARY','READY') THEN state ELSE 'BLOCKED' END FROM feed_control WHERE id=1 FOR SHARE") String gate();
     @Override
     @Select("SELECT mode, mode_epoch AS epoch, publish_seq AS sequence FROM author_feed_mode WHERE author_id=#{authorId} FOR UPDATE")
     AuthorMode lockAuthor(long authorId);
