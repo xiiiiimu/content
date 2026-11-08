@@ -14,4 +14,5 @@ public interface PipelineObserver {
  default void beforeFeedAuthority(long reader,FeedCandidate candidate) {}
  default void beforeFeedReturn(long reader) {}
  default void beforeCacheInvalidate(long postId) {}
+ default void beforeMediaProcess(long taskId) {}
 }
