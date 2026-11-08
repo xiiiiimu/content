@@ -157,6 +157,6 @@ Batch ledger: [docs/m4-m6-batch.md](docs/m4-m6-batch.md). Every application read
 | `POST /api/posts/{id}/media` | Author upload (`expectedVersion`, base64); creates `media_tasks`. |
 | `POST /api/posts/{id}/media/sign` | Short-lived signed URL after DONE + visibility. |
 
-Enable media with `content.media.enabled=true` and `content.media.s3-endpoint`. Local verify: `mvn -Pintegration verify` (124 tests) including `VisibilityAndOfflineIT`, `InteractionsAndTrendingIT` and `MediaPipelineIT`.
+Enable media with `content.media.enabled=true` and `content.media.s3-endpoint`. Clients receive HMAC gateway URLs under `/api/media/objects` (TTL capped at 15 minutes); raw object-store endpoints are not client-facing. Official MinIO and real FFmpeg decode/cover verification remain open. Local verify includes `VisibilityAndOfflineIT`, `InteractionsAndTrendingIT` and `MediaPipelineIT`.
 
 Remaining beyond M4–M6: M7 broad shutdown/reconciliation, M8 capacity/performance and M9 TrendGuard. L2/L3 and strict publication-time follower snapshots remain later contracts. Official MinIO image health remains blocked.

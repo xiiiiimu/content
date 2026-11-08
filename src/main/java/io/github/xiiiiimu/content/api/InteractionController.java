@@ -16,7 +16,7 @@ public class InteractionController {
  @PostMapping("/api/posts/{post}/comments") public InteractionService.CommentResult comment(@PathVariable long post,@RequestHeader("Idempotency-Key")String key,@RequestBody java.util.Map<String,String> body,Principal p){
   return interactions.comment(user(p),post,body.get("body"),key,body.get("topic"));
  }
- @GetMapping("/api/posts/{post}/stats") public Object stats(@PathVariable long post){return interactions.stats(post);}
+ @GetMapping("/api/posts/{post}/stats") public Object stats(@PathVariable long post,Principal p){user(p);return interactions.stats(post);}
  @GetMapping("/api/topics/trending") public List<TrendingService.Entry> trending(@RequestParam(defaultValue="1h")String window,@RequestParam(defaultValue="net_events")String metric,Principal p){
   long millis=switch(window){case "1h"->3_600_000L;case "24h"->86_400_000L;default->throw new FeedFailure(400,"INVALID_REQUEST");};
   return trending.window(metric,millis,user(p));

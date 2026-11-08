@@ -52,6 +52,7 @@ public final class MediaService {
   }
 }
  public Signed sign(long viewer,long post,long ttlMillis){
+  if(ttlMillis<=0 || ttlMillis>900_000L)throw new FeedFailure(400,"INVALID_REQUEST");
   var view=visibility.read(viewer,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   var task=media.byPost(post);if(task==null || task.outputKey()==null || !"DONE".equals(task.state()))throw new FeedFailure(404,"MEDIA_NOT_READY");
   if(task.expectedVersion()!=view.version())throw new FeedFailure(409,"MEDIA_VERSION_STALE");
