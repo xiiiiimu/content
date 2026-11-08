@@ -67,4 +67,5 @@
 - `InteractionsAndTrendingIT`：通过（MySQL 8.4 + Redis 7.4）
 - `MediaPipelineIT`：通过（MySQL + Redis + adobe/s3mock:3.12.0）
 - `VisibilityAndOfflineIT` / `MySqlMigrationIT`（V1→V7）：通过
-- 全量 `mvn -Pintegration verify`：见 PR CI / 本地日志 `target/m4-m6-batch/`
+- 全量 `mvn -Pintegration verify`：**124 tests, Failures: 0, Errors: 0, BUILD SUCCESS**（`target/m4-m6-batch/full-verify-002442.log`）
+- PR：https://github.com/xiiiiimu/content/pull/7 （不自动合并）

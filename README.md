@@ -29,7 +29,7 @@ Use PowerShell 7 for `-MaskInput`. In a second terminal, check `Invoke-RestMetho
 | RocketMQ broker | 30911 | 30911 | content_rocketmq-data |
 | MinIO API and console | 29000 / 29001 | 9000 / 9001 | content_minio-data |
 
-MinIO is retained under `profiles: [media]`. Its current official image reference is blocked by the reported registry authorization failure. Resolve this before M6 by verifying an official image address and exact version with an actual pull and health check. The existing reference is retained pending verification. M0-M3 can start with CONTENT_MINIO_PASSWORD empty. After the image is verified, set a MinIO password of at least eight characters and use `.\infra\docker\start.ps1 -Profile media` to start the default services plus MinIO. The script validates the media password before startup.
+MinIO is retained under `profiles: [media]`, but community MinIO Server archives are unavailable (Docker Hub denied, Quay 401, `dl.min.io` 410 Gone). Do not treat any substitute as official MinIO. M6 media ITs use an S3-compatible stand-in (`adobe/s3mock`) against `content.media.*` / `ObjectStore`. Leave `CONTENT_MINIO_PASSWORD` empty for default stacks. If a maintainable official image returns later, set a password of at least eight characters and use `.\infra\docker\start.ps1 -Profile media`.
 
 `status.ps1` and `stop.ps1` default to all Content profiles so an enabled MinIO container is included. Both accept `-Profile media` explicitly. Stop preserves containers and named volumes. These commands always use project name `content`.
 
@@ -143,4 +143,20 @@ Outbox replay remains available through the existing replay command and now acce
 
 CI uses `mvn -Pintegration verify` against actual MySQL 8.4, Redis 7.4 and RocketMQ 5.3.2. Fault processes run separate Java 17 JVMs; their bounded startup watchdog is separate from leases. Evidence includes transaction/token barriers, force-kill records, real Broker redelivery, Redis generation fencing, per-page traces, query plans/counters, recovery audit timings and component logs. Test ports 30921/30922 are Broker endpoints; 30923 is an explicitly bound volatile Redis used for kill/start fault injection. Recovery timing is fixture evidence, not a production performance claim.
 
-Remaining beyond this batch: full M4 entry-point/media visibility, M5 interactions/trending, M6 media, M7 broad shutdown/reconciliation, M8 capacity/performance and M9 TrendGuard. Private media URLs, L2/L3 and strict publication-time follower snapshots remain governed by their later contracts.
+## M4–M6 visibility, interactions and media
+
+Batch ledger: [docs/m4-m6-batch.md](docs/m4-m6-batch.md). Every application read path consults authoritative MySQL visibility; warmed caches cannot authorize after offline. Likes/comments are idempotent with reconciliable `post_stats`. Topic trending uses a deduped event ledger, minute buckets and rebuildable ranking (`net_events` ≠ active like counts). Media tasks use lease fencing, S3-compatible object I/O and signed GET URLs only after visibility checks.
+
+| API | Behavior |
+| --- | --- |
+| `GET /api/posts/{id}` | Authoritative detail; offline → not visible. |
+| `PUT/DELETE /api/posts/{id}/likes` | Idempotent like/unlike; optional `topic` for trending. |
+| `POST /api/posts/{id}/comments` | Requires `Idempotency-Key`; replays return the same comment id. |
+| `GET /api/posts/{id}/stats` | Reconciled like/comment counts. |
+| `GET /api/topics/trending?window=1h\|24h&metric=net_events\|active_interactions` | Minute-bucket window ranking. |
+| `POST /api/posts/{id}/media` | Author upload (`expectedVersion`, base64); creates `media_tasks`. |
+| `POST /api/posts/{id}/media/sign` | Short-lived signed URL after DONE + visibility. |
+
+Enable media with `content.media.enabled=true` and `content.media.s3-endpoint`. Local verify: `mvn -Pintegration verify` (124 tests) including `VisibilityAndOfflineIT`, `InteractionsAndTrendingIT` and `MediaPipelineIT`.
+
+Remaining beyond M4–M6: M7 broad shutdown/reconciliation, M8 capacity/performance and M9 TrendGuard. L2/L3 and strict publication-time follower snapshots remain later contracts. Official MinIO image health remains blocked.
