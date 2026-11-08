@@ -22,3 +22,6 @@
 - 第一组 GREEN：主库候选/权威判定、关注/取关及固定历史集、基础HTTP与内部签名游标。`mvn -B -ntp -Pintegration -Dit.test=ProductionFeedIT,MySqlMigrationIT verify` BUILD SUCCESS；44 unit +4 IT（迁移3、生产HTTP链1），0失败/错误/跳过。V4仅新增控制行及排序索引，V1–V3不变。日志target/batch-read-verified.log；尚非本批完整验收。
 - 第二组 RED `eedf8a6`：真实MySQL/Redis正常，3个令牌单元通过，合法签名Bearer未接入Principal导致HTTP401（预期200），1 failure/0 errors；日志target/batch-http-red.log。
 - 第二组 GREEN：身份HMAC适配、独立用途/密钥、游标绑定与可配置扫描预算；第一轮47 unit+7 IT通过；修正过滤器只捕获认证阶段异常并补游标过期断言后，`-Dtest=FeedTokensTest -Pintegration -Dit.test=ProductionFeedIT verify` 3 unit+7 IT再次通过。PowerShell签发命令的JSON/签名通过独立Python HMAC核对。目标日志target/batch-http-verified.log。未进行登录业务开发，运维密钥持有者为临时身份信任根。
+- Inbox组 RED `d1b4230`：真实Broker SEND_OK、Outbox SENT后Inbox为0，1 failure/0 errors；不是连接故障。
+- Inbox组 GREEN：V5扩展Inbox快照摘要、任务不可变内容及冲突/重放审计；Relay保留原PostPublished协议并增加FollowChanged/ModeChanged/Offlined标签路由；消费者提交后ACK。`-Dtest=ContentApplicationTest,FeedTokensTest -Pintegration -Dit.test=DistributionIT verify` BUILD SUCCESS，4 unit+6 IT，0失败/错误/跳过；实际覆盖MQ受理、PULL无需扇出、并发重放、真实SQL触发器回滚、提交后失败及冲突对账。V5迁移的3个迁移集成测试也已通过。日志target/batch-inbox-current.log。
+- 调试失败不计通过：修复MyBatis方法重名；MQ预检改为单探针有界读取；新消费者启动元数据RPC10秒、最多3次，失败清理资源并拒绝启动（不修改Relay发送3秒/租约30秒协议）。扫描业务测试尚待后续组完成。

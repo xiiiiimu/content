@@ -42,8 +42,8 @@ final class PipelineMqFixture {
     static void preflight() throws Exception {
         NAMESRV.start(); BROKER.start();
         var created = BROKER.execInContainer("sh","mqadmin","updateTopic","-n","pipeline-namesrv:9876","-b","127.0.0.1:"+PORT,"-t",TOPIC,"-r","1","-w","1");
-        java.nio.file.Files.createDirectories(java.nio.file.Path.of("target","relay-evidence"));
-        java.nio.file.Files.writeString(java.nio.file.Path.of("target","relay-evidence","topic-create.log"),created.getStdout()+created.getStderr());
+        java.nio.file.Files.createDirectories(java.nio.file.Path.of("target","pipeline-evidence"));
+        java.nio.file.Files.writeString(java.nio.file.Path.of("target","pipeline-evidence","topic-create.log"),created.getStdout()+created.getStderr());
         assertThat(created.getExitCode()).as(created.getStdout()+created.getStderr()).isZero();
         assertThat(created.getStdout()).as("mqadmin can report errors with exit code 0").contains("success");
         probe = new DefaultMQProducer("relay-preflight-"+UUID.randomUUID());
@@ -55,7 +55,15 @@ final class PipelineMqFixture {
         var message = new Message(TOPIC,"__Warmup","preflight","{\"eventId\":-1}".getBytes(StandardCharsets.UTF_8));
         await().atMost(Duration.ofSeconds(60)).ignoreExceptions().untilAsserted(() ->
                 assertThat(probe.send(message,10000).getSendStatus()).isEqualTo(SendStatus.SEND_OK));
-        await().atMost(Duration.ofSeconds(20)).ignoreExceptions().until(() -> !received("preflight").isEmpty());
+        // Only one warmup message exists here. Do not run the multi-page evidence scan
+        // under a watchdog equal to its aggregate RPC time budget.
+        await().atMost(Duration.ofSeconds(60)).ignoreExceptions().until(() -> {
+            for(var queue:consumer.fetchSubscribeMessageQueues(TOPIC)) {
+                var result=consumer.pull(queue,"*",0,1,1000);
+                if(result.getMsgFoundList()!=null && result.getMsgFoundList().stream().anyMatch(m -> "preflight".equals(m.getKeys())))return true;
+            }
+            return false;
+        });
     }
     static List<MessageExt> received(String eventId) throws Exception {
         var found = new ArrayList<MessageExt>();
@@ -72,7 +80,7 @@ final class PipelineMqFixture {
         return found;
     }
     static void close() throws Exception {
-        var dir=java.nio.file.Path.of("target","relay-evidence"); java.nio.file.Files.createDirectories(dir);
+        var dir=java.nio.file.Path.of("target","pipeline-evidence"); java.nio.file.Files.createDirectories(dir);
         java.nio.file.Files.writeString(dir.resolve("broker.log"),BROKER.getLogs());
         java.nio.file.Files.writeString(dir.resolve("namesrv.log"),NAMESRV.getLogs());
         var diagnostic=BROKER.execInContainer("sh","-c","find /home/rocketmq/logs -type f -name '*broker*.log' -exec tail -n 100 {} \\;");
