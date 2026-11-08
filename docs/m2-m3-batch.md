@@ -1,6 +1,6 @@
 # M2 剩余 + M3 批量实施记录
 
-状态：开发中；最终只提交一个批量 PR，不自动合并。基线 main 8435d41，PR #4 已合并，main run 42419149640 成功（44 unit +75 IT）。V2.1 PDF 只读保留，四份 ADR 优先；M0–M9 路线不变。
+状态：本地完整回归已通过；待推送批量 PR 并由 CI 复核，不自动合并。基线 main 8435d41，PR #4 已合并，main run 42419149640 成功（44 unit +75 IT）。V2.1 PDF 只读保留，四份 ADR 优先；M0–M9 路线不变。
 
 ## 内部依赖与实施参数
 
@@ -58,4 +58,54 @@
 | T13/T14 | 既有FeedMergerTest/IT全来源头确认、跨源重叠/预取安全重读、L1迟到/来源超时；生产HTTP来源通过同一归并器及主库权限检查。 |
 | T16 | RecoveryAndModesIT真实Redis KILL/start，独立恢复JVM批次后被终止，无READY证明时保持主库读，实际运维命令接管恢复。 |
 
-以上为测试定位，最终通过数量与完整回归/CI结果在验收完成后补录。屏障故障使用测试专用observer，不进入生产JAR；数据库时间到期通过隔离测试库设置为当前时间之前，不能算真实等待30秒的性能结果。M4–M9、无停机恢复、Redis Cluster、容量基准和完整媒体可见性均不在本批。
+以上为测试定位。屏障故障使用测试专用observer，不进入生产JAR；数据库时间到期通过隔离测试库设置为当前时间之前，不能算真实等待30秒的性能结果。M4–M9、无停机恢复、Redis Cluster、容量基准和完整媒体可见性均不在本批。
+
+## 收尾复验与最终本地验收（2026-11-08）
+
+### 历史失败根因（隔离复验）
+
+1. `DistributionIT` / `INBOX_BEFORE`：历史全量中曾在约 3 分钟看门狗内未写屏障；同日隔离复验 `DistributionIT` 9/9 通过（含 `INBOX_BEFORE`/`INBOX_AFTER`），证据 `target/batch-reverify/DistributionIT-20261108-115305.xml` 与 `target/distribution-evidence/inbox_before-17.*`。分类为 Windows MQ 冷启动/进程重叠导致的测试环境问题，非生产 ACK/事务缺陷；当前子进程屏障看门狗为 300 秒（独立于生产租约）。
+2. `OutboxRelayIT` 21 errors：历史报告首错为 `Server shutdown in progress`，随后级联 `Communications link failure`（仅 1 项先通过）。隔离复验前一次因孤儿容器占用固定端口 `30921` 无法启动 Broker；清理后 `OutboxRelayIT` 22/0/0 通过，日志 `target/batch-reverify/outbox-relay-it-20261108-203855.log`。分类为测试环境（孤儿固定端口 + 长跑中 MySQL 容器被关停），非 Relay 3s/30s 协议失败。夹具补丁：`FixedHostPortGuard` 在启动前回收匿名 Testcontainers 孤儿，不触碰 `content-*` Compose 容器，也不放宽断言。
+
+### 本次完整回归（不可用历史结果替代）
+
+命令：`mvn -B -ntp -Pintegration verify`  
+日志：`target/batch-reverify/full-verify-20261108-211429.log`  
+退出码：`0` / `BUILD SUCCESS`
+
+| 范围 | 结果 |
+| --- | --- |
+| Surefire 单元 | 47 tests, 0 failures, 0 errors, 0 skipped |
+| Failsafe 集成 | 120 tests, 0 failures, 0 errors, 0 skipped |
+| DeliveryWorkerIT | 13/0/0 |
+| DistributionIT | 9/0/0（含真实 Broker 重投的两类 Inbox 终止） |
+| OutboxRelayIT | 22/0/0 |
+| ProductionFeedIT | 10/0/0 |
+| RecoveryAndModesIT | 12/0/0 |
+| PublishPostIT | 23/0/0 |
+| FeedMergeIT | 9/0/0 |
+| MySqlMigrationIT | 3/0/0 |
+| RedisFeedCandidateStoreIT | 19/0/0 |
+
+### 矩阵覆盖结论（本批）
+
+| 用例 | 本批结论 | 主要证据 |
+| --- | --- | --- |
+| T01/T02 | 本地通过 | RedisFeedCandidateStoreIT、FeedMergeIT、ProductionFeedIT 501 游标 |
+| T03/T15 | 本地通过 | ProductionFeedIT 空 UNKNOWN/令牌绑定；RecoveryAndModesIT 图版本 |
+| T04/T17 | 本地通过 | RecoveryAndModesIT 双锁序；PublishPostIT 模式竞争子集 |
+| T05/T18 | 本地通过 | RecoveryAndModesIT 双向迁移、下架、Redis 重建 |
+| T06 | 本地通过 | DistributionIT 独立 JVM 提交前/后终止与真实重投 |
+| T07 | 本地通过 | DeliveryWorkerIT 部分 Redis 失败与 Redis 后进度前终止 |
+| T08 | 本地通过 | DeliveryWorkerIT 租约接管/旧 token；恢复 generation fencing |
+| T09 | 本地通过 | ProductionFeedIT 固定历史/重关注；DeliveryWorkerIT 旧代次回填 |
+| T13/T14 | 本地通过 | FeedMergerTest/IT 与生产 HTTP 同源归并 |
+| T16 | 本地通过 | RecoveryAndModesIT 重建中断与运维 JAR 接管 |
+
+### 剩余限制（已知，不宣称已验收）
+
+- CI 远端结果尚未计入本文件；以 PR checks 为准。
+- 不宣称 Redis 相对主库的性能收益或恢复耗时 SLA。
+- 无停机追平、Redis Cluster、容量基准、M4–M9/T10–T12 不在本批。
+- 单节点 Redis `noeviction`；人为单键篡改仍需受控重建。
+- 身份签发信任根为持有运维密钥的 OS 操作者，不是登录系统。
