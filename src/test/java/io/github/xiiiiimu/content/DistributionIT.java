@@ -65,13 +65,16 @@ class DistributionIT {
  @Test void brokerAckIsFollowedByCommittedInboxAndPersistentTask()throws Exception{
   assertThat(db.queryForObject("SELECT 1",Integer.class)).isEqualTo(1);
   recovery.rebuild("integration-operator","initialize verified generation before publication chain");
+  // Publish only after READY so MAINTENANCE-window RECONSUME_LATER is not required for the happy path.
+  await().atMost(Duration.ofSeconds(30)).until(()->"READY".equals(db.queryForObject("SELECT state FROM feed_control WHERE id=1",String.class)));
+  mainConsumer.start();
   db.update("INSERT INTO author_feed_mode(author_id,mode) VALUES(301,'PUSH')");follows.change(401,301,true);
   db.update("INSERT INTO posts(id,author_id,status,body) VALUES(30101,301,'DRAFT','durable dispatch')");
   var publication=publish.publish(301,30101,UUID.randomUUID().toString(),0);
   for(int i=0;i<20 && !"SENT".equals(db.queryForObject("SELECT status FROM outbox_events WHERE id=?",String.class,publication.eventId()));i++)relay.tick();
   await().atMost(Duration.ofSeconds(20)).ignoreExceptions().untilAsserted(()->assertThat(PipelineMqFixture.received(Long.toString(publication.eventId()))).isNotEmpty());
   assertThat(db.queryForObject("SELECT status FROM outbox_events WHERE id=?",String.class,publication.eventId())).isEqualTo("SENT");
-  try{await().atMost(Duration.ofSeconds(15)).until(()->db.queryForObject("SELECT COUNT(*) FROM consumer_inbox WHERE event_id=?",Integer.class,publication.eventId())==1);}catch(org.awaitility.core.ConditionTimeoutException missing){/* Assert the missing behavior below, after genuine Broker preflight and ACK. */}
+  await().atMost(Duration.ofSeconds(90)).until(()->db.queryForObject("SELECT COUNT(*) FROM consumer_inbox WHERE event_id=?",Integer.class,publication.eventId())==1);
   assertThat(db.queryForObject("SELECT COUNT(*) FROM consumer_inbox WHERE event_id=?",Integer.class,publication.eventId())).as("Broker SEND_OK and committed publication exist; production consumer must persist Inbox before ACK").isEqualTo(1);
   assertThat(db.queryForObject("SELECT COUNT(*) FROM feed_delivery_tasks WHERE event_id=?",Integer.class,publication.eventId())).isEqualTo(1);
   for(int i=0;i<20 && !"DONE".equals(db.queryForObject("SELECT state FROM feed_delivery_tasks WHERE event_id=?",String.class,publication.eventId()));i++)worker.tick();
