@@ -38,6 +38,7 @@ public interface FeedMapper {
  List<FeedCandidate> candidates(@Param("reader") long reader,@Param("mode") String mode,@Param("since") long since,@Param("snapshot") long snapshot,@Param("time") Long time,@Param("id") Long id,@Param("limit") int limit);
  @Select("SELECT p.id,p.published_at_ms AS time,p.body,CASE WHEN p.status='PUBLISHED' AND f.status='FOLLOWING' AND (p.publish_seq>f.follow_cutoff_seq OR EXISTS(SELECT 1 FROM follow_history h WHERE h.follower_id=#{reader} AND h.followee_id=p.author_id AND h.follow_epoch=f.follow_epoch AND h.post_id=p.id)) THEN TRUE ELSE FALSE END AS allowed FROM posts p LEFT JOIN follows f ON f.follower_id=#{reader} AND f.followee_id=p.author_id WHERE p.id=#{id}")
  Authority authority(@Param("reader") long reader,@Param("id") long id);
+ @Select("SELECT "+POST+" FROM posts WHERE id=#{id}") Post visible(long id);
  @Update("UPDATE posts SET status='OFFLINE',version=version+1 WHERE id=#{id} AND author_id=#{author} AND version=#{version} AND status IN('PUBLISHED','PROCESSING')")
  int offline(@Param("author") long author,@Param("id") long id,@Param("version") long version);
 }

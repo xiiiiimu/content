@@ -102,10 +102,15 @@
 | T13/T14 | 本地通过 | FeedMergerTest/IT 与生产 HTTP 同源归并 |
 | T16 | 本地通过 | RecoveryAndModesIT 重建中断与运维 JAR 接管 |
 
+### 远端 CI（合并后）
+
+- PR #6 已合并：https://github.com/xiiiiimu/content/pull/6
+- main `e4c6b50`；Actions run `42494438305` **success**（https://github.com/xiiiiimu/content/actions/runs/42494438305）
+- M2/M3 本批矩阵 T01–T09 / T13–T18 以本地完整回归 + main CI 共同确认；无未解释遗漏。
+
 ### 剩余限制（已知，不宣称已验收）
 
-- CI 远端结果尚未计入本文件；以 PR checks 为准。
 - 不宣称 Redis 相对主库的性能收益或恢复耗时 SLA。
-- 无停机追平、Redis Cluster、容量基准、M4–M9/T10–T12 不在本批。
+- 无停机追平、Redis Cluster、容量基准、M4–M9/T10–T12 不在本批（T10 随 ADR-004 进入 M4–M6）。
 - 单节点 Redis `noeviction`；人为单键篡改仍需受控重建。
 - 身份签发信任根为持有运维密钥的 OS 操作者，不是登录系统。

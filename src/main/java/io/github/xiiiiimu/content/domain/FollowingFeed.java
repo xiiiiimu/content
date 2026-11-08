@@ -8,8 +8,8 @@ public final class FollowingFeed {
  public record Cursor(int version,long reader,int limit,long snapshot,long since,FeedCandidate globalBoundary,FeedCandidate consumedBoundary,long graph,long generation,long expiresAt) {}
  public record Item(long postId,long publishedAtMs,String body) {}
  public record Response(List<Item> items,String nextCursor,FeedMerger.PageState pageState,int scanned) {}
- private final FeedMapper db;private final FeedMerger merger;private final FeedTokens tokens;private final long window;private final FeedRedis redis;private final FeedMerger.Budget budget;private final PipelineObserver observer;
- public FollowingFeed(FeedMapper db,ExecutorService executor,FeedTokens tokens,long window,FeedRedis redis,FeedMerger.Budget budget,PipelineObserver observer){this.db=db;merger=new FeedMerger(executor);this.tokens=tokens;this.window=window;this.redis=redis;this.budget=budget;this.observer=observer;}
+ private final FeedMapper db;private final FeedMerger merger;private final FeedTokens tokens;private final long window;private final FeedRedis redis;private final FeedMerger.Budget budget;private final PipelineObserver observer;private final VisibilityService visibility;
+ public FollowingFeed(FeedMapper db,ExecutorService executor,FeedTokens tokens,long window,FeedRedis redis,FeedMerger.Budget budget,PipelineObserver observer,VisibilityService visibility){this.db=db;merger=new FeedMerger(executor);this.tokens=tokens;this.window=window;this.redis=redis;this.budget=budget;this.observer=observer;this.visibility=visibility;}
  public Response read(long reader,int limit,String token){
   if(reader<=0 || limit<1 || limit>100)throw new FeedFailure(400,"INVALID_REQUEST");
   long now=db.now();db.initGraph(reader);long graph=Objects.requireNonNull(db.graph(reader));var control=db.control();
@@ -27,7 +27,8 @@ public final class FollowingFeed {
   FeedMerger.Authority authority=candidate->{observer.beforeFeedAuthority(reader,candidate);var row=db.authority(reader,candidate.postId());
    if(row==null)return new FeedMerger.Decision(null,false);
    if(row.time()==null)throw new FeedFailure(503,"INVALID_PUBLICATION");
-   var canonical=new FeedCandidate(row.time(),row.id());boolean visible=row.allowed() && row.time()>=c.since();
+   // Feed membership still uses the follow predicate; offline/status denial is unified here.
+   var canonical=new FeedCandidate(row.time(),row.id());boolean visible=row.allowed() && row.time()>=c.since() && visibility.visibleInFeed(reader,candidate.postId());
    if(visible)payloads.put(row.id(),new Item(row.id(),row.time(),row.body()));return new FeedMerger.Decision(canonical,visible);
   };
   var input=new FeedMerger.Continuation(c.snapshot(),c.globalBoundary(),c.consumedBoundary());
