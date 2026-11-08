@@ -8,4 +8,9 @@ public interface PipelineObserver {
  default void beforeRedis(DeliveryLease lease) {}
  default void afterRedis(DeliveryLease lease) {}
  default void beforeProgress(DeliveryLease lease) {}
+ default void afterRecoveryClear(long generation,long token) {}
+ default void afterRecoveryBatch(long generation,long token) {}
+ default void beforeRecoveryReady(long generation,long token) {}
+ default void beforeFeedAuthority(long reader,FeedCandidate candidate) {}
+ default void beforeFeedReturn(long reader) {}
 }

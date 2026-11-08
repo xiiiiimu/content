@@ -22,11 +22,16 @@ public class RelayCrashProcess {
             if(phase.equals("ACK") || phase.equals("ONCE")) {
                 // Warm the independent JVM's remoting classes/socket before acquiring a short test lease.
                 var producer=context.getBean(org.apache.rocketmq.client.producer.DefaultMQProducer.class);
-                org.awaitility.Awaitility.await().atMost(java.time.Duration.ofSeconds(30)).ignoreExceptions().untilAsserted(() -> {
+                long started=System.nanoTime();var warmup=signal.resolveSibling(signal.getFileName()+".warmup");
+                Files.writeString(warmup,"phase="+phase+" pid="+ProcessHandle.current().pid()+" startedAt="+java.time.Instant.now()+"\n");
+                // Native Windows adapter enumeration occurs on each fresh SDK connection.
+                // Setup ends only after real SEND_OK; no Outbox lease has been claimed yet.
+                org.awaitility.Awaitility.await().atMost(java.time.Duration.ofSeconds(120)).ignoreExceptions().untilAsserted(() -> {
                     var message=new org.apache.rocketmq.common.message.Message("content-relay-it","PostPublished","child-preflight",
                             "{\"eventId\":-1}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
                     org.assertj.core.api.Assertions.assertThat(producer.send(message,10000).getSendStatus()).isEqualTo(org.apache.rocketmq.client.producer.SendStatus.SEND_OK);
                 });
+                Files.writeString(warmup,"readyAt="+java.time.Instant.now()+" durationMs="+(System.nanoTime()-started)/1_000_000+" ack=SEND_OK\n",StandardOpenOption.APPEND);
             }
             if(phase.equals("SCAN"))new CountDownLatch(1).await();else context.getBean(RelayRunner.class).tick();
         } catch(Exception e) {e.printStackTrace();System.exit(1);}

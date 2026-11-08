@@ -25,6 +25,7 @@ public class PublishTransaction {
         if (authorId <= 0 || postId <= 0 || expectedVersion < 0 || key == null || key.isBlank() || key.length() > 128)
             throw new PublishFailure(INVALID_REQUEST);
 
+        String gate = repository.gate();
         // Every publisher locks the same author row before post or receipt locks.
         // A competing request resumes only after the first transaction commits or rolls back.
         var mode = repository.lockAuthor(authorId);
@@ -41,6 +42,8 @@ public class PublishTransaction {
         }
         if (!post.status().equals("DRAFT")) throw new PublishFailure(POST_STATE_CONFLICT);
         if (post.version() != expectedVersion) throw new PublishFailure(POST_VERSION_CONFLICT);
+        if (!java.util.Set.of("PRIMARY","READY").contains(gate == null ? "BLOCKED" : gate))
+            throw new FeedFailure(503,"MAINTENANCE");
 
         long sequence = Math.addExact(mode.sequence(), 1);
         long version = Math.addExact(post.version(), 1);

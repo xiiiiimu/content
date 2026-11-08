@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.*;
 import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest @Testcontainers
+@SpringBootTest @Testcontainers @org.springframework.test.annotation.DirtiesContext(classMode=org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class DeliveryWorkerIT {
  @Container static final MySQLContainer<?> MYSQL=new MySQLContainer<>("mysql:8.4");
  @Container static final GenericContainer<?> REDIS=new GenericContainer<>("redis:7.4").withExposedPorts(6379);
@@ -135,5 +135,25 @@ class DeliveryWorkerIT {
   }finally{release.countDown();}
   running.get(10,TimeUnit.SECONDS);assertThat(state(task)).isEqualTo("DONE");
   assertThat(feed.read(601,20,null).items()).extracting(FollowingFeed.Item::postId).doesNotContain(original.postId()).hasSize(3);
+ }
+ @Test void killedWorkerAfterRedisBeforeProgressReplaysOriginalBatch()throws Exception{
+  long a=author("PUSH");follows.change(601,a,true);var p=post(a);long task=accept(p);var signal=PipelineProcesses.DIR.resolve("redis-progress-"+task);
+  var child=PipelineProcesses.fault(MYSQL,"redis://"+REDIS.getHost()+":"+REDIS.getMappedPort(6379),"REDIS",task,signal,Map.of());
+  try{PipelineProcesses.killAtBarrier(child,signal);}finally{PipelineProcesses.stop(child);}
+  assertThat(state(task)).isEqualTo("RUNNING");assertThat(cursor(task)).isZero();expire(task);runner.run();assertThat(state(task)).isEqualTo("DONE");
+  try(var client=io.lettuce.core.RedisClient.create("redis://"+REDIS.getHost()+":"+REDIS.getMappedPort(6379));var c=client.connect()){assertThat(c.sync().zrange("feed:v2:{601}:inbox",0,1)).containsExactly(FeedMemberCodec.encode(new FeedCandidate(p.publishedAtMs(),p.postId())));}
+  assertThat(db.queryForObject("SELECT attempt FROM feed_delivery_tasks WHERE id=?",Integer.class,task)).isEqualTo(2);
+ }
+ @Test void killedLastClaimBeforeRedisIsReapedDead()throws Exception{
+  long a=author("PUSH");follows.change(601,a,true);long task=accept(post(a));db.update("UPDATE feed_delivery_tasks SET attempt=4 WHERE id=?",task);var signal=PipelineProcesses.DIR.resolve("final-claim-"+task);
+  var child=PipelineProcesses.fault(MYSQL,"redis://"+REDIS.getHost()+":"+REDIS.getMappedPort(6379),"CLAIM",task,signal,Map.of());
+  try{PipelineProcesses.killAtBarrier(child,signal);}finally{PipelineProcesses.stop(child);}
+  assertThat(db.queryForObject("SELECT attempt FROM feed_delivery_tasks WHERE id=?",Integer.class,task)).isEqualTo(5);expire(task);runner.run();assertThat(state(task)).isEqualTo("DEAD");
+ }
+ @Test void actualOperatorCommandReplaysDeadTaskWithoutStartingBackgroundWorkers()throws Exception{
+  long a=author("PUSH");follows.change(601,a,true);long task=accept(post(a));db.update("UPDATE feed_delivery_tasks SET state='DEAD',attempt=5 WHERE id=?",task);
+  var child=PipelineProcesses.start(io.github.xiiiiimu.content.worker.FeedOpsCommand.class,MYSQL,"redis://"+REDIS.getHost()+":"+REDIS.getMappedPort(6379),"task-replay-"+task,Map.of("CONTENT_PIPELINE_ENABLED","true","CONTENT_RELAY_ENABLED","true"),"replay",Long.toString(task),"verified independent operator command");
+  try{assertThat(child.waitFor(180,TimeUnit.SECONDS)).isTrue();assertThat(child.exitValue()).isZero();}finally{PipelineProcesses.stop(child);}
+  assertThat(state(task)).isEqualTo("NEW");assertThat(db.queryForObject("SELECT COUNT(*) FROM delivery_replay_audit WHERE task_id=? AND operator<>''",Integer.class,task)).isEqualTo(1);runner.run();assertThat(state(task)).isEqualTo("DONE");
  }
 }

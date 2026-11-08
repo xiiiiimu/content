@@ -1,0 +1,13 @@
+# Explicit opt-in production wiring; credentials have no built-in signing-key defaults.
+content:
+  feed:
+    enabled: true
+    redis-uri: ${CONTENT_REDIS_URI:redis://127.0.0.1:26379}
+    cursor-key: ${CONTENT_CURSOR_KEY}
+    identity-key: ${CONTENT_IDENTITY_KEY}
+  relay:
+    enabled: true
+  pipeline:
+    enabled: true
+    consumer-enabled: true
+    scan-enabled: true

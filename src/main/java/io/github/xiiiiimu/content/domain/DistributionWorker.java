@@ -1,13 +1,12 @@
 package io.github.xiiiiimu.content.domain;
 import io.github.xiiiiimu.content.infrastructure.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.lettuce.core.api.StatefulRedisConnection;
 import java.util.*;
 
 public final class DistributionWorker {
  public record Write(long reader,FeedCandidate candidate) {}
- private final DeliveryStore store;private final DeliveryMapper tasks;private final FeedMapper db;private final RedisFeedCandidateStore redis;private final ObjectMapper json;private final PipelineObserver observer;
- public DistributionWorker(DeliveryStore store,DeliveryMapper tasks,FeedMapper db,StatefulRedisConnection<String,String> connection,ObjectMapper json,PipelineObserver observer){this.store=store;this.tasks=tasks;this.db=db;redis=new RedisFeedCandidateStore(connection);this.json=json;this.observer=observer;}
+ private final DeliveryStore store;private final DeliveryMapper tasks;private final FeedMapper db;private final FeedRedis redis;private final ObjectMapper json;private final PipelineObserver observer;
+ public DistributionWorker(DeliveryStore store,DeliveryMapper tasks,FeedMapper db,FeedRedis redis,ObjectMapper json,PipelineObserver observer){this.store=store;this.tasks=tasks;this.db=db;this.redis=redis;this.json=json;this.observer=observer;}
  public void tick(){
   if(org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive())throw new IllegalStateException("Worker I/O must not run in an ambient SQL transaction");
   for(int i=0;i<10;i++){var job=store.claim();if(job==null)return;run(job);}
@@ -36,7 +35,7 @@ public final class DistributionWorker {
     observer.afterRelations(job,List.copyOf(writes));
     if(!store.valid(job))return;
     observer.beforeRedis(job);
-    for(var write:writes)redis.addFenced(write.reader(),List.of(write.candidate()),Objects.requireNonNull(job.generation()));
+    for(var write:writes)new RedisFeedCandidateStore(redis.connection()).addFenced(write.reader(),List.of(write.candidate()),Objects.requireNonNull(job.generation()));
     observer.afterRedis(job);observer.beforeProgress(job);
     if(!store.progress(job,follower,post,done))return;
     if(done)return;job=job.position(follower,post);

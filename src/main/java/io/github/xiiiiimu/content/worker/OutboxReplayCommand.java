@@ -14,9 +14,9 @@ public class OutboxReplayCommand {
             long id=Long.parseLong(args[0]);
             String operator=ProcessHandle.current().info().user().orElseThrow(() -> new IllegalStateException("OS operator identity unavailable"));
             var application=new SpringApplication(ContentApplication.class);application.setWebApplicationType(WebApplicationType.NONE);
-            try(var context=application.run("--spring.main.web-application-type=none","--content.relay.enabled=true","--content.relay.producer-enabled=false","--content.relay.scan-enabled=false")) {
+            try(var context=application.run("--spring.main.web-application-type=none","--content.feed.enabled=false","--content.pipeline.enabled=false","--content.pipeline.consumer-enabled=false","--content.pipeline.scan-enabled=false","--content.relay.enabled=true","--content.relay.producer-enabled=false","--content.relay.scan-enabled=false")) {
                 if(context.getBean(RelayStore.class).replay(id,operator,args[1])){System.out.println("Replayed DEAD eventId="+id+" operator="+operator);result=0;}
-                else {System.err.println("Replay rejected: event must be a DEAD PostPublished");result=2;}
+                else {System.err.println("Replay rejected: event must be a DEAD supported feed event");result=2;}
             }
         }catch(Exception e){System.err.println("Outbox replay failed: "+e.getClass().getSimpleName()+": "+e.getMessage());}
         System.exit(result);

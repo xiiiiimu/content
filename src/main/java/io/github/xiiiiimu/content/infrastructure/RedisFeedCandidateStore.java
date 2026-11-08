@@ -18,7 +18,8 @@ public final class RedisFeedCandidateStore {
     private final RedisCommands<String,String> commands;
 
     // Counts inspect the score invariant without returning or scanning all members.
-    // Both keys use the same {uid} hash tag for atomic execution on Redis Cluster.
+    // Plain adapter operations use two keys with the same {uid} hash tag.
+    // Pipeline fencing also checks a global generation key and requires single-node Redis.
     private static final String GUARD="""
             local function untrusted(reason)
                 redis.call('SET', KEYS[2], reason)
@@ -46,7 +47,7 @@ public final class RedisFeedCandidateStore {
             """;
     private static final String READ=GUARD+"""
             if kind == 'none' then return {'OK'} end
-            local members = redis.call('ZRANGE', KEYS[1], ARGV[1], '-', 'BYLEX', 'REV', 'LIMIT', '0', ARGV[2])
+            local members = redis.call('ZRANGE', KEYS[1], ARGV[1], ARGV[3], 'BYLEX', 'REV', 'LIMIT', '0', ARGV[2])
             local result = {'OK'}
             for _, member in ipairs(members) do
                 local time = string.sub(member, 1, 13)
@@ -71,6 +72,21 @@ public final class RedisFeedCandidateStore {
             redis.call('ZADD', KEYS[1], unpack(values))
             return {'OK'}
             """;
+    private static final String TRIM="""
+            if redis.call('GET', KEYS[3]) ~= ARGV[1] then return {'FENCED'} end
+            """+GUARD+"""
+            local members=redis.call('ZRANGE',KEYS[1],'-',ARGV[2],'BYLEX','LIMIT','0',ARGV[3])
+            for _,member in ipairs(members) do
+                local time=string.sub(member,1,13)
+                local id=string.sub(member,15,34)
+                if #member~=34 or string.sub(member,14,14)~=':' or not string.match(time,'^[0-9]+$')
+                    or not string.match(id,'^[0-9]+$') or id<='00000000000000000000' or id>'09223372036854775807' then
+                    return untrusted('INVALID_MEMBER')
+                end
+            end
+            if #members>0 then redis.call('ZREM',KEYS[1],unpack(members)) end
+            return {'OK',tostring(#members)}
+            """;
 
     public RedisFeedCandidateStore(StatefulRedisConnection<String,String> connection) {
         if(connection==null)throw new IllegalArgumentException("Redis connection is required");
@@ -88,14 +104,37 @@ public final class RedisFeedCandidateStore {
     }
     /** Single-node deployment: recovery generation fencing, not a guarantee against same-generation late lease writes. */
     public void addFenced(long readerId,List<FeedCandidate> candidates,long generation) {
+        if(generation<=0)throw new IllegalArgumentException("Invalid generation");
+        addOwned(readerId,candidates,Long.toString(generation));
+    }
+    public void addRecoveryFenced(long readerId,List<FeedCandidate> candidates,long generation,long token){
+        if(generation<=0 || token<=0)throw new IllegalArgumentException("Invalid recovery ownership");
+        addOwned(readerId,candidates,"REBUILD:"+generation+":"+token);
+    }
+    private void addOwned(long readerId,List<FeedCandidate> candidates,String marker) {
         if(org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive())throw new IllegalStateException("Redis write inside SQL transaction");
         String key=key(readerId);
-        if(generation<=0 || candidates==null || candidates.isEmpty() || candidates.size()>MAX_WRITE_SIZE)throw new IllegalArgumentException("Invalid fenced write");
-        var encoded=new ArrayList<String>();encoded.add(Long.toString(generation));for(var candidate:candidates)encoded.add(FeedMemberCodec.encode(candidate));
+        if(candidates==null || candidates.isEmpty() || candidates.size()>MAX_WRITE_SIZE)throw new IllegalArgumentException("Invalid fenced write");
+        var encoded=new ArrayList<String>();encoded.add(marker);for(var candidate:candidates)encoded.add(FeedMemberCodec.encode(candidate));
         executeKeys(FENCED_WRITE,key,new String[]{key,key+":untrusted","feed:write-generation"},encoded.toArray(String[]::new));
+    }
+    public int trimFenced(long readerId,long sinceMs,int limit,long generation){
+        if(org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive())throw new IllegalStateException("Redis trim inside SQL transaction");
+        String key=key(readerId);String cutoff=FeedMemberCodec.encode(new FeedCandidate(sinceMs,1));
+        if(limit<1 || limit>MAX_READ_SIZE || generation<=0)throw new IllegalArgumentException("Invalid trim bounds");
+        var result=executeKeys(TRIM,key,new String[]{key,key+":untrusted","feed:write-generation"},Long.toString(generation),"("+cutoff,Integer.toString(limit));
+        return Integer.parseInt(result.get(0));
     }
 
     public CandidateSlice read(long readerId,long snapshotMs,String exclusiveBoundary,int limit) {
+        return readBounded(readerId,snapshotMs,exclusiveBoundary,limit,"-");
+    }
+    public CandidateSlice readRange(long readerId,long snapshotMs,String exclusiveBoundary,int limit,long sinceMs){
+        String lower=FeedMemberCodec.encode(new FeedCandidate(sinceMs,1));
+        if(sinceMs>snapshotMs)throw new IllegalArgumentException("Invalid source time window");
+        return readBounded(readerId,snapshotMs,exclusiveBoundary,limit,sinceMs==0?"-":"["+lower);
+    }
+    private CandidateSlice readBounded(long readerId,long snapshotMs,String exclusiveBoundary,int limit,String lower) {
         String key=key(readerId);
         if(limit<1 || limit>MAX_READ_SIZE)throw new IllegalArgumentException("Read limit must be 1.."+MAX_READ_SIZE);
         String snapshot=FeedMemberCodec.encode(new FeedCandidate(snapshotMs,Long.MAX_VALUE));
@@ -104,7 +143,7 @@ public final class RedisFeedCandidateStore {
             FeedMemberCodec.decode(exclusiveBoundary);
             if(exclusiveBoundary.compareTo(snapshot)<=0)upper="("+exclusiveBoundary;
         }
-        var members=execute(READ,key,upper,Integer.toString(limit));
+        var members=execute(READ,key,upper,Integer.toString(limit),lower);
         var items=new ArrayList<FeedCandidate>(members.size());
         for(String member:members)items.add(FeedMemberCodec.decode(member));
         return new CandidateSlice(items,members.isEmpty()?null:members.get(members.size()-1));

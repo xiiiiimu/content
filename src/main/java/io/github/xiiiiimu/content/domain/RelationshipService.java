@@ -40,5 +40,5 @@ public final class RelationshipService {
   db.event(type,aggregate);long id=db.insertedId();var payload=new LinkedHashMap<String,Object>(fields);payload.put("eventId",id);payload.put("eventType",type);
   try{db.eventPayload(id,json.writeValueAsString(payload));}catch(Exception e){throw new IllegalStateException(e);}return id;
  }
- public static void requireWritable(FeedMapper.Control c){if(c==null || c.state().equals("MAINTENANCE") || c.state().equals("REBUILDING"))throw new FeedFailure(503,"MAINTENANCE");}
+ public static void requireWritable(FeedMapper.Control c){if(c==null || c.generation()<=0 || !Set.of("PRIMARY","READY").contains(c.state()))throw new FeedFailure(503,"MAINTENANCE");}
 }

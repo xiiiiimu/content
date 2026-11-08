@@ -29,6 +29,7 @@ import static org.awaitility.Awaitility.await;
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
+@org.springframework.test.annotation.DirtiesContext(classMode=org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class PublishPostIT {
     @Container static final MySQLContainer<?> MYSQL = new MySQLContainer<>("mysql:8.4");
     @DynamicPropertySource static void database(DynamicPropertyRegistry r) {

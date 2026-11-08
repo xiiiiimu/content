@@ -28,3 +28,6 @@ jobs:
             target/relay-evidence/**
             target/redis-candidate-evidence/**
             target/feed-merge-evidence/**
+            target/pipeline-evidence/**
+            target/recovery-evidence/**
+            target/distribution-evidence/**
