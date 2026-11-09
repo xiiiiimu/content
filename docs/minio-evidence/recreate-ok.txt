@@ -1,0 +1,8 @@
+recreate_at=2026-11-09T09:13:08.8652067+08:00
+image=content-minio:RELEASE.2025-04-22T22-12-26Z
+image_id=sha256:68e69775d3e24f79a3bb4f9180bc1714b6e770e684770ac871e624418d3b3df4
+entrypoint=[/usr/bin/minio]
+cmd=[server,/data,--console-address,:9001]
+health_after_force_recreate=200
+volume=content_minio-data
+crlf_fix=skip_upstream_docker-entrypoint

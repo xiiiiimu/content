@@ -40,3 +40,13 @@ Default CI skips (`@EnabledIfSystemProperty content.minio.it=true`) — skipped 
 Result: **Tests run: 1, Failures: 0, Errors: 0** (`MediaMinioIT-run-20261109-072701.log`).
 
 Covered: upload/download, FFmpeg derive, HMAC gateway + bad sig, TTL expiry, offline blocks sign, raw/derived retention after offline.
+
+## Recreate retention (merge gate)
+
+Put object → `--force-recreate` minio on `content_minio-data` → get same key → SHA-256 match.
+
+Evidence: `retain-across-recreate.txt` (`post_get_hash_match=true`).
+
+## Version pin
+
+See `infra/docker/minio/SOURCE.md` § Pin policy / upgrade limits. Fixed at `RELEASE.2025-04-22T22-12-26Z`; upgrades require new build + evidence; forks/Hub substitutes not accepted.

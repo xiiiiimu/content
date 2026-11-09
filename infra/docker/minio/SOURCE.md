@@ -40,3 +40,11 @@ Runtime image runs `/usr/bin/minio` directly (upstream `docker-entrypoint.sh` sk
 ```
 
 Uses compose volume `minio-data` (`content_minio-data`). Never mounts `video_minio_data`.
+
+## Pin policy / upgrade limits
+
+- **Pinned old release on purpose.** Community MinIO server distribution is archived; Hub/Quay pulls for `minio/minio` fail; `dl.min.io` binaries return 410. This pin is a reproducible local/source-build acceptance baseline, not a rolling “latest MinIO”.
+- **Do not silently retag** to a newer upstream RELEASE without a new evidence pass (SigV4 put/get, `MediaMinioIT`, recreate+hash retention on `content_minio-data`).
+- **Do not substitute** Hub/Quay images, `pgsty/silo`, or other forks for closing official MinIO acceptance.
+- **Upgrade path (when needed):** pick a new upstream tag + commit → rebuild `content-minio:<tag>` via `build.ps1` → update compose image pin + this SOURCE.md → re-run probes/IT → record new digests under `docs/minio-evidence/`. Data-format compatibility across MinIO majors is **not** assumed; plan a backup of `content_minio-data` before any upgrade.
+- **CI does not build or run** this image; local `-Dcontent.minio.it=true` remains the official MinIO gate.
