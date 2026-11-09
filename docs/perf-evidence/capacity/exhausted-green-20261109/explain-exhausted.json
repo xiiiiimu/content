@@ -1,0 +1,1 @@
+[{id=1, select_type=SIMPLE, table=feed_delivery_tasks, partitions=null, type=range, possible_keys=ix_delivery_retry,ix_delivery_lease,ix_delivery_retry_attempt,ix_delivery_lease_attempt, key=ix_delivery_retry_attempt, key_len=70, ref=null, rows=1, filtered=33.33, Extra=Using where; Using index; Using filesort}]

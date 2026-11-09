@@ -1,0 +1,5 @@
+status=RED
+error=MySQLTimeoutException on DeliveryMapper.exhausted during drainPipeline
+phase=follow-backfill-or-early-publish (posts may still be 0)
+elapsedSec≈1350
+note=not a capacity ceiling; queue remains paused; reuse harness supersedes single-seed-per-run

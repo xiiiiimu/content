@@ -1,0 +1,15 @@
+mode=hybrid
+phase=capacity
+durationSec=60
+authors=100
+postsPerAuthor=50
+readers=200
+followsPerReader=20
+clients=8
+commit=4aa79e4502ef86744006cf81ebd6f6e266e2f687
+javaXmx=512m
+seedOrder=rebuild,modes,follow-first,drain,publish+accept+worker,coverage,steady,drain
+ops=feed_read,like_write
+plan=docs/m8-capacity-plan.md
+skippedVsPassed=PerfHarnessIT requires -Dcontent.perf.enabled=true; default CI skip is not a pass
+started=2026-11-09T09:35:44.5358316+08:00

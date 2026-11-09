@@ -1,0 +1,10 @@
+status=GREEN
+fixCommits=c662343(RED)+37e1e21(GREEN)
+preFixFailure=docs/perf-evidence/capacity/push-capacity-20261109-111937-RED
+wallClockMin~60 (22:03:07 to 23:03:23)
+seedPrep_notLoadMetric=followCallMs=283382 emptyHistoryBackfillDrainMs=610782 publishAcceptDrainMs=1665574 publishLoopWallMs=1775990
+exhaustedTimeout=absent
+coverage=inboxZcard=5000 feedDistinct=5000
+loadPoints=c8d60,c4d30,c8d30,c16d30,c24d30,c8d600 all valid=true errors=0
+queue=paused
+note=run-baseline wrapper previously exited 1 on Maven stderr; load-point summaries are the pass signal

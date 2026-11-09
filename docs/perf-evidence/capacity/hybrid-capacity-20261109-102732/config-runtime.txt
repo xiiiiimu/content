@@ -1,0 +1,10 @@
+mode=hybrid
+phase=capacity
+authors=100
+postsPerAuthor=50
+readers=200
+follows=20
+durationSec=60
+clients=8
+valid=true
+heapMaxBytes=536870912

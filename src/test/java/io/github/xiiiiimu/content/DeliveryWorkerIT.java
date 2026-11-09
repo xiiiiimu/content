@@ -78,6 +78,18 @@ class DeliveryWorkerIT {
   assertThat(store.progress(old,601,0,false)).isFalse();assertThat(store.fail(old,new IllegalStateException("old"))).isFalse();
   worker.run(next);assertThat(state(task)).isEqualTo("DONE");assertThat(store.progress(old,601,0,true)).isFalse();
  }
+ @Test void expiredRunningTakeoverIsNotStarvedByReadyNewBacklog(){
+  long a=author("PUSH");follows.change(601,a,true);follows.change(602,a,true);
+  long running=accept(post(a));var old=store.claim();assertThat(old.taskId()).isEqualTo(running);expire(running);
+  long newer=accept(post(a));assertThat(state(newer)).isEqualTo("NEW");
+  // Sustained NEW must not block reclaim of the expired lease (RUNNING-first candidate order).
+  var next=store.claim();
+  assertThat(next.taskId()).as("expired RUNNING takeover before NEW").isEqualTo(running);
+  assertThat(next.token()).isEqualTo(old.token()+1);
+  assertThat(state(newer)).isEqualTo("NEW");
+  worker.run(next);assertThat(state(running)).isEqualTo("DONE");
+  var fresh=store.claim();assertThat(fresh.taskId()).isEqualTo(newer);worker.run(fresh);assertThat(state(newer)).isEqualTo("DONE");
+ }
  @Test void finalClaimCrashBecomesDeadAndReplayPreservesIdentityWithAudit(){
   long a=author("PUSH");follows.change(601,a,true);var p=post(a);long task=accept(p);String original=payload(p.eventId());
   db.update("UPDATE feed_delivery_tasks SET attempt=4 WHERE id=?",task);var old=store.claim();assertThat(old.attempt()).isEqualTo(5);expire(task);

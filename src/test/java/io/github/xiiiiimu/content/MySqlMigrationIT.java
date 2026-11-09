@@ -20,9 +20,15 @@ class MySqlMigrationIT {
         Flyway flyway = Flyway.configure()
                 .dataSource(MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword())
                 .load();
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(8);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(9);
         assertThat(flyway.migrate().migrationsExecuted).isZero();
         flyway.validate();
+        try(var c=DriverManager.getConnection(MYSQL.getJdbcUrl(),MYSQL.getUsername(),MYSQL.getPassword());
+            var s=c.createStatement();
+            var r=s.executeQuery("SHOW INDEX FROM feed_delivery_tasks WHERE Key_name IN ('ix_delivery_retry_attempt','ix_delivery_lease_attempt')")){
+            int n=0;while(r.next())n++;
+            assertThat(n).as("V9 attempt-aware claim indexes").isGreaterThanOrEqualTo(2);
+        }catch(Exception e){throw new AssertionError(e);}
     }
 
     @Test
@@ -40,7 +46,7 @@ class MySqlMigrationIT {
             statement.executeUpdate("INSERT INTO posts(id,author_id,status,body,version) VALUES (1,1,'DRAFT','preserved',4)");
         }
         Flyway latest = Flyway.configure().dataSource(url, "root", MYSQL.getPassword()).load();
-        assertThat(latest.migrate().migrationsExecuted).isEqualTo(7);
+        assertThat(latest.migrate().migrationsExecuted).isEqualTo(8);
         assertThat(latest.migrate().migrationsExecuted).isZero();
         latest.validate();
         try (var connection = DriverManager.getConnection(url, "root", MYSQL.getPassword());
@@ -67,7 +73,7 @@ class MySqlMigrationIT {
             try(var r=s.executeQuery("SELECT payload FROM outbox_events WHERE id=42")){r.next();payload=r.getString(1);}
         }
         var latest=Flyway.configure().dataSource(url,"root",MYSQL.getPassword()).load();
-        assertThat(latest.migrate().migrationsExecuted).isEqualTo(6);latest.validate();
+        assertThat(latest.migrate().migrationsExecuted).isEqualTo(7);latest.validate();
         assertThat(latest.migrate().migrationsExecuted).isZero();
         try(var c=DriverManager.getConnection(url,"root",MYSQL.getPassword());var s=c.createStatement();var r=s.executeQuery("SELECT payload,status,attempt,lease_token FROM outbox_events WHERE id=42")) {
             assertThat(r.next()).isTrue();assertThat(r.getString("payload")).isEqualTo(payload);
