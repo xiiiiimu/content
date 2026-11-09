@@ -34,7 +34,9 @@
 
 ## 容量验收（冻结计划）
 
-见 `docs/m8-capacity-plan.md`。全量默认：authors=100 posts=50 readers=200 follows=20；三模式对照 duration=60 clients=8；并发阶梯与 600s 长跑参数以计划为准。小规模结果不得外推。
+见 `docs/m8-capacity-plan.md`。全量默认：authors=100 posts=50 readers=200 follows=20。  
+`CONTENT_PERF_SUITE=reuse`：**每 mode 造数一次**，coverage 后复用到 8:60 + 阶梯 + 600s 稳定性；`8×60` 只是负载点，**不是容量上限**。  
+自动队列暂停：`docs/perf-evidence/capacity/QUEUE-PAUSED.md`。小规模结果不得外推。
 
 ## 运行
 

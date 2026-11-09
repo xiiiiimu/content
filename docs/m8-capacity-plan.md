@@ -26,35 +26,41 @@
 | 中间件 | Testcontainers MySQL 8.4 + Redis 7.4 单节点 | 非 Cluster |
 | 种子顺序 | rebuild → modes → **follow-first** → drain → publish/accept/worker → coverage → steady | |
 
-## 冻结：实验矩阵
+## 关注图：为何不是 200×20=4000
 
-### A. 同条件三模式对照
+配置 `readers×followsPerReader` 只是**基础边**。Harness 另有：
 
-| 参数 | 值 |
-| --- | ---: |
-| modes | push / pull / hybrid（各 1 次主对照，同参数） |
-| durationSec | **60** |
-| clients | **8** |
+1. 每读者再关注前 `min(5,authors)` 热点作者（已在基础边内则幂等，不增边）  
+2. sampler `9001`（即 reader 1）再关注全部 authors（与 1 重叠）
 
-### B. 并发阶梯（固定 hybrid，同数据规模）
+因此 DB `FOLLOWING` 边与空历史 **BACKFILL** 任务数 ≈ **4000 + 非重叠热点边**（实测全量 ≈ **4879**），不是造数错误。
 
-| clients | durationSec |
-| ---: | ---: |
-| 4 | 30 |
-| 8 | 30 |
-| 16 | 30 |
-| 24 | 30 |
+## 冻结：实验矩阵（reuse suite）
 
-阶梯在 A 完成后执行；若某档触发停止条件，更高档不跑。
+**同一 mode：真实 follow/publish 造数一次 → coverage → 多负载点复用。**  
+档间：drain 积压 + 清理 likes/stats；**不**跨 mode 复用（新 JVM/Testcontainers）。  
+`clients=8,duration=60` 仅为矩阵 A 的**一个负载点**，`capacityCeilingClaim=false`。
 
-### C. 稳定性长跑
+### A/B/C 在同一次 mode 进程内
 
-| 参数 | 值 |
-| --- | ---: |
-| mode | hybrid（或 A/B 中仍健康的最高档 mode+clients） |
-| clients | B 中未触发停止条件的最大档（默认目标 8） |
-| durationSec | **600** |
+默认 `CONTENT_PERF_SUITE=reuse` 负载点：
 
+| 顺序 | clients | durationSec | 含义 |
+| ---: | ---: | ---: | --- |
+| 1 | 8 | 60 | 同条件对照负载点（非上限） |
+| 2–5 | 4/8/16/24 | 30 | 并发阶梯 |
+| 6 | 8 | 600 | 稳定性长跑 |
+
+三 mode（push/pull/hybrid）各跑 **一次** reuse 进程。自动队列当前 **暂停**（见 `docs/perf-evidence/capacity/QUEUE-PAUSED.md`）。
+
+### 种子分段计时（`seed-timing.json`）
+
+| 字段 | 含义 |
+| --- | --- |
+| `followCallMs` | follow API 调用 |
+| `emptyHistoryBackfillDrainMs` | 空历史 BACKFILL drain |
+| `publishAcceptDrainMs` | publish+accept+worker drain（真实链路） |
+| `visibilityWaitMs` | `FollowingFeed.read` 可见性轮询（可按 `CONTENT_PERF_VISIBILITY_EVERY` 采样；**不**改为直灌） |
 ## 冻结：延迟与正确性目标（观测门禁，非产品 SLA）
 
 相对小规模有效对照（P95≈800ms、err%=0、thr≈17 ops/s @ clients=8）仅作**本机噪声参考**，不作外推系数。
