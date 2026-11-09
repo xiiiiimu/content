@@ -1,0 +1,142 @@
+Picked up JAVA_TOOL_OPTIONS: -Xms512m -Xmx512m
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< io.github.xiiiiimu:content >---------------------
+[INFO] Building content 0.1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[WARNING] 1 problem was encountered while building the effective model for org.javassist:javassist:jar:3.21.0-GA during dependency collection step for project (use -X to see details)
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ content ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 10 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ content ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 78 source files with javac [debug parameters release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ content ---
+[INFO] skip non existing resourceDirectory E:\content-m9-counterproof\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ content ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 30 source files with javac [debug parameters release 17] to target\test-classes
+[INFO] /E:/content-m9-counterproof/src/test/java/io/github/xiiiiimu/content/OutboxRelayIT.java: 某些输入文件使用或覆盖了已过时的 API。
+[INFO] /E:/content-m9-counterproof/src/test/java/io/github/xiiiiimu/content/OutboxRelayIT.java: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ content ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+Picked up JAVA_TOOL_OPTIONS: -Xms512m -Xmx512m
+[INFO] Running io.github.xiiiiimu.content.TrendGuardRiskIT
+04:02:36.718 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [io.github.xiiiiimu.content.TrendGuardRiskIT]: TrendGuardRiskIT does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+04:02:37.400 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration io.github.xiiiiimu.content.ContentApplication for test class io.github.xiiiiimu.content.TrendGuardRiskIT
+04:02:37.798 [main] INFO org.testcontainers.images.PullPolicy -- Image pull policy will be performed by: DefaultPullPolicy()
+04:02:37.806 [main] INFO org.testcontainers.utility.ImageNameSubstitutor -- Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+04:02:38.198 [main] INFO org.testcontainers.DockerClientFactory -- Testcontainers version: 1.21.4
+04:02:38.809 [main] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+04:02:39.696 [main] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+04:02:39.699 [main] INFO org.testcontainers.DockerClientFactory -- Docker host IP address is localhost
+04:02:39.732 [main] INFO org.testcontainers.DockerClientFactory -- Connected to docker: 
+  Server Version: 29.8.1
+  API Version: 1.56
+  Operating System: Docker Desktop (containerized)
+  Total Memory: 7791 MB
+  Labels: 
+    com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+04:02:40.275 [main] INFO tc.testcontainers/ryuk:0.12.0 -- Creating container for image: testcontainers/ryuk:0.12.0
+04:02:40.727 [main] INFO org.testcontainers.utility.RegistryAuthLocator -- Credential helper/store (docker-credential-desktop) does not have credentials for https://index.docker.io/v1/
+04:02:41.045 [main] INFO tc.testcontainers/ryuk:0.12.0 -- Container testcontainers/ryuk:0.12.0 is starting: fa63673c41e0be68c18feef6b20b858d1f2b647901301d66331a5d20d832f9a3
+04:02:42.142 [main] INFO tc.testcontainers/ryuk:0.12.0 -- Container testcontainers/ryuk:0.12.0 started in PT1.8667224S
+04:02:42.160 [main] INFO org.testcontainers.utility.RyukResourceReaper -- Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+04:02:42.161 [main] INFO org.testcontainers.DockerClientFactory -- Checking the system...
+04:02:42.163 [main] INFO org.testcontainers.DockerClientFactory -- ?? Docker server version should be at least 1.6.0
+04:02:42.168 [main] INFO tc.mysql:8.4 -- Creating container for image: mysql:8.4
+04:02:42.465 [main] INFO tc.mysql:8.4 -- Container mysql:8.4 is starting: cce2d98cbc210c7dd936945223542777938a2f7184078ff4ef70ed38f6abd379
+04:02:43.531 [main] INFO tc.mysql:8.4 -- Waiting for database connection to become available at jdbc:mysql://localhost:57675/test using query 'SELECT 1'
+04:03:08.474 [main] INFO tc.mysql:8.4 -- Container mysql:8.4 started in PT26.3066467S
+04:03:08.475 [main] INFO tc.mysql:8.4 -- Container is started (JDBC URL: jdbc:mysql://localhost:57675/test)
+04:03:08.475 [main] INFO tc.redis:7.4 -- Creating container for image: redis:7.4
+04:03:08.724 [main] INFO tc.redis:7.4 -- Container redis:7.4 is starting: 38b272cec6b699efb6e8a7375eee12a66a68aae3d79f9118982b84c400a56581
+04:03:09.896 [main] INFO tc.redis:7.4 -- Container redis:7.4 started in PT1.4212046S
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.16)
+
+2026-11-10T04:03:10.753+08:00  INFO 21456 --- [content] [           main] i.g.xiiiiimu.content.TrendGuardRiskIT    : Starting TrendGuardRiskIT using Java 17.0.19 with PID 21456 (started by 西木 in E:\content-m9-counterproof)
+2026-11-10T04:03:10.758+08:00  INFO 21456 --- [content] [           main] i.g.xiiiiimu.content.TrendGuardRiskIT    : No active profile set, falling back to 1 default profile: "default"
+2026-11-10T04:03:18.356+08:00  INFO 21456 --- [content] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-10T04:03:19.913+08:00  INFO 21456 --- [content] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4c579b5b
+2026-11-10T04:03:19.915+08:00  INFO 21456 --- [content] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-11-10T04:03:20.077+08:00  INFO 21456 --- [content] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:mysql://localhost:57675/test (MySQL 8.4)
+2026-11-10T04:03:20.443+08:00  WARN 21456 --- [content] [           main] o.f.c.internal.database.base.Database    : Flyway upgrade recommended: MySQL 8.4 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.1.
+2026-11-10T04:03:20.798+08:00  INFO 21456 --- [content] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table `test`.`flyway_schema_history` does not exist yet
+2026-11-10T04:03:20.811+08:00  INFO 21456 --- [content] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 10 migrations (execution time 00:00.317s)
+2026-11-10T04:03:20.888+08:00  INFO 21456 --- [content] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table `test`.`flyway_schema_history` ...
+2026-11-10T04:03:21.157+08:00  INFO 21456 --- [content] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema `test`: << Empty Schema >>
+2026-11-10T04:03:21.212+08:00  INFO 21456 --- [content] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "1 - content baseline"
+2026-11-10T04:03:22.947+08:00  INFO 21456 --- [content] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "2 - idempotent publication"
+2026-11-10T04:03:23.687+08:00  INFO 21456 --- [content] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "3 - outbox relay"
+2026-11-10T04:03:23.987+08:00  INFO 21456 --- [content] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "4 - production feed control"
+2026-11-10T04:03:24.269+08:00  INFO 21456 --- [content] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "5 - durable distribution"
+2026-11-10T04:03:24.712+08:00  INFO 21456 --- [content] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "6 - mode coverage and recovery"
+2026-11-10T04:03:25.017+08:00  INFO 21456 --- [content] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "7 - interactions trending media"
+2026-11-10T04:03:25.503+08:00  INFO 21456 --- [content] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "8 - media ffmpeg artifacts"
+2026-11-10T04:03:25.674+08:00  INFO 21456 --- [content] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "9 - delivery attempt claim indexes"
+2026-11-10T04:03:25.821+08:00  INFO 21456 --- [content] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "10 - trendguard risk events"
+2026-11-10T04:03:26.042+08:00  INFO 21456 --- [content] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 10 migrations to schema `test`, now at version v10 (execution time 00:04.183s)
+2026-11-10T04:03:34.235+08:00  INFO 21456 --- [content] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-10T04:03:34.236+08:00  INFO 21456 --- [content] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-10T04:03:34.262+08:00  INFO 21456 --- [content] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-11-10T04:03:34.315+08:00  INFO 21456 --- [content] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 77 ms
+2026-11-10T04:03:35.028+08:00  INFO 21456 --- [content] [           main] i.g.xiiiiimu.content.TrendGuardRiskIT    : Started TrendGuardRiskIT in 25.055 seconds (process running for 61.96)
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+2026-11-10T04:03:40.202+08:00  INFO 21456 --- [content] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-11-10T04:03:40.217+08:00  INFO 21456 --- [content] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 65.33 s <<< FAILURE! -- in io.github.xiiiiimu.content.TrendGuardRiskIT
+[ERROR] io.github.xiiiiimu.content.TrendGuardRiskIT.productionInteractionPathEmitsRiskEventQueryableReadonly -- Time elapsed: 4.891 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+[threshold reached via trending.record emit] 
+expected: 1
+ but was: 0
+	at io.github.xiiiiimu.content.TrendGuardRiskIT.productionInteractionPathEmitsRiskEventQueryableReadonly(TrendGuardRiskIT.java:55)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   TrendGuardRiskIT.productionInteractionPathEmitsRiskEventQueryableReadonly:55 [threshold reached via trending.record emit] 
+expected: 1
+ but was: 0
+[INFO] 
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  02:13 min
+[INFO] Finished at: 2026-11-10T04:03:42+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.6:test (default-test) on project content: There are test failures.
+[ERROR] 
+[ERROR] See E:\content-m9-counterproof\target\surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

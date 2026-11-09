@@ -107,7 +107,8 @@
 
 - 不把 20×10×40 结果乘比例外推  
 - 不在 CI 默认开启 `PerfHarnessIT`  
-- 不开始 M9 / TrendGuard  
-- 不自动合并 PR  
-- 本暂停期内不追加 PULL/HYBRID 全量 reuse，不宣称最高容量  
+- ~~不开始 M9 / TrendGuard~~ → **M9 已启动**（`docs/m9-trendguard.md`）；本文件不再追加容量实验  
+- 不自动合并 PR（M8 已 merge-commit 合入 main `a4765c1`）  
+- **永久**：不追加 PULL/HYBRID 全量 reuse，不宣称最高容量  
+
 
