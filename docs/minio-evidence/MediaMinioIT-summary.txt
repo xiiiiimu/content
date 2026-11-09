@@ -1,0 +1,2 @@
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-failsafe-plugin/xsd/failsafe-test-report.xsd" version="3.0.2" name="io.github.xiiiiimu.content.MediaMinioIT" time="101.499" tests="1" errors="0" skipped="0" failures="0" flakes="0">
+<testcase name="uploadDownloadAuthExpiryOfflineAgainstOfficialMinio" classname="io.github.xiiiiimu.content.MediaMinioIT" time="17.435">

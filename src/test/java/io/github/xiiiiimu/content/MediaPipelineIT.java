@@ -33,7 +33,7 @@ class MediaPipelineIT {
   r.add("content.media.s3-endpoint",()->"http://"+S3.getHost()+":"+S3.getMappedPort(9090));
   r.add("content.media.bucket",()->"content-media");
   r.add("content.media.secret-key",()->"content-secret-key-32-bytes-minimum");
-  r.add("content.media.ffmpeg-image",()->"linuxserver/ffmpeg:version-7.1-cli");
+  r.add("content.media.ffmpeg-image",()->""); // placeholder path; real FFmpeg covered by MediaFfmpegIT
  }
  @Autowired JdbcTemplate db;@Autowired PublishService publish;@Autowired MediaService media;@Autowired VisibilityService visibility;
  @Autowired RelationshipService follows;@Autowired MediaMapper mediaMapper;@Autowired MockMvc http;
@@ -75,7 +75,7 @@ class MediaPipelineIT {
   db.update("UPDATE media_tasks SET lease_until=TIMESTAMPADD(SECOND,-1,CURRENT_TIMESTAMP(6)),state='RUNNING',lease_token=1,attempt=1 WHERE post_id=300102");
   long taskId=db.queryForObject("SELECT id FROM media_tasks WHERE post_id=300102",Long.class);
   media.tick();
-  assertThat(mediaMapper.complete(taskId,1L,"derived/stale")).as("old lease token must be fenced").isZero();
+  assertThat(mediaMapper.complete(taskId,1L,"derived/stale","derived/stale-cover","{}")).as("old lease token must be fenced").isZero();
   assertThat(db.queryForObject("SELECT state FROM media_tasks WHERE post_id=300102",String.class)).isIn("DONE","NEW","RUNNING","DEAD");
  }
 }

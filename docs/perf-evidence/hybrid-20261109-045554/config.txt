@@ -1,0 +1,12 @@
+mode=hybrid
+durationSec=20
+authors=20
+postsPerAuthor=10
+readers=40
+followsPerReader=8
+commit=a0a6b2c35a208d9f24e7f95bc83c05af53e45a61
+javaXmx=512m
+seedOrder=rebuild,modes,follow-first,drain,publish+accept+worker,warmup,steady
+ops=feed_read,like_write
+skippedVsPassed=PerfHarnessIT requires -Dcontent.perf.enabled=true; default CI skip is not a pass
+started=2026-11-09T04:55:54.3302815+08:00

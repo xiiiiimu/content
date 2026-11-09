@@ -72,7 +72,9 @@ services:
 
   minio:
     profiles: [media]
-    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    # Built locally from github.com/minio/minio @ RELEASE.2025-04-22T22-12-26Z (see infra/docker/minio/SOURCE.md).
+    # Do not substitute pgsty/silo or other forks for official MinIO acceptance.
+    image: content-minio:RELEASE.2025-04-22T22-12-26Z
     restart: "no"
     command: ["server", "/data", "--console-address", ":9001"]
     environment:

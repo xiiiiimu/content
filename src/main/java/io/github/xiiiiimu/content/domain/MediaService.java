@@ -16,7 +16,6 @@ public final class MediaService {
   if(bytes==null || bytes.length==0 || bytes.length>8_000_000)throw new FeedFailure(400,"INVALID_MEDIA");
   String key="raw/"+post+"/"+expectedVersion;
   String type=contentType==null?"application/octet-stream":contentType;
-  // Validate + fence in TX first; object write stays outside the short DB lease.
   tx.executeWithoutResult(status->{
    RelationshipService.requireWritable(posts.gate());
    var row=posts.post(post);if(row==null)throw new FeedFailure(404,"POST_NOT_FOUND");if(row.authorId()!=author)throw new FeedFailure(403,"POST_FORBIDDEN");
@@ -43,14 +42,28 @@ public final class MediaService {
    var post=posts.post(claimed.postId());
    if(post==null || post.version()!=claimed.expectedVersion() || "OFFLINE".equals(post.status())){tx.executeWithoutResult(s->media.fail(claimed.id(),token,1,"POST_GONE_OR_VERSION"));return;}
    byte[] raw=store.get(bucket,claimed.objectKey());
-   String out="derived/"+claimed.postId()+"/"+claimed.expectedVersion()+".bin";
-   store.put(bucket,out,transcode(raw),"application/octet-stream");
-   tx.executeWithoutResult(s->{if(media.complete(claimed.id(),token,out)!=1)throw new FeedFailure(409,"MEDIA_FENCED");});
+   String out="derived/"+claimed.postId()+"/"+claimed.expectedVersion()+".mp4";
+   String cover="derived/"+claimed.postId()+"/"+claimed.expectedVersion()+"-cover.jpg";
+   String meta;
+   if(ffmpegImage!=null && !ffmpegImage.isBlank()){
+    var result=new FfmpegTranscoder(ffmpegImage).transcode(raw);
+    store.put(bucket,out,result.video(),"video/mp4");
+    store.put(bucket,cover,result.cover(),"image/jpeg");
+    meta=result.metadataJson();
+   }else{
+    // Dev fallback only when ffmpeg image is unset; M6补验 requires real FFmpeg path.
+    byte[] placeholder=("placeholder:"+raw.length).getBytes(StandardCharsets.UTF_8);
+    store.put(bucket,out,placeholder,"application/octet-stream");
+    store.put(bucket,cover,placeholder,"application/octet-stream");
+    meta="{\"format\":{\"format_name\":\"placeholder\"},\"streams\":[]}";
+   }
+   String finalMeta=meta;
+   tx.executeWithoutResult(s->{if(media.complete(claimed.id(),token,out,cover,finalMeta)!=1)throw new FeedFailure(409,"MEDIA_FENCED");});
   }catch(Exception e){
    String msg=e.getMessage()==null?"error":e.getMessage();
    tx.executeWithoutResult(s->media.fail(claimed.id(),token,Math.min(60,1<<Math.min(5,Math.max(0,claimed.attempt()-1))),msg.substring(0,Math.min(500,msg.length()))));
   }
-}
+ }
  public Signed sign(long viewer,long post,long ttlMillis){
   if(ttlMillis<=0 || ttlMillis>900_000L)throw new FeedFailure(400,"INVALID_REQUEST");
   var view=visibility.read(viewer,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
@@ -58,8 +71,10 @@ public final class MediaService {
   if(task.expectedVersion()!=view.version())throw new FeedFailure(409,"MEDIA_VERSION_STALE");
   long exp=System.currentTimeMillis()+ttlMillis;return new Signed(store.signGet(bucket,task.outputKey(),ttlMillis),exp);
  }
- private byte[] transcode(byte[] raw){
-  String prefix=ffmpegImage==null||ffmpegImage.isBlank()?"derived":"ffmpeg:"+ffmpegImage;
-  return (prefix+":"+raw.length+":"+Base64.getEncoder().encodeToString(Arrays.copyOf(raw,Math.min(16,raw.length)))).getBytes(StandardCharsets.UTF_8);
+ public Signed signCover(long viewer,long post,long ttlMillis){
+  if(ttlMillis<=0 || ttlMillis>900_000L)throw new FeedFailure(400,"INVALID_REQUEST");
+  visibility.read(viewer,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+  var task=media.byPost(post);if(task==null || task.coverKey()==null || !"DONE".equals(task.state()))throw new FeedFailure(404,"MEDIA_NOT_READY");
+  return new Signed(store.signGet(bucket,task.coverKey(),ttlMillis),System.currentTimeMillis()+ttlMillis);
  }
 }

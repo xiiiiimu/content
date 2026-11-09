@@ -1,0 +1,11 @@
+time=2026-11-09T09:16:17.0773559+08:00
+pre_put=ok
+bucket=content-media
+key=retain-probe/merge-check.bin
+bytes=28
+sha256=ad5f9fea11587033a30c40df586f24c527c0baa0c8c935ce60ab4d2c0065d43f
+force_recreate=ok
+post_health=200
+post_get_hash_match=true
+volume=content_minio-data
+image=content-minio:RELEASE.2025-04-22T22-12-26Z

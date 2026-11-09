@@ -1,0 +1,7 @@
+mode=push
+authors=20
+postsPerAuthor=10
+readers=40
+follows=8
+durationSec=20
+clients=8
