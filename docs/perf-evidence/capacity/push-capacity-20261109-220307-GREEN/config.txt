@@ -1,0 +1,20 @@
+mode=push
+phase=capacity
+suite=reuse
+durationSec=60
+authors=100
+postsPerAuthor=50
+readers=200
+followsPerReader=20
+clients=8
+visibilityEvery=25
+loadPoints=
+commit=37e1e211f3429a86d99ec8b017a634a599148da2
+javaXmx=512m
+seedOrder=rebuild,modes,follow-first,backfill-drain,publish+accept+worker,coverage,reuse-load-points
+ops=feed_read,like_write
+capacityCeilingClaim=false
+plan=docs/m8-capacity-plan.md
+queue=paused-see-docs/perf-evidence/capacity/QUEUE-PAUSED.md
+skippedVsPassed=PerfHarnessIT requires -Dcontent.perf.enabled=true; default CI skip is not a pass
+started=2026-11-09T22:03:07.7668745+08:00

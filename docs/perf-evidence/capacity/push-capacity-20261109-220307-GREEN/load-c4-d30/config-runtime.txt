@@ -1,0 +1,13 @@
+mode=push
+phase=capacity-c4-d30
+authors=100
+postsPerAuthor=50
+readers=200
+follows=20
+durationSec=30
+clients=4
+valid=true
+heapMaxBytes=536870912
+capacityCeilingClaim=false
+loadPointOnly=true
+visibilityEvery=25

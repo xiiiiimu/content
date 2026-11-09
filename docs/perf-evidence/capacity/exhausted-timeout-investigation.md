@@ -82,3 +82,9 @@ RED commit: `c662343` (pre-fix OR SQL → PRIMARY).
 1. `V9__delivery_attempt_claim_indexes.sql` — `(state, attempt, next_retry_at, id)` / `(state, attempt, lease_until, id)`.
 2. Split `exhausted` / `candidate` into NEW then RUNNING selects (no cross-state OR) so the optimizer can use retry/lease/attempt indexes instead of PRIMARY.
 3. Lease token bump, `attempt` accounting, DEAD on exhaust, replay audit, and old-token rejection unchanged (`DeliveryWorkerIT` covers takeover / last-claim crash / DEAD / stale token).
+
+## Post-fix PUSH reuse
+
+- Tip: `37e1e21`. Evidence: `docs/perf-evidence/capacity/push-capacity-20261109-220307-GREEN/`.
+- Prep (not load metric): follow ~283s, empty-history BACKFILL drain ~611s, publish+accept+drain ~1666s; **no** `exhausted` QueryTimeout.
+- All reuse load points `valid=true`, `errors=0` (incl. 8×600). Queue remains paused; pull/hybrid/ladder not started.

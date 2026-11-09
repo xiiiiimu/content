@@ -1,0 +1,1 @@
+baseConfigured=4000 baseFollowCalls=4000 hotFollowCalls=1000 (first min(5,authors) per reader; idempotent if already FOLLOWING) samplerFollowCalls=100 (9001=all authors; overlaps reader 1) followEdgesInDb=4879 emptyHistoryBackfillDone=4879 note=4879_vs_4000_is_base_plus_non_overlapping_hot_edges
