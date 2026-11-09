@@ -20,17 +20,20 @@ public final class TrendingService {
    emitSpikeIfNeeded(topic,post);
   });
  }
- /** Production TrendGuard output path (ADR-005 B1): same TX as ledger/bucket. */
+ /**
+  * Production TrendGuard output (ADR-005): same TX as ledger/bucket.
+  * Lock order: post/like/stats (caller) → ledger insert → minute-bucket row → {@code trend_topic_serial} FOR UPDATE → risk insert.
+  * Single-topic serial lock avoids deadlock; concurrent txs serialize so threshold emit does not require a later interaction.
+  */
  void emitSpikeIfNeeded(String topic,long post){
   if(spikeThreshold<=0 || risks==null)return;
+  risks.lockTopicForEmit(topic);
   long since=Math.max(0,System.currentTimeMillis()-3_600_000L);
   long net=0;for(var b:db.bucketsSince(since))if(topic.equals(b.topic()))net+=b.net();
   if(net<spikeThreshold)return;
   long hour=System.currentTimeMillis()/3_600_000L*3_600_000L;
-  String id="tg:1:TOPIC_SPIKE:"+topic+":"+hour;
-  // RED: truncation retained so long shared-prefix topics collide — removed in GREEN.
-  if(id.length()>64)id=id.substring(0,64);
-  risks.recordInCurrentTx(id,topic,"TOPIC_SPIKE",hour,post,"net_events_1h>="+spikeThreshold+";net="+net);
+  String id=TrendGuardService.spikeEventId(topic,hour);
+  risks.recordInCurrentTx(id,topic,TrendGuardService.KIND_TOPIC_SPIKE,hour,post,"net_events_1h>="+spikeThreshold+";net="+net);
  }
  /** Ranking scores come from MySQL buckets only. Content lists use {@link #topicPosts}. */
  public List<Entry> window(String metric,long windowMillis,long viewer){

@@ -10,7 +10,12 @@ import java.util.List;
 public class TrendGuardController {
  private final TrendGuardService trendGuard;
  public TrendGuardController(TrendGuardService trendGuard){this.trendGuard=trendGuard;}
- private long user(Principal p){if(p==null||p.getName()==null)throw new FeedFailure(401,"UNAUTHENTICATED");try{long id=Long.parseLong(p.getName());if(id<=0)throw new FeedFailure(401,"UNAUTHENTICATED");return id;}catch(NumberFormatException e){throw new FeedFailure(401,"UNAUTHENTICATED");}}
+ /** Ops/TrendGuard service identity only — not a general reader feed. */
+ private ContentPrincipal requireOps(Principal p){
+  if(!(p instanceof ContentPrincipal cp) || cp.reader()<=0)throw new FeedFailure(401,"UNAUTHENTICATED");
+  if(!cp.trendGuardOps())throw new FeedFailure(403,"FORBIDDEN");
+  return cp;
+ }
  @GetMapping("/api/trendguard/risks") public List<TrendGuardService.Risk> risks(
    @RequestParam(defaultValue="1h")String window,
    @RequestParam(required=false)String topic,
@@ -18,7 +23,7 @@ public class TrendGuardController {
    @RequestParam(required=false)Long beforeMs,
    @RequestParam(required=false)String beforeEventId,
    Principal p){
-  user(p);
+  requireOps(p);
   long millis=switch(window){case "1h"->3_600_000L;case "24h"->86_400_000L;default->throw new FeedFailure(400,"INVALID_REQUEST");};
   return trendGuard.list(millis,topic,limit,beforeMs,beforeEventId);
  }
