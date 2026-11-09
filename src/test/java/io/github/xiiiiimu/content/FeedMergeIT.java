@@ -53,7 +53,13 @@ class FeedMergeIT {
         Files.writeString(EVIDENCE.resolve("redis.log"),REDIS.getLogs());Files.writeString(EVIDENCE.resolve("mysql.log"),MYSQL.getLogs());
         if(connection!=null)connection.close();if(client!=null)client.shutdown();if(resources!=null)resources.shutdown();if(pool!=null)pool.close();
     }
-    void post(long time,long id) {sql.update("INSERT INTO posts(id,author_id,status,body,published_at_ms) VALUES(?,1,'PUBLISHED','fixture',?)",id,time);}
+    /** Fixture writes only — keep merger-path queryTimeout=1s, but CI Docker MySQL can stall a single INSERT >1s. */
+    void post(long time,long id) {
+        int prev=sql.getQueryTimeout();
+        sql.setQueryTimeout(Math.max(prev,5));
+        try{sql.update("INSERT INTO posts(id,author_id,status,body,published_at_ms) VALUES(?,1,'PUBLISHED','fixture',?)",id,time);}
+        finally{sql.setQueryTimeout(prev);}
+    }
     Source redis() {return new RedisCandidateSource(store,7);}
     Source sqlSource(String predicate) {
         return (snapshot,boundary,limit) -> {
