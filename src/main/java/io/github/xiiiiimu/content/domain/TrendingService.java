@@ -28,8 +28,9 @@ public final class TrendingService {
   if(net<spikeThreshold)return;
   long hour=System.currentTimeMillis()/3_600_000L*3_600_000L;
   String id="tg:1:TOPIC_SPIKE:"+topic+":"+hour;
+  // RED: truncation retained so long shared-prefix topics collide — removed in GREEN.
   if(id.length()>64)id=id.substring(0,64);
-  risks.recordInCurrentTx(id,topic,"TOPIC_SPIKE",post,"net_events_1h>="+spikeThreshold+";net="+net);
+  risks.recordInCurrentTx(id,topic,"TOPIC_SPIKE",hour,post,"net_events_1h>="+spikeThreshold+";net="+net);
  }
  /** Ranking scores come from MySQL buckets only. Content lists use {@link #topicPosts}. */
  public List<Entry> window(String metric,long windowMillis,long viewer){

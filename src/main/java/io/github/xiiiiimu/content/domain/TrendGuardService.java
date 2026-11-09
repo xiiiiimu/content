@@ -11,18 +11,22 @@ public final class TrendGuardService {
  private final TrendGuardMapper db;private final TransactionTemplate tx;
  public TrendGuardService(TrendGuardMapper db,TransactionTemplate tx){this.db=db;this.tx=tx;}
  /** Idempotent append. Prefer production emit via {@link TrendingService}; direct use is for recovery/tests only. */
- public boolean record(String eventId,String topic,String kind,Long postId,String detail){
+ public boolean record(String eventId,String topic,String kind,long windowStartMs,Long postId,String detail){
   validate(eventId,topic,kind,detail);
   long now=System.currentTimeMillis();
   String d=detail==null?"":detail;
-  return Boolean.TRUE.equals(tx.execute(status->db.insert(eventId,SCHEMA_VERSION,topic,kind,now,postId,d,now)==1));
+  return Boolean.TRUE.equals(tx.execute(status->insertIgnoreDup(eventId,topic,kind,windowStartMs,now,postId,d)));
  }
  /** Same-transaction emit used by TrendingService after ledger/bucket writes. */
- public boolean recordInCurrentTx(String eventId,String topic,String kind,Long postId,String detail){
+ public boolean recordInCurrentTx(String eventId,String topic,String kind,long windowStartMs,Long postId,String detail){
   validate(eventId,topic,kind,detail);
   long now=System.currentTimeMillis();
   String d=detail==null?"":detail;
-  return db.insert(eventId,SCHEMA_VERSION,topic,kind,now,postId,d,now)==1;
+  return insertIgnoreDup(eventId,topic,kind,windowStartMs,now,postId,d);
+ }
+ /** RED-phase helper: still event_id–only; GREEN replaces with business-key uniqueness (no blanket IGNORE). */
+ private boolean insertIgnoreDup(String eventId,String topic,String kind,long windowStartMs,long now,Long postId,String detail){
+  return db.insert(eventId,SCHEMA_VERSION,topic,kind,windowStartMs,now,postId,detail,now)==1;
  }
  public List<Risk> list(long windowMillis,String topic,int limit,Long beforeMs,String beforeEventId){
   if(windowMillis<=0)throw new FeedFailure(400,"INVALID_REQUEST");
@@ -34,7 +38,7 @@ public final class TrendGuardService {
   return rows.stream().map(r->new Risk(r.eventId(),r.schemaVersion(),r.topic(),r.kind(),r.occurredAtMs(),r.postId(),r.detail())).toList();
  }
  private static void validate(String eventId,String topic,String kind,String detail){
-  if(eventId==null||eventId.isBlank()||eventId.length()>64)throw new FeedFailure(400,"INVALID_REQUEST");
+  if(eventId==null||eventId.isBlank()||eventId.length()>256)throw new FeedFailure(400,"INVALID_REQUEST");
   if(topic==null||topic.isBlank()||topic.length()>128)throw new FeedFailure(400,"INVALID_REQUEST");
   if(kind==null||kind.isBlank()||kind.length()>32)throw new FeedFailure(400,"INVALID_REQUEST");
   if(detail!=null && detail.length()>512)throw new FeedFailure(400,"INVALID_REQUEST");
