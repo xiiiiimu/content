@@ -54,7 +54,7 @@ if ($env:JAVA_HOME) { $env:Path = "$env:JAVA_HOME\bin;" + $env:Path }
 $env:JAVA_TOOL_OPTIONS = '-Xms512m -Xmx512m'
 & $mvn -B -ntp -Pintegration `
   "-Dcontent.perf.enabled=true" `
-  "-Dsurefire.skip=true" `
+  "-Dtest=ContentApplicationTest" `
   "-Dit.test=PerfHarnessIT" `
   "-DfailIfNoTests=false" `
   verify 2>&1 | Tee-Object (Join-Path $out 'harness.log')

@@ -201,16 +201,18 @@ class PerfHarnessIT {
    WHERE p.delivery_mode='PUSH' AND p.status='PUBLISHED' AND p.published_at_ms BETWEEN ? AND ?
    """,Long.class,since,now);
   long inboxCard=redis.connection().sync().zcard("feed:v2:{9001}:inbox");
+  Set<Long> expected=new LinkedHashSet<>();expected.addAll(pushPosts);expected.addAll(pullPosts);
   Set<Long> feedIds=new LinkedHashSet<>();
   String cursor=null;
-  for(int page=0;page<20;page++){
-   var resp=feed.read(9001,50,cursor);
+  // Capacity corpora exceed the old 20×50=1000 page budget; page until exhausted with a hard safety cap.
+  int pageSize=50;int maxPages=Math.max(40, expected.size()/pageSize+10);
+  for(int page=0;page<maxPages;page++){
+   var resp=feed.read(9001,pageSize,cursor);
    for(var item:resp.items())feedIds.add(item.postId());
-   if(resp.nextCursor()==null)break;cursor=resp.nextCursor();
+   if(resp.nextCursor()==null || resp.items().isEmpty())break;cursor=resp.nextCursor();
   }
-  Set<Long> expected=new LinkedHashSet<>();expected.addAll(pushPosts);expected.addAll(pullPosts);
   assertThat(feedIds).as("feed result set ⊆ seeded corpus").isSubsetOf(expected);
-  assertThat(feedIds).as("feed result set covers seeded corpus on sampler").containsAll(expected);
+  assertThat(feedIds).as("feed result set covers seeded corpus on sampler (pages=%d corpus=%d)",maxPages,expected.size()).containsAll(expected);
 
   boolean pushPath=inboxCard>0 && nz(pushAuthority)>0;
   boolean pullPath=nz(pullCandidates)>0;

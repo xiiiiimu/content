@@ -1,0 +1,5 @@
+status=RED
+reason=assertModeCoverage feed result set covers seeded corpus on sampler
+detail=page budget 20x50=1000 < corpus 5000; sampler 9001 follows all authors
+seedApproxSec=2738
+fix=paginate until exhausted with maxPages=max(40, corpus/pageSize+10)
