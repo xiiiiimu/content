@@ -21,4 +21,7 @@ public class InteractionController {
   long millis=switch(window){case "1h"->3_600_000L;case "24h"->86_400_000L;default->throw new FeedFailure(400,"INVALID_REQUEST");};
   return trending.window(metric,millis,user(p));
  }
+ @GetMapping("/api/topics/{topic}/posts") public List<VisibilityService.View> topicPosts(@PathVariable String topic,@RequestParam(defaultValue="50")int limit,Principal p){
+  return trending.topicPosts(topic,user(p),limit);
+ }
 }

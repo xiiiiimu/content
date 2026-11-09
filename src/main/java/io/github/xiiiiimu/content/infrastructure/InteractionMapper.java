@@ -27,5 +27,7 @@ public interface InteractionMapper {
  @Delete("DELETE FROM topic_minute_buckets") void clearBuckets();
  @Select("SELECT event_id AS id,topic,post_id AS post,occurred_at_ms AS at,delta,kind FROM topic_event_ledger WHERE occurred_at_ms>=#{since}")
  List<Ledger> ledgerSince(long since);
+ @Select("SELECT DISTINCT post_id FROM topic_event_ledger WHERE topic=#{topic} ORDER BY post_id DESC LIMIT #{limit}")
+ List<Long> postsForTopic(@Param("topic")String topic,@Param("limit")int limit);
  record Ledger(String id,String topic,long post,long at,int delta,String kind) {}
 }
