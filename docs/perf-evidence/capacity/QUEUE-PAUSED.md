@@ -1,8 +1,18 @@
-# Auto queue paused
+# Capacity queue paused
 
-As of 2026-11-09: **do not** auto-start pull / ladder / stability after the in-flight PUSH single load point finishes.
+As of 2026-11-09 (post PUSH reuse GREEN): **do not** auto-start PULL / HYBRID full-quota reuse, ladder, or additional long runs.
 
-Reason: full-quota re-seed per run is multi-hour; harness is being changed to **one seed per mode, reuse across load points**.
+## Keep
 
-In-flight: `push-capacity-*` single-point run may complete and its evidence is kept.  
-`clients=8, durationSec=60` = **one load point only**, not a capacity ceiling.
+- Valid evidence already on disk under `docs/perf-evidence/` and `docs/perf-evidence/capacity/`
+- SQL claim fix (`V9` + NEW/RUNNING split) and runner stderr hardening
+
+## Do not
+
+- Append PULL/HYBRID full-scale capacity suites in this pause
+- Treat `clients=8, durationSec=60` (or any single load point) as a capacity ceiling
+- Claim “highest capacity” / cross-mode full acceptance
+
+## Honest M8 status
+
+See `docs/m8-capacity-plan.md` §验收现状.

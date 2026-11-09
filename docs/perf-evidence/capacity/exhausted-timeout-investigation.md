@@ -88,3 +88,15 @@ RED commit: `c662343` (pre-fix OR SQL → PRIMARY).
 - Tip: `37e1e21`. Evidence: `docs/perf-evidence/capacity/push-capacity-20261109-220307-GREEN/`.
 - Prep (not load metric): follow ~283s, empty-history BACKFILL drain ~611s, publish+accept+drain ~1666s; **no** `exhausted` QueryTimeout.
 - All reuse load points `valid=true`, `errors=0` (incl. 8×600). Queue remains paused; pull/hybrid/ladder not started.
+
+## Targeted review (pre-commit)
+
+| Check | Result |
+| --- | --- |
+| Protocol (lease bump / SKIP LOCKED / DEAD on exhaust / replay audit / stale token) | Unchanged; `DeliveryWorkerIT` gates |
+| Plan after V9 + split | `type=range key=ix_delivery_retry_attempt` (GREEN evidence) |
+| Ordering NEW-then-RUNNING vs global `ORDER BY id` | Fairness only; not a correctness/protocol break |
+| TX timeout | Still 5s; not raised |
+| Runner stderr false-fail | Fixed via `$ErrorActionPreference='Continue'` + `$LASTEXITCODE` |
+| Outbox `RelayMapper` OR | Noted residual; out of this fix scope |
+| M8 claim language | PUSH multi-rung + 10min stability only; no cross-mode full acceptance; no ceiling claim |

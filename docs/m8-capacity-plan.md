@@ -84,9 +84,30 @@
 4. 原始目录留在 `target/perf-evidence/`，有效轮次同步到 `docs/perf-evidence/capacity/`  
 5. 失败 → RED 复现 → GREEN 修复 → REFACTOR 清理 → 重跑同一冻结参数
 
+## 验收现状（如实，2026-11-09）
+
+| 项 | 状态 | 证据 |
+| --- | --- | --- |
+| PUSH 全量 reuse：多档阶梯 + 8×600（10min）稳定性 | **已测** GREEN | `docs/perf-evidence/capacity/push-capacity-20261109-220307-GREEN/`（fix tip `37e1e21`） |
+| 三模式小规模对照（约 20×10×40） | **已有** | `docs/perf-evidence/push-*` / `pull-*` / `hybrid-*`（对照噪声，**非**容量） |
+| HYBRID 全量单负载点（8×60） | 有一轮有效记录 | `docs/perf-evidence/capacity/hybrid-capacity-20261109-102732/`（非 reuse 全矩阵） |
+| 完整规模跨模式容量（push+pull+hybrid 各跑满 reuse） | **未验收** | — |
+| 最高容量 / 天花板宣称 | **不宣称** | `capacityCeilingClaim=false` |
+
+队列暂停：`docs/perf-evidence/capacity/QUEUE-PAUSED.md`。暂不追加 PULL/HYBRID 全套实验。
+
+### Delivery claim SQL 修复（审查摘要）
+
+- **根因**：`exhausted`/`candidate` 的 OR + `attempt` 过滤走 PRIMARY，扫 DONE 堆，烧 5s claim TX（未抬超时）。
+- **修复**：`V9` `(state,attempt,next_retry_at|lease_until,id)`；claim 路径拆成 NEW 再 RUNNING；租约/token/DEAD/replay 语义不变。
+- **残留**：`RelayMapper`（outbox）仍为 OR 形态，本轮不扩 scope；体量远小于 delivery DONE 堆。
+- **Runner**：`run-baseline.ps1` 在 Maven stderr 下用 `Continue` 取 `$LASTEXITCODE`，避免伪失败；不用 `cmd /c`（非 ASCII 用户路径）。
+
 ## 明确不做
 
 - 不把 20×10×40 结果乘比例外推  
 - 不在 CI 默认开启 `PerfHarnessIT`  
 - 不开始 M9 / TrendGuard  
 - 不自动合并 PR  
+- 本暂停期内不追加 PULL/HYBRID 全量 reuse，不宣称最高容量  
+

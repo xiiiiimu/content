@@ -63,12 +63,21 @@ $env:JAVA_HOME = if (Test-Path 'C:\Program Files\Eclipse Adoptium\jdk-17.0.19.10
 } else { $env:JAVA_HOME }
 if ($env:JAVA_HOME) { $env:Path = "$env:JAVA_HOME\bin;" + $env:Path }
 $env:JAVA_TOOL_OPTIONS = '-Xms512m -Xmx512m'
-# Maven writes banners to stderr; with $ErrorActionPreference=Stop that becomes a
-# terminating NativeCommandError even when tests pass — capture exit via cmd.
+# Maven banners go to stderr. Under $ErrorActionPreference=Stop that becomes a
+# terminating NativeCommandError even on BUILD SUCCESS. Temporarily Continue;
+# do not use cmd /c (breaks when $mvn path contains non-ASCII user dirs).
 $log = Join-Path $out 'harness.log'
-cmd /c "`"$mvn`" -B -ntp -Pintegration -Dcontent.perf.enabled=true -Dtest=ContentApplicationTest -Dit.test=PerfHarnessIT -DfailIfNoTests=false verify > `"$log`" 2>&1"
+$prevEap = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+& $mvn -B -ntp -Pintegration `
+  "-Dcontent.perf.enabled=true" `
+  "-Dtest=ContentApplicationTest" `
+  "-Dit.test=PerfHarnessIT" `
+  "-DfailIfNoTests=false" `
+  verify 2>&1 | Tee-Object -FilePath $log
 $exit = $LASTEXITCODE
-Get-Content $log -Tail 40 -ErrorAction SilentlyContinue | Write-Host
+$ErrorActionPreference = $prevEap
+if ($null -eq $exit) { $exit = 1 }
 if ($exit -eq 0 -and $ArchiveToDocs) {
   $destRoot = Join-Path $root 'docs\perf-evidence\capacity'
   New-Item -ItemType Directory -Force -Path $destRoot | Out-Null
