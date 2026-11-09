@@ -6,8 +6,12 @@ import java.util.List;
 @Mapper
 public interface DeliveryMapper {
  String COLS="id AS taskId,event_id AS eventId,kind,author_id AS authorId,post_id AS postId,follower_id AS followerId,follow_epoch AS followEpoch,payload,lease_token AS token,attempt,lease_generation AS generation,scan_upper_follower_id AS upper,last_follower_id AS lastFollower,last_post_id AS lastPost,delivery_epoch AS deliveryEpoch";
+ /** Single-row claim/fail readiness (id already known); OR is safe here. */
  String READY="((state='NEW' AND next_retry_at<=CURRENT_TIMESTAMP(6)) OR (state='RUNNING' AND lease_until<=CURRENT_TIMESTAMP(6)))";
- @Select("SELECT "+COLS+" FROM feed_delivery_tasks WHERE "+READY+" AND attempt<#{max} ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED") DeliveryLease candidate(int max);
+ String READY_NEW="state='NEW' AND next_retry_at<=CURRENT_TIMESTAMP(6)";
+ String READY_RUNNING="state='RUNNING' AND lease_until<=CURRENT_TIMESTAMP(6)";
+ @Select("SELECT "+COLS+" FROM feed_delivery_tasks WHERE "+READY_NEW+" AND attempt<#{max} ORDER BY next_retry_at,id LIMIT 1 FOR UPDATE SKIP LOCKED") DeliveryLease candidateNew(int max);
+ @Select("SELECT "+COLS+" FROM feed_delivery_tasks WHERE "+READY_RUNNING+" AND attempt<#{max} ORDER BY lease_until,id LIMIT 1 FOR UPDATE SKIP LOCKED") DeliveryLease candidateRunning(int max);
  @Select("SELECT "+COLS+" FROM feed_delivery_tasks WHERE id=#{id} FOR UPDATE") DeliveryLease lock(long id);
  @Update("UPDATE feed_delivery_tasks SET state='RUNNING',lease_token=lease_token+1,attempt=attempt+1,lease_generation=#{generation},lease_until=TIMESTAMPADD(MICROSECOND,#{lease}*1000,CURRENT_TIMESTAMP(6)),last_attempt_at=CURRENT_TIMESTAMP(6),scan_upper_follower_id=COALESCE(scan_upper_follower_id,(SELECT COALESCE(MAX(follower_id),0) FROM follows WHERE followee_id=#{author} AND status='FOLLOWING')) WHERE id=#{id} AND lease_token=#{token} AND "+READY)
  int claim(@Param("id")long id,@Param("token")long token,@Param("author")long author,@Param("generation")long generation,@Param("lease")long lease);
@@ -17,7 +21,8 @@ public interface DeliveryMapper {
  int progress(@Param("id")long id,@Param("token")long token,@Param("follower")long follower,@Param("post")long post,@Param("done")boolean done,@Param("lease")long lease,@Param("generation")long generation);
  @Update("UPDATE feed_delivery_tasks t SET t.state=#{state},t.lease_until=NULL,t.last_error=#{error},t.next_retry_at=TIMESTAMPADD(MICROSECOND,#{delay}*1000,CURRENT_TIMESTAMP(6)) WHERE t.id=#{id} AND t.state='RUNNING' AND t.lease_token=#{token} AND t.lease_until>CURRENT_TIMESTAMP(6) AND t.lease_generation=#{generation}")
  int fail(@Param("id")long id,@Param("token")long token,@Param("state")String state,@Param("error")String error,@Param("delay")long delay,@Param("generation")long generation);
- @Select("SELECT "+COLS+" FROM feed_delivery_tasks WHERE "+READY+" AND attempt>=#{max} ORDER BY id LIMIT 100 FOR UPDATE SKIP LOCKED") List<DeliveryLease> exhausted(int max);
+ @Select("SELECT "+COLS+" FROM feed_delivery_tasks WHERE "+READY_NEW+" AND attempt>=#{max} ORDER BY next_retry_at,id LIMIT 100 FOR UPDATE SKIP LOCKED") List<DeliveryLease> exhaustedNew(int max);
+ @Select("SELECT "+COLS+" FROM feed_delivery_tasks WHERE "+READY_RUNNING+" AND attempt>=#{max} ORDER BY lease_until,id LIMIT 100 FOR UPDATE SKIP LOCKED") List<DeliveryLease> exhaustedRunning(int max);
  @Update("UPDATE feed_delivery_tasks SET state='DEAD',lease_until=NULL,last_error='Attempt limit after lease expiry' WHERE id=#{id} AND lease_token=#{token} AND attempt>=#{max} AND "+READY)
  int dead(@Param("id")long id,@Param("token")long token,@Param("max")int max);
  @Select("SELECT follower_id FROM follows WHERE followee_id=#{author} AND status='FOLLOWING' AND follower_id>#{last} AND follower_id<=#{upper} ORDER BY follower_id LIMIT #{n}")

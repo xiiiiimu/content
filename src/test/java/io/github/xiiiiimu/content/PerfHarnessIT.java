@@ -108,7 +108,8 @@ class PerfHarnessIT {
   Runtime rt=Runtime.getRuntime();
   long heapUsedBefore=rt.totalMemory()-rt.freeMemory();
   recovery.rebuild("perf-operator","m8 baseline seed");
-  db.update("DELETE FROM post_likes");db.update("DELETE FROM post_stats");db.update("DELETE FROM feed_delivery_tasks");db.update("DELETE FROM consumer_inbox");
+  clearInteractionSurfaces();
+  db.update("DELETE FROM feed_delivery_tasks");db.update("DELETE FROM consumer_inbox");
   db.update("DELETE FROM follow_history");db.update("DELETE FROM follows");db.update("DELETE FROM follow_graph_version");
   db.update("DELETE FROM outbox_events");db.update("DELETE FROM posts");db.update("DELETE FROM author_feed_mode");
 
@@ -184,12 +185,28 @@ class PerfHarnessIT {
  }
 
  private void resetBetweenLoadPoints(){
-  // Keep posts/follows/modes/inbox corpus; clear interaction noise and drain delivery backlog from prior rung.
-  db.update("DELETE FROM post_likes");db.update("DELETE FROM post_stats");db.update("DELETE FROM topic_event_ledger");
-  try{db.update("DELETE FROM topic_minute_buckets");}catch(Exception ignored){}
+  // Keep posts/follows/modes/inbox corpus; clear interaction + trending surfaces so prior rung cannot bias the next.
+  clearInteractionSurfaces();
   drainPipeline(50_000);
   assertThat(nz(db.queryForObject("SELECT COUNT(*) FROM feed_delivery_tasks WHERE state IN('NEW','RUNNING')",Long.class)))
    .as("backlog must be zero before next load point").isZero();
+  assertThat(nz(db.queryForObject("SELECT COUNT(*) FROM post_likes",Long.class))).isZero();
+  assertThat(nz(db.queryForObject("SELECT COUNT(*) FROM post_stats",Long.class))).isZero();
+  assertThat(nz(db.queryForObject("SELECT COUNT(*) FROM topic_event_ledger",Long.class))).isZero();
+ }
+
+ /** Likes/stats/comments + trending ledger/buckets/redis cache — must stay aligned across seed and reuse resets. */
+ private void clearInteractionSurfaces(){
+  db.update("DELETE FROM post_comments");
+  db.update("DELETE FROM post_likes");
+  db.update("DELETE FROM post_stats");
+  db.update("DELETE FROM topic_event_ledger");
+  try{db.update("DELETE FROM topic_minute_buckets");}catch(Exception ignored){}
+  try{
+   var sync=redis.connection().sync();
+   var keys=sync.keys("trend:v1:*");
+   if(keys!=null && !keys.isEmpty())sync.del(keys.toArray(String[]::new));
+  }catch(Exception ignored){}
  }
 
  private void warmupReads(SeedResult seed,int readers,int n){

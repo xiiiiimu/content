@@ -26,12 +26,11 @@ class DeliveryExhaustedClaimIT {
  static final int DONE=40_000;
  static final int READY_NEW=10_000;
  static final Path EVIDENCE=Path.of("target","delivery-exhausted-evidence");
- static final String EXHAUSTED_SQL="""
+ /** Production exhaustedNew shape after OR-split (GREEN). */
+ static final String EXHAUSTED_NEW_SQL="""
   SELECT id FROM feed_delivery_tasks
-  WHERE ((state='NEW' AND next_retry_at<=CURRENT_TIMESTAMP(6))
-     OR (state='RUNNING' AND lease_until<=CURRENT_TIMESTAMP(6)))
-    AND attempt>=5
-  ORDER BY id LIMIT 100 FOR UPDATE SKIP LOCKED
+  WHERE state='NEW' AND next_retry_at<=CURRENT_TIMESTAMP(6) AND attempt>=5
+  ORDER BY next_retry_at,id LIMIT 100 FOR UPDATE SKIP LOCKED
   """;
  @Container static final MySQLContainer<?> MYSQL=new MySQLContainer<>("mysql:8.4");
  @Container static final GenericContainer<?> REDIS=new GenericContainer<>("redis:7.4").withExposedPorts(6379).withCommand("redis-server","--maxmemory-policy","noeviction");
@@ -57,11 +56,15 @@ class DeliveryExhaustedClaimIT {
   assertThat(done).isEqualTo(DONE);
   assertThat(readyNew).isEqualTo(READY_NEW);
 
-  var explain=db.queryForList("EXPLAIN "+EXHAUSTED_SQL);
+  var explain=db.queryForList("EXPLAIN "+EXHAUSTED_NEW_SQL);
   Files.writeString(EVIDENCE.resolve("explain-exhausted.json"),explain+"\n");
   Files.writeString(EVIDENCE.resolve("counts.txt"),
    "total="+total+" done="+done+" readyNewAttemptLtMax="+readyNew
    +"\nindexes="+db.queryForList("SHOW INDEX FROM feed_delivery_tasks")+"\n");
+  assertThat(db.queryForList("SHOW INDEX FROM feed_delivery_tasks WHERE Key_name='ix_delivery_retry_attempt'"))
+   .as("V9 attempt-aware retry index required").isNotEmpty();
+  assertThat(db.queryForList("SHOW INDEX FROM feed_delivery_tasks WHERE Key_name='ix_delivery_lease_attempt'"))
+   .as("V9 attempt-aware lease index required").isNotEmpty();
 
   // Lock-wait probe: SKIP LOCKED claim must not sit behind a held non-matching row lock.
   var lockOwner=java.sql.DriverManager.getConnection(MYSQL.getJdbcUrl(),MYSQL.getUsername(),MYSQL.getPassword());

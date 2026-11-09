@@ -74,4 +74,11 @@ Keep lease / token / exhaust→DEAD / replay semantics. Prefer **attempt-aware i
 
 ## RED gate
 
-`DeliveryExhaustedClaimIT.exhaustedPlanAndClaimMustNotFullScanPrimaryAcrossDoneHeap` asserts EXPLAIN `key != PRIMARY` and `type != index` on the production exhausted predicate after seeding DONE+NEW volume.
+`DeliveryExhaustedClaimIT.exhaustedPlanAndClaimMustNotFullScanPrimaryAcrossDoneHeap` asserts EXPLAIN `key != PRIMARY` and `type != index` on the exhausted predicate after seeding DONE+NEW volume.  
+RED commit: `c662343` (pre-fix OR SQL → PRIMARY).
+
+## GREEN fix (protocol-preserving)
+
+1. `V9__delivery_attempt_claim_indexes.sql` — `(state, attempt, next_retry_at, id)` / `(state, attempt, lease_until, id)`.
+2. Split `exhausted` / `candidate` into NEW then RUNNING selects (no cross-state OR) so the optimizer can use retry/lease/attempt indexes instead of PRIMARY.
+3. Lease token bump, `attempt` accounting, DEAD on exhaust, replay audit, and old-token rejection unchanged (`DeliveryWorkerIT` covers takeover / last-claim crash / DEAD / stale token).
