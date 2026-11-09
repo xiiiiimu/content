@@ -99,8 +99,8 @@
 ### Delivery claim SQL 修复（审查摘要）
 
 - **根因**：`exhausted`/`candidate` 的 OR + `attempt` 过滤走 PRIMARY，扫 DONE 堆，烧 5s claim TX（未抬超时）。
-- **修复**：`V9` `(state,attempt,next_retry_at|lease_until,id)`；claim 路径拆成 NEW 再 RUNNING；租约/token/DEAD/replay 语义不变。
-- **残留**：`RelayMapper`（outbox）仍为 OR 形态，本轮不扩 scope；体量远小于 delivery DONE 堆。
+- **修复**：`V9` `(state,attempt,next_retry_at|lease_until,id)`；claim 路径拆分扫描；**过期 RUNNING 优先于 NEW**，避免 NEW 积压饿死接管；租约/token/DEAD/replay 语义不变。
+- **待检查（不改）**：`RelayMapper`（outbox）仍为 OR 形态——仅记项，不凭语法相似直接改。
 - **Runner**：`run-baseline.ps1` 在 Maven stderr 下用 `Continue` 取 `$LASTEXITCODE`，避免伪失败；不用 `cmd /c`（非 ASCII 用户路径）。
 
 ## 明确不做

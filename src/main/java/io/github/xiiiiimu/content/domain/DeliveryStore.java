@@ -11,9 +11,11 @@ public final class DeliveryStore {
  }
  public DeliveryLease claim(){return tx.execute(status->{var control=feed.gate();if(control==null || !java.util.Set.of("PRIMARY","READY").contains(control.state()))return null;
   // Split NEW/RUNNING scans so OR cannot force a PRIMARY walk across the DONE heap.
+  // Exhaust both shapes every claim so DEAD reaping is not gated on candidate order.
   for(var expired:tasks.exhaustedNew(max))if(tasks.dead(expired.taskId(),expired.token(),max)==1)org.slf4j.LoggerFactory.getLogger(DeliveryStore.class).error("Delivery DEAD taskId={} eventId={} attempt={}",expired.taskId(),expired.eventId(),expired.attempt());
   for(var expired:tasks.exhaustedRunning(max))if(tasks.dead(expired.taskId(),expired.token(),max)==1)org.slf4j.LoggerFactory.getLogger(DeliveryStore.class).error("Delivery DEAD taskId={} eventId={} attempt={}",expired.taskId(),expired.eventId(),expired.attempt());
-  var row=tasks.candidateNew(max);if(row==null)row=tasks.candidateRunning(max);if(row==null)return null;
+  // Prefer expired RUNNING before NEW so sustained NEW backlog cannot starve lease takeover.
+  var row=tasks.candidateRunning(max);if(row==null)row=tasks.candidateNew(max);if(row==null)return null;
   if(tasks.claim(row.taskId(),row.token(),row.authorId(),control.generation(),lease)!=1)throw new IllegalStateException("Locked task changed");return tasks.lock(row.taskId());
  });}
  public boolean valid(DeliveryLease job){return tasks.valid(job.taskId(),job.token());}

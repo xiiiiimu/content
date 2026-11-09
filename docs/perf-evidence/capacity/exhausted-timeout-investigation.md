@@ -95,7 +95,8 @@ RED commit: `c662343` (pre-fix OR SQL → PRIMARY).
 | --- | --- |
 | Protocol (lease bump / SKIP LOCKED / DEAD on exhaust / replay audit / stale token) | Unchanged; `DeliveryWorkerIT` gates |
 | Plan after V9 + split | `type=range key=ix_delivery_retry_attempt` (GREEN evidence) |
-| Ordering NEW-then-RUNNING vs global `ORDER BY id` | Fairness only; not a correctness/protocol break |
+| Candidate order | **RUNNING-expired first, then NEW** — sustained NEW backlog must not starve lease takeover (see `DeliveryWorkerIT.expiredRunningTakeoverIsNotStarvedByReadyNewBacklog`) |
+| Exhausted DEAD reaping | Both NEW and RUNNING exhausted scanned every claim TX |
 | TX timeout | Still 5s; not raised |
 | Runner stderr false-fail | Fixed via `$ErrorActionPreference='Continue'` + `$LASTEXITCODE` |
 | Outbox `RelayMapper` OR | Noted residual; out of this fix scope |
