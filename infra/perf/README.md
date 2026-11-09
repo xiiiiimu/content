@@ -32,16 +32,27 @@
 | 模式对比 | 纯 PUSH / 纯 PULL / 混合（50/50 作者） |
 | 种子顺序 | rebuild → 作者模式 → **先 follow** → drain → publish/accept/worker → 预热 → 稳态 |
 
+## 容量验收（冻结计划）
+
+见 `docs/m8-capacity-plan.md`。全量默认：authors=100 posts=50 readers=200 follows=20；三模式对照 duration=60 clients=8；并发阶梯与 600s 长跑参数以计划为准。小规模结果不得外推。
+
 ## 运行
 
 ```powershell
-# smoke（笔记本）
-.\infra\perf\run-baseline.ps1 -Mode hybrid -DurationSec 20 -Authors 20 -PostsPerAuthor 10 -Readers 40 -FollowsPerReader 8
-.\infra\perf\run-baseline.ps1 -Mode push   -DurationSec 20 -Authors 20 -PostsPerAuthor 10 -Readers 40 -FollowsPerReader 8
-.\infra\perf\run-baseline.ps1 -Mode pull   -DurationSec 20 -Authors 20 -PostsPerAuthor 10 -Readers 40 -FollowsPerReader 8
+# smoke（笔记本对照，非容量）
+.\infra\perf\run-baseline.ps1 -Mode hybrid -Phase baseline -DurationSec 20 -Authors 20 -PostsPerAuthor 10 -Readers 40 -FollowsPerReader 8 -Clients 8
+
+# 容量同条件对照（冻结配额）
+.\infra\perf\run-baseline.ps1 -Mode hybrid -Phase capacity -ArchiveToDocs
+.\infra\perf\run-baseline.ps1 -Mode push   -Phase capacity -ArchiveToDocs
+.\infra\perf\run-baseline.ps1 -Mode pull   -Phase capacity -ArchiveToDocs
+
+# 并发阶梯 / 稳定性
+.\infra\perf\run-baseline.ps1 -Mode hybrid -Phase ladder -Clients 16 -DurationSec 30 -ArchiveToDocs
+.\infra\perf\run-baseline.ps1 -Mode hybrid -Phase stability -Clients 8 -DurationSec 600 -ArchiveToDocs
 
 # 汇总
 .\infra\perf\summarize.ps1
 ```
 
-输出：`target/perf-evidence/<mode>-<timestamp>/` 含 raw NDJSON、summary.json、git commit、配置快照。重复运行保留全部目录。
+输出：`target/perf-evidence/<mode>-<phase>-<timestamp>/`（raw NDJSON、summary.json、mode-coverage、heap/backlog 字段）。`-ArchiveToDocs` 同步到 `docs/perf-evidence/capacity/`。

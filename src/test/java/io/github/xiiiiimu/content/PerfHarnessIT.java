@@ -48,8 +48,12 @@ class PerfHarnessIT {
   int followsN=Integer.parseInt(System.getenv().getOrDefault("CONTENT_PERF_FOLLOWS","8"));
   int durationSec=Integer.parseInt(System.getenv().getOrDefault("CONTENT_PERF_DURATION_SEC","20"));
   int clients=Integer.parseInt(System.getenv().getOrDefault("CONTENT_PERF_CLIENTS","8"));
+  String phase=System.getenv().getOrDefault("CONTENT_PERF_PHASE","baseline");
   Path out=Path.of(System.getenv().getOrDefault("CONTENT_PERF_OUT","target/perf-evidence/"+mode+"-junit"));
   Files.createDirectories(out);
+  Runtime rt=Runtime.getRuntime();
+  long heapMax=rt.maxMemory();
+  long heapUsedBefore=rt.totalMemory()-rt.freeMemory();
 
   recovery.rebuild("perf-operator","m8 baseline seed");
   db.update("DELETE FROM post_likes");db.update("DELETE FROM post_stats");db.update("DELETE FROM feed_delivery_tasks");db.update("DELETE FROM consumer_inbox");
@@ -139,6 +143,11 @@ class PerfHarnessIT {
   }finally{pool.shutdown();assertThat(pool.awaitTermination(durationSec+60L,TimeUnit.SECONDS)).isTrue();}
 
   long backlogEnd=nz(db.queryForObject("SELECT COUNT(*) FROM feed_delivery_tasks WHERE state IN('NEW','RUNNING')",Long.class));
+  long drainT0=System.nanoTime();
+  drainPipeline(50_000);
+  long backlogAfterDrain=nz(db.queryForObject("SELECT COUNT(*) FROM feed_delivery_tasks WHERE state IN('NEW','RUNNING')",Long.class));
+  long backlogRecoveryMs=(System.nanoTime()-drainT0)/1_000_000L;
+  long heapUsedAfter=rt.totalMemory()-rt.freeMemory();
   long tasksDone=nz(db.queryForObject("SELECT COUNT(*) FROM feed_delivery_tasks WHERE state='DONE'",Long.class));
   long pushPosts=nz(db.queryForObject("SELECT COUNT(*) FROM posts p JOIN author_feed_mode m ON m.author_id=p.author_id WHERE m.mode='PUSH' AND p.status='PUBLISHED'",Long.class));
   double writeAmp=pushPosts==0?0:(double)tasksDone/Math.max(1,pushPosts);
@@ -150,7 +159,7 @@ class PerfHarnessIT {
   boolean clientSaturated=maxInflight.get()>=clients;
 
   String summary="{"
-   +"\"mode\":\""+mode+"\",\"valid\":true,"
+   +"\"mode\":\""+mode+"\",\"phase\":\""+phase+"\",\"valid\":true,"
    +"\"opsDefinition\":{\"feed_read\":\"FollowingFeed.read\",\"like_write\":\"InteractionService.like\",\"publish_visible_ms\":\"publish+accept+worker until feed hit\"},"
    +"\"loadModel\":{\"writeReadRatio\":\"1:9\",\"hotLikePosts\":10,\"clients\":"+clients+",\"authors\":"+authors+",\"postsPerAuthor\":"+posts+",\"readers\":"+readers+",\"followsPerReader\":"+followsN+",\"pushAuthors\":"+pushAuthorIds.size()+",\"pullAuthors\":"+pullAuthorIds.size()+"},"
    +"\"modeCoverage\":"+coverage.json()+","
@@ -162,6 +171,8 @@ class PerfHarnessIT {
    +"\"scanAmplificationP50\":"+(percentile(scanAmp,0.50)/1000.0)+",\"scanAmplificationP95\":"+(percentile(scanAmp,0.95)/1000.0)+","
    +"\"writeAmplificationTasksPerPushPost\":"+writeAmp+","
    +"\"backlogNewOrRunningStart\":"+backlogStart+",\"backlogNewOrRunningEnd\":"+backlogEnd+",\"backlogPeakDuringSeed\":"+backlogPeak+","
+   +"\"backlogAfterDrain\":"+backlogAfterDrain+",\"backlogRecoveryMs\":"+backlogRecoveryMs+","
+   +"\"heapMaxBytes\":"+heapMax+",\"heapUsedBeforeBytes\":"+heapUsedBefore+",\"heapUsedAfterBytes\":"+heapUsedAfter+","
    +"\"maxInflightClients\":"+maxInflight.get()+",\"clientSaturated\":"+clientSaturated+","
    +"\"warmupPublishVisibleSamples\":"+publishVisibleMs.size()
    +"}\n";
@@ -171,10 +182,11 @@ class PerfHarnessIT {
    try{return new String(Runtime.getRuntime().exec(new String[]{"git","rev-parse","HEAD"}).getInputStream().readAllBytes()).trim();}catch(Exception e){return "local";}
   }));
   Files.writeString(out.resolve("config-runtime.txt"),
-   "mode="+mode+"\nauthors="+authors+"\npostsPerAuthor="+posts+"\nreaders="+readers+"\nfollows="+followsN+"\ndurationSec="+durationSec+"\nclients="+clients+"\nvalid=true\n");
+   "mode="+mode+"\nphase="+phase+"\nauthors="+authors+"\npostsPerAuthor="+posts+"\nreaders="+readers+"\nfollows="+followsN+"\ndurationSec="+durationSec+"\nclients="+clients+"\nvalid=true\nheapMaxBytes="+heapMax+"\n");
 
   assertThat(ops).isGreaterThan(0);
   assertThat(errRate).isLessThan(0.05);
+  assertThat(backlogAfterDrain).as("backlog must drain after steady").isZero();
  }
  /** Assert PUSH inbox / PULL SQL / hybrid both paths before any timed op. */
  private ModeCoverage assertModeCoverage(String mode,List<Long> pushPosts,List<Long> pullPosts){
