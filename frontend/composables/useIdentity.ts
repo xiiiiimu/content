@@ -1,10 +1,11 @@
 const STORAGE_KEY = 'content.identity.token'
 
+/** Content tokens are `base64url(json).base64url(hmac)`, not JWT (payload is part[0]). */
 function decodePayload(token: string): { reader?: number, expiresAt?: number, role?: string } | null {
   try {
     const parts = token.split('.')
     if (parts.length < 2) return null
-    const json = atob(parts[1]!.replace(/-/g, '+').replace(/_/g, '/'))
+    const json = atob(parts[0]!.replace(/-/g, '+').replace(/_/g, '/'))
     return JSON.parse(json) as { reader?: number, expiresAt?: number, role?: string }
   }
   catch {
