@@ -1,0 +1,42 @@
+{
+  "name": "content-frontend",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "description": "Content platform web UI (Elk layout/style as visual reference)",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nuxt dev --port 5314",
+    "build": "nuxt build",
+    "start": "cross-env PORT=5314 node .output/server/index.mjs",
+    "prepare": "nuxt prepare",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "^0.9.0",
+    "@vueuse/core": "^12.5.0",
+    "@vueuse/nuxt": "^12.5.0",
+    "nuxt": "^3.15.4",
+    "pinia": "^2.3.1",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@iconify-json/ri": "^1.2.5",
+    "@nuxt/test-utils": "^3.15.4",
+    "@unocss/nuxt": "^66.5.2",
+    "@vue/test-utils": "^2.4.6",
+    "cross-env": "^7.0.3",
+    "happy-dom": "^16.7.3",
+    "typescript": "^5.7.3",
+    "unocss": "^66.5.2",
+    "vitest": "^2.1.8",
+    "vue-tsc": "^2.2.0"
+  }
+}

@@ -1,0 +1,8 @@
+Content frontend incorporates selected layout/visual ideas and an MIT-licensed
+avatar asset adapted from Elk (https://github.com/elk-zone/elk).
+
+Elk license text is preserved in LICENSE.elk.
+
+This application is a Content-platform product: it does not embed Mastodon
+login, instance selection, or Herd hot-topics clients. Copied visual patterns
+were rewritten against Content HTTP APIs.
