@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.dao.DataAccessException;
 
-@RestControllerAdvice(assignableTypes={FeedController.class,PostController.class,InteractionController.class,MediaController.class,MediaObjectController.class})
+@RestControllerAdvice(assignableTypes={FeedController.class,PostController.class,InteractionController.class,TrendGuardController.class,MediaController.class,MediaObjectController.class})
 public class FeedErrors {
  public record Error(String code){}
  @ExceptionHandler(FeedFailure.class) ResponseEntity<Error> known(FeedFailure e){return ResponseEntity.status(e.status).body(new Error(e.code));}

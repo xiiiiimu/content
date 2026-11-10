@@ -20,9 +20,11 @@ public final class FeedIdentityFilter extends OncePerRequestFilter {
    var identity=tokens.verify(header.substring(7),FeedTokens.Identity.class);long now=System.currentTimeMillis();
    if(identity.version()!=1 || identity.reader()<=0 || identity.issuedAt()<=0 || identity.issuedAt()>now+30_000 || identity.expiresAt()<=now
       || identity.expiresAt()<=identity.issuedAt() || identity.expiresAt()-identity.issuedAt()>3_600_000)throw new IllegalArgumentException();
-   String name=Long.toString(identity.reader());
-   if(request.getUserPrincipal()!=null && !request.getUserPrincipal().getName().equals(name))throw new IllegalArgumentException();
-   authenticated=new HttpServletRequestWrapper(request){@Override public Principal getUserPrincipal(){return ()->name;}@Override public String getRemoteUser(){return name;}};
+   String role=identity.role()==null||identity.role().isBlank()?"READER":identity.role();
+   if(!"READER".equals(role) && !"TRENDGUARD_OPS".equals(role))throw new IllegalArgumentException();
+   var principal=new ContentPrincipal(identity.reader(),role);
+   if(request.getUserPrincipal()!=null && !request.getUserPrincipal().getName().equals(principal.getName()))throw new IllegalArgumentException();
+   authenticated=new HttpServletRequestWrapper(request){@Override public Principal getUserPrincipal(){return principal;}@Override public String getRemoteUser(){return principal.getName();}};
   }catch(FeedFailure | IllegalArgumentException e){response.setStatus(401);response.setContentType("application/json");response.getWriter().write("{\"code\":\"AUTHENTICATION_REQUIRED\"}");return;}
   chain.doFilter(authenticated,response);
  }

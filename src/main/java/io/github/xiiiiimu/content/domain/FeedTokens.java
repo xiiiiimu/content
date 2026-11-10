@@ -19,5 +19,8 @@ public final class FeedTokens {
    return json.readValue(Base64.getUrlDecoder().decode(parts[0]),type);
   }catch(Exception e){throw new FeedFailure(400,"INVALID_CURSOR");}
  }
- public record Identity(int version,long reader,long issuedAt,long expiresAt) {}
+ public record Identity(int version,long reader,long issuedAt,long expiresAt,String role) {
+  public Identity(int version,long reader,long issuedAt,long expiresAt){this(version,reader,issuedAt,expiresAt,"READER");}
+  public Identity{role=(role==null||role.isBlank())?"READER":role;}
+ }
 }
