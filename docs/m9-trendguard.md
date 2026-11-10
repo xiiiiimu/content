@@ -1,9 +1,29 @@
-# M9 TrendGuard（冻结契约 · 以 V2.1 原文为准）
+# M9 TrendGuard（验收状态 · 以 V2.1 原文为准）
 
-基线：main `a4765c1`（PR #9 merge commit）。  
+基线 merge：main `0872acc`（PR #10 merge commit；tip `606b1d2`）。  
 本地原文：`C:\Users\西木\Downloads\内容平台_系统设计文档_V2.1_正确性契约强化版.pdf`（2026-11-07；已用 pypdf 全文抽取核对）。  
 **仓库内无 PDF 副本 ≠ 本地无原文。** 不得仅凭 ADR-004 T10b 重定义 M9。  
-**不再追加 M8 容量实验**（`docs/perf-evidence/capacity/QUEUE-PAUSED.md`）。不自动提交 / 不开 PR（本轮保留工作区改动）。
+**不再追加 M8 容量实验**（`docs/perf-evidence/capacity/QUEUE-PAUSED.md`）。
+
+---
+
+## 0. §14 验收结论（已合并）
+
+| §14 要求 | 落地 | 证据 |
+| --- | --- | --- |
+| TrendGuard **风险事件契约** | ADR-005 + V10–V12；确定性 `eventId`；`UNIQUE(kind,topic,window_start_ms)` | ADR-005；`TrendGuardService` / migrations |
+| **只读查询接口** | `GET /api/trendguard/risks`；`TRENDGUARD_OPS` 专用（401/403） | `TrendGuardController`；`TrendGuardRiskIT` |
+| **独立集成验收** | 真实 MySQL/Redis Testcontainers；生产 like→emit→ops 查询路径 | `TrendGuardRiskIT`（6）；hardening RED `5e6b730` → GREEN `606b1d2` |
+| §9 风险事件**输出** | `TrendingService.emitSpikeIfNeeded` 与 ledger/bucket 同事务 | 生产路径 IT；反证 `SUPPLEMENTAL-behavior-counterproof.md` |
+
+**结论：M9（V2.1 §14 + ADR-005）已在 main `0872acc` 验收通过。**  
+话题帖列表可见性（§8 / T10b）为结转，**不替代** §14 标题。
+
+| 验证 | 结果 |
+| --- | --- |
+| 本地 full verify（tip） | 142 run / 0 fail / 2 skip |
+| PR tip CI | [42710696838](https://github.com/xiiiiimu/content/actions/runs/42710696838) success @ `606b1d2` |
+| main CI | [42726581884](https://github.com/xiiiiimu/content/actions/runs/42726581884) success @ `0872acc` |
 
 ---
 
@@ -17,7 +37,7 @@
 | 业务借鉴 | 业务概念借鉴 Cornell Herd Hot Topics；ELK 仅可选 UI 参考，**不预设源码兼容** | 定位段（p.1） |
 | 开放决策 | 协议未定项须 **ADR 单独冻结**（含热点窗口边界精度等） | §15（p.6） |
 
-V2.1 **没有**给出：风险事件字段表、HTTP 路径、专用失败降级表、检测算法/SLA。这些不得假装已在 PDF 内冻结。
+V2.1 **没有**给出：风险事件字段表、HTTP 路径、专用失败降级表、检测算法/SLA。字段级决策见 ADR-005。
 
 ---
 
@@ -29,94 +49,36 @@ V2.1 **没有**给出：风险事件字段表、HTTP 路径、专用失败降级
 | `GET /api/topics/trending`（`window` / `metric`） | **API 冻结表（热点读）**，随 M5 | §10 |
 | 话题页等读取入口统一 `VisibilityService` | **全局可见性 C5 / §8**；ADR-004 将内容列表过滤记在 **M5 T10b** | §2 C5、§8；ADR-004 |
 
-→ **M9 ≠ 补完 T10b 话题帖列表。** T10b/话题可见性是结转缺口，可保留实现，但**不能冒充** §14 M9 完成定义。
+→ **M9 ≠ 补完 T10b 话题帖列表。** T10b 结转已随 PR #10 落地，但不改写 §14 完成定义。
 
 ---
 
-## 3. 与内容平台的集成方式（原文能推出的）
+## 3. 实现映射
 
-1. **同仓模块化单体**：API + Feed / Media / Trending Worker；TrendGuard 为平台内集成能力，非另起微服务（§1）。  
-2. **输出**：平台须能产生并保留 **风险事件**（§9「风险事件输出」）。  
-3. **只读查询**：对外提供只读查询接口（§14）；写路径仅为契约规定的事件落库/受理，不是开放随意改榜。  
-4. **可见性不旁路**：任何仍返回内容的读入口继续走 `VisibilityService`（§8）；风险事件查询返回的是事件，不授权帖子体。  
-5. **Herd**：仅概念借鉴热点分析，不引入 Herd 源码/Collector 兼容（定位段）。
-
----
-
-## 4. 失败降级（原文 + 不得脑补）
-
-| 来源 | 可引用要求 |
-| --- | --- |
-| §2 C5 / §8 / ADR-004 | 权威状态查询失败 → 可重试错误或拒绝；缓存/Redis **不能授权** |
-| §9 热点 | Redis ZSET 为可重建投影；MySQL ledger/buckets 权威 |
-| V2.1 §14 M9 | **未**单列 TrendGuard 专用降级矩阵 |
-
-本里程碑对 TrendGuard 只承诺：风险事件以 **MySQL 权威存储**；可选 Redis 投影不可作为唯一真相；权威读失败不得静默空成功放行。更细阈值若超出原文，须进 ADR，不得写进「已在 V2.1 冻结」。
-
----
-
-## 5. 验收要求（§14 + §15）
-
-1. **风险事件契约**落地（字段/幂等/存储）——字段级细节见下方「待 ADR 补冻结」，不得假称 PDF 已定死。  
-2. **只读查询接口**可测、需身份（与现有 `/api/*` 身份边界一致，沿用平台惯例；PDF 未写 Bearer 字样，但 §8 要求读取入口统一校验）。  
-3. **独立集成验收**（专用 IT，真实 MySQL/Redis Testcontainers；默认 CI 可跑，**不含** M8 perf 长跑）。  
-4. 禁止编造性能数字（§15）。
-
----
-
-## 6. 当前实现 ↔ 原文映射
-
-| 现有改动 / 测试 | 映射到 | 结论 |
+| 实现 / 测试 | 映射到 | 结论 |
 | --- | --- | --- |
-| `GET /api/topics/trending` + M5 IT | §10 / M5 | **结转已完成**（非 M9） |
-| `GET /api/topics/{topic}/posts` + `topicPosts` | §8 / ADR-004 T10b | **可见性结转**；不计 M9 完成 |
-| `TrendGuardIT` | 同上 | 结转 IT；非 §14 |
-| `TrendingService.emitSpikeIfNeeded` → `trend_risk_events` | §9 风险事件**输出** + ADR-005 | **生产输出链路**（须 IT 证明） |
-| `GET /api/trendguard/risks` + `TrendGuardRiskIT` | §14 只读查询 / 独立验收 | 工作区实现中 |
-| M8 长跑 | §14 M8 | **已关闭，不再追加** |
+| `TrendingService.emitSpikeIfNeeded` → `trend_risk_events` | §9 输出 + ADR-005 | **通过** |
+| `GET /api/trendguard/risks` + ops 鉴权 | §14 只读查询 | **通过** |
+| `TrendGuardRiskIT` | §14 独立集成验收 | **通过** |
+| `GET /api/topics/{topic}/posts` + `TrendGuardIT` | §8 / T10b 结转 | **结转通过**；不计作 §14 替代 |
+| M8 长跑 | §14 M8 | **不追加** |
 
 ---
 
-## 7. RED / 反证记录（诚实）
+## 4. RED / 反证（诚实）
 
 | 项 | 事实 |
 | --- | --- |
-| 历史业务 RED commit | **无** |
-| `docs/perf-evidence/m9/RED-risk-query.md` | **编译失败**记录；**不满足**业务 RED；**不是**测试先行 |
-| 补充行为反证 | `SUPPLEMENTAL-behavior-counterproof.md`（隔离工作树去掉 emit 后 IT 失败）；**标明非历史 RED** |
+| 早期 `RED-risk-query.md` | **编译失败**记录；**不满足**业务 RED |
+| 补充行为反证 | `SUPPLEMENTAL-behavior-counterproof.md`（去掉 emit → IT 失败） |
+| 审查硬化业务 RED→GREEN | `5e6b730` → `606b1d2`（唯一性 / 并发串行 / ops 鉴权） |
 
 ---
 
-## 8. 本里程碑实施边界（修正后）
+## 5. 保留边界（非目标）
 
-**做（对齐 §14）：**
-
-- 冻结并实现 **风险事件** 持久化契约 + **只读查询** + **独立 IT**  
-- 字段级缺口用 **ADR-005** 补冻结（V2.1 §15：开放决策走 ADR），ADR 不得另起一套替代 §14 标题  
-
-**可保留但不计入 M9 完成：**
-
-- 话题帖列表可见性过滤（T10b/§8 结转）  
-
-**不做：**
-
+- 亚分钟窗口 / ML / Herd 源码或 Collector 兼容  
 - 追加 M8 容量长跑 / 宣称最高容量  
-- 复刻 Herd/ELK、上推荐算法或独立 Trend 微服务  
-- 改 delivery 租约/token/DEAD  
-- 用 T10b 话题列表冒充 M9 验收通过  
+- 独立 Trend 微服务、改 delivery 租约/token/DEAD  
 
-字段/生产者/查询细节见已审查的 `docs/adr/0005-trendguard-risk-events.md`（区分原文 vs 实施决策）。
-
----
-
-## 9. 启动状态
-
-| 项 | 状态 |
-| --- | --- |
-| V2.1 PDF 已读 | 是 |
-| ADR-005 | 已充实；**暂不宣布 M9 完成** |
-| 编译失败记录 | `RED-risk-query.md`（≠ 业务 RED） |
-| 行为反证 | `SUPPLEMENTAL-behavior-counterproof.md` |
-| 生产输出 + 唯一键 + 并发串行 + ops 只读 | PR #10 RED `5e6b730` → GREEN（本轮）；**不宣布完成至审查** |
-| 话题可见性结转 | 独立 commit；不计 §14 |
-| M8 | 暂停 / 不追加 |
+汇总见 `docs/m0-m9-acceptance.md`。
