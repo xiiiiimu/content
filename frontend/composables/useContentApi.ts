@@ -4,6 +4,10 @@ import type {
   FeedPage,
   FollowResult,
   LikeResult,
+  MaterialDetail,
+  MaterialDiscoverPage,
+  MaterialSigned,
+  MaterialUnlock,
   PageState,
   PostStats,
   RiskEvent,
@@ -64,12 +68,61 @@ export function useContentApi() {
       const q = topic ? `?topic=${encodeURIComponent(topic)}` : ''
       return request<LikeResult>(`/api/posts/${postId}/likes${q}`, { method: 'DELETE' })
     },
-    comment(postId: number, body: string, idempotencyKey: string, topic?: string) {
+    comment(postId: number, body: string, idempotencyKey: string, topic?: string, opts?: { parentId?: number; versionId?: number; offsetMs?: number }) {
       return request<CommentResult>(`/api/posts/${postId}/comments`, {
         method: 'POST',
         headers: { 'Idempotency-Key': idempotencyKey },
-        body: JSON.stringify({ body, topic }),
+        body: JSON.stringify({
+          body,
+          topic,
+          parentId: opts?.parentId,
+          versionId: opts?.versionId,
+          offsetMs: opts?.offsetMs,
+        }),
       })
+    },
+    dislike(postId: number) {
+      return request<{ disliked: boolean; dislikeCount: number }>(`/api/posts/${postId}/dislikes`, { method: 'PUT' })
+    },
+    report(postId: number, reason: string, detail?: string, context?: Record<string, unknown>) {
+      return request<{ reportId: number; reportCount: number }>(`/api/posts/${postId}/reports`, {
+        method: 'POST',
+        body: JSON.stringify({ reason, detail, context }),
+      })
+    },
+    discoverMaterials(opts: { q?: string; tag?: string; beforeMs?: number; beforeId?: number; limit?: number } = {}) {
+      const q = new URLSearchParams({ limit: String(opts.limit ?? 20) })
+      if (opts.q) q.set('q', opts.q)
+      if (opts.tag) q.set('tag', opts.tag)
+      if (opts.beforeMs != null && opts.beforeId != null) {
+        q.set('beforeMs', String(opts.beforeMs))
+        q.set('beforeId', String(opts.beforeId))
+      }
+      return request<MaterialDiscoverPage>(`/api/materials/discover?${q}`)
+    },
+    material(postId: number) {
+      return request<MaterialDetail>(`/api/materials/${postId}`)
+    },
+    signMaterialPreview(postId: number, versionId?: number, ttlMillis = 60_000) {
+      return request<MaterialSigned>(`/api/materials/${postId}/preview/sign`, {
+        method: 'POST',
+        body: JSON.stringify({ versionId, ttlMillis }),
+      })
+    },
+    unlockMaterial(postId: number, password: string) {
+      return request<MaterialUnlock>(`/api/materials/${postId}/unlock`, {
+        method: 'POST',
+        body: JSON.stringify({ password }),
+      })
+    },
+    signMaterialOriginal(postId: number, grant: string, versionId?: number, ttlMillis = 60_000) {
+      return request<MaterialSigned>(`/api/materials/${postId}/original/sign`, {
+        method: 'POST',
+        body: JSON.stringify({ grant, versionId, ttlMillis }),
+      })
+    },
+    acceptComment(postId: number, commentId: number) {
+      return request<CommentResult>(`/api/posts/${postId}/comments/${commentId}/accept`, { method: 'POST' })
     },
     follow(authorId: number) {
       return request<FollowResult>(`/api/follows/${authorId}`, { method: 'PUT' })
