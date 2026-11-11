@@ -5,15 +5,17 @@ import java.util.List;
 @Mapper
 public interface InteractionMapper {
  record Stats(long postId,long likes,long comments) {}
- record Comment(long id,long postId,long userId,String body,long createdAtMs) {}
+ record Comment(long id,long postId,long userId,Long parentId,String body,long createdAtMs) {}
  record Bucket(String topic,long bucket,long net,long active) {}
  @Insert("INSERT IGNORE INTO post_likes(post_id,user_id,created_at_ms) VALUES(#{post},#{user},#{at})") int like(@Param("post")long post,@Param("user")long user,@Param("at")long at);
  @Delete("DELETE FROM post_likes WHERE post_id=#{post} AND user_id=#{user}") int unlike(@Param("post")long post,@Param("user")long user);
  @Select("SELECT COUNT(*) FROM post_likes WHERE post_id=#{post}") long likeCount(long post);
- @Insert("INSERT INTO post_comments(post_id,user_id,body,idempotency_key,created_at_ms) VALUES(#{post},#{user},#{body},#{key},#{at})")
- int comment(@Param("post")long post,@Param("user")long user,@Param("body")String body,@Param("key")String key,@Param("at")long at);
- @Select("SELECT id,post_id AS postId,user_id AS userId,body,created_at_ms AS createdAtMs FROM post_comments WHERE user_id=#{user} AND idempotency_key=#{key}")
+ @Insert("INSERT INTO post_comments(post_id,user_id,parent_id,body,idempotency_key,created_at_ms) VALUES(#{post},#{user},#{parent},#{body},#{key},#{at})")
+ int comment(@Param("post")long post,@Param("user")long user,@Param("parent")Long parent,@Param("body")String body,@Param("key")String key,@Param("at")long at);
+ @Select("SELECT id,post_id AS postId,user_id AS userId,parent_id AS parentId,body,created_at_ms AS createdAtMs FROM post_comments WHERE user_id=#{user} AND idempotency_key=#{key}")
  Comment existingComment(@Param("user")long user,@Param("key")String key);
+ @Select("SELECT id,post_id AS postId,user_id AS userId,parent_id AS parentId,body,created_at_ms AS createdAtMs FROM post_comments WHERE id=#{id}")
+ Comment commentById(long id);
  @Select("SELECT COUNT(*) FROM post_comments WHERE post_id=#{post}") long commentCount(long post);
  @Insert("INSERT INTO post_stats(post_id,like_count,comment_count) VALUES(#{post},#{likes},#{comments}) ON DUPLICATE KEY UPDATE like_count=#{likes},comment_count=#{comments}")
  void upsertStats(@Param("post")long post,@Param("likes")long likes,@Param("comments")long comments);

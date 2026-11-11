@@ -8,15 +8,17 @@ import java.security.MessageDigest;
 import java.util.*;
 
 public final class DistributionInbox {
- private final InboxMapper inbox;private final FeedMapper db;private final TransactionTemplate tx;private final ObjectMapper json;private final PipelineObserver observer;
- public DistributionInbox(InboxMapper inbox,FeedMapper db,TransactionTemplate tx,ObjectMapper json,PipelineObserver observer){this.inbox=inbox;this.db=db;this.tx=tx;this.json=json.copy().enable(com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION);this.observer=observer;}
+ private final InboxMapper inbox;private final FeedMapper db;private final TransactionTemplate tx;private final ObjectMapper json;private final PipelineObserver observer;private final NotificationService notifications;
+ public DistributionInbox(InboxMapper inbox,FeedMapper db,TransactionTemplate tx,ObjectMapper json,PipelineObserver observer,NotificationService notifications){
+  this.inbox=inbox;this.db=db;this.tx=tx;this.json=json.copy().enable(com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION);this.observer=observer;this.notifications=notifications;
+ }
  public void accept(String payload,String key,String tag){
   if(payload==null || payload.getBytes(StandardCharsets.UTF_8).length>65536)throw new FeedFailure(409,"INVALID_EVENT");
   String hash=digest(payload);long id=0;
   try{
    JsonNode body=json.readTree(payload);id=number(body,"eventId");if(!Long.toString(id).equals(key))throw new FeedFailure(409,"EVENT_KEY_CONFLICT");
    String type=body.has("eventType")?body.path("eventType").asText():"PostPublished";
-   if(!type.equals(tag) || !Set.of("PostPublished","FollowChanged","FeedModeChanged","PostOfflined").contains(type))throw new FeedFailure(409,"EVENT_TYPE_CONFLICT");
+   if(!type.equals(tag) || !Set.of("PostPublished","FollowChanged","FeedModeChanged","PostOfflined","CommentCreated").contains(type))throw new FeedFailure(409,"EVENT_TYPE_CONFLICT");
    final long eventId=id;
    tx.executeWithoutResult(status->{
     RelationshipService.requireWritable(db.gate());
@@ -31,6 +33,8 @@ public final class DistributionInbox {
      if(decision.equals("PUSH_TASK"))inbox.createTask(eventId,author,p.epoch(),"PUBLISH",post,null,null,payload);
     }else if(type.equals("FollowChanged") && decision.equals("HISTORY_TASK")){
      inbox.createTask(eventId,number(body,"authorId"),0,"BACKFILL",null,number(body,"followerId"),number(body,"followEpoch"),payload);
+    }else if(type.equals("CommentCreated") && decision.equals("NOTIFY_ACCEPTED")){
+     notifications.acceptCommentEvent(eventId,body);
     }
     observer.beforeInboxCommit(eventId);
    });
@@ -60,6 +64,7 @@ public final class DistributionInbox {
   case "FollowChanged" -> {if(!body.path("following").isBoolean())throw new FeedFailure(409,"INVALID_EVENT");yield body.path("following").booleanValue()?"HISTORY_TASK":"FOLLOW_CANCELLED";}
   case "FeedModeChanged" -> "MODE_ACCEPTED";
   case "PostOfflined" -> "OFFLINE_ACCEPTED";
+  case "CommentCreated" -> "NOTIFY_ACCEPTED";
   default->throw new FeedFailure(409,"INVALID_EVENT");
  };}
  private static long number(JsonNode body,String name){long value=nonnegative(body,name);if(value==0)throw new FeedFailure(409,"INVALID_EVENT");return value;}

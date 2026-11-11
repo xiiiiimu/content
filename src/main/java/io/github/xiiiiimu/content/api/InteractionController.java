@@ -13,8 +13,13 @@ public class InteractionController {
  private long user(Principal p){if(p==null||p.getName()==null)throw new FeedFailure(401,"UNAUTHENTICATED");try{long id=Long.parseLong(p.getName());if(id<=0)throw new FeedFailure(401,"UNAUTHENTICATED");return id;}catch(NumberFormatException e){throw new FeedFailure(401,"UNAUTHENTICATED");}}
  @PutMapping("/api/posts/{post}/likes") public InteractionService.LikeResult like(@PathVariable long post,@RequestParam(required=false)String topic,Principal p){return interactions.like(user(p),post,topic);}
  @DeleteMapping("/api/posts/{post}/likes") public InteractionService.LikeResult unlike(@PathVariable long post,@RequestParam(required=false)String topic,Principal p){return interactions.unlike(user(p),post,topic);}
- @PostMapping("/api/posts/{post}/comments") public InteractionService.CommentResult comment(@PathVariable long post,@RequestHeader("Idempotency-Key")String key,@RequestBody java.util.Map<String,String> body,Principal p){
-  return interactions.comment(user(p),post,body.get("body"),key,body.get("topic"));
+ @PostMapping("/api/posts/{post}/comments") public InteractionService.CommentResult comment(@PathVariable long post,@RequestHeader("Idempotency-Key")String key,@RequestBody java.util.Map<String,Object> body,Principal p){
+  Object parent=body.get("parentId");
+  Long parentId=null;
+  if(parent instanceof Number n)parentId=n.longValue();
+  else if(parent instanceof String s && !s.isBlank())parentId=Long.parseLong(s);
+  Object rawBody=body.get("body");Object topic=body.get("topic");
+  return interactions.comment(user(p),post,rawBody==null?null:String.valueOf(rawBody),key,topic==null?null:String.valueOf(topic),parentId);
  }
  @GetMapping("/api/posts/{post}/stats") public Object stats(@PathVariable long post,Principal p){user(p);return interactions.stats(post);}
  @GetMapping("/api/topics/trending") public List<TrendingService.Entry> trending(@RequestParam(defaultValue="1h")String window,@RequestParam(defaultValue="net_events")String metric,Principal p){
