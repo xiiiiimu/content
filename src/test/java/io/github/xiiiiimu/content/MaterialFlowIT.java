@@ -136,6 +136,36 @@ class MaterialFlowIT {
   assertThatThrownBy(()->materials.detail(idB,postId)).isInstanceOf(FeedFailure.class);
  }
 
+ @Test void laterReadyOfOlderRevisionDoesNotRegressDefaultVersion()throws Exception{
+  var a=register("mat_rev_alice","password-a1");
+  long idA=a.get("userId").asLong();
+  var created=materials.createDraft(idA,"Rev race","",List.of("race"),"PUBLIC_PREVIEW",null,false,false,
+   "video-v1".getBytes(StandardCharsets.UTF_8),"video/mp4");
+  long postId=created.postId();
+  for(int i=0;i<8;i++)materials.tick();
+  long v1=created.versionId();
+  assertThat(db.queryForObject("SELECT default_version_id FROM material_profiles WHERE post_id=?",Long.class,postId)).isEqualTo(v1);
+
+  var v2c=materials.uploadVersion(idA,postId,"video-v2".getBytes(StandardCharsets.UTF_8),"video/mp4");
+  var v3c=materials.uploadVersion(idA,postId,"video-v3".getBytes(StandardCharsets.UTF_8),"video/mp4");
+  long v2=v2c.versionId();long v3=v3c.versionId();
+  // Defer older pending revision so the worker processes v3 first.
+  db.update("UPDATE material_versions SET next_retry_at=TIMESTAMPADD(HOUR,1,CURRENT_TIMESTAMP(6)) WHERE id=?",v2);
+  for(int i=0;i<8;i++)materials.tick();
+  assertThat(db.queryForObject("SELECT state FROM material_versions WHERE id=?",String.class,v3)).isEqualTo("READY");
+  assertThat(db.queryForObject("SELECT default_version_id FROM material_profiles WHERE post_id=?",Long.class,postId)).isEqualTo(v3);
+
+  db.update("UPDATE material_versions SET next_retry_at=CURRENT_TIMESTAMP(6),state='PENDING',lease_until=NULL WHERE id=?",v2);
+  for(int i=0;i<8;i++)materials.tick();
+  assertThat(db.queryForObject("SELECT state FROM material_versions WHERE id=?",String.class,v2)).isEqualTo("READY");
+  assertThat(db.queryForObject("SELECT default_version_id FROM material_profiles WHERE post_id=?",Long.class,postId))
+   .as("late READY of lower revision must not regress default").isEqualTo(v3);
+  assertThat(db.queryForObject("SELECT preview_object_key FROM material_versions WHERE id=?",String.class,v2))
+   .contains("/t");
+  assertThat(db.queryForObject("SELECT preview_object_key FROM material_versions WHERE id=?",String.class,v3))
+   .contains("/t");
+ }
+
  private com.fasterxml.jackson.databind.JsonNode register(String user,String pass)throws Exception{
   return json(http.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
     .content("{\"username\":\""+user+"\",\"password\":\""+pass+"\"}")).andExpect(status().isOk()).andReturn());

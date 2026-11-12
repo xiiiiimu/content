@@ -34,8 +34,16 @@ public interface MaterialMapper {
  int updateProfile(@Param("post")long post,@Param("title")String title,@Param("description")String description,@Param("share")String share,
                    @Param("password")String password,@Param("bump")int bump,@Param("download")boolean download,@Param("commercial")boolean commercial,@Param("at")long at);
 
- @Update("UPDATE material_profiles SET default_version_id=#{version},updated_at_ms=#{at} WHERE post_id=#{post}")
- int setDefault(@Param("post")long post,@Param("version")long version,@Param("at")long at);
+ /** Only advance default when candidate revision is strictly greater than the current default. */
+ @Update("""
+  UPDATE material_profiles mp
+  LEFT JOIN material_versions cur ON cur.id=mp.default_version_id
+  INNER JOIN material_versions cand ON cand.id=#{version} AND cand.post_id=mp.post_id
+  SET mp.default_version_id=#{version},mp.updated_at_ms=#{at}
+  WHERE mp.post_id=#{post}
+    AND (mp.default_version_id IS NULL OR cand.revision>COALESCE(cur.revision,-1))
+  """)
+ int setDefaultIfNewer(@Param("post")long post,@Param("version")long version,@Param("at")long at);
 
  @Insert("""
   INSERT INTO material_versions(post_id,revision,state,raw_object_key,created_at_ms)
@@ -74,9 +82,10 @@ public interface MaterialMapper {
   """)
  Version claimable();
 
+ /** Lease covers FFmpeg wall clock (2m) plus store I/O margin; takeover uses distinct derived object keys. */
  @Update("""
   UPDATE material_versions SET state='PROCESSING',attempt=attempt+1,lease_token=lease_token+1,
-  lease_until=TIMESTAMPADD(SECOND,30,CURRENT_TIMESTAMP(6)) WHERE id=#{id} AND state IN('PENDING','PROCESSING')
+  lease_until=TIMESTAMPADD(SECOND,180,CURRENT_TIMESTAMP(6)) WHERE id=#{id} AND state IN('PENDING','PROCESSING')
     AND (lease_until IS NULL OR lease_until<=CURRENT_TIMESTAMP(6))
   """)
  int claim(long id);

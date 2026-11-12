@@ -80,8 +80,9 @@ public final class MaterialService {
    var post=posts.post(claimed.postId());
    if(post==null || "OFFLINE".equals(post.status())){tx.executeWithoutResult(s->db.fail(claimed.id(),token,1,"POST_GONE"));return;}
    byte[] raw=store.get(bucket,claimed.rawObjectKey());
-   String preview="material/"+claimed.postId()+"/v"+claimed.revision()+"/preview.mp4";
-   String cover="material/"+claimed.postId()+"/v"+claimed.revision()+"/cover.jpg";
+   // Per-claim object keys so a late/stale worker cannot overwrite a newer lease's derived artifacts.
+   String preview="material/"+claimed.postId()+"/v"+claimed.revision()+"/t"+token+"/preview.mp4";
+   String cover="material/"+claimed.postId()+"/v"+claimed.revision()+"/t"+token+"/cover.jpg";
    Long duration=null;String meta;
    if(ffmpegImage!=null && !ffmpegImage.isBlank()){
     var result=new FfmpegTranscoder(ffmpegImage).transcode(raw);
@@ -99,8 +100,8 @@ public final class MaterialService {
    Long finalDuration=duration;String finalMeta=meta;
    tx.executeWithoutResult(s->{
     if(db.complete(claimed.id(),token,preview,cover,finalDuration,finalMeta)!=1)throw new FeedFailure(409,"MEDIA_FENCED");
-    // Switch default only when READY; failed paths never reach here.
-    db.setDefault(claimed.postId(),claimed.id(),System.currentTimeMillis());
+    // Monotonic default: higher revision only; late READY of an older revision cannot regress.
+    db.setDefaultIfNewer(claimed.postId(),claimed.id(),System.currentTimeMillis());
    });
   }catch(Exception e){
    String msg=e.getMessage()==null?"error":e.getMessage();
