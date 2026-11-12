@@ -90,11 +90,11 @@ public interface MaterialMapper {
   """)
  int claim(long id);
 
- @Select("SELECT lease_token FROM material_versions WHERE id=#{id}") Long token(long id);
-
+ /** Expired lease loses authority even with a matching token (DB clock). */
  @Update("""
   UPDATE material_versions SET state='READY',preview_object_key=#{preview},cover_object_key=#{cover},duration_ms=#{duration},
-  meta_json=#{meta},lease_until=NULL,last_error=NULL WHERE id=#{id} AND lease_token=#{token} AND state='PROCESSING'
+  meta_json=#{meta},lease_until=NULL,last_error=NULL
+  WHERE id=#{id} AND lease_token=#{token} AND state='PROCESSING' AND lease_until>CURRENT_TIMESTAMP(6)
   """)
  int complete(@Param("id")long id,@Param("token")long token,@Param("preview")String preview,@Param("cover")String cover,
               @Param("duration")Long duration,@Param("meta")String meta);
@@ -102,7 +102,7 @@ public interface MaterialMapper {
  @Update("""
   UPDATE material_versions SET state=IF(attempt>=5,'FAILED','PENDING'),
   next_retry_at=TIMESTAMPADD(SECOND,#{delay},CURRENT_TIMESTAMP(6)),lease_until=NULL,last_error=#{error}
-  WHERE id=#{id} AND lease_token=#{token} AND state='PROCESSING'
+  WHERE id=#{id} AND lease_token=#{token} AND state='PROCESSING' AND lease_until>CURRENT_TIMESTAMP(6)
   """)
  int fail(@Param("id")long id,@Param("token")long token,@Param("delay")int delay,@Param("error")String error);
 

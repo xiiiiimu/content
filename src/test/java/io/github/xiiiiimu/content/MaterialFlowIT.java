@@ -6,6 +6,10 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.*;
@@ -17,6 +21,8 @@ import org.testcontainers.junit.jupiter.*;
 import org.testcontainers.utility.DockerImageName;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -25,9 +31,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Batch-1 material loop: A publish → B discover by title/tag → preview + comment @8s →
  * A new version + accept → B still resolves old version @8s; offline/password/fail-safe.
  */
-@SpringBootTest @AutoConfigureMockMvc @Testcontainers
+@SpringBootTest @AutoConfigureMockMvc @Testcontainers @Import(MaterialFlowIT.Hooks.class)
 @org.springframework.test.annotation.DirtiesContext(classMode=org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class MaterialFlowIT {
+ static final AtomicReference<Runnable> BEFORE_MEDIA=new AtomicReference<>();
+ @TestConfiguration static class Hooks {
+  @Bean @Primary PipelineObserver materialFlowObserver(){
+   return new PipelineObserver(){@Override public void beforeMediaProcess(long taskId){var r=BEFORE_MEDIA.getAndSet(null);if(r!=null)r.run();}};
+  }
+ }
  @Container static final MySQLContainer<?> MYSQL=new MySQLContainer<>("mysql:8.4");
  @Container static final GenericContainer<?> REDIS=new GenericContainer<>("redis:7.4").withExposedPorts(6379).withCommand("redis-server","--maxmemory-policy","noeviction");
  @Container static final GenericContainer<?> S3=new GenericContainer<>(DockerImageName.parse("adobe/s3mock:3.12.0")).withExposedPorts(9090);
@@ -43,7 +55,14 @@ class MaterialFlowIT {
  }
  @Autowired MockMvc http;@Autowired JdbcTemplate db;@Autowired ObjectMapper json;
  @Autowired MaterialService materials;@Autowired PublishService publish;@Autowired InteractionService interactions;
- @Autowired RelationshipService follows;@Autowired VisibilityService visibility;
+ @Autowired RelationshipService follows;@Autowired VisibilityService visibility;@Autowired ObjectStore store;
+ @BeforeEach void resetHooks(){
+  BEFORE_MEDIA.set(null);
+  // Scheduler also calls materials.tick(); clear leftover versions so claimable cannot steal ticks across tests.
+  db.update("DELETE FROM material_tags");
+  db.update("DELETE FROM material_versions");
+  db.update("DELETE FROM material_profiles");
+ }
 
  @Test void materialDiscoverPreviewTimestampCommentNewVersionAcceptOfflinePassword()throws Exception{
   var a=register("mat_alice","password-a1");
@@ -164,6 +183,50 @@ class MaterialFlowIT {
    .contains("/t");
   assertThat(db.queryForObject("SELECT preview_object_key FROM material_versions WHERE id=?",String.class,v3))
    .contains("/t");
+ }
+
+ @Test void expiredLeaseTakeoverKeepsOldWorkerFromPublishingObjectRefs()throws Exception{
+  var a=register("mat_lease_alice","password-a1");
+  long idA=a.get("userId").asLong();
+  var created=materials.createDraft(idA,"Lease race","",List.of("lease"),"PUBLIC_PREVIEW",null,false,false,
+   "video-lease".getBytes(StandardCharsets.UTF_8),"video/mp4");
+  long postId=created.postId();long versionId=created.versionId();
+  var entered=new CountDownLatch(1);var release=new CountDownLatch(1);
+  BEFORE_MEDIA.set(()->{
+   entered.countDown();
+   try{if(!release.await(30,TimeUnit.SECONDS))throw new IllegalStateException("barrier timeout");}
+   catch(InterruptedException e){Thread.currentThread().interrupt();throw new IllegalStateException(e);}
+  });
+  var pool=Executors.newSingleThreadExecutor();
+  try{
+   Future<?> oldWorker=pool.submit(()->materials.tick());
+   assertThat(entered.await(15,TimeUnit.SECONDS)).isTrue();
+   long oldToken=db.queryForObject("SELECT lease_token FROM material_versions WHERE id=?",Long.class,versionId);
+   String oldPreview="material/"+postId+"/v1/t"+oldToken+"/preview.mp4";
+   String oldCover="material/"+postId+"/v1/t"+oldToken+"/cover.jpg";
+   db.update("UPDATE material_versions SET lease_until=TIMESTAMPADD(SECOND,-1,CURRENT_TIMESTAMP(6)) WHERE id=?",versionId);
+   materials.tick();
+   assertThat(db.queryForObject("SELECT state FROM material_versions WHERE id=?",String.class,versionId)).isEqualTo("READY");
+   long newToken=db.queryForObject("SELECT lease_token FROM material_versions WHERE id=?",Long.class,versionId);
+   assertThat(newToken).isGreaterThan(oldToken);
+   String publishedPreview=db.queryForObject("SELECT preview_object_key FROM material_versions WHERE id=?",String.class,versionId);
+   String publishedCover=db.queryForObject("SELECT cover_object_key FROM material_versions WHERE id=?",String.class,versionId);
+   assertThat(publishedPreview).isEqualTo("material/"+postId+"/v1/t"+newToken+"/preview.mp4");
+   assertThat(publishedCover).isEqualTo("material/"+postId+"/v1/t"+newToken+"/cover.jpg");
+   assertThat(store.exists("content-media",publishedPreview)).isTrue();
+   byte[] winnerPreview=store.get("content-media",publishedPreview);
+   release.countDown();
+   oldWorker.get(30,TimeUnit.SECONDS);
+   assertThat(db.queryForObject("SELECT state FROM material_versions WHERE id=?",String.class,versionId))
+    .as("stale worker must not fail/regress READY").isEqualTo("READY");
+   assertThat(db.queryForObject("SELECT lease_token FROM material_versions WHERE id=?",Long.class,versionId)).isEqualTo(newToken);
+   assertThat(db.queryForObject("SELECT preview_object_key FROM material_versions WHERE id=?",String.class,versionId)).isEqualTo(publishedPreview);
+   assertThat(db.queryForObject("SELECT cover_object_key FROM material_versions WHERE id=?",String.class,versionId)).isEqualTo(publishedCover);
+   assertThat(store.get("content-media",publishedPreview)).isEqualTo(winnerPreview);
+   assertThat(store.exists("content-media",oldPreview)).as("old worker may only write its own claim-scoped keys").isTrue();
+   assertThat(store.exists("content-media",oldCover)).isTrue();
+   assertThat(oldPreview).isNotEqualTo(publishedPreview);
+  }finally{pool.shutdownNow();}
  }
 
  private com.fasterxml.jackson.databind.JsonNode register(String user,String pass)throws Exception{

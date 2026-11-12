@@ -71,10 +71,15 @@ public final class MaterialService {
  public void tick(){
   var claimed=tx.execute(status->{
    var task=db.claimable();if(task==null)return null;
-   if(db.claim(task.id())!=1)return null;return db.version(task.id());
+   // Pin the post-claim token from the locked row; do not re-read lease_token outside this TX.
+   long nextToken=Math.addExact(task.token(),1);
+   int nextAttempt=Math.addExact(task.attempt(),1);
+   if(db.claim(task.id())!=1)return null;
+   return new MaterialMapper.Version(task.id(),task.postId(),task.revision(),"PROCESSING",task.rawObjectKey(),
+    null,null,task.durationMs(),task.metaJson(),nextAttempt,nextToken,task.createdAtMs());
   });
   if(claimed==null)return;
-  long token=Objects.requireNonNull(db.token(claimed.id()));
+  long token=claimed.token();
   try{
    observer.beforeMediaProcess(claimed.id());
    var post=posts.post(claimed.postId());
@@ -103,6 +108,10 @@ public final class MaterialService {
     // Monotonic default: higher revision only; late READY of an older revision cannot regress.
     db.setDefaultIfNewer(claimed.postId(),claimed.id(),System.currentTimeMillis());
    });
+  }catch(FeedFailure e){
+   if("MEDIA_FENCED".equals(e.getMessage()))return; // lost lease/token; do not schedule retry as this claim
+   String msg=e.getMessage()==null?"error":e.getMessage();
+   tx.executeWithoutResult(s->db.fail(claimed.id(),token,Math.min(60,1<<Math.min(5,Math.max(0,claimed.attempt()))),msg.substring(0,Math.min(500,msg.length()))));
   }catch(Exception e){
    String msg=e.getMessage()==null?"error":e.getMessage();
    tx.executeWithoutResult(s->db.fail(claimed.id(),token,Math.min(60,1<<Math.min(5,Math.max(0,claimed.attempt()))),msg.substring(0,Math.min(500,msg.length()))));
