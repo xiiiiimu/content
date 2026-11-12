@@ -1,5 +1,6 @@
 package io.github.xiiiiimu.content.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.xiiiiimu.content.domain.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
@@ -10,14 +11,15 @@ import java.util.*;
 
 @RestController @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
 public class MaterialController {
- private final MaterialService materials;private final InteractionService interactions;private final PublishService publish;
- public MaterialController(MaterialService materials,InteractionService interactions,PublishService publish){
-  this.materials=materials;this.interactions=interactions;this.publish=publish;
+ private final MaterialService materials;private final InteractionService interactions;private final PublishService publish;private final ObjectMapper json;
+ public MaterialController(MaterialService materials,InteractionService interactions,PublishService publish,ObjectMapper json){
+  this.materials=materials;this.interactions=interactions;this.publish=publish;this.json=json;
  }
  private long user(Principal p){if(p==null||p.getName()==null)throw new FeedFailure(401,"UNAUTHENTICATED");try{long id=Long.parseLong(p.getName());if(id<=0)throw new FeedFailure(401,"UNAUTHENTICATED");return id;}catch(NumberFormatException e){throw new FeedFailure(401,"UNAUTHENTICATED");}}
 
  @PostMapping(value="/api/materials",consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
- public MaterialService.Created create(@RequestPart("meta") Map<String,Object> meta,@RequestPart("file") MultipartFile file,Principal p)throws Exception{
+ public MaterialService.Created create(@RequestPart("meta") String metaJson,@RequestPart("file") MultipartFile file,Principal p)throws Exception{
+  Map<String,Object> meta=readMeta(metaJson);
   List<String> tags=tagsOf(meta.get("tags"));
   boolean dl=bool(meta.get("licenseDownload"),false);boolean com=bool(meta.get("licenseCommercial"),false);
   return materials.createDraft(user(p),str(meta.get("title")),str(meta.get("description")),tags,str(meta.get("shareMode")),str(meta.get("password")),dl,com,file.getBytes(),file.getContentType());
@@ -72,6 +74,11 @@ public class MaterialController {
   return interactions.accept(user(p),post,comment);
  }
 
+ @SuppressWarnings("unchecked")
+ private Map<String,Object> readMeta(String metaJson)throws Exception{
+  if(metaJson==null || metaJson.isBlank())throw new FeedFailure(400,"INVALID_REQUEST");
+  return json.readValue(metaJson,Map.class);
+ }
  @SuppressWarnings("unchecked")
  private static List<String> tagsOf(Object raw){
   if(raw==null)return List.of();

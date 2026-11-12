@@ -78,12 +78,15 @@ class MaterialFlowIT {
   assertThat(comment.materialVersionId()).isEqualTo(v1);
   assertThat(comment.offsetMs()).isEqualTo(8000L);
 
-  // Failed new version must not steal default
+  // Failed new version via real tick (missing object) must not steal default
   var failed=materials.uploadVersion(idA,postId,"bad".getBytes(StandardCharsets.UTF_8),"video/mp4");
-  db.update("UPDATE material_versions SET attempt=5,state='PROCESSING',lease_token=1,lease_until=TIMESTAMPADD(SECOND,-1,CURRENT_TIMESTAMP(6)) WHERE id=?",failed.versionId());
-  // force fail path via tick after claiming - mark raw missing by completing fail through service fail API path
-  db.update("UPDATE material_versions SET state='FAILED',last_error='forced' WHERE id=?",failed.versionId());
+  db.update("UPDATE material_versions SET raw_object_key='material/missing/raw',attempt=4 WHERE id=?",failed.versionId());
+  for(int i=0;i<8;i++)materials.tick();
+  assertThat(db.queryForObject("SELECT state FROM material_versions WHERE id=?",String.class,failed.versionId())).isEqualTo("FAILED");
   assertThat(db.queryForObject("SELECT default_version_id FROM material_profiles WHERE post_id=?",Long.class,postId)).isEqualTo(v1);
+
+  assertThatThrownBy(()->interactions.comment(idB,postId,"too late","mat-bad-off","drone",null,v1,9_999_999L))
+   .isInstanceOf(FeedFailure.class);
 
   var v2c=materials.uploadVersion(idA,postId,"video-v2".getBytes(StandardCharsets.UTF_8),"video/mp4");
   for(int i=0;i<8;i++)materials.tick();

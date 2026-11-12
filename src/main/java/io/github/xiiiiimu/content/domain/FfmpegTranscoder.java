@@ -32,7 +32,8 @@ public final class FfmpegTranscoder {
    dir=Files.createTempDirectory("content-ffmpeg-");
    Path in=dir.resolve("input.bin");Path out=dir.resolve("out.mp4");Path cover=dir.resolve("cover.jpg");
    Files.write(in,raw);
-   run(dir,"-y","-i",in.getFileName().toString(),"-t","3","-c:v","libx264","-pix_fmt","yuv420p","-c:a","aac","-movflags","+faststart",out.getFileName().toString());
+   // Keep source duration (material timestamp comments need real offsets; short fixtures stay short).
+   run(dir,"-y","-i",in.getFileName().toString(),"-c:v","libx264","-pix_fmt","yuv420p","-c:a","aac","-movflags","+faststart",out.getFileName().toString());
    run(dir,"-y","-i",out.getFileName().toString(),"-frames:v","1","-q:v","2",cover.getFileName().toString());
    String json=probe(dir,out.getFileName().toString());
    byte[] video=Files.readAllBytes(out);byte[] thumb=Files.readAllBytes(cover);

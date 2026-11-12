@@ -109,10 +109,13 @@ public final class MaterialService {
  }
 
  public MaterialDetail detail(long viewer,long postId){
-  visibility.read(viewer,postId).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+  var post=posts.post(postId);if(post==null)throw new FeedFailure(404,"POST_NOT_FOUND");
+  boolean author=post.authorId()==viewer;
+  var view=visibility.read(viewer,postId);
+  // Authors may inspect DRAFT/PROCESSING material versions before first publish.
+  if(view.isEmpty() && !(author && Set.of("DRAFT","PROCESSING").contains(post.status())))
+   throw new FeedFailure(404,"POST_NOT_VISIBLE");
   var profile=db.profile(postId);if(profile==null)throw new FeedFailure(404,"NOT_MATERIAL");
-  var post=posts.post(postId);
-  boolean author=post!=null && post.authorId()==viewer;
   if("AUTHOR_ONLY".equals(profile.shareMode()) && !author)throw new FeedFailure(404,"POST_NOT_VISIBLE");
   Long def=profile.defaultVersionId();
   List<VersionView> versions=db.versions(postId).stream()
