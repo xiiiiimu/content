@@ -52,7 +52,12 @@ public class FeedConfiguration {
  @Bean FeedTrimmer feedTrimmer(FeedMapper db,FeedRedis redis,@Value("${content.feed.window-millis:2592000000}")long window){return new FeedTrimmer(db,redis,window);}
  @Bean TrendGuardService trendGuardService(TrendGuardMapper risks,TransactionTemplate tx){return new TrendGuardService(risks,tx);}
  @Bean TrendingService trendingService(InteractionMapper interactions,TransactionTemplate tx,FeedRedis redis,VisibilityService visibility,TrendGuardService risks,@Value("${content.trendguard.spike-threshold:3}")int spikeThreshold){return new TrendingService(interactions,tx,redis,visibility,risks,spikeThreshold);}
- @Bean InteractionService interactionService(VisibilityService visibility,InteractionMapper interactions,TransactionTemplate tx,TrendingService trending,RelationshipService relationships,org.springframework.beans.factory.ObjectProvider<MaterialService> materials){return new InteractionService(visibility,interactions,tx,trending,relationships,materials.getIfAvailable());}
+ @Bean InteractionService interactionService(VisibilityService visibility,InteractionMapper interactions,TransactionTemplate tx,TrendingService trending,RelationshipService relationships,org.springframework.beans.factory.ObjectProvider<MaterialService> materials,org.springframework.beans.factory.ObjectProvider<AssistantService> assistant){
+  return new InteractionService(visibility,interactions,tx,trending,relationships,materials.getIfAvailable(),enq->{
+   var a=assistant.getIfAvailable();if(a==null)return null;
+   return a.enqueueFromComment(enq.postId(),enq.commentId(),enq.actorUserId(),enq.parentCommentId(),enq.body());
+  });
+ }
  @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
  ObjectStore objectStore(@Value("${content.media.s3-endpoint}")String endpoint,@Value("${content.media.access-key:content}")String access,@Value("${content.media.secret-key:content-secret-key-32-bytes-minimum}")String secret){return new HttpS3ObjectStore(endpoint,access,secret);}
  @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
@@ -60,7 +65,34 @@ public class FeedConfiguration {
  @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
  MaterialGrants materialGrants(@Value("${content.feed.identity-key}")String key){return new MaterialGrants(key);}
  @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
- MaterialService materialService(FeedMapper posts,PostAuthoringMapper authoring,UserMapper users,MaterialMapper materials,TransactionTemplate tx,ObjectStore store,VisibilityService visibility,@Value("${content.media.bucket:content-media}")String bucket,@Value("${content.media.ffmpeg-image:}")String ffmpeg,MaterialGrants grants,PipelineObserver observer){return new MaterialService(posts,authoring,users,materials,tx,store,visibility,bucket,ffmpeg,grants,observer);}
- @Bean(name="mediaRunner") @ConditionalOnProperty(name="content.media.enabled",havingValue="true") Runnable mediaRunner(MediaService media,MaterialService materials){return ()->{media.tick();materials.tick();};}
+ FeedbackWatchService feedbackWatchService(AssistantMapper assistant,InteractionMapper comments,MaterialMapper materials,FeedMapper posts,NotificationMapper notifications,VisibilityService visibility,TransactionTemplate tx){
+  return new FeedbackWatchService(assistant,comments,materials,posts,notifications,visibility,tx);
+ }
+ @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
+ EligibilityRegistry eligibilityRegistry(InteractionMapper interactions,GiveawayMapper giveaways,FeedMapper posts,ObjectMapper json){
+  return new EligibilityRegistry(interactions,giveaways,posts,json);
+ }
+ @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
+ GiveawayService giveawayService(GiveawayMapper giveaways,InteractionMapper comments,FeedMapper posts,MaterialMapper materials,NotificationMapper notifications,UserMapper users,EligibilityRegistry eligibility,VisibilityService visibility,TransactionTemplate tx,ObjectMapper json){
+  return new GiveawayService(giveaways,comments,posts,materials,notifications,users,eligibility,visibility,tx,json);
+ }
+ @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
+ AssistantParser assistantParser(@Value("${content.assistant.python-url:}")String url,@Value("${content.assistant.internal-token:}")String token,ObjectMapper json){
+  if(url==null || url.isBlank())return new StubAssistantParser();
+  return new HttpAssistantParser(url,token,json);
+ }
+ @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
+ AssistantService assistantService(AssistantMapper assistant,InteractionMapper comments,FeedMapper posts,UserMapper users,MaterialMapper materials,MaterialService materialService,VisibilityService visibility,TransactionTemplate tx,RelationshipService events,AssistantParser parser,FeedbackWatchService feedback,GiveawayService giveaways,ObjectMapper json){
+  return new AssistantService(assistant,comments,posts,users,materials,materialService,visibility,tx,events,parser,feedback,giveaways,json);
+ }
+ @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
+ MaterialService materialService(FeedMapper posts,PostAuthoringMapper authoring,UserMapper users,MaterialMapper materials,TransactionTemplate tx,ObjectStore store,VisibilityService visibility,@Value("${content.media.bucket:content-media}")String bucket,@Value("${content.media.ffmpeg-image:}")String ffmpeg,MaterialGrants grants,PipelineObserver observer,org.springframework.beans.factory.ObjectProvider<FeedbackWatchService> feedback,org.springframework.beans.factory.ObjectProvider<GiveawayService> giveaways){
+  return new MaterialService(posts,authoring,users,materials,tx,store,visibility,bucket,ffmpeg,grants,observer,
+   id->{var f=feedback.getIfAvailable();if(f!=null)f.onVersionReady(id);},
+   q->{var g=giveaways.getIfAvailable();return g!=null && g.hasEntitlement(q[0],q[1],q[2]);});
+ }
+ @Bean(name="mediaRunner") @ConditionalOnProperty(name="content.media.enabled",havingValue="true") Runnable mediaRunner(MediaService media,MaterialService materials,org.springframework.beans.factory.ObjectProvider<AssistantService> assistant,org.springframework.beans.factory.ObjectProvider<GiveawayService> giveaways){
+  return ()->{media.tick();materials.tick();var a=assistant.getIfAvailable();if(a!=null)a.tick();var g=giveaways.getIfAvailable();if(g!=null)g.tick();};
+ }
  @Bean PipelineReconcile pipelineReconcile(org.springframework.jdbc.core.JdbcTemplate jdbc,DistributionInbox inbox,InboxMapper inboxMapper,TransactionTemplate tx,ObjectMapper json,PipelineObserver observer){return new PipelineReconcile(jdbc,inbox,inboxMapper,tx,json,observer);}
 }

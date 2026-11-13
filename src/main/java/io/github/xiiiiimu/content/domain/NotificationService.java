@@ -8,8 +8,8 @@ import java.util.List;
 
 /** In-app notifications; created from CommentCreated outbox consumption; recipient-only access. */
 public final class NotificationService {
- public record Item(long id,String kind,long actorUserId,long postId,long commentId,Long parentCommentId,long createdAtMs,Long readAtMs) {}
- public record Target(long postId,long commentId,Long parentCommentId,VisibilityService.View post) {}
+ public record Item(long id,String kind,long actorUserId,long postId,long commentId,Long parentCommentId,Long refVersionId,long createdAtMs,Long readAtMs) {}
+ public record Target(long postId,long commentId,Long parentCommentId,Long refVersionId,VisibilityService.View post) {}
  private final NotificationMapper db;private final InteractionMapper comments;private final VisibilityService visibility;private final TransactionTemplate tx;
  public NotificationService(NotificationMapper db,InteractionMapper comments,VisibilityService visibility,TransactionTemplate tx){
   this.db=db;this.comments=comments;this.visibility=visibility;this.tx=tx;
@@ -48,10 +48,10 @@ public final class NotificationService {
   // Comment may still exist; absence does not leak body.
   var comment=comments.commentById(row.commentId());
   if(comment==null || comment.postId()!=row.postId())throw new FeedFailure(404,"COMMENT_NOT_FOUND");
-  return new Target(row.postId(),row.commentId(),row.parentCommentId(),view);
+  return new Target(row.postId(),row.commentId(),row.parentCommentId(),row.refVersionId(),view);
  }
  private Item item(NotificationMapper.Row r){
-  return new Item(r.id(),r.kind(),r.actorUserId(),r.postId(),r.commentId(),r.parentCommentId(),r.createdAtMs(),r.readAtMs());
+  return new Item(r.id(),r.kind(),r.actorUserId(),r.postId(),r.commentId(),r.parentCommentId(),r.refVersionId(),r.createdAtMs(),r.readAtMs());
  }
  private static long req(JsonNode body,String name){
   var v=body.get(name);if(v==null || !v.isIntegralNumber() || v.asLong()<=0)throw new FeedFailure(409,"INVALID_EVENT");

@@ -31,3 +31,6 @@ content:
     access-key: ${CONTENT_S3_ACCESS_KEY:content}
     secret-key: ${CONTENT_S3_SECRET_KEY:content-secret-key-32-bytes-minimum}
     ffmpeg-image: ${CONTENT_FFMPEG_IMAGE:}
+  assistant:
+    python-url: ${CONTENT_ASSISTANT_PYTHON_URL:}
+    internal-token: ${CONTENT_ASSISTANT_INTERNAL_TOKEN:}

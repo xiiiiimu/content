@@ -15,6 +15,9 @@ const preview = ref<MaterialSigned | null>(null)
 const selectedVersionId = ref<number | null>(null)
 const offsetMs = ref(8000)
 const commentBody = ref('')
+const assistantBody = ref('@助手 ')
+const feedbackCommentId = ref<number | null>(null)
+const subscribeMsg = ref('')
 const password = ref('')
 const grant = ref('')
 const downloadUrl = ref('')
@@ -156,6 +159,56 @@ async function doDislike() {
   finally { busy.value = false }
 }
 
+async function doAssistantComment() {
+  if (!assistantBody.value || busy.value) return
+  busy.value = true
+  try {
+    await api.comment(postId.value, assistantBody.value, `assistant-${Date.now()}`, undefined, {
+      parentId: feedbackCommentId.value ?? undefined,
+    })
+    assistantBody.value = '@助手 '
+    stats.value = await api.stats(postId.value)
+  }
+  catch (e) {
+    errorCode.value = e instanceof ContentApiError ? e.code : 'ASSISTANT_COMMENT_FAILED'
+  }
+  finally { busy.value = false }
+}
+
+async function doSubscribe() {
+  if (!feedbackCommentId.value || busy.value) return
+  busy.value = true
+  try {
+    const r = await api.subscribeFeedback(postId.value, feedbackCommentId.value)
+    subscribeMsg.value = r.message
+  }
+  catch (e) {
+    errorCode.value = e instanceof ContentApiError ? e.code : 'SUBSCRIBE_FAILED'
+  }
+  finally { busy.value = false }
+}
+
+async function doCancelSubscribe() {
+  if (!feedbackCommentId.value || busy.value) return
+  busy.value = true
+  try {
+    await api.cancelFeedbackSubscribe(postId.value, feedbackCommentId.value)
+    subscribeMsg.value = '已取消订阅'
+  }
+  catch (e) {
+    errorCode.value = e instanceof ContentApiError ? e.code : 'UNSUBSCRIBE_FAILED'
+  }
+  finally { busy.value = false }
+}
+
+async function doFavorite() {
+  if (busy.value) return
+  busy.value = true
+  try { await api.favorite(postId.value) }
+  catch (e) { errorCode.value = e instanceof ContentApiError ? e.code : 'FAVORITE_FAILED' }
+  finally { busy.value = false }
+}
+
 onMounted(() => load())
 watch(postId, () => load())
 </script>
@@ -210,6 +263,22 @@ watch(postId, () => load())
         </div>
       </section>
 
+      <section class="mt6 border-t border-base pt4" data-testid="assistant-panel">
+        <h2 class="text-base font-medium">@助手</h2>
+        <p class="text-sm text-secondary mt1">评论会立即发布；助手异步回复找素材 / 蹲改进 / 抽奖。</p>
+        <div class="mt3 flex flex-wrap gap2 items-end">
+          <input v-model="assistantBody" class="input flex-1 min-w-48" placeholder="@助手 找竖屏允许商用的雨夜">
+          <label class="text-sm">
+            反馈评论 ID
+            <input v-model.number="feedbackCommentId" type="number" class="input w-28 ms2" placeholder="可选">
+          </label>
+          <button type="button" class="btn-primary" :disabled="busy" @click="doAssistantComment">发送</button>
+          <button type="button" class="btn-ghost" :disabled="busy || !feedbackCommentId" @click="doSubscribe">订阅改进</button>
+          <button type="button" class="btn-ghost" :disabled="busy || !feedbackCommentId" @click="doCancelSubscribe">取消订阅</button>
+        </div>
+        <p v-if="subscribeMsg" class="text-sm text-secondary mt2">{{ subscribeMsg }}</p>
+      </section>
+
       <div class="mt6 flex gap2 items-center border-t border-base pt4">
         <span class="text-sm text-secondary">
           赞 {{ stats?.likes ?? '—' }} · 踩 {{ stats?.dislikes ?? '—' }} · 评 {{ stats?.comments ?? '—' }}
@@ -217,6 +286,7 @@ watch(postId, () => load())
         <button type="button" class="btn-text" :disabled="busy" @click="doLike">点赞</button>
         <button type="button" class="btn-text" :disabled="busy" @click="doUnlike">取消赞</button>
         <button type="button" class="btn-text" :disabled="busy" @click="doDislike">反对</button>
+        <button type="button" class="btn-text" :disabled="busy" @click="doFavorite">收藏</button>
       </div>
       <p v-if="errorCode" class="text-sm text-red mt2">{{ errorCode }}</p>
     </article>

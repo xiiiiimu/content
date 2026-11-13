@@ -18,7 +18,7 @@ public final class DistributionInbox {
   try{
    JsonNode body=json.readTree(payload);id=number(body,"eventId");if(!Long.toString(id).equals(key))throw new FeedFailure(409,"EVENT_KEY_CONFLICT");
    String type=body.has("eventType")?body.path("eventType").asText():"PostPublished";
-   if(!type.equals(tag) || !Set.of("PostPublished","FollowChanged","FeedModeChanged","PostOfflined","CommentCreated").contains(type))throw new FeedFailure(409,"EVENT_TYPE_CONFLICT");
+   if(!type.equals(tag) || !Set.of("PostPublished","FollowChanged","FeedModeChanged","PostOfflined","CommentCreated","AssistantTaskCreated").contains(type))throw new FeedFailure(409,"EVENT_TYPE_CONFLICT");
    final long eventId=id;
    tx.executeWithoutResult(status->{
     RelationshipService.requireWritable(db.gate());
@@ -35,6 +35,8 @@ public final class DistributionInbox {
      inbox.createTask(eventId,number(body,"authorId"),0,"BACKFILL",null,number(body,"followerId"),number(body,"followEpoch"),payload);
     }else if(type.equals("CommentCreated") && decision.equals("NOTIFY_ACCEPTED")){
      notifications.acceptCommentEvent(eventId,body);
+    }else if(type.equals("AssistantTaskCreated") && decision.equals("ASSISTANT_ACCEPTED")){
+     // Durable receipt only; AssistantService.tick claims NEW tasks independently.
     }
     observer.beforeInboxCommit(eventId);
    });
@@ -65,6 +67,7 @@ public final class DistributionInbox {
   case "FeedModeChanged" -> "MODE_ACCEPTED";
   case "PostOfflined" -> "OFFLINE_ACCEPTED";
   case "CommentCreated" -> "NOTIFY_ACCEPTED";
+  case "AssistantTaskCreated" -> "ASSISTANT_ACCEPTED";
   default->throw new FeedFailure(409,"INVALID_EVENT");
  };}
  private static long number(JsonNode body,String name){long value=nonnegative(body,name);if(value==0)throw new FeedFailure(409,"INVALID_EVENT");return value;}

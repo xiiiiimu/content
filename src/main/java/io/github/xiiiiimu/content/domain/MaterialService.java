@@ -21,19 +21,33 @@ public final class MaterialService {
  private final FeedMapper posts;private final PostAuthoringMapper authoring;private final UserMapper users;private final MaterialMapper db;private final TransactionTemplate tx;
  private final ObjectStore store;private final VisibilityService visibility;private final String bucket;private final String ffmpegImage;
  private final MaterialGrants grants;private final BCryptPasswordEncoder passwords=new BCryptPasswordEncoder();
- private final PipelineObserver observer;
+ private final PipelineObserver observer;private final java.util.function.Consumer<Long> onVersionReady;
+ /** Optional giveaway/entitlement gate: args are viewer, postId, versionId. */
+ private final java.util.function.Predicate<long[]> entitlementAccess;
 
  public MaterialService(FeedMapper posts,PostAuthoringMapper authoring,UserMapper users,MaterialMapper db,TransactionTemplate tx,ObjectStore store,
                         VisibilityService visibility,String bucket,String ffmpegImage,MaterialGrants grants,PipelineObserver observer){
+  this(posts,authoring,users,db,tx,store,visibility,bucket,ffmpegImage,grants,observer,id->{},q->false);
+ }
+ public MaterialService(FeedMapper posts,PostAuthoringMapper authoring,UserMapper users,MaterialMapper db,TransactionTemplate tx,ObjectStore store,
+                        VisibilityService visibility,String bucket,String ffmpegImage,MaterialGrants grants,PipelineObserver observer,
+                        java.util.function.Consumer<Long> onVersionReady,java.util.function.Predicate<long[]> entitlementAccess){
   this.posts=posts;this.authoring=authoring;this.users=users;this.db=db;this.tx=tx;this.store=store;this.visibility=visibility;
   this.bucket=bucket;this.ffmpegImage=ffmpegImage;this.grants=grants;this.observer=observer;
+  this.onVersionReady=onVersionReady==null?id->{}:onVersionReady;
+  this.entitlementAccess=entitlementAccess==null?q->false:entitlementAccess;
  }
 
  public Created createDraft(long author,String title,String description,List<String> tags,String shareMode,String password,
                             boolean licenseDownload,boolean licenseCommercial,byte[] bytes,String contentType){
+  return createDraft(author,title,description,tags,shareMode,password,licenseDownload,licenseCommercial,bytes,contentType,"UNKNOWN");
+ }
+ public Created createDraft(long author,String title,String description,List<String> tags,String shareMode,String password,
+                            boolean licenseDownload,boolean licenseCommercial,byte[] bytes,String contentType,String aspectRatio){
   validateMeta(title,description,tags,shareMode,password);
   if(bytes==null || bytes.length==0 || bytes.length>8_000_000)throw new FeedFailure(400,"INVALID_MEDIA");
   String mode=shareMode==null?"PUBLIC_PREVIEW":shareMode;
+  String aspect=normalizeAspect(aspectRatio);
   String hash="PASSWORD_ORIGINAL".equals(mode)?passwords.encode(password):null;
   return tx.execute(status->{
    RelationshipService.requireWritable(posts.gate());
@@ -41,7 +55,7 @@ public final class MaterialService {
    if(authoring.insertDraft(author,bodyOf(title,description))!=1)throw new IllegalStateException("draft");
    long postId=authoring.lastId();
    if(db.markMaterial(postId,author)!=1)throw new IllegalStateException("kind");
-   db.insertProfile(postId,title,description==null?"":description,mode,hash,licenseDownload,licenseCommercial,System.currentTimeMillis());
+   db.insertProfile(postId,title,description==null?"":description,mode,hash,licenseDownload,licenseCommercial,aspect,System.currentTimeMillis());
    replaceTags(postId,tags);
    return attachVersion(author,postId,bytes,contentType);
   });
@@ -103,11 +117,13 @@ public final class MaterialService {
     duration=8000L;
    }
    Long finalDuration=duration;String finalMeta=meta;
+   long readyId=claimed.id();
    tx.executeWithoutResult(s->{
     if(db.complete(claimed.id(),token,preview,cover,finalDuration,finalMeta)!=1)throw new FeedFailure(409,"MEDIA_FENCED");
     // Monotonic default: higher revision only; late READY of an older revision cannot regress.
     db.setDefaultIfNewer(claimed.postId(),claimed.id(),System.currentTimeMillis());
    });
+   onVersionReady.accept(readyId);
   }catch(FeedFailure e){
    if("MEDIA_FENCED".equals(e.getMessage()))return; // lost lease/token; do not schedule retry as this claim
    String msg=e.getMessage()==null?"error":e.getMessage();
@@ -186,7 +202,7 @@ public final class MaterialService {
    }else hash=null;
    boolean dl=licenseDownload==null?profile.licenseDownload():licenseDownload;
    boolean com=licenseCommercial==null?profile.licenseCommercial():licenseCommercial;
-   db.updateProfile(postId,profile.title(),profile.description(),mode,hash,bump,dl,com,System.currentTimeMillis());
+   db.updateProfile(postId,profile.title(),profile.description(),mode,hash,bump,dl,com,null,System.currentTimeMillis());
    return detail(author,postId);
   });
  }
@@ -210,12 +226,13 @@ public final class MaterialService {
   var view=visibility.read(viewer,postId).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   var profile=db.profile(postId);if(profile==null)throw new FeedFailure(404,"NOT_MATERIAL");
   boolean author=view.authorId()==viewer;
-  if(!author){
+  var version=resolveVersion(postId,versionId,profile);
+  boolean entitled=!author && entitlementAccess.test(new long[]{viewer,postId,version.id()});
+  if(!author && !entitled){
    if(!"PASSWORD_ORIGINAL".equals(profile.shareMode()))throw new FeedFailure(403,"ORIGINAL_FORBIDDEN");
    grants.verify(grant,viewer,postId,profile.shareEpoch(),"ORIGINAL");
   }
-  if(!profile.licenseDownload() && !author)throw new FeedFailure(403,"DOWNLOAD_NOT_LICENSED");
-  var version=resolveVersion(postId,versionId,profile);
+  if(!profile.licenseDownload() && !author && !entitled)throw new FeedFailure(403,"DOWNLOAD_NOT_LICENSED");
   if(!"READY".equals(version.state()) || version.rawObjectKey()==null)throw new FeedFailure(404,"MEDIA_NOT_READY");
   // Note: object-store signed URLs remain usable until TTL even after revoke; share_epoch invalidates new grants immediately.
   return new Signed(store.signGet(bucket,version.rawObjectKey(),ttlMillis),System.currentTimeMillis()+ttlMillis,"ORIGINAL");
@@ -254,6 +271,12 @@ public final class MaterialService {
   if(shareMode!=null && !Set.of("AUTHOR_ONLY","PUBLIC_PREVIEW","PASSWORD_ORIGINAL").contains(shareMode))throw new FeedFailure(400,"INVALID_REQUEST");
   if("PASSWORD_ORIGINAL".equals(shareMode) && (password==null || password.length()<4 || password.length()>72))throw new FeedFailure(400,"PASSWORD_REQUIRED");
   if(tags!=null && tags.size()>20)throw new FeedFailure(400,"INVALID_REQUEST");
+ }
+ private static String normalizeAspect(String aspect){
+  if(aspect==null || aspect.isBlank())return "UNKNOWN";
+  String a=aspect.trim().toUpperCase(Locale.ROOT);
+  if(!Set.of("PORTRAIT","LANDSCAPE","SQUARE","UNKNOWN").contains(a))throw new FeedFailure(400,"INVALID_ASPECT");
+  return a;
  }
 
  private static String normalizeTag(String t){

@@ -52,6 +52,7 @@ class MaterialFlowIT {
   r.add("content.media.bucket",()->"content-media");
   r.add("content.media.secret-key",()->"content-secret-key-32-bytes-minimum");
   r.add("content.media.ffmpeg-image",()->"");
+  r.add("content.media.scan-delay-millis",()->"3600000");
  }
  @Autowired MockMvc http;@Autowired JdbcTemplate db;@Autowired ObjectMapper json;
  @Autowired MaterialService materials;@Autowired PublishService publish;@Autowired InteractionService interactions;

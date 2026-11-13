@@ -11,8 +11,13 @@ public final class InteractionService {
  public record CommentResult(long commentId,long commentCount,boolean replay,Long parentId,Long materialVersionId,Long offsetMs,Long acceptedAtMs) {}
  private final VisibilityService visibility;private final InteractionMapper db;private final TransactionTemplate tx;private final TrendingService trending;private final RelationshipService events;
  private final MaterialService materials; // optional null when media disabled
+ private final java.util.function.Function<AssistantEnqueue,Long> assistantEnqueue; // optional
+ public record AssistantEnqueue(long postId,long commentId,long actorUserId,Long parentCommentId,String body) {}
  public InteractionService(VisibilityService visibility,InteractionMapper db,TransactionTemplate tx,TrendingService trending,RelationshipService events,MaterialService materials){
-  this.visibility=visibility;this.db=db;this.tx=tx;this.trending=trending;this.events=events;this.materials=materials;
+  this(visibility,db,tx,trending,events,materials,null);
+ }
+ public InteractionService(VisibilityService visibility,InteractionMapper db,TransactionTemplate tx,TrendingService trending,RelationshipService events,MaterialService materials,java.util.function.Function<AssistantEnqueue,Long> assistantEnqueue){
+  this.visibility=visibility;this.db=db;this.tx=tx;this.trending=trending;this.events=events;this.materials=materials;this.assistantEnqueue=assistantEnqueue;
  }
  public LikeResult like(long user,long post,String topic){
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
@@ -92,6 +97,8 @@ public final class InteractionService {
    if(parentId!=null){fields.put("parentCommentId",parentId);fields.put("parentAuthorId",parentAuthor);}
    if(version!=null){fields.put("materialVersionId",version);if(offset!=null)fields.put("offsetMs",offset);}
    events.emit("CommentCreated",post,fields);
+   // Ordinary comment commits first; assistant work is enqueued asynchronously in the same TX.
+   if(assistantEnqueue!=null)assistantEnqueue.apply(new AssistantEnqueue(post,created.id(),user,parentId,body));
    return toResult(created,false);
   });
  }
