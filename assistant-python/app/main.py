@@ -92,20 +92,15 @@ def parse(req: ParseRequest, x_content_internal_token: str | None = Header(defau
     if _contains(text, "抽", "开奖", "抽取", "抽奖"):
         if not req.actorIsAuthor:
             return ParseResult(intent="GIVEAWAY", clarify=Clarify(intent="GIVEAWAY", question="只有作者可以发起抽奖。"))
-        if _contains(text, "购买", "买过", "下单"):
-            return ParseResult(
-                intent="GIVEAWAY",
-                clarify=Clarify(intent="GIVEAWAY", question="历史购买工具尚未接通，不能静默忽略该条件。"),
-                unsupportedTools=["PURCHASE"],
-            )
         like = _contains(text, "点赞")
         comment = _contains(text, "评论")
         favorite = _contains(text, "收藏")
         follow = _contains(text, "关注")
-        if not (like or comment or favorite or follow):
+        purchase = _contains(text, "购买", "买过", "下单")
+        if not (like or comment or favorite or follow or purchase):
             return ParseResult(
                 intent="GIVEAWAY",
-                clarify=Clarify(intent="GIVEAWAY", question="请说明参与条件（点赞/评论/收藏/关注）以及截止时间和中奖人数。"),
+                clarify=Clarify(intent="GIVEAWAY", question="请说明参与条件（点赞/评论/收藏/关注/购买）以及截止时间和中奖人数。"),
             )
         mode = "ALL"
         k = 0
@@ -146,6 +141,8 @@ def parse(req: ParseRequest, x_content_internal_token: str | None = Header(defau
             children.append('{"type":"FAVORITE"}')
         if follow:
             children.append('{"type":"FOLLOW"}')
+        if purchase:
+            children.append('{"type":"PURCHASE"}')
         tree = f'{{"op":"{mode}"' + (f',"k":{k}' if mode == "AT_LEAST" else "") + ',"children":[' + ",".join(children) + "]}"
         summary = f"截止 {deadline}；资格在封池时核验；奖励最新 READY 默认版；人数 {winners}；许可 {license_}"
         return ParseResult(

@@ -20,6 +20,9 @@ public final class EligibilityRegistry {
  private final ObjectMapper json;
 
  public EligibilityRegistry(InteractionMapper interactions,GiveawayMapper giveaways,FeedMapper posts,ObjectMapper json){
+  this(interactions,giveaways,posts,json,null);
+ }
+ public EligibilityRegistry(InteractionMapper interactions,GiveawayMapper giveaways,FeedMapper posts,ObjectMapper json,SaleMapper sales){
   this.json=json;
   register(new Checker(){
    public String type(){return "LIKE";}
@@ -51,9 +54,15 @@ public final class EligibilityRegistry {
   });
   register(new Checker(){
    public String type(){return "PURCHASE";}
-   public boolean enabled(){return false;} // order source not wired
+   public boolean enabled(){return sales!=null;}
    public Set<Long> qualifyingAccounts(long postId,long authorId,Long windowStartMs,Long deadlineMs,JsonNode params){
-    throw new FeedFailure(409,"PURCHASE_TOOL_DISABLED");
+    if(sales==null)throw new FeedFailure(409,"PURCHASE_TOOL_DISABLED");
+    try{
+     Long scopePost=postId;
+     if(params!=null && params.has("postId") && params.get("postId").canConvertToLong())scopePost=params.get("postId").longValue();
+     return new LinkedHashSet<>(sales.purchaseEligible(authorId,scopePost,windowStartMs,deadlineMs));
+    }catch(FeedFailure e){throw e;}
+    catch(RuntimeException e){throw new FeedFailure(409,"PURCHASE_SOURCE_UNAVAILABLE");}
    }
   });
  }
