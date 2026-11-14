@@ -1,0 +1,35 @@
+{
+  "runId": "20261115042949",
+  "mode": "async-rocketmq-short",
+  "stock": 8,
+  "buyers": 24,
+  "duplicateExtraPerBuyer": 1,
+  "totalRequests": 48,
+  "elapsedSec": 5.584,
+  "requestQps": 8.6,
+  "settleTps": 1.43,
+  "acceptProcessingCount": 16,
+  "uniqueSuccessOrders": 8,
+  "businessRejects": 0,
+  "systemErrors": 32,
+  "e2eP50Ms": 2767,
+  "e2eP95Ms": 3258,
+  "e2eP99Ms": 3258,
+  "drainSec": 1.214,
+  "reconcile": {
+    "distinct_order_users": 8,
+    "terminal_requests": 8,
+    "active_purchase_entitlements": 8,
+    "sold_matches_paid": true,
+    "no_oversell": true,
+    "one_order_per_user": true,
+    "paid_orders": 8,
+    "sold_count": 8
+  },
+  "rejectReasons": [],
+  "boundaries": {
+    "payment": "simulated",
+    "refund": "simulated",
+    "ffmpegContainerCleanup": "unverified"
+  }
+}

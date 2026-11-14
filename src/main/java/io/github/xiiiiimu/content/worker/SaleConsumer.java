@@ -11,9 +11,13 @@ import java.util.UUID;
 /** Consumes PurchaseSettle; ACK only after SaleService.settle reaches a durable terminal state. */
 public final class SaleConsumer implements AutoCloseable {
  private final SaleService sales;private final String namesrv;private final String topic;private final int metadataTimeout;
+ private final long settleDelayMs;
  private DefaultMQPushConsumer consumer;
  public SaleConsumer(SaleService sales,String namesrv,String topic,int metadataTimeout){
-  this.sales=sales;this.namesrv=namesrv;this.topic=topic;this.metadataTimeout=metadataTimeout;
+  this(sales,namesrv,topic,metadataTimeout,0);
+ }
+ public SaleConsumer(SaleService sales,String namesrv,String topic,int metadataTimeout,long settleDelayMs){
+  this.sales=sales;this.namesrv=namesrv;this.topic=topic;this.metadataTimeout=metadataTimeout;this.settleDelayMs=Math.max(0,settleDelayMs);
  }
  public synchronized void start()throws Exception{
   if(consumer!=null)return;
@@ -26,6 +30,7 @@ public final class SaleConsumer implements AutoCloseable {
    c.subscribe(topic,"PurchaseSettle");
    c.registerMessageListener((MessageListenerConcurrently)(messages,context)->{
     try{
+     if(settleDelayMs>0)Thread.sleep(settleDelayMs);
      for(var m:messages){
       String body=new String(m.getBody(),StandardCharsets.UTF_8);
       String reservationId=m.getKeys();

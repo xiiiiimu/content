@@ -1,0 +1,33 @@
+{
+  "runId": "20261115042721",
+  "headNote": "real RocketMQ PurchaseSettle path",
+  "path1": {
+    "orderId": 2,
+    "e2eMs": 1437,
+    "terminal": "SUCCEEDED",
+    "accept": "PROCESSING"
+  },
+  "path2": {
+    "refundReason": "GIVEAWAY_AUTO",
+    "refundOnce": true,
+    "downloadOk": true,
+    "notifyOnce": true,
+    "purchaseEligKeepsAuto": true
+  },
+  "path3": {
+    "purchaseEligExcludes": true,
+    "forceRefund": "BUYER_FORCED"
+  },
+  "path4": {
+    "reservation": "92c14e6325ba4109b270328710860bb3",
+    "rejectReason": "BLACKLISTED",
+    "finalState": "REJECTED",
+    "soldCount": 0,
+    "paidOrders": 0
+  },
+  "boundaries": {
+    "refund": "simulated",
+    "payment": "simulated",
+    "ffmpegContainerCleanup": "unverified"
+  }
+}

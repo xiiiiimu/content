@@ -54,6 +54,15 @@ public class SaleController {
   sales.unblock(user(p),targetUserId);return Map.of("ok",true);
  }
 
+ /** Demo/fault hook: settle a PROCESSING reservation without waiting for MQ (enabled only when configured). */
+ @PostMapping("/purchase-requests/{reservationId}/settle")
+ @ConditionalOnProperty(name="content.sale.manual-settle",havingValue="true")
+ public SaleService.PurchaseView manualSettle(@PathVariable String reservationId,Principal p){
+  var view=sales.getRequest(user(p),reservationId);
+  sales.settle(reservationId);
+  return sales.getRequest(user(p),reservationId);
+ }
+
  private static String str(Object o){return o==null?null:String.valueOf(o);}
  private static long num(Object o,long d){if(o==null)return d;if(o instanceof Number n)return n.longValue();try{return Long.parseLong(String.valueOf(o));}catch(Exception e){return d;}}
 }

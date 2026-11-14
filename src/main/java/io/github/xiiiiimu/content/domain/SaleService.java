@@ -85,9 +85,14 @@ public final class SaleService {
    var again=db.byClient(userId,clientKey);if(again!=null)return toPurchase(again);
    throw e;
   }
-  if(syncSettle)settle(reservationId);
-  else enqueue(reservationId);
-  return toPurchase(db.request(reservationId));
+  if(syncSettle){
+   settle(reservationId);
+   return toPurchase(db.request(reservationId));
+  }
+  enqueue(reservationId);
+  // Async path: always surface PROCESSING on the accepting response; clients poll for terminal state.
+  var req=db.request(reservationId);
+  return new PurchaseView(req.reservationId(),"PROCESSING",req.rejectReason(),req.orderId(),req.campaignId(),req.postId());
  }
 
  private void enqueue(String reservationId){

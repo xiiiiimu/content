@@ -22,7 +22,7 @@ public class RelayConfiguration {
     @ConditionalOnProperty(name="content.relay.producer-enabled",havingValue="true",matchIfMissing=true)
     @Import(ProducerConfiguration.Scanning.class)
     static class ProducerConfiguration {
-        @Bean(initMethod="start",destroyMethod="shutdown")
+        @Bean(initMethod="start",destroyMethod="shutdown") @org.springframework.context.annotation.Primary
         DefaultMQProducer relayProducer(RelaySettings settings) {
             var producer=new DefaultMQProducer("content-outbox-relay");
             producer.setNamesrvAddr(settings.namesrv());producer.setVipChannelEnabled(false);producer.setInstanceName(UUID.randomUUID().toString());
@@ -30,7 +30,7 @@ public class RelayConfiguration {
             producer.setSendMsgTimeout(Math.toIntExact(settings.sendTimeoutMillis()));
             return producer;
         }
-        @Bean RelaySender relaySender(DefaultMQProducer producer,ObjectMapper json,RelaySettings settings){return new RocketMqRelaySender(producer,json,settings);}
+        @Bean RelaySender relaySender(@org.springframework.beans.factory.annotation.Qualifier("relayProducer") DefaultMQProducer producer,ObjectMapper json,RelaySettings settings){return new RocketMqRelaySender(producer,json,settings);}
         @Bean RelayRunner relayRunner(RelayStore store,RelaySender sender,RelayObserver observer,RelaySettings settings){return new OutboxRelay(store,sender,observer,settings);}
 
         @EnableScheduling
