@@ -58,9 +58,30 @@ public class SaleController {
  @PostMapping("/purchase-requests/{reservationId}/settle")
  @ConditionalOnProperty(name="content.sale.manual-settle",havingValue="true")
  public SaleService.PurchaseView manualSettle(@PathVariable String reservationId,Principal p){
-  var view=sales.getRequest(user(p),reservationId);
+  sales.getRequest(user(p),reservationId);
   sales.settle(reservationId);
   return sales.getRequest(user(p),reservationId);
+ }
+
+ @PostMapping("/sale-debug/hold-settle")
+ @ConditionalOnProperty(name="content.sale.fault-hooks",havingValue="true")
+ public Map<String,Object> holdSettle(@RequestBody Map<String,Object> body){
+  boolean arm=body.get("arm")==null || Boolean.parseBoolean(String.valueOf(body.get("arm")));
+  if(arm)sales.faults().armHold(); else sales.faults().releaseHold();
+  return Map.of("holdArmed",sales.faults().holdArmed());
+ }
+
+ @PostMapping("/sale-debug/fail-after-commit-once")
+ @ConditionalOnProperty(name="content.sale.fault-hooks",havingValue="true")
+ public Map<String,Object> failAfterCommitOnce(){
+  sales.faults().armFailAfterCommitOnce();
+  return Map.of("armed",true);
+ }
+
+ @GetMapping("/sale-debug/inflight")
+ @ConditionalOnProperty(name="content.sale.fault-hooks",havingValue="true")
+ public Map<String,Object> inflight(){
+  return Map.of("inFlight",sales.faults().inFlight(),"peakInFlight",sales.faults().peakInFlight());
  }
 
  private static String str(Object o){return o==null?null:String.valueOf(o);}

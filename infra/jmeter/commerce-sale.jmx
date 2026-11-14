@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="commerce-sale" enabled="true">
+      <stringProp name="TestPlan.comments">Parameterized material commerce load. Properties: apiBase threads rampSec durationSec scenario csvUsers campaignId postId timeoutMs startEpochMs loops</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="apiBase" elementType="Argument">
+            <stringProp name="Argument.name">apiBase</stringProp>
+            <stringProp name="Argument.value">${__P(apiBase,http://127.0.0.1:28080)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="campaignId" elementType="Argument">
+            <stringProp name="Argument.name">campaignId</stringProp>
+            <stringProp name="Argument.value">${__P(campaignId,0)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="postId" elementType="Argument">
+            <stringProp name="Argument.name">postId</stringProp>
+            <stringProp name="Argument.value">${__P(postId,0)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="scenario" elementType="Argument">
+            <stringProp name="Argument.name">scenario</stringProp>
+            <stringProp name="Argument.value">${__P(scenario,flash)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="timeoutMs" elementType="Argument">
+            <stringProp name="Argument.name">timeoutMs</stringProp>
+            <stringProp name="Argument.value">${__P(timeoutMs,10000)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="startEpochMs" elementType="Argument">
+            <stringProp name="Argument.name">startEpochMs</stringProp>
+            <stringProp name="Argument.value">${__P(startEpochMs,0)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="csvUsers" elementType="Argument">
+            <stringProp name="Argument.name">csvUsers</stringProp>
+            <stringProp name="Argument.value">${__P(csvUsers,target/jmeter-data/buyers.csv)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="commerce-threads" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">${__P(loops,1)}</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">${__P(threads,10)}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${__P(rampSec,1)}</stringProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">${__P(durationSec,3600)}</stringProp>
+        <stringProp name="ThreadGroup.delay">0</stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="buyers-csv" enabled="true">
+          <stringProp name="filename">${csvUsers}</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="variableNames">userId,token,clientKey</stringProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <stringProp name="delimiter">,</stringProp>
+          <boolProp name="quotedData">false</boolProp>
+          <boolProp name="recycle">true</boolProp>
+          <boolProp name="stopThread">false</boolProp>
+          <stringProp name="shareMode">shareMode.all</stringProp>
+        </CSVDataSet>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="wait-absolute-start" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">
+long start = Long.parseLong(vars.get("startEpochMs") ?: "0");
+if (start &gt; 0) {
+  long now = System.currentTimeMillis();
+  if (now &lt; start) {
+    Thread.sleep(start - now);
+  }
+}
+          </stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="auth-header" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Authorization</stringProp>
+              <stringProp name="Header.value">Bearer ${token}</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Content-Type</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="if-detail" enabled="true">
+          <stringProp name="IfController.condition">${__jexl3("${scenario}" == "detail")}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+        </IfController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET-campaign-detail" enabled="true">
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.path">${apiBase}/api/materials/${postId}/sale-campaigns/current</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true">
+              <collectionProp name="Arguments.arguments"/>
+            </elementProp>
+            <stringProp name="HTTPSampler.connect_timeout">${timeoutMs}</stringProp>
+            <stringProp name="HTTPSampler.response_timeout">${timeoutMs}</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+        </hashTree>
+
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="if-purchase" enabled="true">
+          <stringProp name="IfController.condition">${__jexl3("${scenario}" == "purchase" || "${scenario}" == "flash")}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+        </IfController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST-purchase" enabled="true">
+            <stringProp name="HTTPSampler.path">${apiBase}/api/sale-campaigns/${campaignId}/purchase</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{"clientKey":"${clientKey}"}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.connect_timeout">${timeoutMs}</stringProp>
+            <stringProp name="HTTPSampler.response_timeout">${timeoutMs}</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="extract-reservation" enabled="true">
+              <stringProp name="RegexExtractor.refname">reservationId</stringProp>
+              <stringProp name="RegexExtractor.regex">"reservationId"\s*:\s*"([^"]+)"</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default"></stringProp>
+              <boolProp name="RegexExtractor.default_empty_value">true</boolProp>
+              <stringProp name="RegexExtractor.match_number">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="if-poll" enabled="true">
+          <stringProp name="IfController.condition">${__jexl3("${scenario}" == "poll")}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+        </IfController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET-purchase-result" enabled="true">
+            <stringProp name="HTTPSampler.path">${apiBase}/api/purchase-requests/${__P(reservationId,none)}</stringProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <stringProp name="HTTPSampler.connect_timeout">${timeoutMs}</stringProp>
+            <stringProp name="HTTPSampler.response_timeout">${timeoutMs}</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+        </hashTree>
+
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="if-order" enabled="true">
+          <stringProp name="IfController.condition">${__jexl3("${scenario}" == "order")}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+        </IfController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET-order-me" enabled="true">
+            <stringProp name="HTTPSampler.path">${apiBase}/api/materials/${postId}/orders/me</stringProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <stringProp name="HTTPSampler.connect_timeout">${timeoutMs}</stringProp>
+            <stringProp name="HTTPSampler.response_timeout">${timeoutMs}</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+        </hashTree>
+
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="if-sign" enabled="true">
+          <stringProp name="IfController.condition">${__jexl3("${scenario}" == "sign")}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+        </IfController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST-original-sign" enabled="true">
+            <stringProp name="HTTPSampler.path">${apiBase}/api/materials/${postId}/original/sign</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{"ttlMillis":60000}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.connect_timeout">${timeoutMs}</stringProp>
+            <stringProp name="HTTPSampler.response_timeout">${timeoutMs}</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+        </hashTree>
+
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="if-mixed" enabled="true">
+          <stringProp name="IfController.condition">${__jexl3("${scenario}" == "mixed")}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+        </IfController>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="MIX-detail" enabled="true">
+            <stringProp name="HTTPSampler.path">${apiBase}/api/materials/${postId}/sale-campaigns/current</stringProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <stringProp name="HTTPSampler.connect_timeout">${timeoutMs}</stringProp>
+            <stringProp name="HTTPSampler.response_timeout">${timeoutMs}</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="MIX-purchase" enabled="true">
+            <stringProp name="HTTPSampler.path">${apiBase}/api/sale-campaigns/${campaignId}/purchase</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{"clientKey":"${clientKey}-mix-${__threadNum}"}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.connect_timeout">${timeoutMs}</stringProp>
+            <stringProp name="HTTPSampler.response_timeout">${timeoutMs}</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="mix-res" enabled="true">
+              <stringProp name="RegexExtractor.refname">reservationId</stringProp>
+              <stringProp name="RegexExtractor.regex">"reservationId"\s*:\s*"([^"]+)"</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default"></stringProp>
+              <boolProp name="RegexExtractor.default_empty_value">true</boolProp>
+              <stringProp name="RegexExtractor.match_number">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+          </hashTree>
+          <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="mix-poll-bound" enabled="true">
+            <stringProp name="WhileController.condition">${__jexl3("${reservationId}" != "" &amp;&amp; ${__groovy(vars.get("mixPoll")==null || (vars.get("mixPoll") as int) &lt; 8,)} )}</stringProp>
+          </WhileController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="mix-poll-counter" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">
+int n = vars.get("mixPoll") == null ? 0 : vars.get("mixPoll") as int
+vars.put("mixPoll", String.valueOf(n+1))
+SampleResult.setIgnore()
+              </stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="MIX-poll" enabled="true">
+              <stringProp name="HTTPSampler.path">${apiBase}/api/purchase-requests/${reservationId}</stringProp>
+              <stringProp name="HTTPSampler.method">GET</stringProp>
+              <stringProp name="HTTPSampler.connect_timeout">${timeoutMs}</stringProp>
+              <stringProp name="HTTPSampler.response_timeout">${timeoutMs}</stringProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="mix-state" enabled="true">
+                <stringProp name="RegexExtractor.refname">purchaseState</stringProp>
+                <stringProp name="RegexExtractor.regex">"state"\s*:\s*"([^"]+)"</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">PROCESSING</stringProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+              <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="stop-if-terminal" enabled="true">
+                <stringProp name="scriptLanguage">groovy</stringProp>
+                <stringProp name="cacheKey">true</stringProp>
+                <stringProp name="script">
+def st = vars.get("purchaseState")
+if (st == "SUCCEEDED" || st == "REJECTED") { vars.put("mixPoll", "99") }
+Thread.sleep(200)
+                </stringProp>
+              </JSR223PostProcessor>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+          <IfController guiclass="IfControllerPanel" testclass="IfController" testname="if-mix-order" enabled="true">
+            <stringProp name="IfController.condition">"${purchaseState}" == "SUCCEEDED"</stringProp>
+            <boolProp name="IfController.useExpression">true</boolProp>
+          </IfController>
+          <hashTree>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="MIX-order" enabled="true">
+              <stringProp name="HTTPSampler.path">${apiBase}/api/materials/${postId}/orders/me</stringProp>
+              <stringProp name="HTTPSampler.method">GET</stringProp>
+              <stringProp name="HTTPSampler.connect_timeout">${timeoutMs}</stringProp>
+              <stringProp name="HTTPSampler.response_timeout">${timeoutMs}</stringProp>
+            </HTTPSamplerProxy>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+
+        <!-- Lightweight listeners only; View Results Tree disabled for formal runs -->
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="summary-disabled-gui" enabled="false">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

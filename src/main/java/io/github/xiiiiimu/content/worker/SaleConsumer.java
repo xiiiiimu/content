@@ -38,6 +38,8 @@ public final class SaleConsumer implements AutoCloseable {
        var node=new ObjectMapper().readTree(body);reservationId=node.path("reservationId").asText();
       }
       sales.settle(reservationId);
+      // After durable commit: optional one-shot failure before ACK to force MQ redelivery.
+      sales.faults().maybeFailAfterCommit();
      }
      return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
     }catch(Exception e){

@@ -1,0 +1,27 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\band10k-purchase-purchase-t200-20261115061823\\results.jtl",
+  "samples": 200,
+  "spanSec": 0.022,
+  "requestQps": 9090.91,
+  "acceptQps": 0.0,
+  "businessRejects": 200,
+  "systemErrors": 0,
+  "ok": 0,
+  "p50Ms": 816,
+  "p95Ms": 910,
+  "p99Ms": 918,
+  "byLabel": [
+    {
+      "label": "POST-purchase",
+      "p95": 910,
+      "qps": 9090.91,
+      "n": 200
+    }
+  ],
+  "byClass": [
+    {
+      "cls": "BIZ:",
+      "count": 200
+    }
+  ]
+}

@@ -15,14 +15,20 @@ public final class SaleService {
  private final SaleMapper db;private final SaleRedis redis;private final MaterialMapper materials;private final FeedMapper posts;
  private final NotificationMapper notifications;private final VisibilityService visibility;private final TransactionTemplate tx;
  private final boolean syncSettle;
+ private final SaleFaultHooks faults;
  private volatile SaleMessageSender sender;
 
  public SaleService(SaleMapper db,SaleRedis redis,MaterialMapper materials,FeedMapper posts,NotificationMapper notifications,
                     VisibilityService visibility,TransactionTemplate tx,boolean syncSettle){
+  this(db,redis,materials,posts,notifications,visibility,tx,syncSettle,new SaleFaultHooks());
+ }
+ public SaleService(SaleMapper db,SaleRedis redis,MaterialMapper materials,FeedMapper posts,NotificationMapper notifications,
+                    VisibilityService visibility,TransactionTemplate tx,boolean syncSettle,SaleFaultHooks faults){
   this.db=db;this.redis=redis;this.materials=materials;this.posts=posts;this.notifications=notifications;
-  this.visibility=visibility;this.tx=tx;this.syncSettle=syncSettle;
+  this.visibility=visibility;this.tx=tx;this.syncSettle=syncSettle;this.faults=faults==null?new SaleFaultHooks():faults;
  }
  public void setSender(SaleMessageSender sender){this.sender=sender;}
+ public SaleFaultHooks faults(){return faults;}
 
  public CampaignView createCampaign(long merchantId,long postId,long priceCents,int stockCap,long startMs,long endMs){
   var post=posts.post(postId);if(post==null)throw new FeedFailure(404,"POST_NOT_FOUND");
@@ -137,6 +143,13 @@ public final class SaleService {
 
  /** Durable settle; idempotent on reservationId. */
  public void settle(String reservationId){
+  faults.awaitHoldIfArmed(120);
+  faults.enterInFlight();
+  try{settleBody(reservationId);}
+  finally{faults.leaveInFlight();}
+ }
+
+ private void settleBody(String reservationId){
   Boolean release=tx.execute(status->{
    var req=db.lockRequest(reservationId);if(req==null)return false;
    if(!"PROCESSING".equals(req.state())){db.insertReceipt(reservationId,req.state(),System.currentTimeMillis());return false;}

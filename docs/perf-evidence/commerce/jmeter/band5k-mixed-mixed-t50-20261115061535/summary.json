@@ -1,0 +1,43 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\band5k-mixed-mixed-t50-20261115061535\\results.jtl",
+  "samples": 125,
+  "spanSec": 1.983,
+  "requestQps": 63.04,
+  "acceptQps": 50.43,
+  "businessRejects": 25,
+  "systemErrors": 0,
+  "ok": 100,
+  "p50Ms": 505,
+  "p95Ms": 1183,
+  "p99Ms": 1266,
+  "byLabel": [
+    {
+      "n": 50,
+      "qps": 1162.79,
+      "label": "MIX-detail",
+      "p95": 1229
+    },
+    {
+      "n": 25,
+      "qps": 91.58,
+      "label": "MIX-poll",
+      "p95": 147
+    },
+    {
+      "n": 50,
+      "qps": 39.71,
+      "label": "MIX-purchase",
+      "p95": 1183
+    }
+  ],
+  "byClass": [
+    {
+      "count": 25,
+      "cls": "BIZ:"
+    },
+    {
+      "count": 100,
+      "cls": "OK"
+    }
+  ]
+}

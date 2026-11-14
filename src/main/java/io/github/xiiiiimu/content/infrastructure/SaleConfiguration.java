@@ -15,10 +15,12 @@ import java.util.UUID;
 public class SaleConfiguration {
  @Bean SaleRedis saleRedis(FeedRedis redis){return new SaleRedis(redis);}
 
+ @Bean SaleFaultHooks saleFaultHooks(){return new SaleFaultHooks();}
+
  @Bean SaleService saleService(SaleMapper sales,SaleRedis redis,MaterialMapper materials,FeedMapper posts,
                                NotificationMapper notifications,VisibilityService visibility,TransactionTemplate tx,
-                               @Value("${content.sale.sync-settle:false}") boolean syncSettle){
-  return new SaleService(sales,redis,materials,posts,notifications,visibility,tx,syncSettle);
+                               @Value("${content.sale.sync-settle:false}") boolean syncSettle,SaleFaultHooks faults){
+  return new SaleService(sales,redis,materials,posts,notifications,visibility,tx,syncSettle,faults);
  }
 
  @Bean @ConditionalOnProperty(name="content.sale.producer-enabled",havingValue="true")

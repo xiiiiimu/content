@@ -1,0 +1,31 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\band5k-sign-sign-t200-20261115061214\\results.jtl",
+  "samples": 200,
+  "spanSec": 0.314,
+  "requestQps": 636.94,
+  "acceptQps": 264.33,
+  "businessRejects": 117,
+  "systemErrors": 0,
+  "ok": 83,
+  "p50Ms": 3421,
+  "p95Ms": 4678,
+  "p99Ms": 4752,
+  "byLabel": [
+    {
+      "label": "POST-original-sign",
+      "n": 200,
+      "qps": 636.94,
+      "p95": 4678
+    }
+  ],
+  "byClass": [
+    {
+      "cls": "BIZ:",
+      "count": 117
+    },
+    {
+      "cls": "OK",
+      "count": 83
+    }
+  ]
+}

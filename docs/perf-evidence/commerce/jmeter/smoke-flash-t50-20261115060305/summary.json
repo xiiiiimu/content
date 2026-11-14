@@ -1,0 +1,31 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\smoke-flash-t50-20261115060305\\results.jtl",
+  "samples": 50,
+  "spanSec": 0.167,
+  "requestQps": 299.4,
+  "acceptQps": 149.7,
+  "businessRejects": 25,
+  "systemErrors": 0,
+  "ok": 25,
+  "p50Ms": 3213,
+  "p95Ms": 6101,
+  "p99Ms": 6180,
+  "byLabel": [
+    {
+      "label": "POST-purchase",
+      "p95": 6101,
+      "qps": 299.4,
+      "n": 50
+    }
+  ],
+  "byClass": [
+    {
+      "cls": "BIZ:",
+      "count": 25
+    },
+    {
+      "cls": "OK",
+      "count": 25
+    }
+  ]
+}

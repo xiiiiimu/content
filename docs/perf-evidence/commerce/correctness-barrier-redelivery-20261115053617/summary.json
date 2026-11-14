@@ -1,0 +1,25 @@
+{
+  "runId": "20261115053617",
+  "A_barrier_blacklist_resell": {
+    "ownerUserId": 65,
+    "sold": 1,
+    "ok": true,
+    "paid": 1,
+    "redisRemaining": 0,
+    "entitlements": 1,
+    "rejectReason": "BLACKLISTED"
+  },
+  "B_fail_after_commit_redelivery": {
+    "receipts": 1,
+    "reservationId": "94b5b105c64348ab8074266a5a101ec4",
+    "paid": 1,
+    "ok": true,
+    "entitlements": 1,
+    "sold": 1
+  },
+  "boundaries": {
+    "payment": "simulated",
+    "refund": "simulated",
+    "ffmpegContainerCleanup": "unverified"
+  }
+}

@@ -22,3 +22,5 @@ docker-compose.override.yml
 infra/docker/data/
 /m2/
 /broker-diagnostic-logs/
+/tools/
+/content/

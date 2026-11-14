@@ -113,14 +113,25 @@ $jobs | ForEach-Object -Parallel {
       $p = $q.Content | ConvertFrom-Json
     }
     $ms = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds() - $t0
-    $line = (@{ userId=$job.session.userId; clientKey=$job.clientKey; accept=$p.state; reject=$p.rejectReason; reservationId=$p.reservationId; ms=$ms } | ConvertTo-Json -Compress)
+    $line = (@{ userId=$job.session.userId; clientKey=$job.clientKey; http=200; accept=$p.state; reject=$p.rejectReason; reservationId=$p.reservationId; ms=$ms; class=$(if($p.state -eq 'SUCCEEDED'){'SUCCEEDED'}elseif($p.state -eq 'REJECTED'){"BIZ:$($p.rejectReason)"}else{"UNKNOWN:$($p.state)"}) } | ConvertTo-Json -Compress)
     Add-Content -Path $raw -Value $line
     ($using:e2eMs).Add($ms) | Out-Null
     if ($p.state -eq 'SUCCEEDED') { ($using:success).Add($job.session.userId) | Out-Null }
     elseif ($p.state -eq 'REJECTED') { ($using:bizReject).Add("$($p.rejectReason)") | Out-Null }
     else { ($using:sysErr).Add("$($p.state)") | Out-Null }
   } catch {
-    ($using:sysErr).Add("$_") | Out-Null
+    $http = 0; $biz = $null; $c = $null
+    try { $http = [int]$_.Exception.Response.StatusCode } catch {}
+    try { if ($_.ErrorDetails -and $_.ErrorDetails.Message) { $c = $_.ErrorDetails.Message; $j = $c | ConvertFrom-Json; $biz = [string]$j.code } } catch {}
+    $cls = if ("$_" -match 'timed out|Timeout') { 'TIMEOUT' }
+      elseif ("$_" -match 'actively refused|No connection|HttpRequestException') { 'CONNECT_FAIL' }
+      elseif ($http -ge 500) { 'HTTP_5XX' }
+      elseif ($http -ge 400) { "BIZ_HTTP:$biz" }
+      else { 'UNKNOWN' }
+    $line = (@{ userId=$job.session.userId; clientKey=$job.clientKey; http=$http; code=$biz; class=$cls; err="$c"; ms=([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()-$t0) } | ConvertTo-Json -Compress)
+    Add-Content -Path $raw -Value $line
+    if ($cls -like 'BIZ*') { ($using:bizReject).Add($(if($biz){$biz}else{"$http"})) | Out-Null }
+    else { ($using:sysErr).Add($cls) | Out-Null }
   }
 } -ThrottleLimit 16
 $sw.Stop()
