@@ -9,8 +9,14 @@ import java.util.*;
 
 public final class DistributionInbox {
  private final InboxMapper inbox;private final FeedMapper db;private final TransactionTemplate tx;private final ObjectMapper json;private final PipelineObserver observer;private final NotificationService notifications;
+ /** Optional kick after AssistantTaskCreated is durably accepted (Outbox→MQ→Inbox → claim/process). */
+ private final Runnable afterAssistantAccepted;
  public DistributionInbox(InboxMapper inbox,FeedMapper db,TransactionTemplate tx,ObjectMapper json,PipelineObserver observer,NotificationService notifications){
+  this(inbox,db,tx,json,observer,notifications,null);
+ }
+ public DistributionInbox(InboxMapper inbox,FeedMapper db,TransactionTemplate tx,ObjectMapper json,PipelineObserver observer,NotificationService notifications,Runnable afterAssistantAccepted){
   this.inbox=inbox;this.db=db;this.tx=tx;this.json=json.copy().enable(com.fasterxml.jackson.core.JsonParser.Feature.STRICT_DUPLICATE_DETECTION);this.observer=observer;this.notifications=notifications;
+  this.afterAssistantAccepted=afterAssistantAccepted;
  }
  public void accept(String payload,String key,String tag){
   if(payload==null || payload.getBytes(StandardCharsets.UTF_8).length>65536)throw new FeedFailure(409,"INVALID_EVENT");
@@ -18,8 +24,9 @@ public final class DistributionInbox {
   try{
    JsonNode body=json.readTree(payload);id=number(body,"eventId");if(!Long.toString(id).equals(key))throw new FeedFailure(409,"EVENT_KEY_CONFLICT");
    String type=body.has("eventType")?body.path("eventType").asText():"PostPublished";
-   if(!type.equals(tag) || !Set.of("PostPublished","FollowChanged","FeedModeChanged","PostOfflined","CommentCreated").contains(type))throw new FeedFailure(409,"EVENT_TYPE_CONFLICT");
+   if(!type.equals(tag) || !Set.of("PostPublished","FollowChanged","FeedModeChanged","PostOfflined","CommentCreated","AssistantTaskCreated").contains(type))throw new FeedFailure(409,"EVENT_TYPE_CONFLICT");
    final long eventId=id;
+   final boolean[] kickAssistant={false};
    tx.executeWithoutResult(status->{
     RelationshipService.requireWritable(db.gate());
     var stored=inbox.event(eventId);
@@ -35,11 +42,18 @@ public final class DistributionInbox {
      inbox.createTask(eventId,number(body,"authorId"),0,"BACKFILL",null,number(body,"followerId"),number(body,"followEpoch"),payload);
     }else if(type.equals("CommentCreated") && decision.equals("NOTIFY_ACCEPTED")){
      notifications.acceptCommentEvent(eventId,body);
+    }else if(type.equals("AssistantTaskCreated") && decision.equals("ASSISTANT_ACCEPTED")){
+     // Durable receipt first; after commit we kick AssistantService.tick to claim the NEW task.
+     kickAssistant[0]=true;
     }
     observer.beforeInboxCommit(eventId);
    });
    // The listener only ACKs after this method returns, after the transaction commit.
    observer.afterInboxCommit(eventId);
+   if(kickAssistant[0] && afterAssistantAccepted!=null){
+    try{afterAssistantAccepted.run();}
+    catch(Exception e){org.slf4j.LoggerFactory.getLogger(DistributionInbox.class).warn("Assistant kick after inbox accept failed eventId={}",eventId,e);}
+   }
   }catch(Exception failure){
    if(failure instanceof org.springframework.dao.DataIntegrityViolationException)failure=new FeedFailure(409,"TASK_PERSISTENCE_CONFLICT");
    if(failure instanceof FeedFailure f && f.status==409){
@@ -65,6 +79,7 @@ public final class DistributionInbox {
   case "FeedModeChanged" -> "MODE_ACCEPTED";
   case "PostOfflined" -> "OFFLINE_ACCEPTED";
   case "CommentCreated" -> "NOTIFY_ACCEPTED";
+  case "AssistantTaskCreated" -> "ASSISTANT_ACCEPTED";
   default->throw new FeedFailure(409,"INVALID_EVENT");
  };}
  private static long number(JsonNode body,String name){long value=nonnegative(body,name);if(value==0)throw new FeedFailure(409,"INVALID_EVENT");return value;}

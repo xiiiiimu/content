@@ -9,10 +9,16 @@ public final class InteractionService {
  public record DislikeResult(boolean disliked,long dislikeCount) {}
  public record ReportResult(long reportId,long reportCount) {}
  public record CommentResult(long commentId,long commentCount,boolean replay,Long parentId,Long materialVersionId,Long offsetMs,Long acceptedAtMs) {}
+ public record CommentView(long commentId,long userId,Long parentId,Long materialVersionId,Long offsetMs,Long acceptedAtMs,String body,long createdAtMs) {}
  private final VisibilityService visibility;private final InteractionMapper db;private final TransactionTemplate tx;private final TrendingService trending;private final RelationshipService events;
  private final MaterialService materials; // optional null when media disabled
+ private final java.util.function.Function<AssistantEnqueue,Long> assistantEnqueue; // optional
+ public record AssistantEnqueue(long postId,long commentId,long actorUserId,Long parentCommentId,String body) {}
  public InteractionService(VisibilityService visibility,InteractionMapper db,TransactionTemplate tx,TrendingService trending,RelationshipService events,MaterialService materials){
-  this.visibility=visibility;this.db=db;this.tx=tx;this.trending=trending;this.events=events;this.materials=materials;
+  this(visibility,db,tx,trending,events,materials,null);
+ }
+ public InteractionService(VisibilityService visibility,InteractionMapper db,TransactionTemplate tx,TrendingService trending,RelationshipService events,MaterialService materials,java.util.function.Function<AssistantEnqueue,Long> assistantEnqueue){
+  this.visibility=visibility;this.db=db;this.tx=tx;this.trending=trending;this.events=events;this.materials=materials;this.assistantEnqueue=assistantEnqueue;
  }
  public LikeResult like(long user,long post,String topic){
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
@@ -92,6 +98,8 @@ public final class InteractionService {
    if(parentId!=null){fields.put("parentCommentId",parentId);fields.put("parentAuthorId",parentAuthor);}
    if(version!=null){fields.put("materialVersionId",version);if(offset!=null)fields.put("offsetMs",offset);}
    events.emit("CommentCreated",post,fields);
+   // Ordinary comment commits first; assistant work is enqueued asynchronously in the same TX.
+   if(assistantEnqueue!=null)assistantEnqueue.apply(new AssistantEnqueue(post,created.id(),user,parentId,body));
    return toResult(created,false);
   });
  }
@@ -107,6 +115,14 @@ public final class InteractionService {
  }
  public InteractionMapper.Stats stats(long post){
   var s=db.stats(post);return s==null?new InteractionMapper.Stats(post,0,0,0,0):s;
+ }
+ /** Visible comments for a post the viewer can read (oldest first, capped). */
+ public List<CommentView> listComments(long viewer,long post,int limit){
+  visibility.read(viewer,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+  int n=limit<=0?50:Math.min(limit,200);
+  return db.commentsForPost(post,n).stream()
+   .map(c->new CommentView(c.id(),c.userId(),c.parentId(),c.materialVersionId(),c.offsetMs(),c.acceptedAtMs(),c.body(),c.createdAtMs()))
+   .toList();
  }
  public InteractionMapper.Stats reconcile(long post){
   long likes=db.likeCount(post),comments=db.commentCount(post),dislikes=db.dislikeCount(post),reports=db.reportCount(post);

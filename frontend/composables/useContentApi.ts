@@ -124,6 +124,57 @@ export function useContentApi() {
     acceptComment(postId: number, commentId: number) {
       return request<CommentResult>(`/api/posts/${postId}/comments/${commentId}/accept`, { method: 'POST' })
     },
+    favorite(postId: number) {
+      return request<{ favorited: boolean; favoriteCount: number }>(`/api/posts/${postId}/favorite`, { method: 'POST' })
+    },
+    unfavorite(postId: number) {
+      return request<{ favorited: boolean; favoriteCount: number }>(`/api/posts/${postId}/favorite`, { method: 'DELETE' })
+    },
+    subscribeFeedback(postId: number, commentId: number) {
+      return request<{ ok: boolean; message: string }>(`/api/materials/${postId}/feedback/${commentId}/subscribe`, { method: 'POST' })
+    },
+    cancelFeedbackSubscribe(postId: number, commentId: number) {
+      return request<{ ok: boolean }>(`/api/materials/${postId}/feedback/${commentId}/subscribe`, { method: 'DELETE' })
+    },
+    resolveFeedback(postId: number, commentId: number, versionId: number, offsetMs?: number) {
+      return request<{ ok: boolean }>(`/api/materials/${postId}/feedback/${commentId}/resolve`, {
+        method: 'POST',
+        body: JSON.stringify({ versionId, offsetMs }),
+      })
+    },
+    notifications(limit = 50) {
+      return request<Array<{ id: number; kind: string; postId: number; commentId: number; refVersionId?: number }>>(`/api/notifications?limit=${limit}`)
+    },
+    notificationTarget(id: number) {
+      return request<{ postId: number; commentId: number; refVersionId?: number }>(`/api/notifications/${id}/target`)
+    },
+    assistantTask(id: number) {
+      return request<{ taskId: number; state: string; intent?: string; replyCommentId?: number }>(`/api/assistant/tasks/${id}`)
+    },
+    comments(postId: number, limit = 50) {
+      return request<Array<{
+        commentId: number
+        userId: number
+        parentId?: number
+        body: string
+        createdAtMs: number
+        materialVersionId?: number
+        offsetMs?: number
+      }>>(`/api/posts/${postId}/comments?limit=${limit}`)
+    },
+    giveaways(postId: number) {
+      return request<Array<{
+        id: number
+        state: string
+        summaryText?: string
+        winnerAccountIds: number[]
+        candidateAccountIds: number[]
+      }>>(`/api/posts/${postId}/giveaways`)
+    },
+    entitlement(postId: number, versionId?: number) {
+      const q = versionId ? `?versionId=${versionId}` : ''
+      return request<{ entitled: boolean; versionId?: number; license?: string }>(`/api/posts/${postId}/entitlement${q}`)
+    },
     follow(authorId: number) {
       return request<FollowResult>(`/api/follows/${authorId}`, { method: 'PUT' })
     },

@@ -10,6 +10,13 @@ public interface InteractionMapper {
  @Insert("INSERT IGNORE INTO post_likes(post_id,user_id,created_at_ms) VALUES(#{post},#{user},#{at})") int like(@Param("post")long post,@Param("user")long user,@Param("at")long at);
  @Delete("DELETE FROM post_likes WHERE post_id=#{post} AND user_id=#{user}") int unlike(@Param("post")long post,@Param("user")long user);
  @Select("SELECT COUNT(*) FROM post_likes WHERE post_id=#{post}") long likeCount(long post);
+ @Select("SELECT user_id FROM post_likes WHERE post_id=#{post}") List<Long> likedUsers(long post);
+ @Select("""
+  SELECT DISTINCT user_id FROM post_comments WHERE post_id=#{post}
+   AND (#{start} IS NULL OR created_at_ms>=#{start})
+   AND (#{end} IS NULL OR created_at_ms<=#{end})
+  """)
+ List<Long> commentedUsers(@Param("post")long post,@Param("start")Long start,@Param("end")Long end);
  @Insert("INSERT IGNORE INTO post_dislikes(post_id,user_id,created_at_ms) VALUES(#{post},#{user},#{at})") int dislike(@Param("post")long post,@Param("user")long user,@Param("at")long at);
  @Delete("DELETE FROM post_dislikes WHERE post_id=#{post} AND user_id=#{user}") int undislike(@Param("post")long post,@Param("user")long user);
  @Select("SELECT COUNT(*) FROM post_dislikes WHERE post_id=#{post}") long dislikeCount(long post);
@@ -27,6 +34,8 @@ public interface InteractionMapper {
  Comment existingComment(@Param("user")long user,@Param("key")String key);
  @Select("SELECT "+COMMENT_COLS+" FROM post_comments WHERE id=#{id}")
  Comment commentById(long id);
+ @Select("SELECT "+COMMENT_COLS+" FROM post_comments WHERE post_id=#{post} ORDER BY id ASC LIMIT #{limit}")
+ List<Comment> commentsForPost(@Param("post")long post,@Param("limit")int limit);
  @Update("UPDATE post_comments SET accepted_at_ms=#{at} WHERE id=#{id} AND post_id=#{post} AND accepted_at_ms IS NULL")
  int accept(@Param("post")long post,@Param("id")long id,@Param("at")long at);
  @Select("SELECT COUNT(*) FROM post_comments WHERE post_id=#{post}") long commentCount(long post);

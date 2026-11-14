@@ -20,7 +20,7 @@ public final class PipelineConsumer implements AutoCloseable {
   var c=new DefaultMQPushConsumer("content-feed-v1");c.setNamesrvAddr(settings.namesrv());c.setInstanceName(UUID.randomUUID().toString());c.setVipChannelEnabled(false);
   c.setMqClientApiTimeout(metadataTimeout);c.setClientCallbackExecutorThreads(2);
   c.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);c.setConsumeThreadMin(2);c.setConsumeThreadMax(2);c.setConsumeMessageBatchMaxSize(1);c.setPullBatchSize(16);c.setPullThresholdForQueue(100);
-  c.subscribe(settings.topic(),"PostPublished || FollowChanged || FeedModeChanged || PostOfflined || CommentCreated");
+  c.subscribe(settings.topic(),"PostPublished || FollowChanged || FeedModeChanged || PostOfflined || CommentCreated || AssistantTaskCreated");
   c.registerMessageListener((MessageListenerConcurrently)(messages,context)->{
    try{for(var message:messages){if(!message.getKeys().equals(message.getUserProperty("eventId")))throw new IllegalArgumentException("MQ identity property mismatch");
     String payload=StandardCharsets.UTF_8.newDecoder().onMalformedInput(java.nio.charset.CodingErrorAction.REPORT).decode(java.nio.ByteBuffer.wrap(message.getBody())).toString();

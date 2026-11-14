@@ -6,33 +6,36 @@ import java.util.List;
 @Mapper
 public interface MaterialMapper {
  record Profile(long postId,String title,String description,String shareMode,String passwordHash,long shareEpoch,
-                boolean licenseDownload,boolean licenseCommercial,Long defaultVersionId,long createdAtMs,long updatedAtMs) {}
+                boolean licenseDownload,boolean licenseCommercial,String aspectRatio,Long defaultVersionId,long createdAtMs,long updatedAtMs) {}
  record Version(long id,long postId,int revision,String state,String rawObjectKey,String previewObjectKey,String coverObjectKey,
                 Long durationMs,String metaJson,int attempt,long token,long createdAtMs) {}
  record DiscoverRow(long postId,long authorId,long publishedAtMs,String title,String description,Long defaultVersionId,String coverKey,String shareMode) {}
 
  @Insert("""
-  INSERT INTO material_profiles(post_id,title,description,share_mode,password_hash,share_epoch,license_download,license_commercial,default_version_id,created_at_ms,updated_at_ms)
-  VALUES(#{post},#{title},#{description},#{share},#{password},0,#{download},#{commercial},NULL,#{at},#{at})
+  INSERT INTO material_profiles(post_id,title,description,share_mode,password_hash,share_epoch,license_download,license_commercial,aspect_ratio,default_version_id,created_at_ms,updated_at_ms)
+  VALUES(#{post},#{title},#{description},#{share},#{password},0,#{download},#{commercial},#{aspect},NULL,#{at},#{at})
   """)
  int insertProfile(@Param("post")long post,@Param("title")String title,@Param("description")String description,@Param("share")String share,
-                   @Param("password")String password,@Param("download")boolean download,@Param("commercial")boolean commercial,@Param("at")long at);
+                   @Param("password")String password,@Param("download")boolean download,@Param("commercial")boolean commercial,
+                   @Param("aspect")String aspect,@Param("at")long at);
 
  @Select("""
   SELECT post_id AS postId,title,description,share_mode AS shareMode,password_hash AS passwordHash,share_epoch AS shareEpoch,
-         license_download AS licenseDownload,license_commercial AS licenseCommercial,default_version_id AS defaultVersionId,
-         created_at_ms AS createdAtMs,updated_at_ms AS updatedAtMs
+         license_download AS licenseDownload,license_commercial AS licenseCommercial,aspect_ratio AS aspectRatio,
+         default_version_id AS defaultVersionId,created_at_ms AS createdAtMs,updated_at_ms AS updatedAtMs
   FROM material_profiles WHERE post_id=#{post}
   """)
  Profile profile(long post);
 
  @Update("""
   UPDATE material_profiles SET title=#{title},description=#{description},share_mode=#{share},password_hash=#{password},
-  share_epoch=share_epoch+#{bump},license_download=#{download},license_commercial=#{commercial},updated_at_ms=#{at}
+  share_epoch=share_epoch+#{bump},license_download=#{download},license_commercial=#{commercial},
+  aspect_ratio=COALESCE(#{aspect},aspect_ratio),updated_at_ms=#{at}
   WHERE post_id=#{post}
   """)
  int updateProfile(@Param("post")long post,@Param("title")String title,@Param("description")String description,@Param("share")String share,
-                   @Param("password")String password,@Param("bump")int bump,@Param("download")boolean download,@Param("commercial")boolean commercial,@Param("at")long at);
+                   @Param("password")String password,@Param("bump")int bump,@Param("download")boolean download,@Param("commercial")boolean commercial,
+                   @Param("aspect")String aspect,@Param("at")long at);
 
  /** Only advance default when candidate revision is strictly greater than the current default. */
  @Update("""

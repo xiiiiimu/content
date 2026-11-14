@@ -26,6 +26,7 @@ public interface FeedMapper {
  @Insert("INSERT INTO follows(follower_id,followee_id,status,follow_epoch,follow_cutoff_seq,history_since_ms,history_limit) VALUES(#{reader},#{author},'FOLLOWING',#{epoch},#{cutoff},#{since},#{n}) ON DUPLICATE KEY UPDATE status='FOLLOWING',follow_epoch=#{epoch},follow_cutoff_seq=#{cutoff},history_since_ms=#{since},history_limit=#{n}")
  void follow(@Param("reader") long reader,@Param("author") long author,@Param("epoch") long epoch,@Param("cutoff") long cutoff,@Param("since") long since,@Param("n") int n);
  @Update("UPDATE follows SET status='UNFOLLOWED' WHERE follower_id=#{reader} AND followee_id=#{author}") void unfollow(@Param("reader") long reader,@Param("author") long author);
+ @Select("SELECT follower_id FROM follows WHERE followee_id=#{author} AND status='FOLLOWING'") List<Long> followerIds(long author);
  @Select("SELECT id FROM posts WHERE author_id=#{author} AND status='PUBLISHED' AND publish_seq<=#{cutoff} AND published_at_ms>=#{since} ORDER BY published_at_ms DESC,id DESC LIMIT #{n}")
  List<Long> history(@Param("author") long author,@Param("cutoff") long cutoff,@Param("since") long since,@Param("n") int n);
  @Insert("INSERT INTO follow_history(follower_id,followee_id,follow_epoch,post_id) VALUES(#{reader},#{author},#{epoch},#{post})")
