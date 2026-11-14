@@ -70,7 +70,8 @@ function Wait-Until([string]$Name,[scriptblock]$Probe) {
 
 function Sql([string]$q) {
   # Prefer MYSQL_PWD to avoid the CLI password warning (and stderr→ErrorRecord noise).
-  $out = & docker exec -e "MYSQL_PWD=$MysqlPassword" $MysqlContainer mysql -N -u$MysqlUser $MysqlDb -e $q 2>&1
+  $userArg = "-u$MysqlUser"
+  $out = & docker exec -e "MYSQL_PWD=$MysqlPassword" $MysqlContainer mysql -N $userArg $MysqlDb -e $q 2>&1
   if ($LASTEXITCODE -ne 0) { Fail "mysql failed ($LASTEXITCODE): $q :: $($out | Out-String)" }
   return (($out | ForEach-Object { "$_" }) | Out-String).Trim()
 }
