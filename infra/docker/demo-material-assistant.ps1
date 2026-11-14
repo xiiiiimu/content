@@ -201,15 +201,17 @@ Wait-Until "inbox receipt for $outboxId" {
 } | Out-Null
 Log 'ASSERT outbox SENT + inbox ASSISTANT_ACCEPTED'
 
-$reply = Wait-Until 'assistant search reply comment' {
+$taskView = Wait-Until 'assistant task DONE' {
+  $t = (Invoke-Json Get "$ApiBase/api/assistant/tasks/$taskId" $HV).Data
+  if ($t.state -in @('DONE','CLARIFY') -and $t.replyCommentId) { $t } else { $null }
+}
+Log "ASSERT task state=$($taskView.state) replyCommentId=$($taskView.replyCommentId) via Python HTTP"
+$reply = Wait-Until 'assistant search reply body' {
   $comments = (Invoke-Json Get "$ApiBase/api/posts/$givePost/comments?limit=100" $HV).Data
-  $hit = @($comments) | Where-Object { $_.body -match '可公开引用的素材|雨夜|未找到' } | Select-Object -First 1
-  if ($hit) { $hit } else { $null }
+  $hit = @($comments) | Where-Object { [long]$_.commentId -eq [long]$taskView.replyCommentId } | Select-Object -First 1
+  if ($hit -and ($hit.body -match '可公开引用的素材|未找到')) { $hit } else { $null }
 }
 Log "ASSERT search reply commentId=$($reply.commentId) body=$($reply.body.Substring(0,[Math]::Min(120,$reply.body.Length)))"
-$taskView = (Invoke-Json Get "$ApiBase/api/assistant/tasks/$taskId" $HV).Data
-if ($taskView.state -notin @('DONE','CLARIFY')) { Fail "task state=$($taskView.state)" }
-Log "ASSERT task state=$($taskView.state) via Python HTTP"
 
 # ---------- Path 2: feedback subscribe, link before READY, notify once ----------
 Log '== PATH2: feedback watch (link then READY) =='
