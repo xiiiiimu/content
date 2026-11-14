@@ -15,6 +15,7 @@ public final class GiveawayService {
  private final NotificationMapper notifications;private final UserMapper users;private final EligibilityRegistry eligibility;
  private final VisibilityService visibility;private final TransactionTemplate tx;private final ObjectMapper json;
  private final SecureRandom random=new SecureRandom();
+ private java.util.function.Supplier<SaleService> sales;
 
  public GiveawayService(GiveawayMapper db,InteractionMapper comments,FeedMapper posts,MaterialMapper materials,
                         NotificationMapper notifications,UserMapper users,EligibilityRegistry eligibility,
@@ -22,6 +23,7 @@ public final class GiveawayService {
   this.db=db;this.comments=comments;this.posts=posts;this.materials=materials;this.notifications=notifications;
   this.users=users;this.eligibility=eligibility;this.visibility=visibility;this.tx=tx;this.json=json;
  }
+ public void setSaleBridgeProvider(java.util.function.Supplier<SaleService> sales){this.sales=sales;}
 
  public FavoriteResult favorite(long user,long post){
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
@@ -116,6 +118,8 @@ public final class GiveawayService {
   if(g==null || g.rewardVersionId()==null)return;
   for(var w:db.winners(g.id())){
    if(w.entitlementId()!=null)continue;
+   SaleService bridge=sales==null?null:sales.get();
+   if(bridge!=null)bridge.autoRefundOnGiveawayWin(w.accountId(),g.postId(),g.id());
    var ent=new GiveawayMapper.EntitlementInsert();
    ent.account=w.accountId();ent.post=g.postId();ent.version=g.rewardVersionId();ent.license=g.rewardLicense();
    ent.kind="GIVEAWAY";ent.source=g.id();ent.at=System.currentTimeMillis();

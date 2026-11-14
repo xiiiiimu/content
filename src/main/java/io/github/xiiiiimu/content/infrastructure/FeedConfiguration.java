@@ -30,7 +30,7 @@ public class FeedConfiguration {
  @Bean(destroyMethod="close") FeedRedis feedRedis(RedisClient client){return new FeedRedis(client);}
  // Keep AbortPolicy: FeedMerger submits nested futures on this pool; CallerRuns can deadlock workers.
  @Bean(destroyMethod="shutdownNow") ExecutorService feedExecutor(){return new ThreadPoolExecutor(16,16,0,TimeUnit.SECONDS,new ArrayBlockingQueue<>(64),new ThreadPoolExecutor.AbortPolicy());}
- @Bean TransactionTemplate feedTransactions(PlatformTransactionManager manager){var t=new TransactionTemplate(manager);t.setIsolationLevel(org.springframework.transaction.TransactionDefinition.ISOLATION_READ_COMMITTED);t.setTimeout(5);return t;}
+ @Bean TransactionTemplate feedTransactions(PlatformTransactionManager manager,@Value("${content.feed.tx-timeout-seconds:15}")int txTimeoutSeconds){var t=new TransactionTemplate(manager);t.setIsolationLevel(org.springframework.transaction.TransactionDefinition.ISOLATION_READ_COMMITTED);t.setTimeout(Math.max(5,txTimeoutSeconds));return t;}
  @Bean FeedTokens cursorTokens(@Value("${content.feed.cursor-key}")String key){return new FeedTokens(key,"CURSOR");}
  @Bean @org.springframework.beans.factory.annotation.Qualifier("identityTokens") FeedTokens identityTokens(@Value("${content.feed.identity-key}")String key){return new FeedTokens(key,"IDENTITY");}
  @Bean @ConditionalOnMissingBean(PipelineObserver.class) PipelineObserver pipelineObserver(){return new PipelineObserver(){};}
@@ -71,12 +71,14 @@ public class FeedConfiguration {
   return new FeedbackWatchService(assistant,comments,materials,posts,notifications,visibility,tx);
  }
  @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
- EligibilityRegistry eligibilityRegistry(InteractionMapper interactions,GiveawayMapper giveaways,FeedMapper posts,ObjectMapper json){
-  return new EligibilityRegistry(interactions,giveaways,posts,json);
+ EligibilityRegistry eligibilityRegistry(InteractionMapper interactions,GiveawayMapper giveaways,FeedMapper posts,ObjectMapper json,org.springframework.beans.factory.ObjectProvider<SaleMapper> sales){
+  return new EligibilityRegistry(interactions,giveaways,posts,json,sales.getIfAvailable());
  }
  @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
- GiveawayService giveawayService(GiveawayMapper giveaways,InteractionMapper comments,FeedMapper posts,MaterialMapper materials,NotificationMapper notifications,UserMapper users,EligibilityRegistry eligibility,VisibilityService visibility,TransactionTemplate tx,ObjectMapper json){
-  return new GiveawayService(giveaways,comments,posts,materials,notifications,users,eligibility,visibility,tx,json);
+ GiveawayService giveawayService(GiveawayMapper giveaways,InteractionMapper comments,FeedMapper posts,MaterialMapper materials,NotificationMapper notifications,UserMapper users,EligibilityRegistry eligibility,VisibilityService visibility,TransactionTemplate tx,ObjectMapper json,org.springframework.beans.factory.ObjectProvider<SaleService> sales){
+  var g=new GiveawayService(giveaways,comments,posts,materials,notifications,users,eligibility,visibility,tx,json);
+  g.setSaleBridgeProvider(sales::getIfAvailable);
+  return g;
  }
  @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
  AssistantParser assistantParser(@Value("${content.assistant.python-url:}")String url,@Value("${content.assistant.internal-token:}")String token,ObjectMapper json){

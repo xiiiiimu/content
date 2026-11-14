@@ -28,9 +28,8 @@ public final class StubAssistantParser implements AssistantParser {
    boolean favorite=containsAny(text,"收藏");
    boolean follow=containsAny(text,"关注");
    boolean purchase=containsAny(text,"购买","买过","下单");
-   if(purchase)return new Result("GIVEAWAY",new Clarify("GIVEAWAY","历史购买工具尚未接通，不能静默忽略该条件。请去掉购买条件或等待订单源启用。"),null,null,null,List.of("PURCHASE"));
-   if(!(like||comment||favorite||follow))
-    return new Result("GIVEAWAY",new Clarify("GIVEAWAY","请说明参与条件（点赞/评论/收藏/关注）以及截止时间和中奖人数。"),null,null,null,List.of());
+   if(!(like||comment||favorite||follow||purchase))
+    return new Result("GIVEAWAY",new Clarify("GIVEAWAY","请说明参与条件（点赞/评论/收藏/关注/购买）以及截止时间和中奖人数。"),null,null,null,List.of());
    String mode="ALL";
    int atLeast=0;
    if(containsAny(text,"任一","或者","或"))mode="ANY";
@@ -52,10 +51,11 @@ public final class StubAssistantParser implements AssistantParser {
    if(like){tree.append("{\"type\":\"LIKE\"}");first=false;}
    if(comment){if(!first)tree.append(',');tree.append("{\"type\":\"COMMENT\"}");first=false;}
    if(favorite){if(!first)tree.append(',');tree.append("{\"type\":\"FAVORITE\"}");first=false;}
-   if(follow){if(!first)tree.append(',');tree.append("{\"type\":\"FOLLOW\"}");}
+   if(follow){if(!first)tree.append(',');tree.append("{\"type\":\"FOLLOW\"}");first=false;}
+   if(purchase){if(!first)tree.append(',');tree.append("{\"type\":\"PURCHASE\"}");}
    tree.append("]}");
    String summary="截止 "+deadline+"；资格在封池时核验；奖励最新 READY 默认版；人数 "+winners+"；许可 "+license;
-   return new Result("GIVEAWAY",null,null,null,new GiveawayCommand(tree.toString(),"Asia/Shanghai",null,deadline,winners,"DEFAULT",license,summary),tools);
+   return new Result("GIVEAWAY",null,null,null,new GiveawayCommand(tree.toString(),"Asia/Shanghai",null,deadline,winners,"DEFAULT",license,summary),List.of());
   }
 
   // default: search
