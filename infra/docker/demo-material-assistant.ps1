@@ -69,9 +69,11 @@ function Wait-Until([string]$Name,[scriptblock]$Probe) {
 }
 
 function Sql([string]$q) {
-  $out = & docker exec $MysqlContainer mysql -N -u$MysqlUser "-p$MysqlPassword" $MysqlDb -e $q 2>$null
-  if ($LASTEXITCODE -ne 0) { Fail "mysql failed: $q" }
-  return ($out | Out-String).Trim()
+  # mysql CLI prints a password warning on stderr; ignore it and use stdout only.
+  $out = & docker exec $MysqlContainer mysql -N --password=$MysqlPassword -u$MysqlUser $MysqlDb -e $q 2>&1
+  $lines = @($out | Where-Object { $_ -is [string] -and $_ -notmatch 'Using a password on the command line' })
+  if ($LASTEXITCODE -ne 0) { Fail "mysql failed ($LASTEXITCODE): $q :: $($lines -join ' | ')" }
+  return ($lines | Out-String).Trim()
 }
 
 function New-DemoMp4([string]$OutFile) {
