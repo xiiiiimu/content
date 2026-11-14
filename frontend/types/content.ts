@@ -38,12 +38,69 @@ export interface CommentResult {
   commentId: number
   commentCount: number
   replay: boolean
+  parentId?: number | null
+  materialVersionId?: number | null
+  offsetMs?: number | null
+  acceptedAtMs?: number | null
 }
 
 export interface PostStats {
   postId: number
   likes: number
   comments: number
+  dislikes?: number
+  reports?: number
+}
+
+export interface MaterialDiscoverItem {
+  postId: number
+  authorId: number
+  publishedAtMs: number
+  title: string
+  description: string
+  tags: string[]
+  shareMode: string
+  coverAvailable: boolean
+  coverUrl: string | null
+  coverExpiresAtMs: number | null
+}
+
+export interface MaterialDiscoverPage {
+  items: MaterialDiscoverItem[]
+  nextBeforeMs: number | null
+  nextBeforeId: number | null
+}
+
+export interface MaterialVersionView {
+  versionId: number
+  revision: number
+  state: string
+  durationMs: number | null
+  isDefault: boolean
+}
+
+export interface MaterialDetail {
+  postId: number
+  title: string
+  description: string
+  shareMode: string
+  licenseDownload: boolean
+  licenseCommercial: boolean
+  defaultVersionId: number | null
+  tags: string[]
+  versions: MaterialVersionView[]
+}
+
+export interface MaterialSigned {
+  url: string
+  expiresAtMs: number
+  purpose: string
+}
+
+export interface MaterialUnlock {
+  grant: string
+  expiresAtMs: number
+  shareEpoch: number
 }
 
 export interface FollowResult {

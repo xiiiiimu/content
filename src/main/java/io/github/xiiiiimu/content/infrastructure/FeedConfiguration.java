@@ -52,11 +52,15 @@ public class FeedConfiguration {
  @Bean FeedTrimmer feedTrimmer(FeedMapper db,FeedRedis redis,@Value("${content.feed.window-millis:2592000000}")long window){return new FeedTrimmer(db,redis,window);}
  @Bean TrendGuardService trendGuardService(TrendGuardMapper risks,TransactionTemplate tx){return new TrendGuardService(risks,tx);}
  @Bean TrendingService trendingService(InteractionMapper interactions,TransactionTemplate tx,FeedRedis redis,VisibilityService visibility,TrendGuardService risks,@Value("${content.trendguard.spike-threshold:3}")int spikeThreshold){return new TrendingService(interactions,tx,redis,visibility,risks,spikeThreshold);}
- @Bean InteractionService interactionService(VisibilityService visibility,InteractionMapper interactions,TransactionTemplate tx,TrendingService trending,RelationshipService relationships){return new InteractionService(visibility,interactions,tx,trending,relationships);}
+ @Bean InteractionService interactionService(VisibilityService visibility,InteractionMapper interactions,TransactionTemplate tx,TrendingService trending,RelationshipService relationships,org.springframework.beans.factory.ObjectProvider<MaterialService> materials){return new InteractionService(visibility,interactions,tx,trending,relationships,materials.getIfAvailable());}
  @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
  ObjectStore objectStore(@Value("${content.media.s3-endpoint}")String endpoint,@Value("${content.media.access-key:content}")String access,@Value("${content.media.secret-key:content-secret-key-32-bytes-minimum}")String secret){return new HttpS3ObjectStore(endpoint,access,secret);}
  @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
  MediaService mediaService(FeedMapper posts,MediaMapper media,TransactionTemplate tx,ObjectStore store,VisibilityService visibility,@Value("${content.media.bucket:content-media}")String bucket,@Value("${content.media.ffmpeg-image:}")String ffmpeg,PipelineObserver observer){return new MediaService(posts,media,tx,store,visibility,bucket,ffmpeg,observer);}
- @Bean(name="mediaRunner") @ConditionalOnProperty(name="content.media.enabled",havingValue="true") Runnable mediaRunner(MediaService media){return media::tick;}
+ @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
+ MaterialGrants materialGrants(@Value("${content.feed.identity-key}")String key){return new MaterialGrants(key);}
+ @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
+ MaterialService materialService(FeedMapper posts,PostAuthoringMapper authoring,UserMapper users,MaterialMapper materials,TransactionTemplate tx,ObjectStore store,VisibilityService visibility,@Value("${content.media.bucket:content-media}")String bucket,@Value("${content.media.ffmpeg-image:}")String ffmpeg,MaterialGrants grants,PipelineObserver observer){return new MaterialService(posts,authoring,users,materials,tx,store,visibility,bucket,ffmpeg,grants,observer);}
+ @Bean(name="mediaRunner") @ConditionalOnProperty(name="content.media.enabled",havingValue="true") Runnable mediaRunner(MediaService media,MaterialService materials){return ()->{media.tick();materials.tick();};}
  @Bean PipelineReconcile pipelineReconcile(org.springframework.jdbc.core.JdbcTemplate jdbc,DistributionInbox inbox,InboxMapper inboxMapper,TransactionTemplate tx,ObjectMapper json,PipelineObserver observer){return new PipelineReconcile(jdbc,inbox,inboxMapper,tx,json,observer);}
 }

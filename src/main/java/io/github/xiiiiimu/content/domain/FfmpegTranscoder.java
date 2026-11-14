@@ -1,5 +1,7 @@
 package io.github.xiiiiimu.content.domain;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.Duration;
@@ -32,7 +34,8 @@ public final class FfmpegTranscoder {
    dir=Files.createTempDirectory("content-ffmpeg-");
    Path in=dir.resolve("input.bin");Path out=dir.resolve("out.mp4");Path cover=dir.resolve("cover.jpg");
    Files.write(in,raw);
-   run(dir,"-y","-i",in.getFileName().toString(),"-t","3","-c:v","libx264","-pix_fmt","yuv420p","-c:a","aac","-movflags","+faststart",out.getFileName().toString());
+   // Keep source duration (material timestamp comments need real offsets; short fixtures stay short).
+   run(dir,"-y","-i",in.getFileName().toString(),"-c:v","libx264","-pix_fmt","yuv420p","-c:a","aac","-movflags","+faststart",out.getFileName().toString());
    run(dir,"-y","-i",out.getFileName().toString(),"-frames:v","1","-q:v","2",cover.getFileName().toString());
    String json=probe(dir,out.getFileName().toString());
    byte[] video=Files.readAllBytes(out);byte[] thumb=Files.readAllBytes(cover);
@@ -67,17 +70,28 @@ public final class FfmpegTranscoder {
  }
  private String probe(Path dir,String input)throws Exception{
   List<String> cmd=List.of(dockerBin(),"run","--rm","-v",dir.toAbsolutePath()+":/work","-w","/work","--entrypoint","ffprobe",image,"-v","quiet","-print_format","json","-show_format","-show_streams",input);
-  ProcessBuilder pb=new ProcessBuilder(cmd);pb.redirectErrorStream(true);Process p=pb.start();
-  byte[] out=p.getInputStream().readAllBytes();
-  if(!p.waitFor(2,TimeUnit.MINUTES)){p.destroyForcibly();throw new IllegalStateException("ffprobe timeout");}
-  if(p.exitValue()!=0)throw new IllegalStateException("ffprobe exit="+p.exitValue()+" "+new String(out,StandardCharsets.UTF_8));
-  return new String(out,StandardCharsets.UTF_8);
+  return new String(exec(cmd,Duration.ofMinutes(2)),StandardCharsets.UTF_8);
  }
- private static void exec(List<String> cmd,Duration timeout)throws Exception{
+ /**
+  * Wait with a hard wall-clock timeout. Stdout is drained on a daemon thread so a hung child that
+  * keeps the pipe open cannot block forever before waitFor runs; destroyForcibly on timeout.
+  */
+ static byte[] exec(List<String> cmd,Duration timeout)throws Exception{
   ProcessBuilder pb=new ProcessBuilder(cmd);pb.redirectErrorStream(true);Process p=pb.start();
-  byte[] out=p.getInputStream().readAllBytes();
-  if(!p.waitFor(timeout.toMillis(),TimeUnit.MILLISECONDS)){p.destroyForcibly();throw new IllegalStateException("timeout "+cmd);}
-  if(p.exitValue()!=0)throw new IllegalStateException("exit="+p.exitValue()+" cmd="+cmd+" out="+new String(out,StandardCharsets.UTF_8));
+  ByteArrayOutputStream buf=new ByteArrayOutputStream();
+  Thread reader=new Thread(()->{
+   try(InputStream in=p.getInputStream()){in.transferTo(buf);}catch(Exception ignored){/* process killed or closed */}
+  },"content-ffmpeg-out");
+  reader.setDaemon(true);reader.start();
+  boolean finished=p.waitFor(timeout.toMillis(),TimeUnit.MILLISECONDS);
+  if(!finished){
+   p.destroyForcibly();
+   reader.join(TimeUnit.SECONDS.toMillis(5));
+   throw new IllegalStateException("timeout "+cmd);
+  }
+  reader.join(TimeUnit.SECONDS.toMillis(5));
+  if(p.exitValue()!=0)throw new IllegalStateException("exit="+p.exitValue()+" cmd="+cmd+" out="+buf.toString(StandardCharsets.UTF_8));
+  return buf.toByteArray();
  }
  static boolean looksLikeMedia(byte[] raw){
   if(raw.length<12)return false;

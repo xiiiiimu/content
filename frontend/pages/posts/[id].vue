@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ContentPost, PostStats, SignedMedia } from '~/types/content'
+import type { ContentPost, MaterialDetail, MaterialSigned, PostStats, SignedMedia } from '~/types/content'
 import { ContentApiError } from '~/types/content'
 
 const route = useRoute()
@@ -10,6 +10,14 @@ const { hydrate, token, expired } = useIdentity()
 const post = ref<ContentPost | null>(null)
 const stats = ref<PostStats | null>(null)
 const media = ref<SignedMedia | null>(null)
+const material = ref<MaterialDetail | null>(null)
+const preview = ref<MaterialSigned | null>(null)
+const selectedVersionId = ref<number | null>(null)
+const offsetMs = ref(8000)
+const commentBody = ref('')
+const password = ref('')
+const grant = ref('')
+const downloadUrl = ref('')
 const mediaError = ref('')
 const status = ref<'loading' | 'ok' | 'error' | 'auth'>('loading')
 const errorCode = ref('')
@@ -24,6 +32,9 @@ async function load() {
     return
   }
   status.value = 'loading'
+  material.value = null
+  preview.value = null
+  downloadUrl.value = ''
   try {
     post.value = await api.post(postId.value)
     try { stats.value = await api.stats(postId.value) }
@@ -32,6 +43,16 @@ async function load() {
     catch (e) {
       media.value = null
       mediaError.value = e instanceof ContentApiError ? e.code : 'MEDIA_UNAVAILABLE'
+    }
+    try {
+      material.value = await api.material(postId.value)
+      selectedVersionId.value = material.value.defaultVersionId
+      if (selectedVersionId.value) {
+        preview.value = await api.signMaterialPreview(postId.value, selectedVersionId.value)
+      }
+    }
+    catch {
+      material.value = null
     }
     status.value = 'ok'
   }
@@ -42,12 +63,54 @@ async function load() {
   }
 }
 
+async function switchVersion(versionId: number) {
+  selectedVersionId.value = versionId
+  preview.value = await api.signMaterialPreview(postId.value, versionId)
+}
+
+async function doCommentAtOffset() {
+  if (!selectedVersionId.value || !commentBody.value || busy.value) return
+  busy.value = true
+  try {
+    await api.comment(postId.value, commentBody.value, `ui-${Date.now()}`, undefined, {
+      versionId: selectedVersionId.value,
+      offsetMs: offsetMs.value,
+    })
+    commentBody.value = ''
+    stats.value = await api.stats(postId.value)
+  }
+  catch (e) {
+    errorCode.value = e instanceof ContentApiError ? e.code : 'COMMENT_FAILED'
+  }
+  finally { busy.value = false }
+}
+
+async function doUnlockDownload() {
+  busy.value = true
+  try {
+    const u = await api.unlockMaterial(postId.value, password.value)
+    grant.value = u.grant
+    const signed = await api.signMaterialOriginal(postId.value, u.grant, selectedVersionId.value ?? undefined)
+    downloadUrl.value = signed.url
+  }
+  catch (e) {
+    errorCode.value = e instanceof ContentApiError ? e.code : 'UNLOCK_FAILED'
+  }
+  finally { busy.value = false }
+}
+
 async function doLike() {
   if (!post.value || busy.value) return
   busy.value = true
   try {
     const r = await api.like(post.value.postId)
-    stats.value = { postId: post.value.postId, likes: r.likeCount, comments: stats.value?.comments ?? 0 }
+    stats.value = {
+      postId: post.value.postId,
+      likes: r.likeCount,
+      comments: stats.value?.comments ?? 0,
+      dislikes: stats.value?.dislikes,
+      reports: stats.value?.reports,
+    }
   }
   catch (e) {
     errorCode.value = e instanceof ContentApiError ? e.code : 'LIKE_FAILED'
@@ -60,10 +123,35 @@ async function doUnlike() {
   busy.value = true
   try {
     const r = await api.unlike(post.value.postId)
-    stats.value = { postId: post.value.postId, likes: r.likeCount, comments: stats.value?.comments ?? 0 }
+    stats.value = {
+      postId: post.value.postId,
+      likes: r.likeCount,
+      comments: stats.value?.comments ?? 0,
+      dislikes: stats.value?.dislikes,
+      reports: stats.value?.reports,
+    }
   }
   catch (e) {
     errorCode.value = e instanceof ContentApiError ? e.code : 'UNLIKE_FAILED'
+  }
+  finally { busy.value = false }
+}
+
+async function doDislike() {
+  if (!post.value || busy.value) return
+  busy.value = true
+  try {
+    const r = await api.dislike(post.value.postId)
+    stats.value = {
+      postId: post.value.postId,
+      likes: stats.value?.likes ?? 0,
+      comments: stats.value?.comments ?? 0,
+      dislikes: r.dislikeCount,
+      reports: stats.value?.reports,
+    }
+  }
+  catch (e) {
+    errorCode.value = e instanceof ContentApiError ? e.code : 'DISLIKE_FAILED'
   }
   finally { busy.value = false }
 }
@@ -86,12 +174,51 @@ watch(postId, () => load())
       <div v-if="media" class="mt4">
         <img :src="media.url" alt="媒体" class="max-w-full rounded-lg border border-base">
       </div>
-      <p v-else-if="mediaError" class="mt4 text-sm text-secondary">媒体不可用（{{ mediaError }}）</p>
+      <p v-else-if="mediaError && !material" class="mt4 text-sm text-secondary">媒体不可用（{{ mediaError }}）</p>
+
+      <section v-if="material" class="mt6 border-t border-base pt4" data-testid="material-panel">
+        <h2 class="text-base font-medium">{{ material.title }}</h2>
+        <p class="text-sm text-secondary mt1">{{ material.description }}</p>
+        <p class="text-xs text-secondary mt1">#{{ material.tags.join(' #') }} · {{ material.shareMode }}</p>
+        <div class="flex flex-wrap gap2 mt3">
+          <button
+            v-for="v in material.versions"
+            :key="v.versionId"
+            type="button"
+            class="btn-ghost text-sm"
+            :class="{ 'text-primary': selectedVersionId === v.versionId }"
+            @click="switchVersion(v.versionId)"
+          >
+            v{{ v.revision }} {{ v.isDefault ? '(默认)' : '' }} · {{ v.state }}
+          </button>
+        </div>
+        <p v-if="preview" class="text-xs text-secondary mt2 break-all">
+          预览授权：{{ preview.url }}
+        </p>
+        <div class="mt4 flex flex-wrap gap2 items-end">
+          <label class="text-sm">
+            时间点 ms
+            <input v-model.number="offsetMs" type="number" min="0" class="input w-28 ms2">
+          </label>
+          <input v-model="commentBody" class="input flex-1 min-w-40" placeholder="在该时间点反馈">
+          <button type="button" class="btn-primary" :disabled="busy" @click="doCommentAtOffset">评论</button>
+        </div>
+        <div class="mt4 flex flex-wrap gap2 items-end">
+          <input v-model="password" type="password" class="input w-40" placeholder="原片密码">
+          <button type="button" class="btn-ghost" :disabled="busy" @click="doUnlockDownload">解锁下载</button>
+          <a v-if="downloadUrl" :href="downloadUrl" class="text-sm text-primary" target="_blank" rel="noopener">打开原片授权链接</a>
+        </div>
+      </section>
+
       <div class="mt6 flex gap2 items-center border-t border-base pt4">
-        <span class="text-sm text-secondary">赞 {{ stats?.likes ?? '—' }} · 评 {{ stats?.comments ?? '—' }}</span>
+        <span class="text-sm text-secondary">
+          赞 {{ stats?.likes ?? '—' }} · 踩 {{ stats?.dislikes ?? '—' }} · 评 {{ stats?.comments ?? '—' }}
+        </span>
         <button type="button" class="btn-text" :disabled="busy" @click="doLike">点赞</button>
         <button type="button" class="btn-text" :disabled="busy" @click="doUnlike">取消赞</button>
+        <button type="button" class="btn-text" :disabled="busy" @click="doDislike">反对</button>
       </div>
+      <p v-if="errorCode" class="text-sm text-red mt2">{{ errorCode }}</p>
     </article>
   </MainContent>
 </template>
