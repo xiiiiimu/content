@@ -25,6 +25,22 @@ const mediaError = ref('')
 const comments = ref<Array<{ commentId: number; userId: number; parentId?: number; body: string; createdAtMs: number }>>([])
 const notifications = ref<Array<{ id: number; kind: string; postId: number; commentId: number; refVersionId?: number }>>([])
 const entitlement = ref<{ entitled: boolean; versionId?: number; license?: string } | null>(null)
+const campaign = ref<{
+  id: number
+  priceCents: number
+  stockCap: number
+  soldCount: number
+  startMs: number
+  endMs: number
+  state: string
+  linkToken: string
+  remainingStock?: number
+} | null>(null)
+const myOrder = ref<{ id: number; state: string; priceCents: number; refundReason?: string } | null>(null)
+const purchaseState = ref('')
+const salePrice = ref(990)
+const saleStock = ref(10)
+const blacklistTarget = ref<number | null>(null)
 const status = ref<'loading' | 'ok' | 'error' | 'auth'>('loading')
 const errorCode = ref('')
 const busy = ref(false)
@@ -66,6 +82,10 @@ async function load() {
     catch { notifications.value = [] }
     try { entitlement.value = await api.entitlement(postId.value) }
     catch { entitlement.value = null }
+    try { campaign.value = await api.saleCampaignCurrent(postId.value) }
+    catch { campaign.value = null }
+    try { myOrder.value = await api.myMaterialOrder(postId.value) }
+    catch { myOrder.value = null }
     status.value = 'ok'
   }
   catch (e) {
@@ -219,6 +239,67 @@ async function doFavorite() {
   finally { busy.value = false }
 }
 
+async function doCreateCampaign() {
+  if (busy.value) return
+  busy.value = true
+  errorCode.value = ''
+  try {
+    const now = Date.now()
+    campaign.value = await api.createSaleCampaign(postId.value, {
+      priceCents: salePrice.value,
+      stockCap: saleStock.value,
+      startMs: now - 1000,
+      endMs: now + 24 * 3600_000,
+    }) as typeof campaign.value
+  }
+  catch (e) { errorCode.value = e instanceof ContentApiError ? e.code : 'CAMPAIGN_FAILED' }
+  finally { busy.value = false }
+}
+
+async function doPurchase() {
+  if (!campaign.value || busy.value) return
+  busy.value = true
+  purchaseState.value = 'PROCESSING'
+  errorCode.value = ''
+  try {
+    const key = `web-${postId.value}-${Date.now()}`
+    let result = await api.purchaseSale(campaign.value.id, key)
+    const deadline = Date.now() + 30_000
+    while (result.state === 'PROCESSING' && Date.now() < deadline) {
+      await new Promise(r => setTimeout(r, 400))
+      result = await api.purchaseRequest(result.reservationId)
+    }
+    purchaseState.value = result.state + (result.rejectReason ? `:${result.rejectReason}` : '')
+    myOrder.value = await api.myMaterialOrder(postId.value)
+    campaign.value = await api.saleCampaignCurrent(postId.value)
+    entitlement.value = await api.entitlement(postId.value)
+  }
+  catch (e) {
+    errorCode.value = e instanceof ContentApiError ? e.code : 'PURCHASE_FAILED'
+    purchaseState.value = 'FAILED'
+  }
+  finally { busy.value = false }
+}
+
+async function doForceRefund() {
+  if (!myOrder.value || busy.value) return
+  busy.value = true
+  try {
+    myOrder.value = await api.forceOrderRefund(myOrder.value.id) as typeof myOrder.value
+    entitlement.value = await api.entitlement(postId.value)
+  }
+  catch (e) { errorCode.value = e instanceof ContentApiError ? e.code : 'REFUND_FAILED' }
+  finally { busy.value = false }
+}
+
+async function doBlacklist() {
+  if (!blacklistTarget.value || busy.value) return
+  busy.value = true
+  try { await api.blacklistUser(blacklistTarget.value, 'merchant block') }
+  catch (e) { errorCode.value = e instanceof ContentApiError ? e.code : 'BLACKLIST_FAILED' }
+  finally { busy.value = false }
+}
+
 onMounted(() => load())
 watch(postId, () => load())
 </script>
@@ -270,6 +351,30 @@ watch(postId, () => load())
           <input v-model="password" type="password" class="input w-40" placeholder="原片密码">
           <button type="button" class="btn-ghost" :disabled="busy" @click="doUnlockDownload">解锁下载</button>
           <a v-if="downloadUrl" :href="downloadUrl" class="text-sm text-primary" target="_blank" rel="noopener">打开原片授权链接</a>
+        </div>
+
+        <div class="mt6 border-t border-base pt4" data-testid="sale-panel">
+          <h3 class="text-sm font-medium">限量抢购</h3>
+          <div v-if="campaign" class="mt2 text-sm text-secondary">
+            ¥{{ (campaign.priceCents / 100).toFixed(2) }} · 库存 {{ campaign.remainingStock ?? (campaign.stockCap - campaign.soldCount) }}/{{ campaign.stockCap }}
+            · {{ campaign.state }} · 链接 token {{ campaign.linkToken.slice(0, 8) }}…
+            <button type="button" class="btn-primary ms2" :disabled="busy" @click="doPurchase">抢购</button>
+            <span v-if="purchaseState" class="ms2">{{ purchaseState }}</span>
+          </div>
+          <div v-else class="mt2 flex flex-wrap gap2 items-end">
+            <label class="text-sm">价格分<input v-model.number="salePrice" type="number" class="input w-24 ms1"></label>
+            <label class="text-sm">库存<input v-model.number="saleStock" type="number" class="input w-20 ms1"></label>
+            <button type="button" class="btn-ghost" :disabled="busy" @click="doCreateCampaign">创建活动</button>
+          </div>
+          <p v-if="myOrder" class="text-sm mt2">
+            我的订单 #{{ myOrder.id }} · {{ myOrder.state }}
+            <span v-if="myOrder.refundReason"> · {{ myOrder.refundReason }}</span>
+            <button v-if="myOrder.state === 'PAID'" type="button" class="btn-text ms2" :disabled="busy" @click="doForceRefund">强制退款</button>
+          </p>
+          <div class="mt2 flex flex-wrap gap2 items-end">
+            <input v-model.number="blacklistTarget" type="number" class="input w-28" placeholder="拉黑用户ID">
+            <button type="button" class="btn-ghost" :disabled="busy || !blacklistTarget" @click="doBlacklist">拉黑</button>
+          </div>
         </div>
       </section>
 
