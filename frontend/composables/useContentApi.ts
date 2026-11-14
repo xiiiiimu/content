@@ -151,6 +151,30 @@ export function useContentApi() {
     assistantTask(id: number) {
       return request<{ taskId: number; state: string; intent?: string; replyCommentId?: number }>(`/api/assistant/tasks/${id}`)
     },
+    comments(postId: number, limit = 50) {
+      return request<Array<{
+        commentId: number
+        userId: number
+        parentId?: number
+        body: string
+        createdAtMs: number
+        materialVersionId?: number
+        offsetMs?: number
+      }>>(`/api/posts/${postId}/comments?limit=${limit}`)
+    },
+    giveaways(postId: number) {
+      return request<Array<{
+        id: number
+        state: string
+        summaryText?: string
+        winnerAccountIds: number[]
+        candidateAccountIds: number[]
+      }>>(`/api/posts/${postId}/giveaways`)
+    },
+    entitlement(postId: number, versionId?: number) {
+      const q = versionId ? `?versionId=${versionId}` : ''
+      return request<{ entitled: boolean; versionId?: number; license?: string }>(`/api/posts/${postId}/entitlement${q}`)
+    },
     follow(authorId: number) {
       return request<FollowResult>(`/api/follows/${authorId}`, { method: 'PUT' })
     },

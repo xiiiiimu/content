@@ -136,6 +136,35 @@ public final class GiveawayService {
   return db.activeEntitlement(accountId,postId,versionId)!=null;
  }
 
+ public record GiveawayView(long id,String state,long deadlineMs,int winnerCount,Long rewardVersionId,String rewardLicense,
+                            String summaryText,List<Long> candidateAccountIds,List<Long> winnerAccountIds) {}
+ public record EntitlementView(boolean entitled,Long versionId,String license) {}
+
+ public GiveawayView view(long viewer,long giveawayId){
+  var g=db.get(giveawayId);if(g==null)throw new FeedFailure(404,"GIVEAWAY_NOT_FOUND");
+  visibility.read(viewer,g.postId()).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+  return toView(g);
+ }
+ public List<GiveawayView> listForPost(long viewer,long postId,int limit){
+  visibility.read(viewer,postId).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+  int n=limit<=0?10:Math.min(limit,50);
+  return db.forPost(postId,n).stream().map(this::toView).toList();
+ }
+ public EntitlementView myEntitlement(long viewer,long postId,Long versionId){
+  visibility.read(viewer,postId).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+  var profile=materials.profile(postId);if(profile==null)throw new FeedFailure(404,"NOT_MATERIAL");
+  long vid=versionId==null?(profile.defaultVersionId()==null?0:profile.defaultVersionId()):versionId;
+  if(vid<=0)return new EntitlementView(false,null,null);
+  var ent=db.activeEntitlement(viewer,postId,vid);
+  return ent==null?new EntitlementView(false,vid,null):new EntitlementView(true,vid,ent.license());
+ }
+ private GiveawayView toView(GiveawayMapper.Giveaway g){
+  return new GiveawayView(g.id(),g.state(),g.deadlineMs()==null?0:g.deadlineMs(),g.winnerCount(),g.rewardVersionId(),g.rewardLicense(),
+   g.summaryText(),
+   db.candidates(g.id()).stream().map(GiveawayMapper.Candidate::accountId).toList(),
+   db.winners(g.id()).stream().map(GiveawayMapper.Winner::accountId).toList());
+ }
+
  private Long resolveRewardVersion(long postId,String hint){
   var profile=materials.profile(postId);if(profile==null)return null;
   if(hint==null || "DEFAULT".equalsIgnoreCase(hint) || "最新版".equals(hint))return profile.defaultVersionId();

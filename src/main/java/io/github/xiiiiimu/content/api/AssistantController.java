@@ -30,5 +30,12 @@ public class AssistantController {
  }
  @PostMapping("/posts/{post}/favorite") public GiveawayService.FavoriteResult favorite(@PathVariable long post,Principal p){return giveaways.favorite(user(p),post);}
  @DeleteMapping("/posts/{post}/favorite") public GiveawayService.FavoriteResult unfavorite(@PathVariable long post,Principal p){return giveaways.unfavorite(user(p),post);}
+ @GetMapping("/posts/{post}/giveaways") public java.util.List<GiveawayService.GiveawayView> giveaways(@PathVariable long post,@RequestParam(defaultValue="10")int limit,Principal p){
+  return giveaways.listForPost(user(p),post,limit);
+ }
+ @GetMapping("/giveaways/{id}") public GiveawayService.GiveawayView giveaway(@PathVariable long id,Principal p){return giveaways.view(user(p),id);}
+ @GetMapping("/posts/{post}/entitlement") public GiveawayService.EntitlementView entitlement(@PathVariable long post,@RequestParam(required=false)Long versionId,Principal p){
+  return giveaways.myEntitlement(user(p),post,versionId);
+ }
  private static long user(Principal p){if(p==null)throw new FeedFailure(401,"UNAUTHENTICATED");return Long.parseLong(p.getName());}
 }

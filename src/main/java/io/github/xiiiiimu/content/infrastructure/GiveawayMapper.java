@@ -56,6 +56,15 @@ public interface GiveawayMapper {
   """)
  List<Long> dueOpen(long now);
 
+ @Select("""
+  SELECT id,source_comment_id AS sourceCommentId,post_id AS postId,author_id AS authorId,state,CAST(rule_tree_json AS CHAR) AS ruleTreeJson,
+         CAST(tool_versions_json AS CHAR) AS toolVersionsJson,timezone,window_start_ms AS windowStartMs,deadline_ms AS deadlineMs,
+         winner_count AS winnerCount,reward_version_id AS rewardVersionId,reward_license AS rewardLicense,summary_text AS summaryText,
+         announce_comment_id AS announceCommentId,frozen_at_ms AS frozenAtMs,drawn_at_ms AS drawnAtMs,created_at_ms AS createdAtMs
+  FROM giveaways WHERE post_id=#{post} ORDER BY id DESC LIMIT #{limit}
+  """)
+ List<Giveaway> forPost(@Param("post")long post,@Param("limit")int limit);
+
  @Update("""
   UPDATE giveaways SET state=#{state},announce_comment_id=COALESCE(#{announce},announce_comment_id),summary_text=COALESCE(#{summary},summary_text),
   frozen_at_ms=COALESCE(#{frozen},frozen_at_ms),drawn_at_ms=COALESCE(#{drawn},drawn_at_ms),last_error=#{error},updated_at_ms=#{at}

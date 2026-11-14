@@ -29,6 +29,9 @@ public class InteractionController {
   return interactions.comment(user(p),post,rawBody==null?null:String.valueOf(rawBody),key,topic==null?null:String.valueOf(topic),parentId,versionId,offsetMs);
  }
  @GetMapping("/api/posts/{post}/stats") public Object stats(@PathVariable long post,Principal p){user(p);return interactions.stats(post);}
+ @GetMapping("/api/posts/{post}/comments") public List<InteractionService.CommentView> comments(@PathVariable long post,@RequestParam(defaultValue="50")int limit,Principal p){
+  return interactions.listComments(user(p),post,limit);
+ }
  private static Long num(Object o){
   if(o==null)return null;if(o instanceof Number n)return n.longValue();
   if(o instanceof String s && !s.isBlank())return Long.parseLong(s);return null;

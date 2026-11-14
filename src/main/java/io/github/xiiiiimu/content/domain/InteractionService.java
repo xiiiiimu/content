@@ -9,6 +9,7 @@ public final class InteractionService {
  public record DislikeResult(boolean disliked,long dislikeCount) {}
  public record ReportResult(long reportId,long reportCount) {}
  public record CommentResult(long commentId,long commentCount,boolean replay,Long parentId,Long materialVersionId,Long offsetMs,Long acceptedAtMs) {}
+ public record CommentView(long commentId,long userId,Long parentId,Long materialVersionId,Long offsetMs,Long acceptedAtMs,String body,long createdAtMs) {}
  private final VisibilityService visibility;private final InteractionMapper db;private final TransactionTemplate tx;private final TrendingService trending;private final RelationshipService events;
  private final MaterialService materials; // optional null when media disabled
  private final java.util.function.Function<AssistantEnqueue,Long> assistantEnqueue; // optional
@@ -114,6 +115,14 @@ public final class InteractionService {
  }
  public InteractionMapper.Stats stats(long post){
   var s=db.stats(post);return s==null?new InteractionMapper.Stats(post,0,0,0,0):s;
+ }
+ /** Visible comments for a post the viewer can read (oldest first, capped). */
+ public List<CommentView> listComments(long viewer,long post,int limit){
+  visibility.read(viewer,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+  int n=limit<=0?50:Math.min(limit,200);
+  return db.commentsForPost(post,n).stream()
+   .map(c->new CommentView(c.id(),c.userId(),c.parentId(),c.materialVersionId(),c.offsetMs(),c.acceptedAtMs(),c.body(),c.createdAtMs()))
+   .toList();
  }
  public InteractionMapper.Stats reconcile(long post){
   long likes=db.likeCount(post),comments=db.commentCount(post),dislikes=db.dislikeCount(post),reports=db.reportCount(post);

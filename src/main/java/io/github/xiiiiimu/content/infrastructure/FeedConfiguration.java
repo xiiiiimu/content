@@ -35,7 +35,9 @@ public class FeedConfiguration {
  @Bean @org.springframework.beans.factory.annotation.Qualifier("identityTokens") FeedTokens identityTokens(@Value("${content.feed.identity-key}")String key){return new FeedTokens(key,"IDENTITY");}
  @Bean @ConditionalOnMissingBean(PipelineObserver.class) PipelineObserver pipelineObserver(){return new PipelineObserver(){};}
  @Bean NotificationService notificationService(NotificationMapper notifications,InteractionMapper interactions,VisibilityService visibility,TransactionTemplate tx){return new NotificationService(notifications,interactions,visibility,tx);}
- @Bean DistributionInbox distributionInbox(InboxMapper inbox,FeedMapper db,TransactionTemplate tx,ObjectMapper json,PipelineObserver observer,NotificationService notifications){return new DistributionInbox(inbox,db,tx,json,observer,notifications);}
+ @Bean DistributionInbox distributionInbox(InboxMapper inbox,FeedMapper db,TransactionTemplate tx,ObjectMapper json,PipelineObserver observer,NotificationService notifications,org.springframework.beans.factory.ObjectProvider<AssistantService> assistant){
+  return new DistributionInbox(inbox,db,tx,json,observer,notifications,()->{var a=assistant.getIfAvailable();if(a!=null)a.tick();});
+ }
  @Bean AuthService authService(UserMapper users,TransactionTemplate tx,@org.springframework.beans.factory.annotation.Qualifier("identityTokens") FeedTokens identity,@Value("${content.auth.token-ttl-ms:900000}")long ttl){return new AuthService(users,tx,identity,ttl);}
  @Bean PostAuthoringService postAuthoringService(PostAuthoringMapper posts,UserMapper users,TransactionTemplate tx){return new PostAuthoringService(posts,users,tx);}
  @Bean DeliveryStore deliveryStore(FeedMapper db,DeliveryMapper tasks,TransactionTemplate tx,@Value("${content.pipeline.max-attempts:5}")int max,@Value("${content.pipeline.lease-millis:30000}")long lease){return new DeliveryStore(db,tasks,tx,max,lease);}

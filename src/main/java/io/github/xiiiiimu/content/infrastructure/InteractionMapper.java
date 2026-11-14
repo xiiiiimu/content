@@ -34,6 +34,8 @@ public interface InteractionMapper {
  Comment existingComment(@Param("user")long user,@Param("key")String key);
  @Select("SELECT "+COMMENT_COLS+" FROM post_comments WHERE id=#{id}")
  Comment commentById(long id);
+ @Select("SELECT "+COMMENT_COLS+" FROM post_comments WHERE post_id=#{post} ORDER BY id ASC LIMIT #{limit}")
+ List<Comment> commentsForPost(@Param("post")long post,@Param("limit")int limit);
  @Update("UPDATE post_comments SET accepted_at_ms=#{at} WHERE id=#{id} AND post_id=#{post} AND accepted_at_ms IS NULL")
  int accept(@Param("post")long post,@Param("id")long id,@Param("at")long at);
  @Select("SELECT COUNT(*) FROM post_comments WHERE post_id=#{post}") long commentCount(long post);

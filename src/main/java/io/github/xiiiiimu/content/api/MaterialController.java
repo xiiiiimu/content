@@ -22,8 +22,9 @@ public class MaterialController {
   Map<String,Object> meta=readMeta(metaJson);
   List<String> tags=tagsOf(meta.get("tags"));
   boolean dl=bool(meta.get("licenseDownload"),false);boolean com=bool(meta.get("licenseCommercial"),false);
-  return materials.createDraft(user(p),str(meta.get("title")),str(meta.get("description")),tags,str(meta.get("shareMode")),str(meta.get("password")),dl,com,file.getBytes(),file.getContentType());
- }
+  String aspect=str(meta.get("aspectRatio"));
+  return materials.createDraft(user(p),str(meta.get("title")),str(meta.get("description")),tags,str(meta.get("shareMode")),str(meta.get("password")),dl,com,file.getBytes(),file.getContentType(),aspect);
+}
 
  @PostMapping(value="/api/materials/{post}/versions",consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
  public MaterialService.Created uploadVersion(@PathVariable long post,@RequestPart("file") MultipartFile file,Principal p)throws Exception{
