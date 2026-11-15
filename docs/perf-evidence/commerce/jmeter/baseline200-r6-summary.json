@@ -1,28 +1,70 @@
-[
-  {
-    "sys": 0,
-    "biz": 0,
-    "qps": 106.79,
-    "peakHttp": 200,
-    "scenario": "sign",
-    "p50": 1077,
+{
+  "head": "45086ece714c577df84e0c8bad67abf55cf7e9f7",
+  "band": "baseline200-r6",
+  "config": {
+    "hikariMaxPool": 120,
+    "jdbcSocketTimeoutMs": 60000,
+    "pipelineScanEnabled": false,
+    "redisIoThreads": 8,
+    "saleConsumeThreads": 20,
+    "saleScanDelayMillis": 50,
+    "purchaseAcceptDefersMqSend": true,
+    "jmeterTimeoutMs": 20000
+  },
+  "sign": {
     "dir": "baseline200-r6-sign-t200-20261115110651",
     "samples": 1152,
-    "p95": 6049,
-    "p99": 9988,
-    "peakSettle": 0
-  },
-  {
-    "sys": 0,
-    "biz": 0,
-    "qps": 139.24,
+    "spanSec": 10.788,
+    "requestQps": 106.79,
+    "p50Ms": 1077,
+    "p95Ms": 6049,
+    "p99Ms": 9988,
+    "systemErrors": 0,
     "peakHttp": 200,
-    "scenario": "mixed",
-    "p50": 205,
+    "peakSettle": 0,
+    "note": "High tail retained: sign P99 ≈ 10s"
+  },
+  "mixed": {
     "dir": "baseline200-r6-mixed-t200-20261115110827",
     "samples": 1992,
-    "p95": 3479,
-    "p99": 5273,
-    "peakSettle": 20
+    "windowSec": 14.306,
+    "requestQps": 139.24,
+    "systemErrors": 0,
+    "peakHttp": 200,
+    "peakSettle": 20,
+    "reconcile": "sold=paid=succReq=ents=200",
+    "byLabelWholeWindowQps": {
+      "MIX-detail": { "n": 200, "windowSec": 14.306, "qps": 13.98, "p50": 1781, "p95": 3402, "p99": 5637 },
+      "MIX-purchase": { "n": 200, "windowSec": 14.306, "qps": 13.98, "p50": 3291, "p95": 5471, "p99": 6387 },
+      "MIX-poll": { "n": 1592, "windowSec": 14.306, "qps": 111.28, "p50": 149, "p95": 829, "p99": 1372 }
+    },
+    "qpsCorrection": "baseline200-r6-mixed-qps-correction.md"
+  },
+  "tps": {
+    "settle": {
+      "evidence": "tps-window-20261115111219",
+      "windowExactSec": 20.107,
+      "commitsInWindow": 76,
+      "steadyTps": 3.78,
+      "commitsThroughDrain": 100,
+      "fullTpsIncludingDrain": 3.1,
+      "drainSec": 9.996
+    },
+    "buyerRefund": {
+      "evidence": "tps-window-20261115111219",
+      "windowExactSec": 16.676,
+      "commitsInWindow": 20,
+      "steadyTps": 1.2
+    },
+    "giveawayAutoRefund": {
+      "evidence": "tps-giveaway-auto-20261115111403",
+      "commitBurstNote": "18 commits in 0.956s commit-span throughput = 18.83 TPS (not a sustained window rate)",
+      "fullIncludingWaitNote": "4.60 TPS = 18 commits / 3.909s wall including deadline wait inside debug controller",
+      "commitsInWindow": 18,
+      "commitSpanSec": 0.956,
+      "commitBurstTps": 18.83,
+      "wallSec": 3.909,
+      "fullTpsIncludingWait": 4.6
+    }
   }
-]
+}

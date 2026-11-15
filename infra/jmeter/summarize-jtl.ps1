@@ -86,12 +86,26 @@ $summary = [ordered]@{
   p50Ms = (Pct $lat 50)
   p95Ms = (Pct $lat 95)
   p99Ms = (Pct $lat 99)
+  # Per-label QPS uses the same whole-run window as requestQps (not each label's start-ts span,
+  # which collapses under concurrent first-hit samplers and inflates e.g. MIX-detail to thousands).
+  # activeWindowSec/activeQps retained as optional "busy interval" only.
   byLabel = @($parsed | Group-Object label | ForEach-Object {
     $g = $_.Group
-    $gs = [Math]::Max(0.001, ((($g | Measure-Object ts -Maximum).Maximum) - (($g | Measure-Object ts -Minimum).Minimum)) / 1000.0)
-    @{ label=$_.Name; n=$g.Count; qps=[Math]::Round($g.Count/$gs,2); p95=(Pct @($g.elapsed) 95) }
+    $activeGs = [Math]::Max(0.001, ((($g | Measure-Object ts -Maximum).Maximum) - (($g | Measure-Object ts -Minimum).Minimum)) / 1000.0)
+    @{
+      label=$_.Name
+      n=$g.Count
+      windowSec=[Math]::Round($spanSec, 3)
+      qps=[Math]::Round($g.Count / $spanSec, 2)
+      activeWindowSec=[Math]::Round($activeGs, 3)
+      activeQps=[Math]::Round($g.Count / $activeGs, 2)
+      p50=(Pct @($g.elapsed) 50)
+      p95=(Pct @($g.elapsed) 95)
+      p99=(Pct @($g.elapsed) 99)
+    }
   })
   byClass = @($parsed | Group-Object cls | ForEach-Object { @{ cls=$_.Name; count=$_.Count } })
+  qpsNote = 'byLabel.qps = n / whole-run spanSec; byLabel.activeQps = n / label start-ts span (optional)'
 }
 $json = $summary | ConvertTo-Json -Depth 6
 if ($OutJson) { $json | Set-Content $OutJson -Encoding utf8 }

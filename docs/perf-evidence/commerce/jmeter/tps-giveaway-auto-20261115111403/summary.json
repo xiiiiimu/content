@@ -20,15 +20,18 @@
     "minResolvedAtMs": 1794712492324,
     "maxResolvedAtMs": 1794712493280,
     "commitsInWindow": 18,
-    "steadyTps": 18.83,
+    "commitBurstTps": 18.83,
+    "commitBurstLabel": "18 commits in 0.956s commit-span throughput (not a sustained steady-window rate)",
     "fullTpsIncludingWait": 4.6,
+    "fullIncludingWaitLabel": "4.60 TPS = 18 commits / 3.909s wall including deadline wait",
+    "steadyTps": 18.83,
     "sampleSize": 18,
     "sampleInsufficient": false,
     "notificationsInWindow": 18,
     "giveawayEntitlementsActive": 19,
     "purchaseEntitlementsRemaining": 1,
     "ordersRefundedGiveawayAuto": 19,
-    "note": "Winners keep GIVEAWAY entitlement; PURCHASE entitlement revoked on auto-refund (IT contract). Wall includes deadline sleep inside debug controller."
+    "note": "Winners keep GIVEAWAY entitlement; PURCHASE entitlement revoked on auto-refund (IT contract). Prefer commitBurstTps / fullTpsIncludingWait labels over calling 18.83 a steady window TPS."
   },
   "boundaries": {
     "payment": "simulated",

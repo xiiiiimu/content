@@ -15,28 +15,44 @@
   "p99Ms": 5273,
   "byLabel": [
     {
+      "activeWindowSec": 0.108,
       "n": 200,
       "p95": 3402,
-      "label": "MIX-detail",
-      "qps": 1851.85
+      "qps": 13.98,
+      "activeQps": 1851.85,
+      "p50": 1781,
+      "windowSec": 14.306,
+      "p99": 5637,
+      "label": "MIX-detail"
     },
     {
+      "activeWindowSec": 10.57,
       "n": 1592,
       "p95": 829,
-      "label": "MIX-poll",
-      "qps": 150.61
+      "qps": 111.28,
+      "activeQps": 150.61,
+      "p50": 149,
+      "windowSec": 14.306,
+      "p99": 1372,
+      "label": "MIX-poll"
     },
     {
+      "activeWindowSec": 6.121,
       "n": 200,
       "p95": 5471,
-      "label": "MIX-purchase",
-      "qps": 32.67
+      "qps": 13.98,
+      "activeQps": 32.67,
+      "p50": 3291,
+      "windowSec": 14.306,
+      "p99": 6387,
+      "label": "MIX-purchase"
     }
   ],
   "byClass": [
     {
-      "cls": "OK",
-      "count": 1992
+      "count": 1992,
+      "cls": "OK"
     }
-  ]
+  ],
+  "qpsNote": "byLabel.qps = n / whole-run spanSec; byLabel.activeQps = n / label start-ts span (optional)"
 }

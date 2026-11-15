@@ -71,7 +71,15 @@ Machine: single-box JMeter 5.6.3 + Java 21. TimeoutMs=20000 unchanged. Steady: D
 | sign (r6) | 1152 | 106.8 | 1077 | 6049 | 9988 | 1152 | 0 | **0** | 200 | 0 |
 | mixed (r6) | 1992 | 139.2 | 205 | 3479 | 5273 | 1992 | 0 | **0** | 200 | 20 |
 
-Mixed by label (r6): MIX-detail QPS≈1852 p95=3402; MIX-purchase QPS=32.7 p50=3291 p95=5471 p99=6387; MIX-poll QPS=150.6 p95=829. Reconcile after MQ drain: sold=paid=succReq=ents=**200**/200 (`baseline200-r6-mixed-reconcile.txt`). High tails retained (sign p99≈10s; purchase p99≈6.4s) — not closed by widening TimeoutMs.
+Mixed by label (r6, **whole-run windowSec=14.306**; all 1992 rows are HTTP samplers with URL; 200+200+1592=1992). See `baseline200-r6-mixed-qps-correction.md`.
+
+| Label | n | windowSec | QPS | P50 | P95 | P99 | activeQps (optional) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| MIX-detail | 200 | 14.306 | **13.98** | 1781 | 3402 | 5637 | 1851.85 (start-span 0.108s; not for capacity) |
+| MIX-purchase | 200 | 14.306 | **13.98** | 3291 | 5471 | 6387 | 32.67 |
+| MIX-poll | 1592 | 14.306 | **111.28** | 149 | 829 | 1372 | 150.61 |
+
+Reconcile after MQ drain: sold=paid=succReq=ents=**200**/200 (`baseline200-r6-mixed-reconcile.txt`). High tails retained (**sign P99 ≈ 10s**; purchase p99≈6.4s) — not closed by widening TimeoutMs. JVM keeps **`pipeline.scan-enabled=false`** for commerce load (see `config-before-after-sign-mixed.md`).
 
 ### Prior r4 archive (retained; sign/mixed failed bar)
 
@@ -98,11 +106,11 @@ Flash reconcile: sold=paid=ents=**80**/80. Intermediate: r5 sign sys=0 / mixed 4
 
 Same measurement contract: window `[t0,tWindowEnd)` commits / exact seconds = steady; through-drain / full wall = full TPS. Deduped by unique order / refund row for the run’s campaign.
 
-| Metric | Window | Steady | Full / note | Evidence |
+| Metric | Window | Steady / burst | Full / note | Evidence |
 |---|---|---|---|---|
 | Settle (PAID) | 20.107s; backlog 0→19; drain 9.996s | **3.78 TPS** (76 in window) | **3.10 TPS** (100 through drain / 32.223s) | `tps-window-20261115111219` |
 | Buyer refund | 16.676s | **1.20 TPS** (20/20) | sample OK | same |
-| Giveaway auto-refund | wall 3.909s; commit span 0.956s | **18.83 TPS** (18 commits) | **4.60 TPS** incl. deadline wait; smoke 1 refund+1 notify OK | `tps-giveaway-auto-20261115111403` |
+| Giveaway auto-refund | commit span 0.956s; wall 3.909s | **18.83** = 18 commits in 0.956s **提交段吞吐** (not sustained steady-window) | **4.60** = 含等待的全程吞吐 (18/3.909s); smoke 1 refund+1 notify OK | `tps-giveaway-auto-20261115111403` |
 
 Legacy r4 **4.82 TPS / ~20s / 100 单**: taken from wall that **included ~0.7s drain** (fullTps style: 100/≈20.744s), not steady-in-window. Corrected split above. Giveaway route was 404 on `/api/materials/{post}/giveaways`; fixed via `POST /api/sale-debug/giveaway-auto-refund` (fault-hooks, same service path as IT).
 
@@ -112,11 +120,13 @@ Reconcile TPS settle campaign: sold=80, orders PAID|REFUNDED=100, active purchas
 
 | Band | Status |
 |---|---|
-| baseline 200 | **Passed** (r6: sign+mixed sys=0, reconcile OK, three TPS windows valid) |
-| 5,000 | **待验** — no remote injectors on this workstation; kit ready in `infra/jmeter/distributed/` |
+| baseline 200 | **Passed** (r6: sign+mixed sys=0, reconcile OK, three TPS windows valid; QPS correction applied) |
+| 5,000 | **待验** — injector inventory empty on this workstation |
 | 10,000 | **待验** — same |
 
-Do not report configured thread sum as capacity when launch failed. Actual single-box launch ceiling used here: **200**.
+Available here: control host `LAPTOP-FUI34S6T` (16 vCPU / ~16 GB), JMeter 5.6.3, actual concurrent launch **200**. Missing: remote injector list, per-node JMeter/Java confirmations, SUT URL reachable from injectors. Copy-paste shard/thread tables and launch commands: `infra/jmeter/distributed/README.md`.
+
+Do not report configured thread sum as capacity when launch failed.
 
 ## Boundaries
 
