@@ -66,10 +66,10 @@ if (-not $env:CONTENT_REDIS_COMPUTATION_THREADS) { $env:CONTENT_REDIS_COMPUTATIO
 $args = @(
   '-jar', $jar,
   '--spring.profiles.active=pipeline',
-  '--server.tomcat.threads.max=400',
-  '--server.tomcat.threads.min-spare=50',
-  '--server.tomcat.accept-count=500',
-  '--server.tomcat.max-connections=10000',
+  '--server.tomcat.threads.max=800',
+  '--server.tomcat.threads.min-spare=80',
+  '--server.tomcat.accept-count=2000',
+  '--server.tomcat.max-connections=20000',
   # Pause delivery scan during commerce JMeter (Redis recovery DEAD storm contended JDBC).
   '--content.pipeline.scan-enabled=false',
   '--content.media.enabled=true',

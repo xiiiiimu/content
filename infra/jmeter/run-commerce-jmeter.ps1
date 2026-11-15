@@ -23,7 +23,9 @@ param(
   [string]$ApiBase = 'http://127.0.0.1:28080',
   [switch]$SkipPreflight,
   [int]$WarmupThreads = 5,
-  [int]$WarmupSec = 3
+  [int]$WarmupSec = 3,
+  [string]$ClientKeyMode = 'csv',
+  [switch]$SkipHtml
 )
 
 $ErrorActionPreference = 'Stop'
@@ -90,7 +92,8 @@ function Invoke-JMeter([hashtable]$P, [string]$JtlPath, [string]$LogPath, [strin
     "-JcsvUsers=$($P.csvUsers)",
     "-JcampaignId=$($P.campaignId)",
     "-JpostId=$($P.postId)",
-    "-JstartEpochMs=$($P.startEpochMs)"
+    "-JstartEpochMs=$($P.startEpochMs)",
+    "-JclientKeyMode=$($P.clientKeyMode)"
   )
   $jmx = Join-Path $PSScriptRoot 'commerce-sale.jmx'
   # Quote every -J so paths with spaces survive cmd.exe; capture error bodies for 503 classification.
@@ -125,7 +128,7 @@ if ($WarmupThreads -gt 0 -and $WarmupSec -gt 0 -and $Scenario -in @('detail','pu
   [void](Invoke-JMeter @{
     apiBase=$ApiBase; threads=$WarmupThreads; rampSec=1; durationSec=$WarmupSec; loops=-1
     timeoutMs=$TimeoutMs; scenario=$Scenario; csvUsers=$CsvUsers
-    campaignId=$CampaignId; postId=$PostId; startEpochMs=0
+    campaignId=$CampaignId; postId=$PostId; startEpochMs=0; clientKeyMode=$ClientKeyMode
   } (Join-Path $warmupDir 'warmup.jtl') (Join-Path $warmupDir 'warmup.log') $null)
   try { Invoke-RestMethod -Method Post -Uri "$ApiBase/api/sale-debug/reset-inflight-peaks" -ContentType 'application/json' -Body '{}' -TimeoutSec 3 | Out-Null } catch {}
 }
@@ -153,11 +156,12 @@ $cpuBefore = (Get-CimInstance Win32_Processor | Measure-Object -Property LoadPer
 $memBefore = Get-CimInstance Win32_OperatingSystem | Select-Object FreePhysicalMemory,TotalVisibleMemorySize
 $formalStartMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
 
+$htmlOut = if ($SkipHtml) { $null } else { $html }
 $jmExit = Invoke-JMeter @{
   apiBase=$ApiBase; threads=$Threads; rampSec=$RampSec; durationSec=$durationProp; loops=$effectiveLoops
   timeoutMs=$TimeoutMs; scenario=$Scenario; csvUsers=$CsvUsers
-  campaignId=$CampaignId; postId=$PostId; startEpochMs=$StartEpochMs
-} $jtl $jmlog $html
+  campaignId=$CampaignId; postId=$PostId; startEpochMs=$StartEpochMs; clientKeyMode=$ClientKeyMode
+} $jtl $jmlog $htmlOut
 
 $sw.Stop()
 $formalEndMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()

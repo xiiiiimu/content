@@ -1,0 +1,52 @@
+{
+  "band": "purchase-soldout-t500",
+  "kind": "sold-out-continuous",
+  "dir": "purchase-soldout-t500-purchase-t500-20261116000806",
+  "configuredThreads": 500,
+  "peakActiveThreads": 411.0,
+  "peakHttpInFlight": 409.0,
+  "peakSettleInFlight": 0.0,
+  "emitSpanMs": 14482,
+  "hostBefore": {
+    "at": "2026-11-16T00:08:03.9406540+08:00",
+    "freeRamGB": 2.73,
+    "totalRamGB": 15.7,
+    "cpuLoad": 33.0
+  },
+  "hostAfter": {
+    "at": "2026-11-16T00:08:47.0687749+08:00",
+    "freeRamGB": 2.59,
+    "totalRamGB": 15.7,
+    "cpuLoad": 10.0
+  },
+  "classification": {
+    "postPurchaseSamples": 1232,
+    "windowSec": 14.535,
+    "startTsSpanSec": 14.482,
+    "windowEndInclusiveSec": 14.535,
+    "requestQps": 84.76,
+    "soldOut": 1230,
+    "soldOutQps": 84.62,
+    "soldOutP95": 4216,
+    "soldOutP99": 4791,
+    "acceptHttpOk": 2,
+    "acceptQps": 0.14,
+    "acceptP95": 2560,
+    "acceptP99": 2560,
+    "idempotentReplay": 0,
+    "bizOther": 0,
+    "systemErrors": 0,
+    "timeouts": 0,
+    "connectFail": 0,
+    "http5xx": 0,
+    "peakAllThreads": 411.0
+  },
+  "campaignId": 67,
+  "throughput": {
+    "label": "sold-out continuous; SOLD_OUT QPS over POST-purchase window",
+    "soldOutQps": 84.62,
+    "soldOutP95": 4216,
+    "soldOutP99": 4791,
+    "requestQps": 84.76
+  }
+}

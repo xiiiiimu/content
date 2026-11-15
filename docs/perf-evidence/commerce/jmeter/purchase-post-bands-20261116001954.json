@@ -1,0 +1,246 @@
+[
+  {
+    "band": "purchase-soldout-t500",
+    "kind": "sold-out-continuous",
+    "dir": "purchase-soldout-t500-purchase-t500-20261116000806",
+    "configuredThreads": 500,
+    "peakActiveThreads": 411.0,
+    "peakHttpInFlight": 409.0,
+    "peakSettleInFlight": 0.0,
+    "emitSpanMs": 14482,
+    "hostBefore": {
+      "at": "2026-11-16T00:08:03.9406540+08:00",
+      "freeRamGB": 2.73,
+      "totalRamGB": 15.7,
+      "cpuLoad": 33.0
+    },
+    "hostAfter": {
+      "at": "2026-11-16T00:08:47.0687749+08:00",
+      "freeRamGB": 2.59,
+      "totalRamGB": 15.7,
+      "cpuLoad": 10.0
+    },
+    "classification": {
+      "postPurchaseSamples": 1232,
+      "windowSec": 14.535,
+      "startTsSpanSec": 14.482,
+      "windowEndInclusiveSec": 14.535,
+      "requestQps": 84.76,
+      "soldOut": 1230,
+      "soldOutQps": 84.62,
+      "soldOutP95": 4216,
+      "soldOutP99": 4791,
+      "acceptHttpOk": 2,
+      "acceptQps": 0.14,
+      "acceptP95": 2560,
+      "acceptP99": 2560,
+      "idempotentReplay": 0,
+      "bizOther": 0,
+      "systemErrors": 0,
+      "timeouts": 0,
+      "connectFail": 0,
+      "http5xx": 0,
+      "peakAllThreads": 411.0
+    },
+    "campaignId": 67,
+    "throughput": {
+      "label": "sold-out continuous; SOLD_OUT QPS over POST-purchase window",
+      "soldOutQps": 84.62,
+      "soldOutP95": 4216,
+      "soldOutP99": 4791,
+      "requestQps": 84.76
+    }
+  },
+  {
+    "band": "purchase-stock-t500",
+    "kind": "in-stock-burst",
+    "dir": "purchase-stock-t500-purchase-t500-20261116001011",
+    "configuredThreads": 500,
+    "peakActiveThreads": 231.0,
+    "peakHttpInFlight": 227.0,
+    "peakSettleInFlight": 20.0,
+    "emitSpanMs": 14862,
+    "hostBefore": {
+      "at": "2026-11-16T00:10:09.8124655+08:00",
+      "freeRamGB": 2.45,
+      "totalRamGB": 15.7,
+      "cpuLoad": 25.0
+    },
+    "hostAfter": {
+      "at": "2026-11-16T00:10:53.1276390+08:00",
+      "freeRamGB": 2.52,
+      "totalRamGB": 15.7,
+      "cpuLoad": 8.0
+    },
+    "classification": {
+      "postPurchaseSamples": 500,
+      "windowSec": 16.236,
+      "startTsSpanSec": 14.862,
+      "windowEndInclusiveSec": 16.236,
+      "requestQps": 30.8,
+      "soldOut": 0,
+      "soldOutQps": 0.0,
+      "soldOutP95": null,
+      "soldOutP99": null,
+      "acceptHttpOk": 500,
+      "acceptQps": 30.8,
+      "acceptP95": 2940,
+      "acceptP99": 3202,
+      "idempotentReplay": 0,
+      "bizOther": 0,
+      "systemErrors": 0,
+      "timeouts": 0,
+      "connectFail": 0,
+      "http5xx": 0,
+      "peakAllThreads": 231.0
+    },
+    "campaignId": 68,
+    "throughput": {
+      "label": "burst (Loops=1 first-buy); not steady-window accept QPS unless buyers/stock cover full duration",
+      "uniqueProcessingAccepts": 500,
+      "acceptQpsFromHttp": 30.8,
+      "paidInFormalWindow": 117,
+      "settleSteadyTps": 3.25,
+      "paidThroughDrain": 500,
+      "settleFullTps": 7.03,
+      "drain": {
+        "drainSec": 27.952,
+        "processingLeft": 0
+      },
+      "formalWindowSec": 36.052,
+      "fullWallSec": 71.114
+    },
+    "reconcile": {
+      "sold": 500,
+      "paid": 500,
+      "succReq": 500,
+      "ents": 500,
+      "processing": 0,
+      "stockCap": 500,
+      "ok": true,
+      "raw": "500\t500\t500\t500\t0\t500"
+    }
+  },
+  {
+    "band": "purchase-soldout-t1000",
+    "kind": "sold-out-continuous",
+    "dir": "purchase-soldout-t1000-purchase-t1000-20261116001415",
+    "configuredThreads": 1000,
+    "peakActiveThreads": 424.0,
+    "peakHttpInFlight": 420.0,
+    "peakSettleInFlight": 0.0,
+    "emitSpanMs": 37606,
+    "hostBefore": {
+      "at": "2026-11-16T00:14:12.4977638+08:00",
+      "freeRamGB": 2.27,
+      "totalRamGB": 15.7,
+      "cpuLoad": 39.0
+    },
+    "hostAfter": {
+      "at": "2026-11-16T00:15:27.3960674+08:00",
+      "freeRamGB": 2.85,
+      "totalRamGB": 15.7,
+      "cpuLoad": 16.0
+    },
+    "classification": {
+      "postPurchaseSamples": 2209,
+      "windowSec": 37.637,
+      "startTsSpanSec": 37.606,
+      "windowEndInclusiveSec": 37.637,
+      "requestQps": 58.69,
+      "soldOut": 2207,
+      "soldOutQps": 58.64,
+      "soldOutP95": 3556,
+      "soldOutP99": 4371,
+      "acceptHttpOk": 2,
+      "acceptQps": 0.05,
+      "acceptP95": 33,
+      "acceptP99": 33,
+      "idempotentReplay": 0,
+      "bizOther": 0,
+      "systemErrors": 0,
+      "timeouts": 0,
+      "connectFail": 0,
+      "http5xx": 0,
+      "peakAllThreads": 424.0
+    },
+    "campaignId": 69,
+    "throughput": {
+      "label": "sold-out continuous; SOLD_OUT QPS over POST-purchase window",
+      "soldOutQps": 58.64,
+      "soldOutP95": 3556,
+      "soldOutP99": 4371,
+      "requestQps": 58.69
+    }
+  },
+  {
+    "band": "purchase-stock-t1000",
+    "kind": "in-stock-burst",
+    "dir": "purchase-stock-t1000-purchase-t1000-20261116001804",
+    "configuredThreads": 1000,
+    "peakActiveThreads": 234.0,
+    "peakHttpInFlight": 231.0,
+    "peakSettleInFlight": 20.0,
+    "emitSpanMs": 39460,
+    "hostBefore": {
+      "at": "2026-11-16T00:18:01.6500067+08:00",
+      "freeRamGB": 2.67,
+      "totalRamGB": 15.7,
+      "cpuLoad": 49.0
+    },
+    "hostAfter": {
+      "at": "2026-11-16T00:19:13.2612863+08:00",
+      "freeRamGB": 2.62,
+      "totalRamGB": 15.7,
+      "cpuLoad": 0.0
+    },
+    "classification": {
+      "postPurchaseSamples": 1000,
+      "windowSec": 39.783,
+      "startTsSpanSec": 39.46,
+      "windowEndInclusiveSec": 39.783,
+      "requestQps": 25.14,
+      "soldOut": 0,
+      "soldOutQps": 0.0,
+      "soldOutP95": null,
+      "soldOutP99": null,
+      "acceptHttpOk": 1000,
+      "acceptQps": 25.14,
+      "acceptP95": 2733,
+      "acceptP99": 3187,
+      "idempotentReplay": 0,
+      "bizOther": 0,
+      "systemErrors": 0,
+      "timeouts": 0,
+      "connectFail": 0,
+      "http5xx": 0,
+      "peakAllThreads": 234.0
+    },
+    "campaignId": 70,
+    "throughput": {
+      "label": "burst (Loops=1 first-buy); not steady-window accept QPS unless buyers/stock cover full duration",
+      "uniqueProcessingAccepts": 1000,
+      "acceptQpsFromHttp": 25.14,
+      "paidInFormalWindow": 481,
+      "settleSteadyTps": 7.98,
+      "paidThroughDrain": 1000,
+      "settleFullTps": 9.34,
+      "drain": {
+        "drainSec": 36.082,
+        "processingLeft": 0
+      },
+      "formalWindowSec": 60.249,
+      "fullWallSec": 107.029
+    },
+    "reconcile": {
+      "sold": 1000,
+      "paid": 1000,
+      "succReq": 1000,
+      "ents": 1000,
+      "processing": 0,
+      "stockCap": 1000,
+      "ok": true,
+      "raw": "1000\t1000\t1000\t1000\t0\t1000"
+    }
+  }
+]

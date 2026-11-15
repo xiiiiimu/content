@@ -116,17 +116,38 @@ Legacy r4 **4.82 TPS / ~20s / 100 单**: taken from wall that **included ~0.7s d
 
 Reconcile TPS settle campaign: sold=80, orders PAID|REFUNDED=100, active purchase ents=80 after 20 buyer refunds. Giveaway: winners keep GIVEAWAY ents; PURCHASE revoked on auto-refund.
 
+## Purchase-POST local bands (500 / 1,000) — not the 200 multi-API baseline
+
+Orchestrator: `infra/jmeter/run-purchase-post-bands.ps1` → `run-commerce-jmeter.ps1` (**no** `MaxLocalThreads` clamp; that clamp exists only in `run-formal-bands.ps1`). Scenario=`purchase` (POST only). Sold-out uses `-JclientKeyMode=unique`. Index JSON: `purchase-post-bands-20261116001954.json`.
+
+JVM for this series: Tomcat `threads.max=800`, `accept-count=2000`, `max-connections=20000` (after first 500 attempt showed CONNECT_FAIL).
+
+| Run | cfg threads | peakActive | peakHttp | peakSettle | POST n | metric | P95/P99 | sys (connect) | reconcile |
+|---|---:|---:|---:|---:|---:|---|---|---:|---|
+| sold-out 500 (retest) | 500 | **411** | 409 | 0 | 1232 | SOLD_OUT QPS **84.62** (1230) | 4216 / 4791 | **0** | n/a (reject path) |
+| in-stock 500 (retest) | 500 | **231** | 227 | 20 | 500 | burst accept QPS **30.8**; settle full **7.03** TPS (500/≈55s incl drain 28s) | 2940 / 3202 | **0** | sold=paid=ents=**500**/500 |
+| sold-out 1000 | 1000 | **424** | 420 | 0 | 2209 | SOLD_OUT QPS **58.64** (2207) | 3556 / 4371 | **0** | n/a |
+| in-stock 1000 | 1000 | **234** | 231 | 20 | 1000 | burst accept QPS **25.14**; settle full **9.34** TPS (1000, drain 36s) | 2733 / 3187 | **0** | sold=paid=ents=**1000**/1000 |
+
+Notes:
+- In-stock runs are **Loops=1 first-buy burst** (not steady-window accept QPS). Polling/settle after accept; drain times above.
+- Peak active ≪ configured on stock bursts (~230) and ~410–420 on sold-out continuous — **injector-side** limit (RAM ~2.5GB free, single-box JMeter), not silent downscale in runner. Samples still completed for Loops=1.
+- Earlier attempt `purchase-post-bands-20261116000502` / `…000208`+`…00405`: peakActive=500 but **CONNECT_FAIL** 200/190 — **server accept** limit before Tomcat bump; JTLs retained.
+- **2000** skipped: stock@1000 peakActive=234 &lt; 0.8×1000 effective-launch bar.
+- Commands: `pwsh -File infra/jmeter/run-purchase-post-bands.ps1 -SkipSmoke -Band1 500 -Band2 1000 -SoldOutDurationSec 20 -Try2000After1000`
+
 ## Bands 5,000 / 10,000
 
 | Band | Status |
 |---|---|
 | baseline 200 | **Passed** (r6: sign+mixed sys=0, reconcile OK, three TPS windows valid; QPS correction applied) |
-| 5,000 | **待验** — injector inventory empty on this workstation |
+| purchase-POST 500/1000 | **Executed** (see table above; effective concurrency ~230–420) |
+| 5,000 | **待验** — injector inventory empty; need remote injectors |
 | 10,000 | **待验** — same |
 
-Available here: control host `LAPTOP-FUI34S6T` (16 vCPU / ~16 GB), JMeter 5.6.3, actual concurrent launch **200**. Missing: remote injector list, per-node JMeter/Java confirmations, SUT URL reachable from injectors. Copy-paste shard/thread tables and launch commands: `infra/jmeter/distributed/README.md`.
+Available here: control host `LAPTOP-FUI34S6T` (16 vCPU / ~16 GB), JMeter 5.6.3. Missing for 5k/10k: remote injector list. Playbook: `infra/jmeter/distributed/README.md`.
 
-Do not report configured thread sum as capacity when launch failed.
+Do not report configured thread sum as capacity when peakActive ≪ configured.
 
 ## Boundaries
 

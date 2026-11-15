@@ -143,7 +143,7 @@ if (start &gt; 0) {
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{"clientKey":"${clientKey}"}</stringProp>
+                  <stringProp name="Argument.value">{"clientKey":"${effClientKey}"}</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
@@ -152,6 +152,21 @@ if (start &gt; 0) {
             <stringProp name="HTTPSampler.response_timeout">${timeoutMs}</stringProp>
           </HTTPSamplerProxy>
           <hashTree>
+            <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="eff-client-key" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">def mode = props.get(&quot;clientKeyMode&quot;)
+if (&quot;unique&quot;.equals(mode)) {
+  vars.put(&quot;effClientKey&quot;, java.util.UUID.randomUUID().toString().replace(&quot;-&quot;, &quot;&quot;))
+} else {
+  def ck = vars.get(&quot;clientKey&quot;)
+  vars.put(&quot;effClientKey&quot;, ck == null ? &quot;&quot; : ck)
+}
+</stringProp>
+            </JSR223PreProcessor>
+            <hashTree/>
             <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="extract-reservation" enabled="true">
               <stringProp name="RegexExtractor.refname">reservationId</stringProp>
               <stringProp name="RegexExtractor.regex">"reservationId"\s*:\s*"([^"]+)"</stringProp>

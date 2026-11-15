@@ -85,8 +85,9 @@ $bag = [System.Collections.Concurrent.ConcurrentBag[object]]::new()
   }
   if (-not $ok) { throw "follow failed for $($s.userId)" }
   ($using:bag).Add([pscustomobject]@{ userId=$s.userId; token=$s.token; clientKey="jm-$($s.userId)" }) | Out-Null
-} -ThrottleLimit 8
+} -ThrottleLimit 4
 $buyerObjs = @($bag)
+if ($buyerObjs.Count -lt $Buyers) { throw "seed buyers incomplete got=$($buyerObjs.Count) want=$Buyers" }
 foreach ($b in ($buyerObjs | Sort-Object userId)) {
   Add-Content $buyersPath -Value "$($b.userId),$($b.token),$($b.clientKey)"
 }
