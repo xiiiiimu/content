@@ -51,9 +51,16 @@ $jar = Join-Path $RepoRoot 'target/content-0.1.0-SNAPSHOT.jar'
 if (-not (Test-Path $jar)) { throw "missing $jar — re-run with -Package" }
 
 # FeedConfiguration overwrites spring.datasource.hikari.*; use env (or -D before -jar).
-if (-not $env:CONTENT_HIKARI_MAX_POOL) { $env:CONTENT_HIKARI_MAX_POOL = '80' }
-if (-not $env:CONTENT_HIKARI_CONNECTION_TIMEOUT_MS) { $env:CONTENT_HIKARI_CONNECTION_TIMEOUT_MS = '10000' }
-if (-not $env:CONTENT_MYBATIS_STATEMENT_TIMEOUT_SECONDS) { $env:CONTENT_MYBATIS_STATEMENT_TIMEOUT_SECONDS = '10' }
+# Before (r4 residual 503/500): pool=80, jdbc socketTimeout hard-coded 5000 → Communications link failure ~5.4s.
+# After: pool=120, jdbc socket/connect timeouts raised; pipeline scan off; Redis Lettuce io/cpu=8; MQ accept deferred.
+if (-not $env:CONTENT_HIKARI_MAX_POOL) { $env:CONTENT_HIKARI_MAX_POOL = '120' }
+if (-not $env:CONTENT_HIKARI_CONNECTION_TIMEOUT_MS) { $env:CONTENT_HIKARI_CONNECTION_TIMEOUT_MS = '15000' }
+if (-not $env:CONTENT_HIKARI_JDBC_CONNECT_TIMEOUT_MS) { $env:CONTENT_HIKARI_JDBC_CONNECT_TIMEOUT_MS = '10000' }
+if (-not $env:CONTENT_HIKARI_JDBC_SOCKET_TIMEOUT_MS) { $env:CONTENT_HIKARI_JDBC_SOCKET_TIMEOUT_MS = '60000' }
+if (-not $env:CONTENT_MYBATIS_STATEMENT_TIMEOUT_SECONDS) { $env:CONTENT_MYBATIS_STATEMENT_TIMEOUT_SECONDS = '30' }
+# Lettuce default 2/2 starves redis.reserve under 200-way purchase (mixed Read timed out).
+if (-not $env:CONTENT_REDIS_IO_THREADS) { $env:CONTENT_REDIS_IO_THREADS = '8' }
+if (-not $env:CONTENT_REDIS_COMPUTATION_THREADS) { $env:CONTENT_REDIS_COMPUTATION_THREADS = '8' }
 
 # Tomcat accept backlog / thread pool sized for concurrent connect storms (200+ clients).
 $args = @(
@@ -63,6 +70,8 @@ $args = @(
   '--server.tomcat.threads.min-spare=50',
   '--server.tomcat.accept-count=500',
   '--server.tomcat.max-connections=10000',
+  # Pause delivery scan during commerce JMeter (Redis recovery DEAD storm contended JDBC).
+  '--content.pipeline.scan-enabled=false',
   '--content.media.enabled=true',
   "--content.media.s3-endpoint=$($env:CONTENT_S3_ENDPOINT)",
   "--content.media.access-key=$($env:CONTENT_S3_ACCESS_KEY)",
@@ -72,11 +81,15 @@ $args = @(
   '--content.sale.producer-enabled=true',
   '--content.sale.consumer-enabled=true',
   '--content.sale.scan-enabled=true',
+  # Fast pending-MQ drain now that purchase accept no longer sync-sends (default was 1000ms / 50).
+  '--content.sale.scan-delay-millis=50',
   '--content.sale.manual-settle=true',
   '--content.sale.fault-hooks=true',
   '--content.sale.namesrv=127.0.0.1:29876',
   '--content.sale.topic=content-sale',
-  '--content.sale.settle-delay-ms=0'
+  '--content.sale.settle-delay-ms=0',
+  # Default 20: bumping to 48 worsened mixed TIMEOUTs (JDBC lockCampaign contention).
+  '--content.sale.consume-threads=20'
 )
 if (-not $SkipAssistant -and $env:CONTENT_ASSISTANT_PYTHON_URL) {
   $args += "--content.assistant.python-url=$($env:CONTENT_ASSISTANT_PYTHON_URL)"

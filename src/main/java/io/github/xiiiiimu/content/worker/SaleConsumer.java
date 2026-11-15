@@ -9,15 +9,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 /** Consumes PurchaseSettle; ACK only after SaleService.settle reaches a durable terminal state. */
-public final class SaleConsumer implements AutoCloseable {
+ public final class SaleConsumer implements AutoCloseable {
  private final SaleService sales;private final String namesrv;private final String topic;private final int metadataTimeout;
- private final long settleDelayMs;
+ private final long settleDelayMs;private final int consumeThreads;
  private DefaultMQPushConsumer consumer;
  public SaleConsumer(SaleService sales,String namesrv,String topic,int metadataTimeout){
-  this(sales,namesrv,topic,metadataTimeout,0);
+  this(sales,namesrv,topic,metadataTimeout,0,20);
  }
  public SaleConsumer(SaleService sales,String namesrv,String topic,int metadataTimeout,long settleDelayMs){
-  this.sales=sales;this.namesrv=namesrv;this.topic=topic;this.metadataTimeout=metadataTimeout;this.settleDelayMs=Math.max(0,settleDelayMs);
+  this(sales,namesrv,topic,metadataTimeout,settleDelayMs,20);
+ }
+ public SaleConsumer(SaleService sales,String namesrv,String topic,int metadataTimeout,long settleDelayMs,int consumeThreads){
+  this.sales=sales;this.namesrv=namesrv;this.topic=topic;this.metadataTimeout=metadataTimeout;
+  this.settleDelayMs=Math.max(0,settleDelayMs);this.consumeThreads=Math.max(4,consumeThreads);
  }
  public synchronized void start()throws Exception{
   if(consumer!=null)return;
@@ -27,6 +31,8 @@ public final class SaleConsumer implements AutoCloseable {
    c.setNamesrvAddr(namesrv);c.setInstanceName(UUID.randomUUID().toString());c.setVipChannelEnabled(false);
    c.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_LAST_OFFSET);
    c.setMqClientApiTimeout(metadataTimeout);
+   // Default RocketMQ pool is 20; under 200-way flash settle locks starve purchase JDBC (mixed TIMEOUT).
+   c.setConsumeThreadMin(consumeThreads);c.setConsumeThreadMax(consumeThreads);
    c.subscribe(topic,"PurchaseSettle");
    c.registerMessageListener((MessageListenerConcurrently)(messages,context)->{
     try{

@@ -95,8 +95,9 @@ public final class SaleService {
    settle(reservationId);
    return toPurchase(db.request(reservationId));
   }
-  enqueue(reservationId);
-  // Async path: always surface PROCESSING on the accepting response; clients poll for terminal state.
+  // Accept path must not block on RocketMQ producer RTT: under 200-way mixed, sync send + settle JDBC
+  // contention pushed MIX-purchase past JMeter TimeoutMs=20000 (Read timed out). Leave mq_sent unset;
+  // SalePendingScanner.flushPending owns durable send (scan-enabled=true in commerce JVM).
   var req=db.request(reservationId);
   return new PurchaseView(req.reservationId(),"PROCESSING",req.rejectReason(),req.orderId(),req.campaignId(),req.postId());
  }

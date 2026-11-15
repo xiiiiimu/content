@@ -46,9 +46,10 @@ public class SaleConfiguration {
                            @Value("${content.sale.namesrv:${content.relay.namesrv:127.0.0.1:9876}}")String namesrv,
                            @Value("${content.sale.topic:content-sale}")String topic,
                            @Value("${content.sale.metadata-timeout-millis:3000}")int timeout,
-                           @Value("${content.sale.settle-delay-ms:0}")long settleDelayMs){
-  return new SaleConsumer(sales,namesrv,topic,timeout,settleDelayMs);
- }
+                           @Value("${content.sale.settle-delay-ms:0}")long settleDelayMs,
+                           @Value("${content.sale.consume-threads:20}")int consumeThreads){
+  return new SaleConsumer(sales,namesrv,topic,timeout,settleDelayMs,consumeThreads);
+}
 
  @EnableScheduling
  @ConditionalOnProperty(name="content.sale.scan-enabled",havingValue="true")
@@ -59,6 +60,6 @@ public class SaleConfiguration {
   private final SaleService sales;
   SalePendingScanner(SaleService sales){this.sales=sales;}
   @Scheduled(fixedDelayString="${content.sale.scan-delay-millis:1000}")
-  public void tick(){sales.flushPending(50);}
+  public void tick(){sales.flushPending(200);}
  }
 }

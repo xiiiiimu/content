@@ -1,14 +1,16 @@
 <#
 .SYNOPSIS
-  Scenario C helper: measure settle / buyer-refund / giveaway-auto-refund TPS in a fixed window
-  by counting distinct MySQL committed business rows (not HTTP retries / MQ redeliveries).
+  Unified TPS windows: settle / buyer-refund (giveaway-auto is run-tps-giveaway-auto.ps1).
+  Steady TPS = commits in [t0,tWindowEnd] / windowSec.
+  Full TPS = commits through drain / (window+drain).
+  Old r4 figure 4.82 TPS = 100 PAID / ~20.744s wall that included drain (~0.7s) — see INDEX.
 #>
 #Requires -Version 7
 param(
   [string]$ApiBase = 'http://127.0.0.1:28080',
   [int]$Buyers = 100,
   [int]$Stock = 100,
-  [int]$WindowSec = 30,
+  [int]$WindowSec = 20,
   [string]$EvidenceDir = 'docs/perf-evidence/commerce/jmeter',
   [string]$MysqlContainer = 'content-mysql-1',
   [string]$MysqlUser = 'content',
@@ -72,6 +74,8 @@ $suffix = -join ((97..122) | Get-Random -Count 4 | ForEach-Object { [char]$_ })
   ($using:sessions).Add($s) | Out-Null
 } -ThrottleLimit 6
 
+# --- Settle window ---
+$backlogStart = [int](Sql "SELECT COUNT(*) FROM material_purchase_requests WHERE campaign_id=$($camp.id) AND state='PROCESSING'")
 $t0 = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
 $sw = [Diagnostics.Stopwatch]::StartNew()
 @($sessions) | ForEach-Object -Parallel {
@@ -82,28 +86,31 @@ $sw = [Diagnostics.Stopwatch]::StartNew()
     Invoke-WebRequest -Method Post -Uri "$ApiBase/api/sale-campaigns/$cid/purchase" -Headers $H -ContentType 'application/json' -Body $body -TimeoutSec 30 | Out-Null
   } catch {}
 } -ThrottleLimit 32
-# wait window
-while ($sw.Elapsed.TotalSeconds -lt $WindowSec) { Start-Sleep -Milliseconds 200 }
-# drain remaining PROCESSING briefly
+while ($sw.Elapsed.TotalSeconds -lt $WindowSec) { Start-Sleep -Milliseconds 50 }
+$tWindowEnd = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+$windowExactSec = ($tWindowEnd - $t0) / 1000.0
+$backlogAtWindowEnd = [int](Sql "SELECT COUNT(*) FROM material_purchase_requests WHERE campaign_id=$($camp.id) AND state='PROCESSING'")
+$paidInWindow = [int](Sql "SELECT COUNT(*) FROM material_orders WHERE campaign_id=$($camp.id) AND state='PAID' AND paid_at_ms>=$t0 AND paid_at_ms<$tWindowEnd")
+
 $drainSw=[Diagnostics.Stopwatch]::StartNew()
 $dline=(Get-Date).AddSeconds(120)
 while ((Get-Date) -lt $dline) {
   $p=Sql "SELECT COUNT(*) FROM material_purchase_requests WHERE campaign_id=$($camp.id) AND state='PROCESSING'"
   if ($p -eq '0') { break }
-  Start-Sleep -Milliseconds 300
+  Start-Sleep -Milliseconds 200
 }
 $drainSw.Stop()
-$t1=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+$tDrainEnd=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+$paidThroughDrain=[int](Sql "SELECT COUNT(*) FROM material_orders WHERE campaign_id=$($camp.id) AND state='PAID' AND paid_at_ms>=$t0 AND paid_at_ms<=$tDrainEnd")
+$fullSec = ($tDrainEnd - $t0) / 1000.0
+$steadyTps = [Math]::Round($paidInWindow / [Math]::Max(0.001,$windowExactSec), 2)
+$fullTps = [Math]::Round($paidThroughDrain / [Math]::Max(0.001,$fullSec), 2)
 
-$paid = [int](Sql "SELECT COUNT(*) FROM material_orders WHERE campaign_id=$($camp.id) AND state='PAID' AND paid_at_ms>=$t0 AND paid_at_ms<=$t1")
-$window = [Math]::Max(0.001, ($t1-$t0)/1000.0)
-$settleTps = [Math]::Round($paid / $window, 2)
-
-# Buyer refunds on paid orders (sample up to 20) — unique SUCCEEDED BUYER_REQUESTED rows in window
+# --- Buyer refund window (separate) ---
 $orderIdText = Sql "SELECT id FROM material_orders WHERE campaign_id=$($camp.id) AND state='PAID' ORDER BY id LIMIT 20"
 $orderIds = @($orderIdText -split "[\r\n]+" | Where-Object { $_ -match '^\d+$' })
-$refundSw=[Diagnostics.Stopwatch]::StartNew()
 $rf0=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+$refundSw=[Diagnostics.Stopwatch]::StartNew()
 $buyerRefunded=0
 $sessionList = @($sessions)
 foreach ($oid in $orderIds) {
@@ -119,21 +126,47 @@ foreach ($oid in $orderIds) {
 }
 $refundSw.Stop()
 $rf1=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+$rfWindowSec=[Math]::Max(0.001,$refundSw.Elapsed.TotalSeconds)
 $buyerRefundRows=[int](Sql "SELECT COUNT(*) FROM material_refund_requests rr JOIN material_orders o ON rr.order_id=o.id WHERE o.campaign_id=$($camp.id) AND rr.state='SUCCEEDED' AND rr.reason_kind='BUYER_REQUESTED' AND rr.resolved_at_ms>=$rf0 AND rr.resolved_at_ms<=$rf1")
-$buyerRefundTps=[Math]::Round($buyerRefundRows / [Math]::Max(0.001,$refundSw.Elapsed.TotalSeconds), 2)
+$buyerRefundTps=[Math]::Round($buyerRefundRows / $rfWindowSec, 2)
 
 $sold=[int](Sql "SELECT sold_count FROM material_sale_campaigns WHERE id=$($camp.id)")
-$paidNow=[int](Sql "SELECT COUNT(*) FROM material_orders WHERE campaign_id=$($camp.id) AND state='PAID'")
+$paidNow=[int](Sql "SELECT COUNT(*) FROM material_orders WHERE campaign_id=$($camp.id) AND state IN ('PAID','REFUNDED')")
 $ents=[int](Sql "SELECT COUNT(*) FROM material_entitlements e JOIN material_orders o ON e.source_kind='PURCHASE' AND e.source_id=o.id WHERE o.campaign_id=$($camp.id) AND e.state='ACTIVE'")
+$notifies=[int](Sql "SELECT COUNT(*) FROM notifications WHERE kind='ORDER_REFUNDED' AND created_at_ms>=$rf0")
 
 $report=[ordered]@{
-  runId=$runId; campaignId=$camp.id; windowSec=$WindowSec
-  settle = @{ uniquePaidOrdersInWindow=$paid; wallSec=[Math]::Round($window,3); tps=$settleTps; drainSec=[Math]::Round($drainSw.Elapsed.TotalSeconds,3); measurement='COUNT DISTINCT PAID orders with paid_at_ms in window' }
-  buyerRefund = @{ succeededRows=$buyerRefundRows; attempted=$buyerRefunded; wallSec=[Math]::Round($refundSw.Elapsed.TotalSeconds,3); tps=$buyerRefundTps; measurement='COUNT SUCCEEDED BUYER_REQUESTED refunds resolved in window' }
-  giveawayAutoRefund = @{ note='see run-tps-giveaway-auto.ps1 / mq-demo evidence'; tps=$null }
-  reconcile = @{ sold_count=$sold; paid_orders=$paidNow; active_purchase_ents=$ents }
-  peakBacklog = [int](Sql "SELECT COUNT(*) FROM material_purchase_requests WHERE campaign_id=$($camp.id) AND state='PROCESSING'")
+  runId=$runId; campaignId=$camp.id; postId=$postId
+  configuredWindowSec=$WindowSec
+  settle = [ordered]@{
+    measurement='COUNT unique PAID orders with paid_at_ms in [t0,tWindowEnd)'
+    t0Ms=$t0; tWindowEndMs=$tWindowEnd; tDrainEndMs=$tDrainEnd
+    windowExactSec=[Math]::Round($windowExactSec,3)
+    drainSec=[Math]::Round($drainSw.Elapsed.TotalSeconds,3)
+    fullWallSec=[Math]::Round($fullSec,3)
+    backlogAtWindowStart=$backlogStart
+    backlogAtWindowEnd=$backlogAtWindowEnd
+    commitsInWindow=$paidInWindow
+    commitsThroughDrain=$paidThroughDrain
+    steadyTps=$steadyTps
+    fullTpsIncludingDrain=$fullTps
+    noteLegacy482='r4 archive 4.82 = 100 commits / ~20.744s wall that included ~0.7s drain (fullTps style)'
+  }
+  buyerRefund = [ordered]@{
+    measurement='COUNT SUCCEEDED BUYER_REQUESTED refunds with resolved_at_ms in refund window'
+    t0Ms=$rf0; t1Ms=$rf1
+    windowExactSec=[Math]::Round($rfWindowSec,3)
+    attempted=$buyerRefunded
+    sampleSize=$buyerRefundRows
+    commitsInWindow=$buyerRefundRows
+    steadyTps=$buyerRefundTps
+    notificationsInWindow=$notifies
+    sampleInsufficient=($buyerRefundRows -lt 1)
+  }
+  giveawayAutoRefund = @{ note='see run-tps-giveaway-auto.ps1'; tps=$null }
+  reconcile = @{ sold_count=$sold; orders_paid_or_refunded=$paidNow; active_purchase_ents=$ents }
   boundaries=@{payment='simulated';refund='simulated';ffmpegContainerCleanup='unverified'}
 }
-$report | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $out 'summary.json') -Encoding utf8
-Write-Host ($report | ConvertTo-Json -Depth 6)
+$report | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $out 'summary.json') -Encoding utf8
+Write-Host ($report | ConvertTo-Json -Depth 8)
+Write-Host "TPS_WINDOW_OUT=$out"

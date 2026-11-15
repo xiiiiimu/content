@@ -1,0 +1,28 @@
+[
+  {
+    "sys": 0,
+    "biz": 0,
+    "qps": 106.79,
+    "peakHttp": 200,
+    "scenario": "sign",
+    "p50": 1077,
+    "dir": "baseline200-r6-sign-t200-20261115110651",
+    "samples": 1152,
+    "p95": 6049,
+    "p99": 9988,
+    "peakSettle": 0
+  },
+  {
+    "sys": 0,
+    "biz": 0,
+    "qps": 139.24,
+    "peakHttp": 200,
+    "scenario": "mixed",
+    "p50": 205,
+    "dir": "baseline200-r6-mixed-t200-20261115110827",
+    "samples": 1992,
+    "p95": 3479,
+    "p99": 5273,
+    "peakSettle": 20
+  }
+]
