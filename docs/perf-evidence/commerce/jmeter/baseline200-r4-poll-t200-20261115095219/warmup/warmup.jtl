@@ -1,0 +1,11 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1794707561476,131,GET-purchase-result,200,,commerce-threads 1-8,text,true,,307,398,10,10,http://127.0.0.1:28080/api/purchase-requests/ff1f78d6fd3f4378afa12261b1f02a87,130,0,82
+1794707561475,132,GET-purchase-result,200,,commerce-threads 1-10,text,true,,307,398,10,10,http://127.0.0.1:28080/api/purchase-requests/5e7a9f7871514b53a6fee05a395cc1a3,129,0,83
+1794707561474,133,GET-purchase-result,200,,commerce-threads 1-3,text,true,,307,398,10,10,http://127.0.0.1:28080/api/purchase-requests/835286d1308145b79fe4d712ccf57793,131,0,91
+1794707561474,133,GET-purchase-result,200,,commerce-threads 1-9,text,true,,307,398,10,10,http://127.0.0.1:28080/api/purchase-requests/80adcdbdaaab45e8adc914738ca56247,132,0,88
+1794707561477,130,GET-purchase-result,200,,commerce-threads 1-1,text,true,,307,398,10,10,http://127.0.0.1:28080/api/purchase-requests/f1d71b9e7f86420ca909fec087aec2d2,129,0,81
+1794707561474,133,GET-purchase-result,200,,commerce-threads 1-6,text,true,,307,398,10,10,http://127.0.0.1:28080/api/purchase-requests/598de71de8d54abbb31e503c679883cf,130,0,88
+1794707561475,132,GET-purchase-result,200,,commerce-threads 1-5,text,true,,307,398,10,10,http://127.0.0.1:28080/api/purchase-requests/524b57186f794fccb0281f759bbb4a73,129,0,83
+1794707561474,133,GET-purchase-result,200,,commerce-threads 1-2,text,true,,307,398,10,10,http://127.0.0.1:28080/api/purchase-requests/8f486022e54148e09c0c430fec1a63d2,130,0,88
+1794707561475,132,GET-purchase-result,200,,commerce-threads 1-4,text,true,,307,398,10,10,http://127.0.0.1:28080/api/purchase-requests/5b1ef5fcfe8a497697ad270542220c56,130,0,83
+1794707561477,130,GET-purchase-result,200,,commerce-threads 1-7,text,true,,307,398,10,10,http://127.0.0.1:28080/api/purchase-requests/eea1d9c8d95341b5ba6c2aa01adeccd0,129,0,84

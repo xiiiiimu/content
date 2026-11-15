@@ -1,0 +1,29 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\loopchk5-detail-t20-20261115081041\\results.jtl",
+  "samples": 470,
+  "spanSec": 4.823,
+  "requestQps": 97.45,
+  "acceptQps": 97.45,
+  "businessRejects": 0,
+  "systemErrors": 0,
+  "connectFail": 0,
+  "timeouts": 0,
+  "ok": 470,
+  "p50Ms": 179,
+  "p95Ms": 318,
+  "p99Ms": 371,
+  "byLabel": [
+    {
+      "n": 470,
+      "p95": 318,
+      "label": "GET-campaign-detail",
+      "qps": 97.45
+    }
+  ],
+  "byClass": [
+    {
+      "count": 470,
+      "cls": "OK"
+    }
+  ]
+}

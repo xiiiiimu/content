@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
-  CLI JMeter runner for commerce-sale.jmx → CSV JTL + HTML report + summarize.
-  Formal runs: no View Results Tree. Records launch timing + optional inflight peak.
+  CLI JMeter runner. Seed/preflight/warmup are OUTSIDE the formal timed window.
+  Formal runs: no View Results Tree. Samples HTTP + settle in-flight peaks separately.
 #>
 #Requires -Version 7
 param(
@@ -20,7 +20,10 @@ param(
   [string]$MetaJson = '',
   [string]$EvidenceDir = 'docs/perf-evidence/commerce/jmeter',
   [string]$Band = 'smoke',
-  [string]$ApiBase = 'http://127.0.0.1:28080'
+  [string]$ApiBase = 'http://127.0.0.1:28080',
+  [switch]$SkipPreflight,
+  [int]$WarmupThreads = 5,
+  [int]$WarmupSec = 3
 )
 
 $ErrorActionPreference = 'Stop'
@@ -34,14 +37,34 @@ if (-not $JMeterHome) {
 }
 $jmeter = Join-Path $JMeterHome 'bin/jmeter.bat'
 
+$meta = $null
 if ($MetaJson -and (Test-Path $MetaJson)) {
   $meta = Get-Content $MetaJson -Raw | ConvertFrom-Json
   if (-not $CampaignId) { $CampaignId = [long]$meta.campaignId }
   if (-not $PostId) { $PostId = [long]$meta.postId }
-  if (-not $CsvUsers) { $CsvUsers = [string]$meta.buyersCsv }
+  if (-not $CsvUsers) {
+    # poll/order/sign prefer reservation/order CSV; others use buyers
+    if ($Scenario -eq 'poll' -and $meta.reservationsCsv -and (Test-Path ([string]$meta.reservationsCsv))) {
+      $CsvUsers = [string]$meta.reservationsCsv
+    } elseif ($Scenario -in @('order','sign') -and $meta.ordersCsv -and (Test-Path ([string]$meta.ordersCsv))) {
+      $CsvUsers = [string]$meta.ordersCsv
+    } else {
+      $CsvUsers = [string]$meta.buyersCsv
+    }
+  }
 }
 if (-not $CsvUsers) { throw 'CsvUsers or MetaJson with buyersCsv required' }
 if ($CampaignId -le 0 -or $PostId -le 0) { throw 'campaignId/postId required' }
+
+# --- OUTSIDE formal window: preflight ---
+$preflight = $null
+if (-not $SkipPreflight) {
+  if (-not $MetaJson) { throw 'MetaJson required for preflight' }
+  $preflightOut = @( & (Join-Path $PSScriptRoot 'preflight-commerce.ps1') -MetaJson $MetaJson -ApiBase $ApiBase -MinBuyers ([Math]::Min(1,$Threads)) )
+  $preflight = $preflightOut | Where-Object { $_ -is [pscustomobject] -and $_.PSObject.Properties.Name -contains 'buyers' } | Select-Object -Last 1
+  if (-not $preflight) { throw "preflight returned no object: $preflightOut" }
+  Write-Host "preflight OK buyers=$($preflight.buyers) campaign=$($preflight.campaignId)"
+}
 
 $runId = Get-Date -Format 'yyyyMMddHHmmss'
 $outDir = Join-Path $EvidenceDir "$Band-$Scenario-t$Threads-$runId"
@@ -51,71 +74,170 @@ $html = Join-Path $outDir 'html'
 $jmlog = Join-Path $outDir 'jmeter.log'
 $summary = Join-Path $outDir 'summary.json'
 $hostMetrics = Join-Path $outDir 'host-metrics.json'
+$windowNote = Join-Path $outDir 'window.json'
 
-# reset peak if fault-hooks present
-try { Invoke-RestMethod -Method Post -Uri "$ApiBase/api/sale-debug/hold-settle" -ContentType 'application/json' -Body '{"arm":false}' -TimeoutSec 3 | Out-Null } catch {}
+# CSV headers define vars (see commerce-sale.jmx CSVDataSet); do not pass -JcsvVars (commas break __P).
 
-# Scheduler always on. Timed QPS: durationSec>0 & loops=-1. Once-through: loops=1 & durationSec=3600 cap.
+function Invoke-JMeter([hashtable]$P, [string]$JtlPath, [string]$LogPath, [string]$HtmlPath) {
+  $props = @(
+    "-JapiBase=$($P.apiBase)",
+    "-Jthreads=$($P.threads)",
+    "-JrampSec=$($P.rampSec)",
+    "-JdurationSec=$($P.durationSec)",
+    "-Jloops=$($P.loops)",
+    "-JtimeoutMs=$($P.timeoutMs)",
+    "-Jscenario=$($P.scenario)",
+    "-JcsvUsers=$($P.csvUsers)",
+    "-JcampaignId=$($P.campaignId)",
+    "-JpostId=$($P.postId)",
+    "-JstartEpochMs=$($P.startEpochMs)"
+  )
+  $jmx = Join-Path $PSScriptRoot 'commerce-sale.jmx'
+  # Quote every -J so paths with spaces survive cmd.exe; capture error bodies for 503 classification.
+  $props += '-Jjmeter.save.saveservice.response_data_on_error=true'
+  $propStr = ($props | ForEach-Object { '"{0}"' -f $_ }) -join ' '
+  $cmd = "`"$jmeter`" -n -t `"$jmx`" -l `"$JtlPath`" -j `"$LogPath`" $propStr"
+  if ($HtmlPath) { $cmd += " -e -o `"$HtmlPath`"" }
+  Write-Host $cmd
+  # cmd stdout must not enter the success stream or $jmExit becomes text+code.
+  cmd /c $cmd 2>&1 | ForEach-Object { Write-Host $_ }
+  return [int]$LASTEXITCODE
+}
+
+# Steady-state: duration>0 ⇒ loops=-1 (forever until scheduler). Once-through: loops=1, duration cap.
 $effectiveLoops = $Loops
 $durationProp = 3600
 if ($DurationSec -gt 0) {
   $durationProp = $DurationSec
-  if ($Loops -eq 0) { $effectiveLoops = -1 }
-} elseif ($Loops -eq 0) {
+  if ($Loops -le 0) { $effectiveLoops = -1 }
+} elseif ($Loops -le 0) {
   $effectiveLoops = 1
 }
 
-$props = @(
-  "-JapiBase=$ApiBase",
-  "-Jthreads=$Threads",
-  "-JrampSec=$RampSec",
-  "-JdurationSec=$durationProp",
-  "-Jloops=$effectiveLoops",
-  "-JtimeoutMs=$TimeoutMs",
-  "-Jscenario=$Scenario",
-  "-JcsvUsers=$CsvUsers",
-  "-JcampaignId=$CampaignId",
-  "-JpostId=$PostId",
-  "-JstartEpochMs=$StartEpochMs"
-)
+# --- OUTSIDE formal window: reset peaks + warmup ---
+try { Invoke-RestMethod -Method Post -Uri "$ApiBase/api/sale-debug/reset-inflight-peaks" -ContentType 'application/json' -Body '{}' -TimeoutSec 3 | Out-Null } catch {}
+try { Invoke-RestMethod -Method Post -Uri "$ApiBase/api/sale-debug/hold-settle" -ContentType 'application/json' -Body '{"arm":false}' -TimeoutSec 3 | Out-Null } catch {}
+
+$warmupDir = Join-Path $outDir 'warmup'
+New-Item -ItemType Directory -Force -Path $warmupDir | Out-Null
+if ($WarmupThreads -gt 0 -and $WarmupSec -gt 0 -and $Scenario -in @('detail','purchase','order','sign','poll','mixed')) {
+  Write-Host "warmup threads=$WarmupThreads sec=$WarmupSec (excluded from formal window)"
+  [void](Invoke-JMeter @{
+    apiBase=$ApiBase; threads=$WarmupThreads; rampSec=1; durationSec=$WarmupSec; loops=-1
+    timeoutMs=$TimeoutMs; scenario=$Scenario; csvUsers=$CsvUsers
+    campaignId=$CampaignId; postId=$PostId; startEpochMs=0
+  } (Join-Path $warmupDir 'warmup.jtl') (Join-Path $warmupDir 'warmup.log') $null)
+  try { Invoke-RestMethod -Method Post -Uri "$ApiBase/api/sale-debug/reset-inflight-peaks" -ContentType 'application/json' -Body '{}' -TimeoutSec 3 | Out-Null } catch {}
+}
+
+# Sample peak HTTP/settle in-flight during formal run
+$peakProbe = [System.Collections.Concurrent.ConcurrentBag[object]]::new()
+$probeStop = $false
+$probeJob = Start-ThreadJob -ScriptBlock {
+  param($ApiBase,$Bag,$StopRef)
+  while (-not $StopRef.Value) {
+    try {
+      $x = Invoke-RestMethod "$ApiBase/api/sale-debug/inflight" -TimeoutSec 2
+      $Bag.Add([pscustomobject]@{
+        at=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+        http=$x.httpInFlight; peakHttp=$x.peakHttpInFlight
+        settle=$x.settleInFlight; peakSettle=$x.peakSettleInFlight
+      }) | Out-Null
+    } catch {}
+    Start-Sleep -Milliseconds 200
+  }
+} -ArgumentList $ApiBase,$peakProbe,([ref]$probeStop)
 
 $sw = [Diagnostics.Stopwatch]::StartNew()
 $cpuBefore = (Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average
 $memBefore = Get-CimInstance Win32_OperatingSystem | Select-Object FreePhysicalMemory,TotalVisibleMemorySize
-$inflightBefore = $null
-try { $inflightBefore = Invoke-RestMethod "$ApiBase/api/sale-debug/inflight" -TimeoutSec 3 } catch {}
+$formalStartMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
 
-# Build a single cmdline so cmd.exe/jmeter.bat does not drop negative -Jloops=-1.
-$jmx = Join-Path $PSScriptRoot 'commerce-sale.jmx'
-$propStr = ($props -join ' ')
-$cmd = "`"$jmeter`" -n -t `"$jmx`" -l `"$jtl`" -j `"$jmlog`" -e -o `"$html`" $propStr"
-Write-Host $cmd
-cmd /c $cmd
-$jmExit = $LASTEXITCODE
+$jmExit = Invoke-JMeter @{
+  apiBase=$ApiBase; threads=$Threads; rampSec=$RampSec; durationSec=$durationProp; loops=$effectiveLoops
+  timeoutMs=$TimeoutMs; scenario=$Scenario; csvUsers=$CsvUsers
+  campaignId=$CampaignId; postId=$PostId; startEpochMs=$StartEpochMs
+} $jtl $jmlog $html
+
 $sw.Stop()
+$formalEndMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+$probeStop = $true
+try { Wait-Job $probeJob -Timeout 5 | Out-Null; Receive-Job $probeJob | Out-Null; Remove-Job $probeJob -Force } catch {}
 
 $cpuAfter = (Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average
 $memAfter = Get-CimInstance Win32_OperatingSystem | Select-Object FreePhysicalMemory,TotalVisibleMemorySize
 $inflightAfter = $null
 try { $inflightAfter = Invoke-RestMethod "$ApiBase/api/sale-debug/inflight" -TimeoutSec 3 } catch {}
 
+$probeArr = @($peakProbe)
+$obsPeakHttp = if ($probeArr.Count) { ($probeArr | Measure-Object -Property peakHttp -Maximum).Maximum } else { $null }
+$obsPeakSettle = if ($probeArr.Count) { ($probeArr | Measure-Object -Property peakSettle -Maximum).Maximum } else { $null }
+
+# Active threads from JTL
+$activePeak = $null
+$firstTs = $null; $lastTs = $null; $samples = 0
+if (Test-Path $jtl) {
+  $rows = @(Import-Csv $jtl)
+  $samples = $rows.Count
+  if ($samples -gt 0) {
+    $firstTs = ($rows | Measure-Object timeStamp -Minimum).Minimum
+    $lastTs = ($rows | Measure-Object timeStamp -Maximum).Maximum
+    $activePeak = ($rows | ForEach-Object { [int]$_.allThreads } | Measure-Object -Maximum).Maximum
+  }
+}
+
+$expectedMinSamples = if ($DurationSec -gt 0 -and $effectiveLoops -lt 0) { $Threads * 2 } else { $Threads }
+$multiIterOk = ($samples -ge $expectedMinSamples)
+
+@{
+  formalWindow = @{
+    startEpochMs = $formalStartMs
+    endEpochMs = $formalEndMs
+    wallSec = [Math]::Round($sw.Elapsed.TotalSeconds,3)
+    seedAndPreflightExcluded = $true
+    warmupExcluded = $true
+  }
+  jmeter = @{
+    configuredThreads = $Threads
+    rampSec = $RampSec
+    durationSec = $durationProp
+    loops = $effectiveLoops
+    samples = $samples
+    firstSampleTs = $firstTs
+    lastSampleTs = $lastTs
+    emitSpanMs = $(if ($firstTs -and $lastTs) { [long]$lastTs - [long]$firstTs } else { $null })
+    peakActiveThreads = $activePeak
+    multiIterCheck = @{ expectedMinSamples = $expectedMinSamples; ok = $multiIterOk }
+  }
+} | ConvertTo-Json -Depth 6 | Set-Content $windowNote -Encoding utf8
+
 $hostReport = [ordered]@{
   configuredThreads = $Threads
+  peakActiveThreadsObserved = $activePeak
   jmeterElapsedSec = [Math]::Round($sw.Elapsed.TotalSeconds, 3)
   cpuLoadPctBefore = $cpuBefore
   cpuLoadPctAfter = $cpuAfter
   freeMemMBBefore = [Math]::Round($memBefore.FreePhysicalMemory/1024,1)
   freeMemMBAfter = [Math]::Round($memAfter.FreePhysicalMemory/1024,1)
   totalMemMB = [Math]::Round($memBefore.TotalVisibleMemorySize/1024,1)
-  serverInFlight = @{
-    measurement = 'GET /api/sale-debug/inflight (SaleFaultHooks AtomicLong; settle enter/leave)'
-    before = $inflightBefore
-    after = $inflightAfter
+  httpInFlight = @{
+    measurement = 'SaleHttpInFlightFilter + GET /api/sale-debug/inflight peakHttpInFlight (polled ~200ms)'
+    endSnapshot = $inflightAfter
+    observedPeakHttpInFlight = $obsPeakHttp
   }
-  note = 'Report actual peak active threads from JMeter jmeter.log / HTML; do not treat -Jthreads as capacity ceiling.'
+  settleInFlight = @{
+    measurement = 'SaleFaultHooks settle enter/leave; peakSettleInFlight'
+    endSnapshot = $inflightAfter
+    observedPeakSettleInFlight = $obsPeakSettle
+  }
+  note = 'Do not treat -Jthreads as capacity ceiling. Connection-refused at ramp = CONNECT_FAIL system error.'
 }
-$hostReport | ConvertTo-Json -Depth 6 | Set-Content $hostMetrics -Encoding utf8
+$hostReport | ConvertTo-Json -Depth 8 | Set-Content $hostMetrics -Encoding utf8
+if ($preflight) { $preflight | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $outDir 'preflight.json') -Encoding utf8 }
 
 & (Join-Path $PSScriptRoot 'summarize-jtl.ps1') -JtlPath $jtl -OutJson $summary
-Write-Host "jmeterExit=$jmExit out=$outDir"
+Write-Host "jmeterExit=$jmExit samples=$samples multiIterOk=$multiIterOk out=$outDir"
 if ($jmExit -ne 0) { throw "jmeter exit $jmExit" }
+if (-not $multiIterOk -and $DurationSec -gt 0) {
+  Write-Warning "multi-iter check failed: samples=$samples expectedMin=$expectedMinSamples (loops may still be wrong)"
+}

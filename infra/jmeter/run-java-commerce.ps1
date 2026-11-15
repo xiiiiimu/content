@@ -50,9 +50,19 @@ if ($Package) {
 $jar = Join-Path $RepoRoot 'target/content-0.1.0-SNAPSHOT.jar'
 if (-not (Test-Path $jar)) { throw "missing $jar — re-run with -Package" }
 
+# FeedConfiguration overwrites spring.datasource.hikari.*; use env (or -D before -jar).
+if (-not $env:CONTENT_HIKARI_MAX_POOL) { $env:CONTENT_HIKARI_MAX_POOL = '80' }
+if (-not $env:CONTENT_HIKARI_CONNECTION_TIMEOUT_MS) { $env:CONTENT_HIKARI_CONNECTION_TIMEOUT_MS = '10000' }
+if (-not $env:CONTENT_MYBATIS_STATEMENT_TIMEOUT_SECONDS) { $env:CONTENT_MYBATIS_STATEMENT_TIMEOUT_SECONDS = '10' }
+
+# Tomcat accept backlog / thread pool sized for concurrent connect storms (200+ clients).
 $args = @(
   '-jar', $jar,
   '--spring.profiles.active=pipeline',
+  '--server.tomcat.threads.max=400',
+  '--server.tomcat.threads.min-spare=50',
+  '--server.tomcat.accept-count=500',
+  '--server.tomcat.max-connections=10000',
   '--content.media.enabled=true',
   "--content.media.s3-endpoint=$($env:CONTENT_S3_ENDPOINT)",
   "--content.media.access-key=$($env:CONTENT_S3_ACCESS_KEY)",
@@ -77,7 +87,14 @@ if (-not $SkipAssistant -and $env:CONTENT_ASSISTANT_PYTHON_URL) {
 
 $log = Join-Path $RepoRoot 'target/java-commerce-run.log'
 Write-Host "Starting Java → $log (sale MQ + fault-hooks)"
-$p = Start-Process -FilePath 'java' -ArgumentList $args -WorkingDirectory $RepoRoot `
+$javaExe = 'java'
+foreach ($cand in @(
+  'C:\Program Files\Java\jdk-21.0.11\bin\java.exe',
+  "$env:JAVA_HOME\bin\java.exe"
+)) {
+  if ($cand -and (Test-Path $cand)) { $javaExe = $cand; break }
+}
+$p = Start-Process -FilePath $javaExe -ArgumentList $args -WorkingDirectory $RepoRoot `
   -RedirectStandardOutput $log -RedirectStandardError (Join-Path $RepoRoot 'target/java-commerce-run.err.log') `
   -PassThru -WindowStyle Hidden
 "pid=$($p.Id)" | Set-Content (Join-Path $RepoRoot 'target/java-commerce.pid') -Encoding utf8

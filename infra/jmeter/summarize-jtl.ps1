@@ -33,8 +33,15 @@ $parsed = foreach ($r in $rows) {
   if ($data -match '"code"\s*:\s*"([^"]+)"') { $bodyCode = $Matches[1] }
   $http = 0; [void][int]::TryParse($code, [ref]$http)
   $cls = 'OK'
-  if ($ok -eq 'false' -or $ok -eq 'FALSE') {
-    if ($http -ge 500 -or $http -eq 0) { $cls = 'SYSTEM' }
+  $codeStr = [string]$code
+  if ($codeStr -match 'HttpHostConnectException|ConnectException|Connection refused' -or "$msg" -match 'Connection refused') {
+    $cls = 'CONNECT_FAIL'
+  } elseif ($codeStr -match 'SocketTimeout|Timeout' -or "$msg" -match 'timed out|Timeout') {
+    $cls = 'TIMEOUT'
+  } elseif ($http -eq 503 -or $bodyCode -eq 'FEED_UNAVAILABLE') {
+    $cls = 'HTTP_503'
+  } elseif ($ok -eq 'false' -or $ok -eq 'FALSE') {
+    if ($http -ge 500 -or $http -eq 0 -or $codeStr -match 'Non HTTP') { $cls = 'SYSTEM' }
     elseif ($http -ge 400) { $cls = "BIZ:$bodyCode" }
     else { $cls = 'SYSTEM' }
   } elseif ($http -ge 400 -and $http -lt 500) {
@@ -58,7 +65,10 @@ function Pct($arr, $p) {
 
 $lat = @($parsed | ForEach-Object { $_.elapsed })
 $biz = @($parsed | Where-Object { $_.cls -like 'BIZ*' }).Count
-$sys = @($parsed | Where-Object { $_.cls -eq 'SYSTEM' }).Count
+$sys = @($parsed | Where-Object { $_.cls -in @('SYSTEM','CONNECT_FAIL','TIMEOUT','HTTP_503') }).Count
+$connectFail = @($parsed | Where-Object { $_.cls -eq 'CONNECT_FAIL' }).Count
+$timeouts = @($parsed | Where-Object { $_.cls -eq 'TIMEOUT' }).Count
+$http503 = @($parsed | Where-Object { $_.cls -eq 'HTTP_503' }).Count
 $okn = @($parsed | Where-Object { $_.cls -eq 'OK' }).Count
 
 $summary = [ordered]@{
@@ -69,6 +79,9 @@ $summary = [ordered]@{
   acceptQps = [Math]::Round($okn / $spanSec, 2)
   businessRejects = $biz
   systemErrors = $sys
+  connectFail = $connectFail
+  timeouts = $timeouts
+  http503 = $http503
   ok = $okn
   p50Ms = (Pct $lat 50)
   p95Ms = (Pct $lat 95)

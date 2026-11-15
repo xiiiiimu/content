@@ -13,66 +13,90 @@ Formal load uses Apache JMeter 5.6.3 CLI (`infra/jmeter/`). Payment/refund simul
 ## How to re-run
 
 ```powershell
-# API with async MQ + fault-hooks
+# API: async MQ + fault-hooks + Tomcat backlog + Hikari via CONTENT_HIKARI_MAX_POOL (FeedConfiguration)
 pwsh -File infra/jmeter/run-java-commerce.ps1 -Package -SkipAssistant
+
+# Optional MySQL headroom for 200-thread storms
+docker exec -e MYSQL_PWD=11111 content-mysql-1 mysql -uroot -e "SET GLOBAL max_connections=500;"
 
 # Correctness
 pwsh -File infra/jmeter/correctness-short.ps1
 pwsh -File infra/jmeter/correctness-barrier-redelivery.ps1
 
-# Seed (CSV under target/jmeter-data — not committed)
-pwsh -File infra/jmeter/seed-commerce-data.ps1 -Buyers 200 -Stock 80 -Prefix smoke
+# Seed OUTSIDE formal window (CSV under target/jmeter-data — not committed)
+pwsh -File infra/jmeter/seed-commerce-data.ps1 -Buyers 200 -Stock 500 -Prefix b200 -PaidOrders 80
 
-# Smoke / bands
-pwsh -File infra/jmeter/run-commerce-jmeter.ps1 -Scenario detail -Threads 20 -DurationSec 12 -Loops 0 -MetaJson target/jmeter-data/meta-<id>.json -Band smoke
-pwsh -File infra/jmeter/run-commerce-jmeter.ps1 -Scenario flash -Threads 50 -Loops 1 -MetaJson ... -Band smoke
-pwsh -File infra/jmeter/run-formal-bands.ps1 -MaxLocalThreads 200   # want 5k/10k; records actual launch
+# Preflight then steady QPS (loops=-1, DurationSec>0). Warmup excluded from window.
+pwsh -File infra/jmeter/run-commerce-jmeter.ps1 -Scenario detail -Threads 200 -RampSec 15 -DurationSec 20 -Loops 0 `
+  -MetaJson target/jmeter-data/meta-<id>.json -Band baseline200 -TimeoutMs 20000
 
-# Scenario C TPS window (MySQL unique commits)
-pwsh -File infra/jmeter/run-tps-window.ps1 -Buyers 80 -Stock 80 -WindowSec 25
+# Full baseline pack
+pwsh -File infra/jmeter/run-baseline-200.ps1 -Threads 200 -DurationSec 20 -RampSec 15
+
+# Scenario C TPS (MySQL unique commits)
+pwsh -File infra/jmeter/run-tps-window.ps1 -Buyers 100 -Stock 100 -WindowSec 20
+pwsh -File infra/jmeter/run-tps-giveaway-auto.ps1 -Buyers 6
+
+# Distributed 5k/10k (requires injectors)
+# see infra/jmeter/distributed/README.md
 ```
 
 ## Concurrency reporting rule
 
-Configured `-Jthreads` is **not** a capacity ceiling. Each run’s `host-metrics.json` records configured threads, CPU/mem snapshots, and server in-flight via `GET /api/sale-debug/inflight` (`SaleFaultHooks` AtomicLong around settle). If host cannot open 5,000/10,000 threads, report **actual launch threads** and bottleneck (local single-box JMeter/JVM/OS).
+Configured `-Jthreads` is **not** a capacity ceiling. Each run’s `host-metrics.json` records configured threads, peak active threads, `peakHttpInFlight` (servlet filter) and `peakSettleInFlight` (settle hooks) separately via `GET /api/sale-debug/inflight`.
 
-## Smoke (this machine)
+## Detail GET 35 system errors — before / after
 
-| Run | Samples | Notes |
-|---|---|---|
-| `smoke-detail-t20-20261115055952` | 20 | detail OK |
-| `smoke-flash-t50-20261115060305` | 50 | ~299 req/s; biz rejects vs OK split; 0 system |
-| `smoke-mixed-t10-20261115060414` | 25 | detail→purchase→poll |
+See `syserr-35-remediation.md` and `band5k-detail-detail-t200-20261115060906/syserr-classification.md`.
 
-Failed empty JTLs from early scheduler bugs archived under same folder (0-sample runs) — do not use for capacity claims.
+| Phase | Evidence | CONNECT_FAIL | Other system | Notes |
+|---|---|---:|---:|---|
+| Before | `band5k-detail-detail-t200-20261115060906` | **35/35** | 0 | Connection refused; one-iter (loops mangled) |
+| Loop fix | `loopchk5-detail-t20-20261115081041` | 0 | 0 | samples=470≫20; multiIterOk |
+| After (formal) | `baseline200-r4-detail-t200-20261115094647` | **0** | **0** | Hikari max-pool=80 via env; Tomcat accept-count=500 |
 
-## Bands 5k / 10k (this host)
+Root causes fixed: Tomcat accept backlog; JMX `__P(csvVars,…)` 4-arg compile fail; FeedConfiguration hard-cap Hikari=16 (now `CONTENT_HIKARI_MAX_POOL`); seed/warmup outside formal window; `loops=-1` for duration runs.
 
-**Want** 5000 / 10000 threads. **Actual launch** on this box: **200** (single JMeter JVM / OS thread ceiling — not a product capacity claim). In-flight measured via `GET /api/sale-debug/inflight`.
+Residual under mixed load: HTTP 503 `FEED_UNAVAILABLE` (Hikari wait / DataAccess) and rare TIMEOUT — not Connection refused.
 
-### band5k @ 200 threads (representative)
+## Baseline 200 (r4, authoritative)
 
-| Run | Samples | Req QPS | OK | Biz | Sys |
-|---|---:|---:|---:|---:|---:|
-| detail | 200 | 281 | 165 | 0 | 35 |
-| purchase | 200 | 412 | 83 | 117 | 0 |
-| order | 200 | 382 | 200 | 0 | 0 |
-| sign | 200 | 637 | 83 | 117 | 0 |
-| flash | 200 | 820 | 83 | 117 | 0 |
-| mixed (50 thr) | 125 | 63 | 100 | 25 | 0 |
+Machine: single-box JMeter 5.6.3 + Java 21. Window: DurationSec=20, RampSec=15, TimeoutMs=20000, loops=-1 (steady). Flash: loops=1, startEpochMs sync. Summary JSON: `baseline200-summary-20261115100806.json`.
 
-Note: early duration-window runs used `-Jloops=-1` mangled by `jmeter.bat` arg parsing → one iteration/thread (samples≈threads). Runner now invokes via `cmd /c` with quoted props; re-run duration QPS for multi-iter windows. Flash/mixed once-through numbers remain valid.
+| Scenario | Samples | Req QPS | P50 | P95 | P99 | OK | Biz | Sys | peakHttp | peakSettle |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| detail | 798 | 99.3 | 1413 | 6081 | 9041 | 798 | 0 | **0** | 200 | 0 |
+| purchase | 427 | 55.2 | 3007 | 10556 | 11562 | 427 | 0 | **0** | (see host-metrics) | |
+| poll | 2590 | 282.8 | 450 | 1231 | 1696 | 2590 | 0 | **0** | | |
+| order | 1743 | 180.1 | 758 | 2702 | 5021 | 1743 | 0 | **0** | | |
+| sign | 1075 | 107.9 | 1300 | 7019 | 10903 | 1072 | 0 | 3 | | |
+| flash | 200 | 372.4 | 6762 | 8383 | 8606 | 80 | 120 | **0** | 200 | |
+| mixed | 1651 | 57.2 | 1080 | 12656 | 17787 | 1612 | 0 | 39 | 200 | |
 
-### band10k @ 200 threads
+Flash reconcile: sold=paid=ents=**80**/80 (sell-out rate 60% biz reject). Evidence dir `baseline200-r4-flash-flash-t200-20261115095903`; `baseline200-r4-flash-reconcile.txt`.
 
-First pass (`band10k-*-202611150617*`) returned all-biz (stale/seed mismatch under Redis `FEED_UNAVAILABLE` during parallel follow). Treat as **failed archive**; retest after seed follow retries. Distributed 10k requires sharded CSV + clock-synced `startEpochMs`.
+### TPS windows (MySQL unique commits)
 
-### Scenario C TPS
+| Metric | Window | Value | Evidence |
+|---|---|---|---|
+| Settle (PAID distinct) | 20s wall | **4.82 TPS** (100 unique) | `tps-window-20261115100548` |
+| Buyer refund SUCCEEDED | ~18s | **1.09 TPS** (20/20) | same |
+| Giveaway auto-refund | — | **Pending sample** (giveaway POST 404); correctness via `MaterialCommerceRefundBlacklistIT` + mq-demo | `tps-giveaway-auto-20261115100715` |
 
-`run-tps-window.ps1` counts MySQL unique PAID / SUCCEEDED refund rows in a wall window. Giveaway-auto-refund TPS: use mq-demo evidence when sample insufficient under load seed pressure.
+Reconcile after TPS seed path: sold=paid=ents=80 (stock-limited campaign in that script).
 
-## Bottlenecks observed
+## Bands 5,000 / 10,000
 
-1. Local JMeter cannot open 5k/10k threads — cap and report actual.
-2. Parallel register/follow can trip Redis → `FEED_UNAVAILABLE` (seed now retries follow).
-3. Auth username charset `[a-zA-Z0-9_]{3,32}` — seed sanitizes prefixes.
+| Band | Status |
+|---|---|
+| baseline 200 | **Executed** (r4) |
+| 5,000 | **待验** — no remote injectors on this workstation; kit ready in `infra/jmeter/distributed/` |
+| 10,000 | **待验** — same |
+
+Do not report configured thread sum as capacity when launch failed. Actual single-box launch ceiling used here: **200**.
+
+## Earlier archives (non-authoritative)
+
+- `band5k-*` / `band10k-*` @200 before Hikari/JMX fixes — retained for CONNECT_FAIL comparison only.
+- `baseline200-retest-*` — first post-Tomcat pass; residual 503 under pool=16.
+- Empty JTLs (`loopchk3`/`loopchk4`) — JMX `__P` compile failure; do not use.

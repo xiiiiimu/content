@@ -93,22 +93,27 @@ foreach ($b in ($buyerObjs | Sort-Object userId)) {
 $swBuyers.Stop()
 
 $ordersPath = Join-Path $OutDir "orders-$runId.csv"
+$reservationsPath = Join-Path $OutDir "reservations-$runId.csv"
 "orderId,userId,token,postId,reservationId" | Set-Content $ordersPath -Encoding utf8
+"reservationId,userId,token,postId,state" | Set-Content $reservationsPath -Encoding utf8
 $swOrders = [Diagnostics.Stopwatch]::StartNew()
+# Paid/reservation seed is OUTSIDE the formal JMeter window (caller must not include this in load timing).
+$nPaid = 0
 if ($CreatePaidOrders -or $PaidOrders -gt 0) {
-  $n = if ($PaidOrders -gt 0) { $PaidOrders } else { [Math]::Min(10, $Buyers, $Stock) }
-  for ($i=0; $i -lt $n; $i++) {
-    $b = $buyerObjs[$i]
-    $H = @{ Authorization = "Bearer $($b.token)" }
-    $p = Invoke-Json POST "$ApiBase/api/sale-campaigns/$($campaign.id)/purchase" $H @{ clientKey = $b.clientKey }
-    $deadline = (Get-Date).AddSeconds(90)
-    while ($p.state -eq 'PROCESSING' -and (Get-Date) -lt $deadline) {
-      Start-Sleep -Milliseconds 200
-      $p = Invoke-Json GET "$ApiBase/api/purchase-requests/$($p.reservationId)" $H
-    }
-    if ($p.state -eq 'SUCCEEDED' -and $p.orderId) {
-      Add-Content $ordersPath -Value "$($p.orderId),$($b.userId),$($b.token),$postId,$($p.reservationId)"
-    }
+  $nPaid = if ($PaidOrders -gt 0) { $PaidOrders } else { [Math]::Min(10, $Buyers, $Stock) }
+}
+for ($i=0; $i -lt $nPaid; $i++) {
+  $b = $buyerObjs[$i]
+  $H = @{ Authorization = "Bearer $($b.token)" }
+  $p = Invoke-Json POST "$ApiBase/api/sale-campaigns/$($campaign.id)/purchase" $H @{ clientKey = $b.clientKey }
+  $deadline = (Get-Date).AddSeconds(90)
+  while ($p.state -eq 'PROCESSING' -and (Get-Date) -lt $deadline) {
+    Start-Sleep -Milliseconds 200
+    $p = Invoke-Json GET "$ApiBase/api/purchase-requests/$($p.reservationId)" $H
+  }
+  Add-Content $reservationsPath -Value "$($p.reservationId),$($b.userId),$($b.token),$postId,$($p.state)"
+  if ($p.state -eq 'SUCCEEDED' -and $p.orderId) {
+    Add-Content $ordersPath -Value "$($p.orderId),$($b.userId),$($b.token),$postId,$($p.reservationId)"
   }
 }
 $swOrders.Stop()
@@ -122,13 +127,16 @@ $metaOut = [ordered]@{
   campaignId = $campaign.id
   stock = $Stock
   buyers = $Buyers
+  paidSeeded = $nPaid
   buyersCsv = (Resolve-Path $buyersPath).Path
   ordersCsv = (Resolve-Path $ordersPath).Path
+  reservationsCsv = (Resolve-Path $reservationsPath).Path
   timingsSec = @{
     registerAuthor = [Math]::Round($swReg.Elapsed.TotalSeconds,3)
     mediaPublish = [Math]::Round($swMedia.Elapsed.TotalSeconds,3)
     registerBuyers = [Math]::Round($swBuyers.Elapsed.TotalSeconds,3)
     seedOrders = [Math]::Round($swOrders.Elapsed.TotalSeconds,3)
+    note = 'seed timings excluded from formal JMeter window'
   }
 }
 $metaPath = Join-Path $OutDir "meta-$runId.json"

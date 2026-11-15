@@ -64,7 +64,8 @@
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="buyers-csv" enabled="true">
           <stringProp name="filename">${csvUsers}</stringProp>
           <stringProp name="fileEncoding">UTF-8</stringProp>
-          <stringProp name="variableNames">userId,token,clientKey</stringProp>
+          <!-- Empty variableNames + ignoreFirstLine: use CSV header (avoids __P commas → 4-arg InvalidVariableException). -->
+          <stringProp name="variableNames"></stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <stringProp name="delimiter">,</stringProp>
           <boolProp name="quotedData">false</boolProp>
@@ -170,7 +171,7 @@ if (start &gt; 0) {
         </IfController>
         <hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET-purchase-result" enabled="true">
-            <stringProp name="HTTPSampler.path">${apiBase}/api/purchase-requests/${__P(reservationId,none)}</stringProp>
+            <stringProp name="HTTPSampler.path">${apiBase}/api/purchase-requests/${reservationId}</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
             <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
             <stringProp name="HTTPSampler.connect_timeout">${timeoutMs}</stringProp>

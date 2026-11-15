@@ -15,6 +15,9 @@ public final class SaleFaultHooks {
  private final AtomicBoolean failAfterCommitOnce=new AtomicBoolean(false);
  private final AtomicLong inFlight=new AtomicLong();
  private final AtomicLong peakInFlight=new AtomicLong();
+ /** HTTP request in-flight (servlet filter); separate from settle in-flight. */
+ private final AtomicLong httpInFlight=new AtomicLong();
+ private final AtomicLong peakHttpInFlight=new AtomicLong();
 
  public void armHold(){
   CountDownLatch next=new CountDownLatch(1);
@@ -48,4 +51,13 @@ public final class SaleFaultHooks {
  public long inFlight(){return inFlight.get();}
  public long peakInFlight(){return peakInFlight.get();}
  public void resetPeakInFlight(){peakInFlight.set(inFlight.get());}
+
+ public void enterHttpInFlight(){
+  long v=httpInFlight.incrementAndGet();
+  peakHttpInFlight.accumulateAndGet(v,Math::max);
+ }
+ public void leaveHttpInFlight(){httpInFlight.decrementAndGet();}
+ public long httpInFlight(){return httpInFlight.get();}
+ public long peakHttpInFlight(){return peakHttpInFlight.get();}
+ public void resetPeakHttpInFlight(){peakHttpInFlight.set(httpInFlight.get());}
 }

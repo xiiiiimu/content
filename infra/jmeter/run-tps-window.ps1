@@ -99,14 +99,17 @@ $paid = [int](Sql "SELECT COUNT(*) FROM material_orders WHERE campaign_id=$($cam
 $window = [Math]::Max(0.001, ($t1-$t0)/1000.0)
 $settleTps = [Math]::Round($paid / $window, 2)
 
-# Buyer refunds on paid orders (sample up to 20)
-$orderIds = @(Sql "SELECT id FROM material_orders WHERE campaign_id=$($camp.id) AND state='PAID' LIMIT 20" -split "`n" | Where-Object { $_ })
+# Buyer refunds on paid orders (sample up to 20) — unique SUCCEEDED BUYER_REQUESTED rows in window
+$orderIdText = Sql "SELECT id FROM material_orders WHERE campaign_id=$($camp.id) AND state='PAID' ORDER BY id LIMIT 20"
+$orderIds = @($orderIdText -split "[\r\n]+" | Where-Object { $_ -match '^\d+$' })
 $refundSw=[Diagnostics.Stopwatch]::StartNew()
 $rf0=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
 $buyerRefunded=0
+$sessionList = @($sessions)
 foreach ($oid in $orderIds) {
-  $row = Sql "SELECT user_id FROM material_orders WHERE id=$oid"
-  $tok = ($sessions | Where-Object { $_.userId -eq [long]$row } | Select-Object -First 1)
+  $uidText = Sql "SELECT user_id FROM material_orders WHERE id=$oid"
+  if ($uidText -notmatch '^\d+$') { continue }
+  $tok = $sessionList | Where-Object { [long]$_.userId -eq [long]$uidText } | Select-Object -First 1
   if (-not $tok) { continue }
   try {
     $rr = Invoke-Json POST "$ApiBase/api/orders/$oid/refund-requests" @{Authorization="Bearer $($tok.token)"}
@@ -116,15 +119,20 @@ foreach ($oid in $orderIds) {
 }
 $refundSw.Stop()
 $rf1=[DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
-$buyerRefundRows=[int](Sql "SELECT COUNT(*) FROM material_refund_requests WHERE state='SUCCEEDED' AND reason_kind='BUYER_REQUESTED' AND resolved_at_ms>=$rf0 AND resolved_at_ms<=$rf1")
+$buyerRefundRows=[int](Sql "SELECT COUNT(*) FROM material_refund_requests rr JOIN material_orders o ON rr.order_id=o.id WHERE o.campaign_id=$($camp.id) AND rr.state='SUCCEEDED' AND rr.reason_kind='BUYER_REQUESTED' AND rr.resolved_at_ms>=$rf0 AND rr.resolved_at_ms<=$rf1")
 $buyerRefundTps=[Math]::Round($buyerRefundRows / [Math]::Max(0.001,$refundSw.Elapsed.TotalSeconds), 2)
+
+$sold=[int](Sql "SELECT sold_count FROM material_sale_campaigns WHERE id=$($camp.id)")
+$paidNow=[int](Sql "SELECT COUNT(*) FROM material_orders WHERE campaign_id=$($camp.id) AND state='PAID'")
+$ents=[int](Sql "SELECT COUNT(*) FROM material_entitlements e JOIN material_orders o ON e.source_kind='PURCHASE' AND e.source_id=o.id WHERE o.campaign_id=$($camp.id) AND e.state='ACTIVE'")
 
 $report=[ordered]@{
   runId=$runId; campaignId=$camp.id; windowSec=$WindowSec
-  settle = @{ uniquePaidOrdersInWindow=$paid; wallSec=[Math]::Round($window,3); tps=$settleTps; drainSec=[Math]::Round($drainSw.Elapsed.TotalSeconds,3) }
-  buyerRefund = @{ succeededRows=$buyerRefundRows; attempted=$buyerRefunded; wallSec=[Math]::Round($refundSw.Elapsed.TotalSeconds,3); tps=$buyerRefundTps }
-  giveawayAutoRefund = @{ note='sample insufficient unless separate giveaway fixture run; see mq-demo evidence'; tps=$null }
-  peakBacklog = [int](Sql "SELECT COUNT(*) FROM material_purchase_requests WHERE campaign_id=$($camp.id)")
+  settle = @{ uniquePaidOrdersInWindow=$paid; wallSec=[Math]::Round($window,3); tps=$settleTps; drainSec=[Math]::Round($drainSw.Elapsed.TotalSeconds,3); measurement='COUNT DISTINCT PAID orders with paid_at_ms in window' }
+  buyerRefund = @{ succeededRows=$buyerRefundRows; attempted=$buyerRefunded; wallSec=[Math]::Round($refundSw.Elapsed.TotalSeconds,3); tps=$buyerRefundTps; measurement='COUNT SUCCEEDED BUYER_REQUESTED refunds resolved in window' }
+  giveawayAutoRefund = @{ note='see run-tps-giveaway-auto.ps1 / mq-demo evidence'; tps=$null }
+  reconcile = @{ sold_count=$sold; paid_orders=$paidNow; active_purchase_ents=$ents }
+  peakBacklog = [int](Sql "SELECT COUNT(*) FROM material_purchase_requests WHERE campaign_id=$($camp.id) AND state='PROCESSING'")
   boundaries=@{payment='simulated';refund='simulated';ffmpegContainerCleanup='unverified'}
 }
 $report | ConvertTo-Json -Depth 6 | Set-Content (Join-Path $out 'summary.json') -Encoding utf8

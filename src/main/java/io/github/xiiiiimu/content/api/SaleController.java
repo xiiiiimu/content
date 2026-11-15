@@ -81,7 +81,20 @@ public class SaleController {
  @GetMapping("/sale-debug/inflight")
  @ConditionalOnProperty(name="content.sale.fault-hooks",havingValue="true")
  public Map<String,Object> inflight(){
-  return Map.of("inFlight",sales.faults().inFlight(),"peakInFlight",sales.faults().peakInFlight());
+  var f=sales.faults();
+  return Map.of(
+   "settleInFlight",f.inFlight(),"peakSettleInFlight",f.peakInFlight(),
+   "httpInFlight",f.httpInFlight(),"peakHttpInFlight",f.peakHttpInFlight(),
+   // legacy aliases
+   "inFlight",f.inFlight(),"peakInFlight",f.peakInFlight());
+ }
+
+ @PostMapping("/sale-debug/reset-inflight-peaks")
+ @ConditionalOnProperty(name="content.sale.fault-hooks",havingValue="true")
+ public Map<String,Object> resetInflightPeaks(){
+  sales.faults().resetPeakInFlight();
+  sales.faults().resetPeakHttpInFlight();
+  return Map.of("ok",true);
  }
 
  private static String str(Object o){return o==null?null:String.valueOf(o);}

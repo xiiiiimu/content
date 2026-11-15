@@ -1,0 +1,18 @@
+{
+  "runId": "20261115100715",
+  "postId": 58,
+  "campaignId": 45,
+  "giveawayAutoRefund": {
+    "note": "giveaway API path unavailable or failed: 响应状态代码未指示成功: 404 ()。; use MaterialCommerceRefundBlacklistIT + mq-demo as correctness evidence",
+    "tps": 0.0,
+    "notificationsInWindow": 0,
+    "wallSec": 0.916,
+    "measurement": "COUNT SUCCEEDED GIVEAWAY_AUTO refunds resolved in window (MySQL)",
+    "uniqueSucceededRows": 0
+  },
+  "boundaries": {
+    "payment": "simulated",
+    "refund": "simulated",
+    "ffmpegContainerCleanup": "unverified"
+  }
+}

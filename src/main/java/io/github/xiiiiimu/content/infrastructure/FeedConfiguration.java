@@ -19,12 +19,20 @@ import java.time.Duration;
 public class FeedConfiguration {
  @Bean static org.springframework.beans.factory.config.BeanPostProcessor feedDataSourceBounds(){return new org.springframework.beans.factory.config.BeanPostProcessor(){
   @Override public Object postProcessBeforeInitialization(Object bean,String name){if(bean instanceof com.zaxxer.hikari.HikariDataSource pool && !pool.isRunning()){
-   // Sized for concurrent FollowingFeed merges (source+authority futures) without starving the 8-client harness.
-   pool.setMaximumPoolSize(16);pool.setMinimumIdle(2);pool.setConnectionTimeout(5000);pool.setValidationTimeout(1000);pool.setInitializationFailTimeout(10000);
+   // Default 16 suits FollowingFeed harness; commerce load sets CONTENT_HIKARI_MAX_POOL / -Dcontent.hikari.max-pool.
+   int maxPool=parsePositive(firstNonBlank(System.getProperty("content.hikari.max-pool"),System.getenv("CONTENT_HIKARI_MAX_POOL")),16);
+   int minIdle=Math.min(Math.max(2,maxPool/4),maxPool);
+   int connTimeoutMs=parsePositive(firstNonBlank(System.getProperty("content.hikari.connection-timeout-ms"),System.getenv("CONTENT_HIKARI_CONNECTION_TIMEOUT_MS")),5000);
+   pool.setMaximumPoolSize(maxPool);pool.setMinimumIdle(minIdle);pool.setConnectionTimeout(connTimeoutMs);pool.setValidationTimeout(1000);pool.setInitializationFailTimeout(10000);
    pool.addDataSourceProperty("connectTimeout","5000");pool.addDataSourceProperty("socketTimeout","5000");
   }return bean;}
  };}
- @Bean org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer feedStatementBounds(){return configuration->configuration.setDefaultStatementTimeout(2);}
+ @Bean org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer feedStatementBounds(){
+  int timeoutSec=parsePositive(firstNonBlank(System.getProperty("content.mybatis.default-statement-timeout-seconds"),System.getenv("CONTENT_MYBATIS_STATEMENT_TIMEOUT_SECONDS")),2);
+  return configuration->configuration.setDefaultStatementTimeout(timeoutSec);
+ }
+ private static String firstNonBlank(String a,String b){if(a!=null&&!a.isBlank())return a;if(b!=null&&!b.isBlank())return b;return null;}
+ private static int parsePositive(String raw,int fallback){if(raw==null||raw.isBlank())return fallback;try{return Math.max(1,Integer.parseInt(raw.trim()));}catch(NumberFormatException e){return fallback;}}
  @Bean(destroyMethod="shutdown") DefaultClientResources feedRedisResources(){return DefaultClientResources.builder().ioThreadPoolSize(2).computationThreadPoolSize(2).build();}
  @Bean(destroyMethod="shutdown") RedisClient feedRedisClient(DefaultClientResources r,@Value("${content.feed.redis-uri:redis://127.0.0.1:26379}")String uri){var u=RedisURI.create(uri);u.setTimeout(Duration.ofSeconds(5));var client=RedisClient.create(r,u);client.setOptions(ClientOptions.builder().socketOptions(SocketOptions.builder().connectTimeout(Duration.ofSeconds(5)).build()).build());return client;}
  @Bean(destroyMethod="close") FeedRedis feedRedis(RedisClient client){return new FeedRedis(client);}
