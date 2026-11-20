@@ -223,11 +223,16 @@ public final class MaterialService {
 
  public Signed signOriginal(long viewer,long postId,Long versionId,long ttlMillis,String grant){
   if(ttlMillis<=0 || ttlMillis>900_000L)throw new FeedFailure(400,"INVALID_REQUEST");
-  var view=visibility.read(viewer,postId).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+  if(viewer<=0)throw new FeedFailure(401,"UNAUTHENTICATED");
+  var post=posts.post(postId);
+  if(post==null||!"PUBLISHED".equals(post.status())||post.time()==null)throw new FeedFailure(404,"POST_NOT_VISIBLE");
+  Long purchasedVersion=db.activePurchaseVersion(viewer,postId);
+  boolean purchased=purchasedVersion!=null && (versionId==null || versionId.equals(purchasedVersion));
+  if(!purchased)visibility.read(viewer,postId).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   var profile=db.profile(postId);if(profile==null)throw new FeedFailure(404,"NOT_MATERIAL");
-  boolean author=view.authorId()==viewer;
-  var version=resolveVersion(postId,versionId,profile);
-  boolean entitled=!author && entitlementAccess.test(new long[]{viewer,postId,version.id()});
+  boolean author=post.authorId()==viewer;
+  var version=resolveVersion(postId,versionId==null && purchased?purchasedVersion:versionId,profile);
+  boolean entitled=purchased || (!author && entitlementAccess.test(new long[]{viewer,postId,version.id()}));
   if(!author && !entitled){
    if(!"PASSWORD_ORIGINAL".equals(profile.shareMode()))throw new FeedFailure(403,"ORIGINAL_FORBIDDEN");
    grants.verify(grant,viewer,postId,profile.shareEpoch(),"ORIGINAL");

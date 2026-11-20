@@ -5,6 +5,8 @@ import java.util.List;
 
 @Mapper
 public interface MaterialMapper {
+ @org.apache.ibatis.annotations.Select("SELECT e.version_id FROM material_entitlements e JOIN material_orders o ON o.id=e.source_id AND o.user_id=e.account_id AND o.post_id=e.post_id WHERE e.account_id=#{user} AND e.post_id=#{post} AND e.source_kind='PURCHASE' AND e.state='ACTIVE' AND o.state='PAID' LIMIT 1")
+ Long activePurchaseVersion(@org.apache.ibatis.annotations.Param("user")long user,@org.apache.ibatis.annotations.Param("post")long post);
  record Profile(long postId,String title,String description,String shareMode,String passwordHash,long shareEpoch,
                 boolean licenseDownload,boolean licenseCommercial,String aspectRatio,Long defaultVersionId,long createdAtMs,long updatedAtMs) {}
  record Version(long id,long postId,int revision,String state,String rawObjectKey,String previewObjectKey,String coverObjectKey,

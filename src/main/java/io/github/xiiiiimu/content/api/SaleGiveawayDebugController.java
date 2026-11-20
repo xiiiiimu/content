@@ -9,7 +9,7 @@ import java.util.UUID;
 
 /**
  * Load-test / fault-hooks only: create a giveaway via the same service path as the assistant IT,
- * then seal+draw so GIVEAWAY_AUTO refunds commit. Not a product public API.
+ * then seal+draw awards. No automatic refunds. Not a product public API.
  */
 @RestController
 @RequestMapping("/api/sale-debug")
@@ -30,7 +30,8 @@ public class SaleGiveawayDebugController {
   return Long.parseLong(p.getName());
  }
 
- @PostMapping("/giveaway-auto-refund")
+ // Preserve the old diagnostic route as an alias; its name no longer implies a refund.
+ @PostMapping({"/giveaway-award","/giveaway-auto-refund"})
  public Map<String,Object> createSealDraw(@RequestBody Map<String,Object> body,Principal p)throws Exception{
   long author=user(p);
   long postId=num(body.get("postId"),0);
@@ -43,7 +44,7 @@ public class SaleGiveawayDebugController {
   String rules="{\"op\":\"ALL\",\"children\":[{\"type\":\""+elig+"\"}]}";
   String key="gwa-debug-"+UUID.randomUUID();
   var comment=interactions.comment(author,postId,"@助手 load-test giveaway",key,"general");
-  var cmd=new AssistantParser.GiveawayCommand(rules,"Asia/Shanghai",null,deadlineMs,winners,"DEFAULT","DOWNLOAD","load-test-auto-refund");
+  var cmd=new AssistantParser.GiveawayCommand(rules,"Asia/Shanghai",null,deadlineMs,winners,"DEFAULT","DOWNLOAD","load-test-award");
   giveaways.createFromAssistant(author,postId,comment.commentId(),cmd);
   var g=giveawayDb.bySource(comment.commentId());
   if(g==null)throw new FeedFailure(500,"GIVEAWAY_CREATE_FAILED");
@@ -53,7 +54,7 @@ public class SaleGiveawayDebugController {
   giveaways.draw(g.id());
   giveaways.draw(g.id());
   return Map.of(
-   "ok",true,
+   "ok",true,"automaticRefund",false,
    "giveawayId",g.id(),
    "sourceCommentId",comment.commentId(),
    "deadlineMs",deadlineMs,

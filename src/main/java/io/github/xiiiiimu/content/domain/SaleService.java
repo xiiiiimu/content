@@ -10,7 +10,7 @@ public final class SaleService {
  public record CampaignView(long id,long postId,long merchantId,long priceCents,int stockCap,int soldCount,
                             long startMs,long endMs,String state,String linkToken,Long remainingStock) {}
  public record PurchaseView(String reservationId,String state,String rejectReason,Long orderId,long campaignId,long postId) {}
- public record OrderView(long id,long postId,long merchantId,long priceCents,String state,long paidAtMs,Long refundedAtMs,String refundReason) {}
+ public record OrderView(long id,long postId,long merchantId,long priceCents,String state,long paidAtMs,Long refundedAtMs,String refundReason,boolean giveawayRefundEligible) {}
 
  private final SaleMapper db;private final SaleRedis redis;private final MaterialMapper materials;private final FeedMapper posts;
  private final NotificationMapper notifications;private final VisibilityService visibility;private final TransactionTemplate tx;
@@ -73,12 +73,12 @@ public final class SaleService {
  }
 
  public CampaignView currentForPost(long viewer,long postId){
-  visibility.read(viewer,postId).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+  if(viewer<=0)throw new FeedFailure(401,"UNAUTHENTICATED");
   var c=db.openByPost(postId);return c==null?null:view(c);
  }
  public CampaignView byToken(long viewer,String token){
   var c=db.byToken(token);if(c==null)throw new FeedFailure(404,"CAMPAIGN_NOT_FOUND");
-  visibility.read(viewer,c.postId()).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+  if(viewer<=0)throw new FeedFailure(401,"UNAUTHENTICATED");
   return view(c);
  }
  private CampaignView view(SaleMapper.Campaign c){
@@ -141,7 +141,7 @@ public final class SaleService {
  }
 
  public OrderView myOrder(long userId,long postId){
-  visibility.read(userId,postId).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+  if(userId<=0)throw new FeedFailure(401,"UNAUTHENTICATED");
   var o=db.orderByUserPost(userId,postId);if(o==null)return null;
   return toOrder(o);
  }
@@ -151,7 +151,7 @@ public final class SaleService {
   return toOrder(o);
  }
  private OrderView toOrder(SaleMapper.Order o){
-  return new OrderView(o.id(),o.postId(),o.merchantId(),o.priceCents(),o.state(),o.paidAtMs(),o.refundedAtMs(),o.refundReason());
+  return new OrderView(o.id(),o.postId(),o.merchantId(),o.priceCents(),o.state(),o.paidAtMs(),o.refundedAtMs(),o.refundReason(),"PAID".equals(o.state())&&ingress.winner(o.userId(),o.postId()));
  }
 
  /** Durable settle; idempotent on reservationId. */
@@ -293,6 +293,20 @@ public final class SaleService {
    db.insertRefund(row);return row.id;
   });
  }
+ public long requestGiveawayRefund(long buyerId,long orderId){
+  return tx.execute(status->{
+   ingress.guard();var snapshot=db.order(orderId);if(snapshot==null)throw new FeedFailure(404,"ORDER_NOT_FOUND");
+   if(snapshot.userId()!=buyerId)throw new FeedFailure(403,"ORDER_FORBIDDEN");
+   db.touchLock(buyerId,snapshot.postId(),System.currentTimeMillis());db.lockDecision(buyerId,snapshot.postId());
+   var order=db.lockOrder(orderId);var success=db.succeededRefund(orderId);
+   if(success!=null){if("GIVEAWAY_REFUND".equals(success.reasonKind()))return success.id();throw new FeedFailure(409,"ALREADY_REFUNDED");}
+   if(!"PAID".equals(order.state()))throw new FeedFailure(409,"ORDER_NOT_PAID");
+   if(ingress.winner(buyerId,order.postId())==false)throw new FeedFailure(409,"GIVEAWAY_ENTITLEMENT_REQUIRED");
+   var pending=db.pendingRefund(orderId);
+   if(pending!=null){if("GIVEAWAY_REFUND".equals(pending.reasonKind()))return pending.id();throw new FeedFailure(409,"REFUND_PENDING");}
+   var row=new SaleMapper.RefundInsert();row.order=orderId;row.kind="GIVEAWAY_REFUND";row.requester=buyerId;row.at=System.currentTimeMillis();db.insertRefund(row);return row.id;
+  });
+ }
 
  public OrderView approveRefund(long merchantId,long refundId){
   return completeRefund(merchantId,refundId,false);
@@ -324,7 +338,8 @@ public final class SaleService {
    if(!"PENDING".equals(rr.state()))throw new FeedFailure(409,"REFUND_NOT_PENDING");
    long at=System.currentTimeMillis();
    String kind=rr.reasonKind();
-   if(forced && !"GIVEAWAY_AUTO".equals(kind))kind="BUYER_FORCED";
+   if(forced)kind="BUYER_FORCED";
+   if("GIVEAWAY_REFUND".equals(kind)&&!ingress.winner(o.userId(),o.postId()))throw new FeedFailure(409,"GIVEAWAY_ENTITLEMENT_REQUIRED");
    if(db.markRefunded(o.id(),kind,at)!=1)throw new FeedFailure(409,"ALREADY_REFUNDED");
    db.revokePurchaseEntitlement(o.id(),o.userId(),at);
    var c=db.lockCampaign(o.campaignId());
@@ -341,38 +356,16 @@ public final class SaleService {
   var latest=db.order(meta[0]);ingress.bestEffort("OWNER",latest.userId()+":"+latest.postId());
   return toOrder(db.order(meta[0]));
  }
- /**
-  * Called under giveaway award lock path: if winner has PAID order on post, auto-refund once.
-  * Must be invoked while account_material_decision_locks is held by caller OR we lock here.
-  */
- /** Prefer calling from ensureAwards; joins ambient tx when present (avoid nested timeout). */
- public void autoRefundOnGiveawayWin(long accountId,long postId,long giveawayId){
-  Runnable body=()->{
-   db.touchLock(accountId,postId,System.currentTimeMillis());
-   db.lockDecision(accountId,postId);
-   var o=db.orderByUserPost(accountId,postId);
-   if(o==null || !"PAID".equals(o.state()))return;
-   if(db.succeededRefund(o.id())!=null)return;
-   var pending=db.pendingRefund(o.id());
-   long refundId;
-   if(pending!=null){
-    refundId=pending.id();
-   }else{
-    var row=new SaleMapper.RefundInsert();row.order=o.id();row.kind="GIVEAWAY_AUTO";row.requester=0;row.at=System.currentTimeMillis();
-    db.insertRefund(row);refundId=row.id;
-   }
-   long at=System.currentTimeMillis();
-   if(db.markRefunded(o.id(),"GIVEAWAY_AUTO",at)!=1)return;
-   db.revokePurchaseEntitlement(o.id(),accountId,at);
-   var c=db.lockCampaign(o.campaignId());
-   if(c!=null && "OPEN".equals(c.state()))db.tryDecrementSold(c.id(),at);
-   db.finishRefund(refundId,"SUCCEEDED",0L,1,at);
-   String dedupe="order-refund:"+o.id()+":GIVEAWAY_AUTO";
-   long synthetic=Math.floorMod(Objects.hash(o.id(),"GIVEAWAY_AUTO",giveawayId),1_000_000_000)+4_000_000_000L;
-   notifications.insertWithMeta(accountId,synthetic,"ORDER_REFUNDED",o.merchantId(),postId,0L,null,null,dedupe,at);
-  };
-  if(org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive())body.run();
-  else tx.executeWithoutResult(status->body.run());
+ public void lockForGiveawayAward(long account,long post){ingress.guard();db.touchLock(account,post,System.currentTimeMillis());db.lockDecision(account,post);}
+ public void giveawayAwarded(long account,long post,long giveaway){
+  ingress.dirty("OWNER",account+":"+post);
+  ingress.afterCommit("OWNER",account+":"+post);
+  var order=db.orderByUserPost(account,post);
+  if(order!=null&&"PAID".equals(order.state())){
+   String dedupe="giveaway-refund-available:"+giveaway+":"+account;
+   long synthetic=Math.floorMod(Objects.hash(giveaway,account,"refund-available"),1000000000)+5000000000L;
+   notifications.insertWithMeta(account,synthetic,"GIVEAWAY_REFUND_AVAILABLE",order.merchantId(),post,0L,null,null,dedupe,System.currentTimeMillis());
+  }
  }
 
  public List<Long> purchaseEligibleAccounts(long merchantId,Long postId,Long windowStartMs,Long deadlineMs){

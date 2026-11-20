@@ -24,9 +24,9 @@ export default defineNuxtConfig({
       },
     },
   },
+  devServer: { port: 5314 },
   vite: {
     server: {
-      port: 5314,
       strictPort: true,
     },
   },

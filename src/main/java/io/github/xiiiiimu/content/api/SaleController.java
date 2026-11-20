@@ -39,6 +39,8 @@ public class SaleController {
  public Map<String,Object> requestRefund(@PathVariable long id,Principal p){
   return Map.of("refundRequestId",sales.requestRefund(user(p),id));
  }
+ @PostMapping("/orders/{id}/giveaway-refund-requests")
+ public Map<String,Object> requestGiveawayRefund(@PathVariable long id,Principal p){return Map.of("refundRequestId",sales.requestGiveawayRefund(user(p),id));}
  @PostMapping("/refund-requests/{id}/approve")
  public SaleService.OrderView approve(@PathVariable long id,Principal p){return sales.approveRefund(user(p),id);}
  @PostMapping("/orders/{id}/force-refund")

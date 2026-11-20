@@ -5,7 +5,7 @@ import { ContentApiError } from '~/types/content'
 const route = useRoute()
 const postId = computed(() => Number(route.params.id))
 const api = useContentApi()
-const { hydrate, token, expired } = useIdentity()
+const { hydrate, token, expired, readerId } = useIdentity()
 
 const post = ref<ContentPost | null>(null)
 const stats = ref<PostStats | null>(null)
@@ -36,7 +36,8 @@ const campaign = ref<{
   linkToken: string
   remainingStock?: number
 } | null>(null)
-const myOrder = ref<{ id: number; state: string; priceCents: number; refundReason?: string } | null>(null)
+const myOrder = ref<{ id: number; state: string; priceCents: number; refundReason?: string; giveawayRefundEligible?: boolean } | null>(null)
+const refundMessage = ref('')
 const purchaseState = ref('')
 const salePrice = ref(990)
 const saleStock = ref(10)
@@ -262,7 +263,9 @@ async function doPurchase() {
   purchaseState.value = 'PROCESSING'
   errorCode.value = ''
   try {
-    const key = `web-${postId.value}-${Date.now()}`
+    const attempt = `sale-attempt:${readerId.value}:${campaign.value.id}`
+    const key = sessionStorage.getItem(attempt) || `web-${crypto.randomUUID()}`
+    sessionStorage.setItem(attempt, key)
     let result = await api.purchaseSale(campaign.value.id, key)
     const deadline = Date.now() + 30_000
     while (result.state === 'PROCESSING' && Date.now() < deadline) {
@@ -270,13 +273,14 @@ async function doPurchase() {
       result = await api.purchaseRequest(result.reservationId)
     }
     purchaseState.value = result.state + (result.rejectReason ? `:${result.rejectReason}` : '')
+    if (result.state === 'REJECTED') sessionStorage.removeItem(attempt)
     myOrder.value = await api.myMaterialOrder(postId.value)
     campaign.value = await api.saleCampaignCurrent(postId.value)
     entitlement.value = await api.entitlement(postId.value)
   }
   catch (e) {
     errorCode.value = e instanceof ContentApiError ? e.code : 'PURCHASE_FAILED'
-    purchaseState.value = 'FAILED'
+    purchaseState.value = e instanceof ContentApiError && e.status === 409 ? 'REJECTED' : 'UNKNOWN'
   }
   finally { busy.value = false }
 }
@@ -289,6 +293,16 @@ async function doForceRefund() {
     entitlement.value = await api.entitlement(postId.value)
   }
   catch (e) { errorCode.value = e instanceof ContentApiError ? e.code : 'REFUND_FAILED' }
+  finally { busy.value = false }
+}
+async function requestGiveawayRefund() {
+  if (!myOrder.value || busy.value) return
+  busy.value = true
+  try {
+    const result = await api.requestGiveawayRefund(myOrder.value.id)
+    refundMessage.value = `中奖退款申请 #${result.refundRequestId} 已提交，等待商家审批；中奖权益保留。`
+  }
+  catch (e) { errorCode.value = e instanceof ContentApiError ? e.code : 'REFUND_REQUEST_FAILED' }
   finally { busy.value = false }
 }
 
@@ -357,7 +371,7 @@ watch(postId, () => load())
           <h3 class="text-sm font-medium">限量抢购</h3>
           <div v-if="campaign" class="mt2 text-sm text-secondary">
             ¥{{ (campaign.priceCents / 100).toFixed(2) }} · 库存 {{ campaign.remainingStock ?? (campaign.stockCap - campaign.soldCount) }}/{{ campaign.stockCap }}
-            · {{ campaign.state }} · 链接 token {{ campaign.linkToken.slice(0, 8) }}…
+            · {{ campaign.state }} · <NuxtLink :to="`/sales/${campaign.linkToken}`" class="text-primary">打开独立购买页</NuxtLink>
             <button type="button" class="btn-primary ms2" :disabled="busy" @click="doPurchase">抢购</button>
             <span v-if="purchaseState" class="ms2">{{ purchaseState }}</span>
           </div>
@@ -369,8 +383,10 @@ watch(postId, () => load())
           <p v-if="myOrder" class="text-sm mt2">
             我的订单 #{{ myOrder.id }} · {{ myOrder.state }}
             <span v-if="myOrder.refundReason"> · {{ myOrder.refundReason }}</span>
+            <button v-if="myOrder.giveawayRefundEligible" type="button" class="btn-text ms2" :disabled="busy" @click="requestGiveawayRefund">申请中奖退款</button>
             <button v-if="myOrder.state === 'PAID'" type="button" class="btn-text ms2" :disabled="busy" @click="doForceRefund">强制退款</button>
           </p>
+          <p v-if="refundMessage" class="text-sm mt2">{{ refundMessage }}</p>
           <div class="mt2 flex flex-wrap gap2 items-end">
             <input v-model.number="blacklistTarget" type="number" class="input w-28" placeholder="拉黑用户ID">
             <button type="button" class="btn-ghost" :disabled="busy || !blacklistTarget" @click="doBlacklist">拉黑</button>
@@ -422,7 +438,7 @@ watch(postId, () => load())
         </p>
         <ul v-if="notifications.length" class="mt3 space-y-2">
           <li v-for="n in notifications" :key="n.id" class="text-sm">
-            {{ n.kind }} · 帖 {{ n.postId }} · 评论 {{ n.commentId }}
+            {{ n.kind === 'GIVEAWAY_REFUND_AVAILABLE' ? '您已获得中奖权益，可申请中奖退款' : n.kind }} · 帖 {{ n.postId }} · 评论 {{ n.commentId }}
             <span v-if="n.refVersionId"> · 版本 {{ n.refVersionId }}</span>
           </li>
         </ul>
