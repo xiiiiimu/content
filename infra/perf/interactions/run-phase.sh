@@ -67,7 +67,7 @@ run_k6(){ # name rate postBase postCount topic
   ( maxp=0; while [ ! -f $OUT/$name.stop ]; do p=$(metric hikaricp.connections.pending | sed 's/VALUE=//;s/\..*//'); [[ "$p" =~ ^[0-9]+$ ]] && [ $p -gt $maxp ] && maxp=$p; echo $maxp > $OUT/$name.maxpending; sleep 1; done ) &
   local poller=$!
   log "run $name rate=$rate posts=$pbase+$pcount topic=${topic:-<none>}"
-  BASE_URL=$BASE RATE=$rate DURATION=${K6_DUR:-60s} POST_BASE=$pbase POST_COUNT=$pcount USER_BASE=600001 TOPIC=$topic IDENTITY_KEY=$IDENTITY_KEY MAX_VUS=400 \
+  BASE_URL=$BASE RATE=$rate DURATION=${K6_DUR:-60s} POST_BASE=$pbase POST_COUNT=$pcount USER_BASE=600001 USER_COUNT=4000 TOPIC=$topic IDENTITY_KEY=$IDENTITY_KEY MAX_VUS=400 \
     "$K6" run --quiet --no-color --summary-export "$(cygpath -w $OUT/$name.json)" "$(cygpath -w $TOOLS/like.k6.js)" > $OUT/$name.k6.txt 2>&1
   touch $OUT/$name.stop; wait $poller
   wait_idle
