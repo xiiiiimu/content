@@ -53,7 +53,10 @@ public interface SaleMapper {
  @Update("UPDATE material_sale_campaigns SET state='CLOSED',open_guard=NULL,updated_at_ms=#{at} WHERE id=#{id} AND state='OPEN'")
  int closeCampaign(@Param("id")long id,@Param("at")long at);
 
- @Update("UPDATE material_sale_campaigns SET sold_count=sold_count+1,updated_at_ms=#{at} WHERE id=#{id} AND state='OPEN' AND sold_count<stock_cap")
+/** Settle's only campaign-row write and its last statement (V26 / docs/commerce-campaign-lock-analysis.md option (a)):
+  * every sellability condition is re-checked here, so a close, window end or sell-out that committed while the order was
+  * being written yields 0 rows and the whole settle rolls back. */
+ @Update("UPDATE material_sale_campaigns SET sold_count=sold_count+1,updated_at_ms=#{at} WHERE id=#{id} AND state='OPEN' AND start_ms<=#{at} AND end_ms>=#{at} AND sold_count<stock_cap")
  int tryIncrementSold(@Param("id")long id,@Param("at")long at);
 
  @Update("UPDATE material_sale_campaigns SET sold_count=sold_count-1,updated_at_ms=#{at} WHERE id=#{id} AND sold_count>0")

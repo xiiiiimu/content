@@ -25,8 +25,23 @@ public final class SaleFaultHooks {
  public void recordDelivery(String id){if(id!=null&&id.equals(watchedReservation.get()))watchedDeliveries.incrementAndGet();}
  public long watchedDeliveries(){return watchedDeliveries.get();}
  public void armFailure(String point){failures.put(point,new AtomicBoolean(true));}
- public void resetFailures(){failures.clear();failAfterCommitOnce.set(false);watchedReservation.set(null);watchedDeliveries.set(0);}
+ public void resetFailures(){pauses.keySet().forEach(this::releasePause);failures.clear();failAfterCommitOnce.set(false);watchedReservation.set(null);watchedDeliveries.set(0);}
  public void failIfArmed(String point){var armed=failures.get(point);if(armed!=null&&armed.compareAndSet(true,false))throw new IllegalStateException("INJECTED_"+point);}
+
+ /** Test/demo pause point inside a transaction: the caller blocks at {@code point} until released (bounded). */
+ private record Pause(CountDownLatch entered,CountDownLatch release){}
+ private final java.util.concurrent.ConcurrentHashMap<String,Pause> pauses=new java.util.concurrent.ConcurrentHashMap<>();
+ public void armPause(String point){pauses.put(point,new Pause(new CountDownLatch(1),new CountDownLatch(1)));}
+ public boolean awaitPaused(String point,long timeoutSeconds)throws InterruptedException{
+  var p=pauses.get(point);return p!=null&&p.entered().await(timeoutSeconds,TimeUnit.SECONDS);
+ }
+ public void releasePause(String point){var p=pauses.remove(point);if(p!=null)p.release().countDown();}
+ public void pauseIfArmed(String point,long timeoutSeconds){
+  var p=pauses.get(point);if(p==null||p.entered().getCount()==0)return; // one caller per arming
+  p.entered().countDown();
+  try{if(!p.release().await(timeoutSeconds,TimeUnit.SECONDS))throw new FeedFailure(503,"PAUSE_TIMEOUT_"+point);}
+  catch(InterruptedException e){Thread.currentThread().interrupt();throw new FeedFailure(503,"PAUSE_INTERRUPTED_"+point);}
+ }
 
  public void armHold(){
   CountDownLatch next=new CountDownLatch(1);

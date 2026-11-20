@@ -162,54 +162,97 @@ public final class SaleService {
   finally{faults.leaveInFlight();}
  }
 
+ /** Thrown inside the settle transaction when the final stock UPDATE matched no row; rolls the order writes back. */
+ private static final class StockClaimMissed extends RuntimeException{
+  final long at;StockClaimMissed(long at){super(null,null,false,false);this.at=at;}
+ }
+
  private void settleBody(String reservationId){
-  Boolean release=tx.execute(status->{
+  for(int attempt=1;;attempt++){
+   try{settleOnce(reservationId);break;}
+   catch(StockClaimMissed miss){
+    // Rolled back: no order, entitlement or receipt survived. Re-judge on committed state in a new transaction.
+    if(rejectAfterStockMiss(reservationId,miss.at))break;
+    if(attempt>=2)throw new FeedFailure(503,"SETTLE_STOCK_CONTENDED"); // stock freed again meanwhile: MQ redelivery retries
+   }
+  }
+  var req=db.request(reservationId);
+  if(req==null)return;
+  ingress.bestEffort("REQUEST",reservationId);ingress.bestEffort("OWNER",req.userId()+":"+req.postId());
+ }
+
+ /**
+  * Campaign row is read without a lock and written once, by the conditional stock UPDATE that is the last statement
+  * (docs/commerce-campaign-lock-analysis.md, option (a)). The X lock on the hot row is therefore held only from that
+  * UPDATE to commit, and close/takedown/refund/bridge inserts are not serialized behind the order writes.
+  * The early campaign checks read committed state; they can only reject, and every request they let through is
+  * re-checked by the final UPDATE.
+  */
+ private void settleOnce(String reservationId){
+  tx.executeWithoutResult(status->{
    ingress.guard();
    boolean ingressBlocked=ingress.blocked(reservationId);
    var req=db.lockRequest(reservationId);if(req==null)throw new FeedFailure(503,"REQUEST_NOT_PERSISTED");
    SaleLatency.correlate(req.clientKey(),reservationId);
-   if(!"PROCESSING".equals(req.state())){db.insertReceipt(reservationId,req.state(),System.currentTimeMillis());return false;}
-   if(ingressBlocked)return false; // Durable isolation, never a late successful order or an unproven release.
-   if(db.receipt(reservationId)!=null)return false;
-   // Upsert then FOR UPDATE the account/material decision row before campaign lock.
-   // Refunds and giveaway awards take the same lock, so ownership is stable here.
+   if(!"PROCESSING".equals(req.state())){db.insertReceipt(reservationId,req.state(),System.currentTimeMillis());return;}
+   if(ingressBlocked)return; // Durable isolation, never a late successful order or an unproven release.
+   if(db.receipt(reservationId)!=null)return;
+   // Upsert then FOR UPDATE the account/material decision row; refunds and giveaway awards take the same lock,
+   // so ownership is stable here.
    db.touchLock(req.userId(),req.postId(),System.currentTimeMillis());
    db.lockDecision(req.userId(),req.postId());
    boolean alreadyOwns=db.alreadyOwnsMaterial(req.userId(),req.postId());
-   var campaign=db.lockCampaign(req.campaignId());
+   var campaign=db.campaign(req.campaignId());
    long at=System.currentTimeMillis();
    // Dynamic blacklist remains authoritative in MySQL even if Redis deny cache lags.
-   if(db.activeBlacklist(req.merchantId(),req.userId())>0){
-    reject(req,"BLACKLISTED",at);return true;
-   }
-   if(alreadyOwns){reject(req,"ALREADY_OWNED",at);return true;}
-   if(campaign==null || !"OPEN".equals(campaign.state())){reject(req,"CAMPAIGN_CLOSED",at);return true;}
-   if(!"PUBLISHED".equals(Optional.ofNullable(posts.post(req.postId())).map(FeedMapper.Post::status).orElse(null))){reject(req,"POST_OFFLINE",at);return true;}
-   if(at<campaign.startMs()){reject(req,"NOT_STARTED",at);return true;}
-   if(at>campaign.endMs()){reject(req,"ENDED",at);return true;}
+   if(db.activeBlacklist(req.merchantId(),req.userId())>0){reject(req,"BLACKLISTED",at);return;}
+   if(alreadyOwns){reject(req,"ALREADY_OWNED",at);return;}
+   String closed=campaignRejection(campaign,at); // same order as before V26: closed, post offline, window, stock
+   if("CAMPAIGN_CLOSED".equals(closed)){reject(req,closed,at);return;}
+   if(!"PUBLISHED".equals(Optional.ofNullable(posts.post(req.postId())).map(FeedMapper.Post::status).orElse(null))){reject(req,"POST_OFFLINE",at);return;}
+   if(closed!=null){reject(req,closed,at);return;}
    Long version=campaign.frozenVersionId();
    if(version==null){
     var profile=materials.profile(req.postId());
     version=profile==null?null:profile.defaultVersionId();
    }
    if(version==null)throw new IllegalStateException("Campaign settlement requires a material version");
-   if(db.tryIncrementSold(campaign.id(),at)!=1){reject(req,"SOLD_OUT",at);return true;}
    var order=new SaleMapper.OrderInsert();
    order.reservationId=req.reservationId();order.campaignId=req.campaignId();order.postId=req.postId();
    order.merchantId=req.merchantId();order.userId=req.userId();order.priceCents=req.priceCents();order.paidAt=at;
    try{db.insertOrder(order);}
-   catch(DuplicateKeyException e){reject(req,"ALREADY_OWNED",at);db.tryDecrementSold(campaign.id(),at);return true;}
+   catch(DuplicateKeyException e){reject(req,"ALREADY_OWNED",at);return;} // no stock taken yet
    var ent=new SaleMapper.EntitlementInsert();
    ent.account=req.userId();ent.post=req.postId();ent.version=version;ent.license="DOWNLOAD";
    ent.kind="PURCHASE";ent.source=order.id;ent.at=at;
    if(db.insertEntitlement(ent)!=1 || db.finishRequest(reservationId,"SUCCEEDED",null,order.id,at)!=1
       || db.insertReceipt(reservationId,"SUCCEEDED",at)!=1)throw new IllegalStateException("Incomplete purchase settlement");
-   ingress.dirty("OWNER",req.userId()+":"+req.postId());ingress.dirty("REQUEST",reservationId);faults.failIfArmed("settle.beforeCommit");
-   return false;
+   ingress.dirty("OWNER",req.userId()+":"+req.postId());ingress.dirty("REQUEST",reservationId);
+   faults.pauseIfArmed("settle.beforeStockUpdate",60);
+   if(db.tryIncrementSold(campaign.id(),at)!=1)throw new StockClaimMissed(at); // rolls back every write above
+   faults.failIfArmed("settle.beforeCommit");
   });
-  var req=db.request(reservationId);
-  if(req==null)return;
-  ingress.bestEffort("REQUEST",reservationId);ingress.bestEffort("OWNER",req.userId()+":"+req.postId());
+ }
+
+ /** First failing sellability condition at {@code at}, or null when the campaign can still sell. */
+ private static String campaignRejection(SaleMapper.Campaign c,long at){
+  if(c==null || !"OPEN".equals(c.state()))return "CAMPAIGN_CLOSED";
+  if(at<c.startMs())return "NOT_STARTED";
+  if(at>c.endMs())return "ENDED";
+  if(c.soldCount()>=c.stockCap())return "SOLD_OUT";
+  return null;
+ }
+
+ /** After a missed stock claim: reject with the reason the committed campaign row now gives; false if none (stock freed). */
+ private boolean rejectAfterStockMiss(String reservationId,long at){
+  return Boolean.TRUE.equals(tx.execute(status->{
+   ingress.guard();
+   var req=db.lockRequest(reservationId);
+   if(req==null || !"PROCESSING".equals(req.state()) || db.receipt(reservationId)!=null)return true; // decided elsewhere
+   String reason=campaignRejection(db.campaign(req.campaignId()),at);
+   if(reason==null)return false;
+   reject(req,reason,at);return true;
+  }));
  }
 
  private void reject(SaleMapper.PurchaseRequest req,String reason,long at){
