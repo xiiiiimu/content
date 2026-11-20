@@ -31,7 +31,7 @@ class MaterialCommerceRefundBlacklistIT {
   r.add("content.media.ffmpeg-image",()->"");
   r.add("content.assistant.python-url",()->"");
   r.add("content.media.scan-delay-millis",()->"3600000");
-  r.add("content.sale.sync-settle",()->"true");
+  r.add("content.sale.sync-settle",()->"false");
  }
  @Autowired JdbcTemplate db;@Autowired MaterialService materials;@Autowired PublishService publish;
  @Autowired SaleService sales;@Autowired AuthService auth;@Autowired GiveawayService giveaways;
@@ -43,6 +43,7 @@ class MaterialCommerceRefundBlacklistIT {
   db.update("DELETE FROM material_refund_requests");
   db.update("DELETE FROM material_orders");
   db.update("DELETE FROM material_purchase_requests");
+  db.update("DELETE FROM material_sale_eligibility_blocks");
   db.update("DELETE FROM material_sale_campaigns");
   db.update("DELETE FROM merchant_blacklist");
   db.update("DELETE FROM account_material_decision_locks");
@@ -53,7 +54,7 @@ class MaterialCommerceRefundBlacklistIT {
   db.update("DELETE FROM notifications");
  }
 
- @Test void autoRefundOnWinKeepsGiveawayEntitlementAndPurchaseEligibility()throws Exception{
+ @Test void requestedGiveawayRefundKeepsEntitlementAndPurchaseEligibility()throws Exception{
   long author=register("rf_author","password-a1");
   long buyer=register("rf_buyer","password-b1");
   var mat=materials.createDraft(author,"退款素材","sale",List.of("sale"),"PUBLIC_PREVIEW",null,true,true,
@@ -63,7 +64,7 @@ class MaterialCommerceRefundBlacklistIT {
   follows.change(buyer,author,true);
   long now=System.currentTimeMillis();
   var campaign=sales.createCampaign(author,mat.postId(),500,5,now-1_000,now+3_600_000);
-  var purchase=sales.purchase(buyer,campaign.id(),"buy-1");
+  var purchase=purchaseAndSettle(buyer,campaign.id(),"buy-1");
   assertThat(purchase.state()).isEqualTo("SUCCEEDED");
   long orderId=purchase.orderId();
 
@@ -79,8 +80,13 @@ class MaterialCommerceRefundBlacklistIT {
   giveaways.seal(gid);giveaways.draw(gid);
   giveaways.draw(gid);
 
+  assertThat(db.queryForObject("SELECT state FROM material_orders WHERE id=?",String.class,orderId)).isEqualTo("PAID");
+  assertThat(db.queryForObject("SELECT COUNT(*) FROM material_refund_requests WHERE order_id=?",Integer.class,orderId)).isZero();
+  long requested=sales.requestGiveawayRefund(buyer,orderId);
+  assertThat(sales.requestGiveawayRefund(buyer,orderId)).isEqualTo(requested);
+  sales.approveRefund(author,requested);sales.approveRefund(author,requested);
   assertThat(db.queryForObject("SELECT state FROM material_orders WHERE id=?",String.class,orderId)).isEqualTo("REFUNDED");
-  assertThat(db.queryForObject("SELECT refund_reason FROM material_orders WHERE id=?",String.class,orderId)).isEqualTo("GIVEAWAY_AUTO");
+  assertThat(db.queryForObject("SELECT refund_reason FROM material_orders WHERE id=?",String.class,orderId)).isEqualTo("GIVEAWAY_REFUND");
   assertThat(db.queryForObject("SELECT COUNT(*) FROM material_refund_requests WHERE order_id=? AND state='SUCCEEDED'",Integer.class,orderId)).isEqualTo(1);
   long reward=db.queryForObject("SELECT reward_version_id FROM giveaways WHERE id=?",Long.class,gid);
   assertThat(giveaways.hasEntitlement(buyer,mat.postId(),reward)).isTrue();
@@ -111,7 +117,7 @@ class MaterialCommerceRefundBlacklistIT {
   long now=System.currentTimeMillis();
   var c1=sales.createCampaign(author,mat1.postId(),100,2,now-1_000,now+3_600_000);
   var c2=sales.createCampaign(author,mat2.postId(),100,2,now-1_000,now+3_600_000);
-  var p=sales.purchase(buyer,c1.id(),"bl-buy");
+  var p=purchaseAndSettle(buyer,c1.id(),"bl-buy");
   assertThat(p.state()).isEqualTo("SUCCEEDED");
   sales.forceRefund(author,p.orderId());
   assertThat(db.queryForObject("SELECT state FROM material_orders WHERE id=?",String.class,p.orderId())).isEqualTo("REFUNDED");
@@ -121,14 +127,22 @@ class MaterialCommerceRefundBlacklistIT {
   assertThat(eligibility.evaluate(tree,mat1.postId(),author,0L,null,null)).doesNotContain(buyer);
 
   sales.block(author,buyer,"abuse");
-  var blocked=sales.purchase(buyer,c2.id(),"bl-buy-2");
-  assertThat(blocked.state()).isEqualTo("REJECTED");
-  assertThat(blocked.rejectReason()).isEqualTo("BLACKLISTED");
+  assertThatThrownBy(()->purchaseAndSettle(buyer,c2.id(),"bl-buy-2"))
+   .isInstanceOfSatisfying(FeedFailure.class,e->assertThat(e.code).isEqualTo("BLACKLISTED"));
   sales.unblock(author,buyer);
-  var ok=sales.purchase(buyer,c2.id(),"bl-buy-3");
+  var ok=purchaseAndSettle(buyer,c2.id(),"bl-buy-3");
   assertThat(ok.state()).isEqualTo("SUCCEEDED");
  }
 
+ private SaleService.PurchaseView purchaseAndSettle(long user,long campaign,String key){
+  var accepted=sales.purchase(user,campaign,key);
+  sales.flushPending(200);
+  org.awaitility.Awaitility.await().atMost(java.time.Duration.ofSeconds(15)).untilAsserted(()->{
+   sales.settle(accepted.reservationId());
+   assertThat(sales.getRequest(user,accepted.reservationId()).state()).isNotEqualTo("PROCESSING");
+  });
+  return sales.getRequest(user,accepted.reservationId());
+ }
  private long register(String user,String pass){
   auth.register(user,pass);
   return db.queryForObject("SELECT id FROM users WHERE username=?",Long.class,user);
