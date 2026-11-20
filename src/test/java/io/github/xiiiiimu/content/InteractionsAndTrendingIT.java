@@ -37,7 +37,7 @@ class InteractionsAndTrendingIT {
  String bearer(long user){long now=System.currentTimeMillis();return new FeedTokens("identity-test-key-32-bytes-minimum-0001","IDENTITY").sign(new FeedTokens.Identity(1,user,now,now+300_000));}
  @Test void likesCommentsAreIdempotentAndStatsReconcileWhileOfflineIsDenied()throws Exception{
   follows.change(2001,1001,true);
-  db.update("INSERT INTO posts(id,author_id,status,body) VALUES(100101,1001,'DRAFT','interact')");
+  db.update("INSERT INTO posts(id,author_id,status,body,topic) VALUES(100101,1001,'DRAFT','interact','sports')");
   publish.publish(1001,100101,UUID.randomUUID().toString(),0);
   assertThat(visibility.read(9999,100101)).as("non-follower cannot read published detail").isEmpty();
   var like1=interactions.like(2001,100101,"sports");var like2=interactions.like(2001,100101,"sports");

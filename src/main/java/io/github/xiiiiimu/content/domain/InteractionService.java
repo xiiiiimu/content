@@ -20,21 +20,28 @@ public final class InteractionService {
  public InteractionService(VisibilityService visibility,InteractionMapper db,TransactionTemplate tx,TrendingService trending,RelationshipService events,MaterialService materials,java.util.function.Function<AssistantEnqueue,Long> assistantEnqueue){
   this.visibility=visibility;this.db=db;this.tx=tx;this.trending=trending;this.events=events;this.materials=materials;this.assistantEnqueue=assistantEnqueue;
  }
- public LikeResult like(long user,long post,String topic){
+ /**
+  * @param clientTopic ignored. Kept for API compatibility; topic statistics use the post's own topic attribute
+  *                    ({@code posts.topic}) and a post without a topic writes no topic statistics.
+  */
+ public LikeResult like(long user,long post,String clientTopic){
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
    db.undislike(post,user);
    boolean inserted=db.like(post,user,System.currentTimeMillis())==1;
    reconcile(post);
-   if(inserted)trending.record("like:"+post+":"+user,topic==null?"general":topic,post,1,"LIKE");
+   String topic=inserted?db.postTopic(post):null;
+   if(topic!=null)trending.record("like:"+post+":"+user,topic,post,1,"LIKE");
    return new LikeResult(true,db.stats(post).likes());
   });
  }
- public LikeResult unlike(long user,long post,String topic){
+ /** @param clientTopic ignored, see {@link #like}. */
+ public LikeResult unlike(long user,long post,String clientTopic){
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
    boolean removed=db.unlike(post,user)==1;reconcile(post);
-   if(removed)trending.record("unlike:"+post+":"+user+":"+System.currentTimeMillis(),topic==null?"general":topic,post,-1,"UNLIKE");
+   String topic=removed?db.postTopic(post):null;
+   if(topic!=null)trending.record("unlike:"+post+":"+user+":"+System.currentTimeMillis(),topic,post,-1,"UNLIKE");
    return new LikeResult(false,db.stats(post).likes());
   });
  }
@@ -66,7 +73,8 @@ public final class InteractionService {
  }
  public CommentResult comment(long user,long post,String body,String key,String topic){return comment(user,post,body,key,topic,null,null,null);}
  public CommentResult comment(long user,long post,String body,String key,String topic,Long parentId){return comment(user,post,body,key,topic,parentId,null,null);}
- public CommentResult comment(long user,long post,String body,String key,String topic,Long parentId,Long materialVersionId,Long offsetMs){
+ /** @param clientTopic ignored, see {@link #like}. */
+ public CommentResult comment(long user,long post,String body,String key,String clientTopic,Long parentId,Long materialVersionId,Long offsetMs){
   if(body==null || body.isBlank() || body.length()>4000 || key==null || key.isBlank() || key.length()>128)throw new FeedFailure(400,"INVALID_REQUEST");
   var view=visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
@@ -91,7 +99,8 @@ public final class InteractionService {
    }
    if(db.comment(post,user,parentId,version,offset,body,key,System.currentTimeMillis())!=1)throw new IllegalStateException("comment insert failed");
    var created=db.existingComment(user,key);reconcile(post);
-   trending.record("comment:"+key,topic==null?"general":topic,post,1,"COMMENT");
+   String topic=db.postTopic(post);
+   if(topic!=null)trending.record("comment:"+key,topic,post,1,"COMMENT");
    Map<String,Object> fields=new LinkedHashMap<>();
    fields.put("postId",post);fields.put("commentId",created.id());fields.put("actorUserId",user);
    fields.put("postAuthorId",view.authorId());fields.put("occurredAtMs",created.createdAtMs());

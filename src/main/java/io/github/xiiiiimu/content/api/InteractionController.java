@@ -11,6 +11,7 @@ public class InteractionController {
  private final InteractionService interactions;private final TrendingService trending;
  public InteractionController(InteractionService interactions,TrendingService trending){this.interactions=interactions;this.trending=trending;}
  private long user(Principal p){if(p==null||p.getName()==null)throw new FeedFailure(401,"UNAUTHENTICATED");try{long id=Long.parseLong(p.getName());if(id<=0)throw new FeedFailure(401,"UNAUTHENTICATED");return id;}catch(NumberFormatException e){throw new FeedFailure(401,"UNAUTHENTICATED");}}
+ // The topic request parameter is accepted for compatibility and ignored: topic statistics use posts.topic.
  @PutMapping("/api/posts/{post}/likes") public InteractionService.LikeResult like(@PathVariable long post,@RequestParam(required=false)String topic,Principal p){return interactions.like(user(p),post,topic);}
  @DeleteMapping("/api/posts/{post}/likes") public InteractionService.LikeResult unlike(@PathVariable long post,@RequestParam(required=false)String topic,Principal p){return interactions.unlike(user(p),post,topic);}
  @PutMapping("/api/posts/{post}/dislikes") public InteractionService.DislikeResult dislike(@PathVariable long post,Principal p){return interactions.dislike(user(p),post);}

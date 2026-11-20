@@ -45,13 +45,13 @@ public final class TrendingService {
   return scores.entrySet().stream().sorted((a,b)->Long.compare(b.getValue(),a.getValue())).limit(50)
    .map(e->new Entry(e.getKey(),e.getValue())).toList();
  }
- /** Topic page / hotspot content list: every returned post re-checks VisibilityService (ADR-004 T10b carry-over). */
+ /** Topic page / hotspot content list from posts.topic (the same attribute that routes topic statistics); every returned post re-checks VisibilityService (ADR-004 T10b carry-over). */
  public List<VisibilityService.View> topicPosts(String topic,long viewer,int limit){
   if(viewer<=0)throw new FeedFailure(401,"UNAUTHENTICATED");
   if(topic==null || topic.isBlank())throw new FeedFailure(400,"INVALID_REQUEST");
   int n=limit<=0?50:Math.min(limit,50);
   var out=new ArrayList<VisibilityService.View>();
-  for(long post:db.postsForTopic(topic,n*4)){
+  for(long post:db.postsWithTopic(topic,n*4)){
    visibility.read(viewer,post).ifPresent(out::add);
    if(out.size()>=n)break;
   }
