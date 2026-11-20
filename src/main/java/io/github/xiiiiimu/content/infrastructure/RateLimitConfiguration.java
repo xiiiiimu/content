@@ -25,7 +25,12 @@ import java.util.List;
  * login-ip    per IP        20 / 1m   burst 20
  * login-user  per username   5 / 1m   burst 5
  * register-ip per IP        10 / 1h   burst 10
+ * unlock-user per user      10 / 1m   burst 10   (share-password unlock, A9)
+ * unlock-ip   per IP        30 / 1m   burst 30
  * </pre>
+ * Failure backoff {@code content.ratelimit.backoff.unlock.{threshold,base,max,window}} (A9): after 5 consecutive wrong
+ * share passwords for one (user, post) the next attempt waits 1 s, 2 s, 4 s ... up to 15 min; forgotten 1 h after the
+ * last failure or on success.
  * The limiter has its own Redis client ({@code content.ratelimit.redis-uri}, default the feed Redis) with a short
  * command/connect timeout, so a slow Redis costs a limiter decision at most {@code timeout-millis} before the
  * per-instance fallback takes over for {@code redis-cooldown-millis}.
@@ -44,7 +49,16 @@ public class RateLimitConfiguration {
    rule(env,"report",5,Duration.ofMinutes(1),5),
    rule(env,"login-ip",20,Duration.ofMinutes(1),20),
    rule(env,"login-user",5,Duration.ofMinutes(1),5),
-   rule(env,"register-ip",10,Duration.ofHours(1),10));
+   rule(env,"register-ip",10,Duration.ofHours(1),10),
+   rule(env,"unlock-user",10,Duration.ofMinutes(1),10),
+   rule(env,"unlock-ip",30,Duration.ofMinutes(1),30));
+ }
+ static List<RateLimiter.Backoff> backoffs(Environment env){
+  String p="content.ratelimit.backoff.unlock.";
+  return List.of(new RateLimiter.Backoff("unlock-fail",env.getProperty(p+"threshold",Integer.class,5),
+   env.getProperty(p+"base",Duration.class,Duration.ofSeconds(1)).toMillis(),
+   env.getProperty(p+"max",Duration.class,Duration.ofMinutes(15)).toMillis(),
+   env.getProperty(p+"window",Duration.class,Duration.ofHours(1)).toMillis()));
  }
  @Bean(destroyMethod="close") RateLimiter rateLimiter(Environment env,DefaultClientResources resources,ObjectProvider<MeterRegistry> meters,
    @Value("${content.ratelimit.redis-uri:${content.feed.redis-uri:redis://127.0.0.1:26379}}")String uri,
@@ -54,6 +68,6 @@ public class RateLimitConfiguration {
   var u=RedisURI.create(uri);u.setTimeout(Duration.ofMillis(timeoutMillis));
   var client=RedisClient.create(resources,u);
   client.setOptions(ClientOptions.builder().socketOptions(SocketOptions.builder().connectTimeout(Duration.ofMillis(Math.max(timeoutMillis,100))).build()).build());
-  return new RateLimiter(client,rules(env),cooldownMillis,meters.getIfAvailable());
+  return new RateLimiter(client,rules(env),backoffs(env),cooldownMillis,meters.getIfAvailable());
  }
 }

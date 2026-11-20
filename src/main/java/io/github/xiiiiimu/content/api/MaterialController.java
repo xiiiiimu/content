@@ -12,8 +12,9 @@ import java.util.*;
 @RestController @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
 public class MaterialController {
  private final MaterialService materials;private final InteractionService interactions;private final PublishService publish;private final ObjectMapper json;
- public MaterialController(MaterialService materials,InteractionService interactions,PublishService publish,ObjectMapper json){
-  this.materials=materials;this.interactions=interactions;this.publish=publish;this.json=json;
+ private final io.github.xiiiiimu.content.infrastructure.RateLimiter limits;
+ public MaterialController(MaterialService materials,InteractionService interactions,PublishService publish,ObjectMapper json,io.github.xiiiiimu.content.infrastructure.RateLimiter limits){
+  this.materials=materials;this.interactions=interactions;this.publish=publish;this.json=json;this.limits=limits;
  }
  private long user(Principal p){if(p==null||p.getName()==null)throw new FeedFailure(401,"UNAUTHENTICATED");try{long id=Long.parseLong(p.getName());if(id<=0)throw new FeedFailure(401,"UNAUTHENTICATED");return id;}catch(NumberFormatException e){throw new FeedFailure(401,"UNAUTHENTICATED");}}
 
@@ -41,9 +42,25 @@ public class MaterialController {
  @GetMapping("/api/materials/{post}")
  public MaterialService.MaterialDetail detail(@PathVariable long post,Principal p){return materials.detail(user(p),post);}
 
+ /**
+  * Hardening A9: share-password attempts are limited per user and per client IP (A2 limiter), and repeated wrong
+  * passwords for one (user, post) back off exponentially; a successful unlock clears the failures.
+  */
  @PostMapping("/api/materials/{post}/unlock")
- public MaterialService.Unlock unlock(@PathVariable long post,@RequestBody Map<String,String> body,Principal p){
-  return materials.unlock(user(p),post,body.get("password"));
+ public MaterialService.Unlock unlock(@PathVariable long post,@RequestBody Map<String,String> body,Principal p,jakarta.servlet.http.HttpServletRequest request){
+  long viewer=user(p);
+  limits.acquire("unlock-user",Long.toString(viewer));
+  limits.acquire("unlock-ip",request.getRemoteAddr());
+  String attempt=viewer+":"+post;
+  limits.checkBackoff("unlock-fail",attempt);
+  try{
+   var unlocked=materials.unlock(viewer,post,body.get("password"));
+   limits.clearFailures("unlock-fail",attempt);
+   return unlocked;
+  }catch(FeedFailure e){
+   if("INVALID_SHARE_PASSWORD".equals(e.code))limits.recordFailure("unlock-fail",attempt);
+   throw e;
+  }
  }
 
  @PatchMapping("/api/materials/{post}/share")
