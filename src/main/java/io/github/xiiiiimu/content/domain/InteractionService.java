@@ -83,6 +83,18 @@ public final class InteractionService {
  public CommentResult comment(long user,long post,String body,String key,String clientTopic,Long parentId,Long materialVersionId,Long offsetMs){
   if(body==null || body.isBlank() || body.length()>4000 || key==null || key.isBlank() || key.length()>128)throw new FeedFailure(400,"INVALID_REQUEST");
   var view=visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+  try{
+   return createComment(user,post,body,key,parentId,materialVersionId,offsetMs,view);
+  }catch(org.springframework.dao.DuplicateKeyException conflict){
+   // Hardening A5 (same as PublishService): a concurrent request with this key committed first and our insert hit
+   // uq_comment_idem. The template rolled back every write of this attempt; read the winner in a new transaction,
+   // never inside the failed one.
+   var replay=tx.execute(status->{var winner=db.existingComment(user,key);return winner==null?null:toResult(winner,true);});
+   if(replay==null)throw conflict;
+   return replay;
+  }
+ }
+ private CommentResult createComment(long user,long post,String body,String key,Long parentId,Long materialVersionId,Long offsetMs,VisibilityService.View view){
   return tx.execute(status->{
    var existing=db.existingComment(user,key);
    if(existing!=null)return toResult(existing,true);
