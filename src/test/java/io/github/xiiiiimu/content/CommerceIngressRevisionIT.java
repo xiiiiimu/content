@@ -31,7 +31,7 @@ class CommerceIngressRevisionIT {
   r.add("content.feed.enabled",()->"true");r.add("content.feed.redis-uri",()->"redis://"+REDIS.getHost()+":"+REDIS.getMappedPort(6379));
   r.add("content.feed.cursor-key",()->"cursor-test-key-32-bytes-minimum-00001");r.add("content.feed.identity-key",()->"identity-test-key-32-bytes-minimum-0001");
   r.add("content.media.enabled",()->"true");r.add("content.media.s3-endpoint",()->"http://"+S3.getHost()+":"+S3.getMappedPort(9090));
-  r.add("content.media.bucket",()->"content-media");r.add("content.media.secret-key",()->"content-secret-key-32-bytes-minimum");
+  r.add("content.media.bucket",()->"content-media");r.add("content.media.secret-key",()->"media-test-secret-key-not-for-production-01");
   r.add("content.media.ffmpeg-image",()->"");r.add("content.assistant.python-url",()->"");
   r.add("content.media.scan-delay-millis",()->"3600000");r.add("content.sale.sync-settle",()->"false");
   r.add("content.sale.scan-enabled",()->"false");r.add("content.sale.latency-enabled",()->"true");

@@ -29,7 +29,7 @@ content:
     s3-endpoint: ${CONTENT_S3_ENDPOINT:}
     bucket: ${CONTENT_S3_BUCKET:content-media}
     access-key: ${CONTENT_S3_ACCESS_KEY:content}
-    secret-key: ${CONTENT_S3_SECRET_KEY:content-secret-key-32-bytes-minimum}
+    secret-key: ${CONTENT_S3_SECRET_KEY:}
     ffmpeg-image: ${CONTENT_FFMPEG_IMAGE:}
   assistant:
     python-url: ${CONTENT_ASSISTANT_PYTHON_URL:}
