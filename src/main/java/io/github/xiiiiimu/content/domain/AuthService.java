@@ -14,16 +14,19 @@ public final class AuthService {
  public AuthService(UserMapper users,TransactionTemplate tx,FeedTokens identity,long ttlMs){
   this.users=users;this.tx=tx;this.identity=identity;this.ttlMs=Math.min(Math.max(ttlMs,60_000),3_600_000);
  }
+ /** A concurrent registration of the same name (the key is case-insensitive) hits uq_users_username: 409 USERNAME_TAKEN (A6), never a server error. */
  public Session register(String username,String password){
   validateCreds(username,password);
-  return tx.execute(status->{
-   if(users.byUsername(username)!=null)throw new FeedFailure(409,"USERNAME_TAKEN");
-   long now=System.currentTimeMillis();
-   if(users.insert(username,passwords.encode(password),now)!=1)throw new IllegalStateException("user insert");
-   long id=users.lastId();
-   users.ensureAuthor(id);
-   return session(id,username);
-  });
+  try{
+   return tx.execute(status->{
+    if(users.byUsername(username)!=null)throw new FeedFailure(409,"USERNAME_TAKEN");
+    long now=System.currentTimeMillis();
+    if(users.insert(username,passwords.encode(password),now)!=1)throw new IllegalStateException("user insert");
+    long id=users.lastId();
+    users.ensureAuthor(id);
+    return session(id,username);
+   });
+  }catch(org.springframework.dao.DuplicateKeyException e){throw new FeedFailure(409,"USERNAME_TAKEN");}
  }
  public Session login(String username,String password){
   validateCreds(username,password);
