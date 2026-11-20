@@ -54,7 +54,13 @@ public class FeedConfiguration {
  @Bean DistributionInbox distributionInbox(InboxMapper inbox,FeedMapper db,TransactionTemplate tx,ObjectMapper json,PipelineObserver observer,NotificationService notifications,org.springframework.beans.factory.ObjectProvider<AssistantService> assistant){
   return new DistributionInbox(inbox,db,tx,json,observer,notifications,()->{var a=assistant.getIfAvailable();if(a!=null)a.tick();});
  }
- @Bean AuthService authService(UserMapper users,TransactionTemplate tx,@org.springframework.beans.factory.annotation.Qualifier("identityTokens") FeedTokens identity,@Value("${content.auth.token-ttl-ms:900000}")long ttl){return new AuthService(users,tx,identity,ttl);}
+ /** Hardening A4: bounded BCrypt pool for login/register; threads default max(1, cores/2), queue default 4 x threads. */
+ @Bean(destroyMethod="close") PasswordHasher passwordHasher(@Value("${content.auth.bcrypt-threads:0}")int threads,@Value("${content.auth.bcrypt-queue:-1}")int queue,
+   @Value("${content.auth.bcrypt-wait-millis:5000}")long waitMillis){
+  int t=threads>0?threads:PasswordHasher.defaultThreads();
+  return new PasswordHasher(t,queue>=0?queue:4*t,waitMillis);
+ }
+ @Bean AuthService authService(UserMapper users,TransactionTemplate tx,@org.springframework.beans.factory.annotation.Qualifier("identityTokens") FeedTokens identity,@Value("${content.auth.token-ttl-ms:900000}")long ttl,PasswordHasher passwords){return new AuthService(users,tx,identity,ttl,passwords);}
  @Bean PostAuthoringService postAuthoringService(PostAuthoringMapper posts,UserMapper users,TransactionTemplate tx){return new PostAuthoringService(posts,users,tx);}
  @Bean DeliveryStore deliveryStore(FeedMapper db,DeliveryMapper tasks,TransactionTemplate tx,@Value("${content.pipeline.max-attempts:5}")int max,@Value("${content.pipeline.lease-millis:30000}")long lease){return new DeliveryStore(db,tasks,tx,max,lease);}
  @Bean DistributionWorker distributionWorker(DeliveryStore store,DeliveryMapper tasks,FeedMapper db,FeedRedis redis,ObjectMapper json,PipelineObserver observer){return new DistributionWorker(store,tasks,db,redis,json,observer);}
