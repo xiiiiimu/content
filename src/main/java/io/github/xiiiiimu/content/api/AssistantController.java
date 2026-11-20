@@ -12,7 +12,7 @@ public class AssistantController {
  public AssistantController(AssistantService assistant,FeedbackWatchService feedback,GiveawayService giveaways){
   this.assistant=assistant;this.feedback=feedback;this.giveaways=giveaways;
  }
- @GetMapping("/assistant/tasks/{id}") public AssistantService.TaskView task(@PathVariable long id){return assistant.status(id);}
+ @GetMapping("/assistant/tasks/{id}") public AssistantService.TaskView task(@PathVariable long id,Principal p){return assistant.status(user(p),id);}
  @PostMapping("/materials/{post}/feedback/{comment}/subscribe")
  public Map<String,Object> subscribe(@PathVariable long post,@PathVariable long comment,Principal p){
   String msg=feedback.subscribe(user(p),comment);return Map.of("ok",true,"message",msg);

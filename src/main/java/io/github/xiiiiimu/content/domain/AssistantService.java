@@ -117,8 +117,13 @@ public final class AssistantService {
   });
  }
 
- public TaskView status(long taskId){
+ /** Hardening A8: only the task's requester or the author of its post may read it; anyone else sees "not found". */
+ public TaskView status(long viewer,long taskId){
   var t=db.task(taskId);if(t==null)throw new FeedFailure(404,"ASSISTANT_TASK_NOT_FOUND");
+  if(viewer!=t.actorUserId()){
+   var post=posts.post(t.postId());
+   if(post==null || post.authorId()!=viewer)throw new FeedFailure(404,"ASSISTANT_TASK_NOT_FOUND");
+  }
   return new TaskView(t.id(),t.state(),t.intent(),t.replyCommentId());
  }
 

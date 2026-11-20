@@ -46,9 +46,7 @@ class AnonymousAccessIT {
   * Anonymous-reachable routes found by this probe and reported in docs/hardening-plan.md (A1 inventory), not yet fixed.
   * Kept separate from ANONYMOUS so the list cannot silently grow: a new entry here needs a reviewed decision.
   */
- static final Map<String,String> KNOWN_FINDINGS=Map.of(
-  "GET /api/assistant/tasks/{id}","task state/intent/reply comment of any task id, no identity or owner check"
- );
+ static final Map<String,String> KNOWN_FINDINGS=Map.of();
  /** Bodies that pass request parsing, so the probe reaches the handler's identity check instead of a 400/415/500. */
  static final Map<String,String> BODIES=Map.of(
   "PATCH /api/posts/{id}","{\"expectedVersion\":0,\"body\":\"x\"}",
