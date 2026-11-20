@@ -19,12 +19,16 @@
 | 项 | 标题 | 优先级 | 状态 |
 |---|---|---|---|
 | 0 | 上一轮收尾（提交、扫描、推送、CI） | — | 完成 |
-| A1 | 调试接口仅在显式测试配置下注册 | P0 | 未开始 |
-| A2 | 互动/登录/注册限流（已决定） | P0 | 未开始 |
-| A3 | 举报去重（已决定） | P0 | 未开始 |
-| A4 | 登录 BCrypt 有界线程池 | P0 | 未开始 |
-| A5 | 评论幂等竞态 | P0 | 未开始 |
-| A6 | 注册并发重名返回 409 | P0 | 未开始 |
+| A1 | 调试接口仅在显式测试配置下注册 | P0 | 已修复，待全量 IT |
+| A2 | 互动/登录/注册限流（已决定） | P0 | 已修复，待全量 IT 与压测复核 |
+| A3 | 举报去重（已决定） | P0 | 已修复，待全量 IT |
+| A4 | 登录 BCrypt 有界线程池 | P0 | 已修复，待全量 IT 与登录压测 |
+| A5 | 评论幂等竞态 | P0 | 已修复，待全量 IT |
+| A6 | 注册并发重名返回 409 | P0 | 已修复，待全量 IT |
+| A7 | 媒体下载签名密钥去掉公开默认值 | P0 | 已修复，待全量 IT |
+| A8 | `GET /api/assistant/tasks/{id}` 需登录且仅发起人可看 | P0 | 已修复，待全量 IT |
+| A9 | 分享密码解锁限流 | P0 | 已修复，待全量 IT |
+| A10 | 相同幂等键下评论话题统计丢失【需决定】 | P1 | 待确认（已复现，修复方案待决定） |
 | B1 | 同一话题分钟计数热点【需决定】 | P1 | 未开始 |
 | B2 | 计数改为增量更新 + 离线对账（R3） | P1 | 未开始 |
 | B3 | 每次点赞 3 次连接获取 | P1 | 未开始 |
@@ -110,6 +114,42 @@
 - **问题**：`AuthService.register` 在事务里先查后插，并发重名撞 `uq_users_username` 时返回 500。
 - **验收**：RED 用屏障并发注册同一用户名，当前有 1 个返回 5xx；GREEN 后一个 200、一个 409 `USERNAME_TAKEN`，不出现 500，只有 1 条用户记录。
 
+### A7 媒体下载签名密钥去掉公开默认值
+- **问题**：`/api/media/objects` 只靠 HMAC 签名授权；`application.yml` 给 `content.media.secret-key` 配了公开默认值 `content-secret-key-32-bytes-minimum`。生产若没有设置 `CONTENT_S3_SECRET_KEY`，任何人都能伪造任意对象（包括付费原件）的下载链接。
+- **证据**：A1 认证扫描；`HttpS3ObjectStore.verifyGet`/`mac`。
+- **决定**：去掉公开默认值；非开发配置下未设置密钥时启动直接失败；开发配置使用随机生成的密钥并打印警告。
+- **验收**：RED/GREEN：未设置密钥的非开发配置启动失败；设置为旧的公开默认值也视为未设置；开发配置下自动生成随机密钥（两次启动不同）并打印 WARN；已有媒体 IT 通过。
+- **结果**（`89f9816`）：`MediaSecret.resolve`；`MediaSecretStartupIT` 4 项通过；9 个媒体相关 IT 改用测试专用密钥。注意：该密钥同时是 S3 SigV4 的 secret（MinIO 密码），部署时两处须一致。未纳入本轮的 `AssistantEvalE2EIT`（他人未提交文件）仍使用旧默认值，启动会失败，需要其作者改为显式测试密钥。
+
+### A8 `GET /api/assistant/tasks/{id}` 需要登录且仅发起人可看
+- **问题**：该接口不检查身份，任何人可按 id 遍历读取任务的状态、意图和回复评论 id。
+- **证据**：A1 认证扫描（`AnonymousAccessIT.KNOWN_FINDINGS`）。
+- **决定**：需要登录；只有任务发起人（`actor_user_id`）或该帖子的作者可以查看，其他人返回 404（不暴露任务是否存在）。
+- **验收**：RED/GREEN：匿名 401、其他用户 404、发起人和作者 200；`AnonymousAccessIT` 的 `KNOWN_FINDINGS` 清空；`demo-material-assistant.ps1` 的调用方式仍然可用（带发起人 token）。
+- **结果**（`88668db`）：RED 为匿名 200；GREEN `AssistantTaskAccessIT`、`AnonymousAccessIT`（KNOWN_FINDINGS 已清空）、`AssistantFlowIT` 通过。演示脚本用评论者本人 token 调用，符合新规则（未实跑演示脚本）。
+
+### A9 分享密码解锁限流
+- **问题**：`POST /api/materials/{post}/unlock` 校验分享密码（BCrypt），没有限流，也没有有界线程池，可被暴力尝试。
+- **决定**：复用 A2 的限流组件，按用户和按 IP 限流；失败次数多时退避。
+- **验收**：RED/GREEN：超过阈值返回 429 + Retry-After；连续失败后退避时间变长，成功后不再额外惩罚；不同用户/IP 互不影响；BCrypt 走 A4 的有界线程池。
+- **取值**：`unlock-user` 每用户 10/分钟（突发 10）；`unlock-ip` 每 IP 30/分钟（突发 30）；退避按 (用户, 帖子)：连续 5 次密码错误后，下一次须在上次失败后等待 1s、2s、4s…，上限 15 分钟；成功即清零，最后一次失败 1 小时后自动过期。均可通过 `content.ratelimit.rules.unlock-*`、`content.ratelimit.backoff.unlock.*` 配置。退避状态存 Redis（Lua，使用 Redis TIME），Redis 不可用时与 A2 相同退回每实例内存。
+- **结果**（`056a65a`、`3627911`）：RED 为三项均返回 200、16 路并发全部 200；GREEN `UnlockRateLimitIT` 3 项、`UnlockBcryptPoolIT`（1 线程、队列 0，部分请求 429 RATE_LIMITED + Retry-After: 1，其余 200，无 5xx）、`RateLimitIT`、`RateLimitRedisDownIT`、`MaterialFlowIT` 通过。分享密码的创建、修改和校验现在都走 A4 的 `PasswordHasher`。
+
+### A10 相同幂等键下评论话题统计丢失【需决定】
+- **问题**：评论的话题事件 id 为 `"comment:"+Idempotency-Key`，没有按用户区分。两个用户恰好使用相同的幂等键时，第二个用户的评论不会计入话题统计（ledger `INSERT IGNORE`）。
+- **计划**：先分析和复现，给出结论（影响范围、客户端幂等键的实际生成方式），修复与否等决定。
+- **复现**（`aa75ca7`，`CommentTopicEventIdIT`，当前 `@Disabled`）：用户 2101 在 sports 帖、用户 2102 在 music 帖，使用相同幂等键 `k-1` 评论。两条评论都创建成功（评论幂等按 (user_id, key)），sports 计 1，music 计 **0**。失败日志：`target/hardening-a/A10-repro-025840.log`。
+- **结论**：
+  - 原因：`topic_event_ledger.event_id` 全局唯一，评论事件 id 为 `"comment:"+key`，作用域比评论幂等（按用户）大。不同用户的同键评论，第二条的 ledger `INSERT IGNORE` 不生效，分钟桶不 +1，也不会触发 `emitSpikeIfNeeded`；`rebuild` 从 ledger 重建时同样缺失。评论本身、`comment_count`、Outbox 事件都不受影响，只影响话题热度统计和突增检测。冲突仅在 ledger 保留窗口内有效。
+  - 实际触发概率不低：前端的键是毫秒时间戳，`posts/[id].vue` 用 `ui-${Date.now()}` 和 `assistant-${Date.now()}`，`hot-topics/[topic]/[post].vue` 用 `web-${postId}-${Date.now()}`。两个用户在同一毫秒发评论就会冲突，前两种键不含帖子 id，跨帖子也会冲突。评论量越大，丢失越多。
+  - 可被利用：键可预测，用户可以提前用未来时间戳的键发评论，压制其他人评论的话题计数（影响仅限热度统计）。
+  - 附带发现（不属于 A10）：前端每次点击都生成新键，网络重试不会复用同一个键，所以评论幂等对用户重试实际不起作用；抢购页已用 `sessionStorage` 保存键，可参照。
+- **修复方案（待决定）**：
+  1. **推荐**：事件 id 改为 `"comment:"+commentId`。ledger 写入与评论插入在同一事务，重放路径不记账，每条评论恰好计一次；不需要迁移，旧格式的行在保留窗口后自然过期，新旧格式不冲突。
+  2. 事件 id 改为 `"comment:"+userId+":"+key`，与评论幂等作用域一致，效果相同；但 `event_id` 为 `VARCHAR(64)`，用户 id 加长幂等键可能超长（现有 `"comment:"+key` 在键超过 56 字符时同样有此风险，需另核实键长度校验）。
+  3. 维持现状，只在文档中说明。
+  - 前端幂等键的问题另列，是否纳入本计划也请决定。
+
 ---
 
 ## 第 B 轮：P1 性能
@@ -148,6 +188,9 @@
 - **问题**：缓存同步在每单的提交里占比最大。
 - **证据**：`docs/perf-evidence/commerce/campaign-lock-v26-clean-20261120.md:83-91`：落单后固定 2.000 次，加上 bridge 触发的 0.16–0.95 次，合计每单约 2.7–2.8 次提交；`campaign-lock-v26-20261120.md` §6 有优化方向，测算每单降到 2.3–2.6 次提交后约 120–150 单/秒。
 - **先给合并或批量方案，说明对缓存一致性和恢复流程的影响，等确认**。
+- **前置：压测脚本与 A2 限流（已决定 2026-11-21）**：`seed-commerce-data.ps1`、`refresh_commerce_tokens.py`、`run_ingress_qps.py` 等在造数阶段经 HTTP 注册、登录数百个买家，会被 A2 的注册/登录 IP 限流拦住。
+  - **选择**：造数改为直接在独立库中写入账号（`users`、`author_feed_mode`），token 用测试身份密钥在本地签发（与 `infra/perf/interactions` 相同；密钥只放在 `target/`），不再经过 `/api/auth/register`、`/api/auth/login`。
+  - **不影响测量结论的理由**：被测应用的配置与生产默认完全相同，没有放宽任何限流；登录/注册本就不在抢购测量窗口内，以前的造数阶段也不在；测量路径（下单、结算、发送）没有任何改动。改动在 B4/B5 采基线之前完成，基线与改后使用同一套脚本。
 - **验收**：B2 档对比每单提交次数（`commits_per_order.py`）和吞吐；缓存一致性和恢复相关 IT（`CommerceIngressRevisionIT`、`MaterialCommercePurchaseIT` 等）通过。
 
 ### B6 关注潮（R6）与推模式扩散（R7）实测
@@ -225,3 +268,5 @@
 |---|---|---|
 | 2026-11-21 | 计划 | 建立本计划；上一轮收尾提交 `0b9d5b7`、`eddba0c` 并推送，CI 通过 |
 | 2026-11-21 | 计划 | 计划确认；A2、A3 设计已决定（见各项），A1 追加全仓接口认证检查 |
+| 2026-11-21 | A | A1–A6 已修复（`0480365`…`982e742`）；全量 IT 因系统内存不足被中止，待重跑；新增 A7–A10（A1 扫描发现）；记录抢购压测脚本的造数方式决定（B5 前置） |
+| 2026-11-21 | A | A7（`89f9816`）、A8（`88668db`）、A9（`056a65a`、`3627911`）已修复；A10 已复现（`aa75ca7`），结论与方案待决定 |
