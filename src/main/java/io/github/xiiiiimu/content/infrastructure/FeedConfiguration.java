@@ -70,6 +70,28 @@ public class FeedConfiguration {
  @Bean FeedTrimmer feedTrimmer(FeedMapper db,FeedRedis redis,@Value("${content.feed.window-millis:2592000000}")long window){return new FeedTrimmer(db,redis,window);}
  @Bean TrendGuardService trendGuardService(TrendGuardMapper risks,TransactionTemplate tx){return new TrendGuardService(risks,tx);}
  @Bean TrendingService trendingService(InteractionMapper interactions,TransactionTemplate tx,FeedRedis redis,VisibilityService visibility,TrendGuardService risks,@Value("${content.trendguard.spike-threshold:3}")int spikeThreshold){return new TrendingService(interactions,tx,redis,visibility,risks,spikeThreshold);}
+ @Bean TopicRetention topicRetention(InteractionMapper interactions,TransactionTemplate tx,
+   @Value("${content.trending.retention-millis:"+TopicRetention.DEFAULT_RETENTION_MS+"}")long retention,@Value("${content.trending.retention-batch:500}")int batch){
+  return new TopicRetention(interactions,tx,retention,batch);
+ }
+ /** Periodic purge on its own daemon thread (no @EnableScheduling dependency). Disable with content.trending.retention-enabled=false. */
+ @Bean(destroyMethod="close") @ConditionalOnProperty(name="content.trending.retention-enabled",havingValue="true",matchIfMissing=true)
+ TopicRetentionJob topicRetentionJob(TopicRetention retention,@Value("${content.trending.retention-interval-millis:600000}")long interval){
+  return new TopicRetentionJob(retention,interval);
+ }
+ /** Own daemon thread so the purge never competes with request or pipeline executors; not an ExecutorService bean. */
+ public static final class TopicRetentionJob implements AutoCloseable {
+  private final ScheduledExecutorService scheduler=Executors.newSingleThreadScheduledExecutor(r->{var t=new Thread(r,"topic-retention");t.setDaemon(true);return t;});
+  TopicRetentionJob(TopicRetention retention,long interval){
+   long every=Math.max(60_000L,interval);
+   scheduler.scheduleWithFixedDelay(()->{
+    try{var r=retention.purge(System.currentTimeMillis());
+     if(r.buckets()+r.ledger()>0)org.slf4j.LoggerFactory.getLogger(TopicRetention.class).info("Topic retention purged buckets={} ledger={}",r.buckets(),r.ledger());}
+    catch(Exception e){org.slf4j.LoggerFactory.getLogger(TopicRetention.class).warn("Topic retention purge failed; will retry",e);}
+   },every,every,TimeUnit.MILLISECONDS);
+  }
+  @Override public void close(){scheduler.shutdownNow();}
+ }
  @Bean InteractionService interactionService(VisibilityService visibility,InteractionMapper interactions,TransactionTemplate tx,TrendingService trending,RelationshipService relationships,org.springframework.beans.factory.ObjectProvider<MaterialService> materials,org.springframework.beans.factory.ObjectProvider<AssistantService> assistant){
   return new InteractionService(visibility,interactions,tx,trending,relationships,materials.getIfAvailable(),enq->{
    var a=assistant.getIfAvailable();if(a==null)return null;

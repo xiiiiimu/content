@@ -20,7 +20,7 @@ class MySqlMigrationIT {
         Flyway flyway = Flyway.configure()
                 .dataSource(MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword())
                 .load();
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(26);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(27);
         assertThat(flyway.migrate().migrationsExecuted).isZero();
         flyway.validate();
         try(var c=DriverManager.getConnection(MYSQL.getJdbcUrl(),MYSQL.getUsername(),MYSQL.getPassword());
@@ -47,6 +47,12 @@ class MySqlMigrationIT {
             try(var r=s.executeQuery("SELECT CONCAT(table_name,'.',index_name,'=',GROUP_CONCAT(column_name ORDER BY seq_in_index)) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name IN ('material_purchase_requests','material_orders') AND index_name IN ('ix_purchase_campaign_state','fk_order_campaign') GROUP BY table_name,index_name ORDER BY 1")){while(r.next())idx.add(r.getString(1));}
             assertThat(idx).as("V26 keeps the campaign_id indexes").containsExactly("material_orders.fk_order_campaign=campaign_id","material_purchase_requests.ix_purchase_campaign_state=campaign_id,state");
         }catch(Exception e){throw new AssertionError(e);}
+        try(var c=DriverManager.getConnection(MYSQL.getJdbcUrl(),MYSQL.getUsername(),MYSQL.getPassword());var s=c.createStatement();
+            var r=s.executeQuery("SELECT CONCAT(table_name,'.',index_name,'=',GROUP_CONCAT(column_name ORDER BY seq_in_index)) FROM information_schema.statistics WHERE table_schema=DATABASE() AND index_name IN ('ix_bucket_start','ix_ledger_time') GROUP BY table_name,index_name ORDER BY 1")){
+            var idx=new java.util.ArrayList<String>();while(r.next())idx.add(r.getString(1));
+            assertThat(idx).as("V27: time-leading indexes for the trending window read and the retention purge")
+             .containsExactly("topic_event_ledger.ix_ledger_time=occurred_at_ms","topic_minute_buckets.ix_bucket_start=bucket_start_ms");
+        }catch(Exception e){throw new AssertionError(e);}
     }
 
     @Test
@@ -64,7 +70,7 @@ class MySqlMigrationIT {
             statement.executeUpdate("INSERT INTO posts(id,author_id,status,body,version) VALUES (1,1,'DRAFT','preserved',4)");
         }
         Flyway latest = Flyway.configure().dataSource(url, "root", MYSQL.getPassword()).load();
-        assertThat(latest.migrate().migrationsExecuted).isEqualTo(25);
+        assertThat(latest.migrate().migrationsExecuted).isEqualTo(26);
         assertThat(latest.migrate().migrationsExecuted).isZero();
         latest.validate();
         try (var connection = DriverManager.getConnection(url, "root", MYSQL.getPassword());
@@ -91,7 +97,7 @@ class MySqlMigrationIT {
             try(var r=s.executeQuery("SELECT payload FROM outbox_events WHERE id=42")){r.next();payload=r.getString(1);}
         }
         var latest=Flyway.configure().dataSource(url,"root",MYSQL.getPassword()).load();
-        assertThat(latest.migrate().migrationsExecuted).isEqualTo(24);latest.validate();
+        assertThat(latest.migrate().migrationsExecuted).isEqualTo(25);latest.validate();
         assertThat(latest.migrate().migrationsExecuted).isZero();
         try(var c=DriverManager.getConnection(url,"root",MYSQL.getPassword());var s=c.createStatement();var r=s.executeQuery("SELECT payload,status,attempt,lease_token FROM outbox_events WHERE id=42")) {
             assertThat(r.next()).isTrue();assertThat(r.getString("payload")).isEqualTo(payload);

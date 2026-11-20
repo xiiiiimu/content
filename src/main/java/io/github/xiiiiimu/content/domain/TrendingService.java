@@ -29,7 +29,7 @@ public final class TrendingService {
   if(spikeThreshold<=0 || risks==null)return;
   risks.lockTopicForEmit(topic);
   long since=Math.max(0,System.currentTimeMillis()-3_600_000L);
-  long net=0;for(var b:db.bucketsSince(since))if(topic.equals(b.topic()))net+=b.net();
+  long net=db.topicNetSince(topic,since);
   if(net<spikeThreshold)return;
   long hour=System.currentTimeMillis()/3_600_000L*3_600_000L;
   String id=TrendGuardService.spikeEventId(topic,hour);

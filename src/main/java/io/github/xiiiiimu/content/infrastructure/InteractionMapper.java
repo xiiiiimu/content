@@ -53,6 +53,15 @@ public interface InteractionMapper {
  void bucket(@Param("topic")String topic,@Param("bucket")long bucket,@Param("net")long net,@Param("active")long active);
  @Select("SELECT topic,bucket_start_ms AS bucket,net_events AS net,active_interactions AS active FROM topic_minute_buckets WHERE bucket_start_ms>=#{since} ORDER BY topic,bucket_start_ms")
  List<Bucket> bucketsSince(long since);
+ /** Spike check: net of one topic since a time, a primary-key prefix range (topic, bucket_start_ms). */
+ @Select("SELECT COALESCE(SUM(net_events),0) FROM topic_minute_buckets WHERE topic=#{topic} AND bucket_start_ms>=#{since}")
+ long topicNetSince(@Param("topic")String topic,@Param("since")long since);
+ /** Retention: delete at most {@code limit} expired buckets, oldest first, via ix_bucket_start. */
+ @Delete("DELETE FROM topic_minute_buckets WHERE bucket_start_ms<#{cutoff} ORDER BY bucket_start_ms LIMIT #{limit}")
+ int purgeBuckets(@Param("cutoff")long cutoff,@Param("limit")int limit);
+ /** Retention: delete at most {@code limit} expired ledger rows, oldest first, via ix_ledger_time. */
+ @Delete("DELETE FROM topic_event_ledger WHERE occurred_at_ms<#{cutoff} ORDER BY occurred_at_ms LIMIT #{limit}")
+ int purgeLedger(@Param("cutoff")long cutoff,@Param("limit")int limit);
  @Delete("DELETE FROM topic_minute_buckets") void clearBuckets();
  @Select("SELECT event_id AS id,topic,post_id AS post,occurred_at_ms AS at,delta,kind FROM topic_event_ledger WHERE occurred_at_ms>=#{since}")
  List<Ledger> ledgerSince(long since);
