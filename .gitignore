@@ -34,6 +34,9 @@ docs/perf-evidence/**/*.jtl
 docs/perf-evidence/**/*.ndjson
 docs/perf-evidence/**/*.tsv
 docs/perf-evidence/**/html/
+docs/perf-evidence/**/observer.stop
+docs/perf-evidence/**/*.csv
+docs/perf-evidence/**/*.gz
 # Per-request JSON (one entry per request; > 256 KB for formal runs). Small smoke-run copies may be committed with -f.
 docs/perf-evidence/**/*request-db-timelines.json
 docs/perf-evidence/**/phase-timelines.json
