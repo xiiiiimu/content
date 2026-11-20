@@ -7,7 +7,15 @@
 param(
   [string]$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path,
   [switch]$Package,
-  [switch]$SkipAssistant
+  [switch]$SkipAssistant,
+  [string]$DiagnosticsDir = '',
+  [string]$JarPath = '',
+  [switch]$SegmentTimings,
+  [ValidateRange(1,200)][int]$BridgeBatchSize = 20,
+  # MQ dispatch switch in one JAR: batch (default, cap 20 / concurrency 2 = tier B2) or serial = original one-row loop.
+  [ValidateSet('serial','batch')][string]$DispatchMode = 'batch',
+  [ValidateRange(1,200)][int]$DispatchBatchMax = 20,
+  [ValidateRange(1,16)][int]$DispatchConcurrency = 2
 )
 
 $ErrorActionPreference = 'Stop'
@@ -41,13 +49,14 @@ foreach ($c in @(
 }
 if (-not $mvn) { throw 'mvn not found' }
 
+if ($Package -and $JarPath) { throw 'Use either -Package or an explicit -JarPath' }
 if ($Package) {
   Write-Host "mvn -DskipTests package"
   & $mvn -q -DskipTests package
   if ($LASTEXITCODE -ne 0) { throw "package failed: $LASTEXITCODE" }
 }
 
-$jar = Join-Path $RepoRoot 'target/content-0.1.0-SNAPSHOT.jar'
+$jar = if ($JarPath) { (Resolve-Path -LiteralPath $JarPath).Path } else { Join-Path $RepoRoot 'target/content-0.1.0-SNAPSHOT.jar' }
 if (-not (Test-Path $jar)) { throw "missing $jar — re-run with -Package" }
 
 # FeedConfiguration overwrites spring.datasource.hikari.*; use env (or -D before -jar).
@@ -62,13 +71,20 @@ if (-not $env:CONTENT_MYBATIS_STATEMENT_TIMEOUT_SECONDS) { $env:CONTENT_MYBATIS_
 if (-not $env:CONTENT_REDIS_IO_THREADS) { $env:CONTENT_REDIS_IO_THREADS = '8' }
 if (-not $env:CONTENT_REDIS_COMPUTATION_THREADS) { $env:CONTENT_REDIS_COMPUTATION_THREADS = '8' }
 
-# Tomcat accept backlog / thread pool sized for concurrent connect storms (200+ clients).
+# Historical configuration (superseded by measured Windows local acceptance below): 5k purchase-POST evidence (purchase-5k-limited-t5000-…20261116023232) showed
+# peakHttpInFlight pinned at 800 (= old threads.max) with CONNECT_FAIL/503 under 5000-ready barrier.
+# Windows plain backlog was measured at 200 despite accept-count=5000. Opt in to native hint.
+# Bound HTTP workers to 100, leaving Hikari slots for 20 settlement workers (pool=120).
+# Keep connection limits, queue target and all request/Redis/JDBC timeouts unchanged.
 $args = @(
+  '--add-opens=java.base/sun.nio.ch=ALL-UNNAMED',
   '-jar', $jar,
   '--spring.profiles.active=pipeline',
-  '--server.tomcat.threads.max=800',
-  '--server.tomcat.threads.min-spare=80',
-  '--server.tomcat.accept-count=2000',
+  '--server.address=127.0.0.1',
+  '--content.local.windows-backlog-hint=true',
+  '--server.tomcat.threads.max=100',
+  '--server.tomcat.threads.min-spare=100',
+  '--server.tomcat.accept-count=5000',
   '--server.tomcat.max-connections=20000',
   # Pause delivery scan during commerce JMeter (Redis recovery DEAD storm contended JDBC).
   '--content.pipeline.scan-enabled=false',
@@ -83,6 +99,10 @@ $args = @(
   '--content.sale.scan-enabled=true',
   # Fast pending-MQ drain now that purchase accept no longer sync-sends (default was 1000ms / 50).
   '--content.sale.scan-delay-millis=50',
+  "--content.sale.bridge-batch-size=$BridgeBatchSize",
+  "--content.sale.dispatch-mode=$DispatchMode",
+  "--content.sale.dispatch-batch-max=$DispatchBatchMax",
+  "--content.sale.dispatch-concurrency=$DispatchConcurrency",
   '--content.sale.manual-settle=true',
   '--content.sale.fault-hooks=true',
   '--content.sale.namesrv=127.0.0.1:29876',
@@ -99,18 +119,34 @@ if (-not $SkipAssistant -and $env:CONTENT_ASSISTANT_PYTHON_URL) {
 }
 
 $log = Join-Path $RepoRoot 'target/java-commerce-run.log'
+$errorLog = Join-Path $RepoRoot 'target/java-commerce-run.err.log'
+$pidFile = Join-Path $RepoRoot 'target/java-commerce.pid'
+if ($SegmentTimings -and -not $DiagnosticsDir) { throw 'SegmentTimings requires a new DiagnosticsDir' }
+if ($DiagnosticsDir) {
+  if (Test-Path $DiagnosticsDir) { throw 'DiagnosticsDir already exists' }
+  New-Item -ItemType Directory -Path $DiagnosticsDir | Out-Null
+  $args += @( '--server.tomcat.mbeanregistry.enabled=true',
+    '--management.endpoints.web.exposure.include=health,metrics', '--spring.datasource.hikari.register-mbeans=true')
+  if ($SegmentTimings) {
+    $fullDiagnostics=(Resolve-Path $DiagnosticsDir).Path
+    $args += @('--content.sale.latency-enabled=true','--server.tomcat.accesslog.enabled=true','--server.tomcat.accesslog.buffered=true',"--server.tomcat.accesslog.directory=$fullDiagnostics/access",'--server.tomcat.accesslog.pattern=%{begin:msec}t,%{end:msec}t,%D,%s,%U,%{X-Diag-Id}i,%I')
+  }
+  $log = Join-Path $DiagnosticsDir 'java.log' 
+  $errorLog = Join-Path $DiagnosticsDir 'java.err.log'
+  $pidFile = Join-Path $DiagnosticsDir 'java.pid'
+}
 Write-Host "Starting Java → $log (sale MQ + fault-hooks)"
 $javaExe = 'java'
 foreach ($cand in @(
-  'C:\Program Files\Java\jdk-21.0.11\bin\java.exe',
-  "$env:JAVA_HOME\bin\java.exe"
+  "$env:JAVA_HOME\bin\java.exe",
+  'C:\Users\西木\.jdks\ms-17.0.17\bin\java.exe'
 )) {
   if ($cand -and (Test-Path $cand)) { $javaExe = $cand; break }
 }
 $p = Start-Process -FilePath $javaExe -ArgumentList $args -WorkingDirectory $RepoRoot `
-  -RedirectStandardOutput $log -RedirectStandardError (Join-Path $RepoRoot 'target/java-commerce-run.err.log') `
+  -RedirectStandardOutput $log -RedirectStandardError $errorLog `
   -PassThru -WindowStyle Hidden
-"pid=$($p.Id)" | Set-Content (Join-Path $RepoRoot 'target/java-commerce.pid') -Encoding utf8
+"pid=$($p.Id)" | Set-Content $pidFile -Encoding utf8
 Write-Host "pid=$($p.Id)"
 $deadline = (Get-Date).AddMinutes(3)
 while ((Get-Date) -lt $deadline) {

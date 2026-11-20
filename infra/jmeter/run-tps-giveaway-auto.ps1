@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Giveaway-auto-refund TPS via fault-hooks debug route (same service path as MaterialCommerceRefundBlacklistIT).
+  RETIRED: historical automatic-refund TPS scenario, preserved for interpreting old evidence.
   POST /api/sale-debug/giveaway-auto-refund — not the non-existent /api/materials/{post}/giveaways.
   Smoke: 1 refund + 1 notification, winners keep GIVEAWAY entitlement.
   Formal: MySQL SUCCEEDED GIVEAWAY_AUTO commits; steady = commits / (max-min resolved_at); full = commits / wall.
@@ -17,6 +17,8 @@ param(
   [string]$FfmpegImage = 'linuxserver/ffmpeg:version-7.1-cli',
   [switch]$SmokeOnly
 )
+
+throw 'Retired scenario: awards no longer refund automatically. Use buyer-requested GIVEAWAY_REFUND plus the existing merchant approval flow; historical evidence is preserved.'
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest

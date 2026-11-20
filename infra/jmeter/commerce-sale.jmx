@@ -2,7 +2,7 @@
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
   <hashTree>
     <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="commerce-sale" enabled="true">
-      <stringProp name="TestPlan.comments">Parameterized material commerce load. Properties: apiBase threads rampSec durationSec scenario csvUsers campaignId postId timeoutMs startEpochMs loops</stringProp>
+      <stringProp name="TestPlan.comments">Parameterized material commerce load. Properties: apiBase threads rampSec durationSec scenario csvUsers campaignId postId timeoutMs startEpochMs loops barrierEnabled barrierGroupSize barrierTimeoutMs barrierStatsPath</stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
       <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
@@ -41,6 +41,26 @@
           <elementProp name="csvUsers" elementType="Argument">
             <stringProp name="Argument.name">csvUsers</stringProp>
             <stringProp name="Argument.value">${__P(csvUsers,target/jmeter-data/buyers.csv)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="barrierEnabled" elementType="Argument">
+            <stringProp name="Argument.name">barrierEnabled</stringProp>
+            <stringProp name="Argument.value">${__P(barrierEnabled,false)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="barrierGroupSize" elementType="Argument">
+            <stringProp name="Argument.name">barrierGroupSize</stringProp>
+            <stringProp name="Argument.value">${__P(barrierGroupSize,0)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="barrierTimeoutMs" elementType="Argument">
+            <stringProp name="Argument.name">barrierTimeoutMs</stringProp>
+            <stringProp name="Argument.value">${__P(barrierTimeoutMs,120000)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="barrierStatsPath" elementType="Argument">
+            <stringProp name="Argument.name">barrierStatsPath</stringProp>
+            <stringProp name="Argument.value">${__P(barrierStatsPath,)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -90,8 +110,80 @@ if (start &gt; 0) {
           </stringProp>
         </JSR223PreProcessor>
         <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="start-barrier" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script"><![CDATA[
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
+
+def enabledRaw = vars.get("barrierEnabled") ?: props.get("barrierEnabled") ?: "false"
+if (!"true".equalsIgnoreCase(enabledRaw?.toString()?.trim())) {
+  return
+}
+
+int groupSize = Integer.parseInt((vars.get("barrierGroupSize") ?: props.get("barrierGroupSize") ?: "0").toString())
+if (groupSize <= 0) {
+  groupSize = Integer.parseInt((props.get("threads") ?: "1").toString())
+}
+long timeoutMs = Long.parseLong((vars.get("barrierTimeoutMs") ?: props.get("barrierTimeoutMs") ?: "120000").toString())
+String outPath = (vars.get("barrierStatsPath") ?: props.get("barrierStatsPath") ?: "").toString().trim()
+
+synchronized (props) {
+  if (props.get("__startBarrierLock") == null) {
+    props.put("__startBarrierLock", new Object())
+    props.put("__startBarrierArrived", new AtomicInteger(0))
+    props.put("__startBarrierReleasedAt", new AtomicLong(0))
+    props.put("__startBarrierReadyCount", new AtomicInteger(0))
+  }
+}
+def lock = props.get("__startBarrierLock")
+def arrived = (AtomicInteger) props.get("__startBarrierArrived")
+def releasedAt = (AtomicLong) props.get("__startBarrierReleasedAt")
+def readyCount = (AtomicInteger) props.get("__startBarrierReadyCount")
+
+int my = arrived.incrementAndGet()
+long deadline = System.currentTimeMillis() + Math.max(1L, timeoutMs)
+synchronized (lock) {
+  while (arrived.get() < groupSize && System.currentTimeMillis() < deadline && releasedAt.get() == 0L) {
+    long waitMs = Math.min(250L, Math.max(1L, deadline - System.currentTimeMillis()))
+    lock.wait(waitMs)
+  }
+  if (releasedAt.compareAndSet(0L, System.currentTimeMillis())) {
+    readyCount.set(arrived.get())
+    boolean timedOut = readyCount.get() < groupSize
+    if (outPath) {
+      def f = new File(outPath)
+      if (f.parentFile != null) { f.parentFile.mkdirs() }
+      f.setText('{"readyCount":' + readyCount.get() +
+        ',"configuredGroupSize":' + groupSize +
+        ',"releaseEpochMs":' + releasedAt.get() +
+        ',"timedOut":' + timedOut +
+        ',"firstArrivedSeen":' + my +
+        ',"jmeterPid":' + ProcessHandle.current().pid() +
+        ',"groovyIndy":"' + System.getProperty('groovy.target.indy','false') + '"' +
+        ',"javaVersion":"' + System.getProperty('java.version') + '"' +
+        ',"maxHeapBytes":' + Runtime.runtime.maxMemory() +
+        ',"availableProcessors":' + Runtime.runtime.availableProcessors() +
+        '}\n', 'UTF-8')
+    }
+    lock.notifyAll()
+  } else {
+    while (releasedAt.get() == 0L) {
+      lock.wait(50L)
+    }
+  }
+}
+vars.put("barrierReadyCount", String.valueOf(readyCount.get()))
+vars.put("barrierReleaseEpochMs", String.valueOf(releasedAt.get()))
+]]></stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
         <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="auth-header" enabled="true">
           <collectionProp name="HeaderManager.headers">
+            <elementProp name="diagnostic" elementType="Header"><stringProp name="Header.name">X-Diag-Id</stringProp><stringProp name="Header.value">${effClientKey}</stringProp></elementProp>
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Authorization</stringProp>
               <stringProp name="Header.value">Bearer ${token}</stringProp>
@@ -167,6 +259,67 @@ if (&quot;unique&quot;.equals(mode)) {
 </stringProp>
             </JSR223PreProcessor>
             <hashTree/>
+            <JSR223Timer guiclass="TestBeanGUI" testclass="JSR223Timer" testname="purchase-start-rate" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script"><![CDATA[
+long rate = Long.parseLong(props.getProperty('purchaseStartsPerSecond', '0'))
+if (rate <= 0L) return 0L
+// Leave a small scheduling margin between timer permits and actual JTL start times.
+long interval = (long) Math.ceil(1_040_000_000d / rate)
+def permit
+synchronized (props) {
+  permit = props.get('purchaseRatePermit')
+  if (permit == null) {
+    permit = new java.util.concurrent.atomic.AtomicLong(Long.MIN_VALUE)
+    props.put('purchaseRatePermit', permit)
+  }
+}
+long coldWaitLimit = System.nanoTime() +
+  java.util.concurrent.TimeUnit.MILLISECONDS.toNanos(Long.parseLong(props.getProperty('timeoutMs', '30000')) + 5000L)
+while (true) {
+  long now = System.nanoTime()
+  long next = permit.get()
+  // Let the first real sampler finish initializing the HTTP client before
+  // giving another thread a permit. The first request is still counted.
+  if (next == Long.MIN_VALUE) {
+    if (permit.compareAndSet(next, Long.MAX_VALUE)) return 0L
+    continue
+  }
+  if (next == Long.MAX_VALUE) {
+    if (now >= coldWaitLimit) {
+      log.error('Cold purchase sampler did not release its rate permit')
+      ctx.getEngine().stopTest(true)
+      throw new IllegalStateException('Cold purchase sampler did not release its rate permit')
+    }
+    Thread.sleep(25L)
+    continue
+  }
+  if (now >= next && permit.compareAndSet(next, now + interval)) return 0L
+  long remaining = next - now
+  if (remaining > 0L) java.util.concurrent.TimeUnit.NANOSECONDS.sleep(Math.min(remaining, 50_000_000L))
+}
+]]></stringProp>
+            </JSR223Timer>
+            <hashTree/>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="release-cold-purchase-permit" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script"><![CDATA[
+long rate = Long.parseLong(props.getProperty('purchaseStartsPerSecond', '0'))
+if (rate > 0L) {
+  long interval = (long) Math.ceil(1_040_000_000d / rate)
+  props.get('purchaseRatePermit')?.compareAndSet(Long.MAX_VALUE, System.nanoTime() + interval)
+}
+]]></stringProp>
+            </JSR223PostProcessor>
+            <hashTree/>
+            <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="capture-business-code" enabled="true">
+<stringProp name="scriptLanguage">groovy</stringProp><stringProp name="cacheKey">true</stringProp>
+<stringProp name="script"><![CDATA[
+vars.put('businessCode','')
+try { def body = new groovy.json.JsonSlurper().parseText(prev.getResponseDataAsString()); def code = body.code; if (code instanceof String && code ==~ /[A-Z][A-Z0-9_]{0,79}/) vars.put('businessCode',code) } catch (Exception ignored) {}
+]]></stringProp></JSR223PostProcessor><hashTree/>
             <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="extract-reservation" enabled="true">
               <stringProp name="RegexExtractor.refname">reservationId</stringProp>
               <stringProp name="RegexExtractor.regex">"reservationId"\s*:\s*"([^"]+)"</stringProp>
