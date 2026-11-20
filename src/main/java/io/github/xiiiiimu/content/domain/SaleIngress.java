@@ -47,6 +47,46 @@ public final class SaleIngress {
   });
  }
  public SaleIngressMapper.Dispatch claim(){return tx.execute(status->{guard();var d=db.next();if(d==null)return null;db.claim(d.reservationId());return db.dispatch(d.reservationId());});}
+ /**
+  * One claim transaction for up to {@code limit} rows. Lease-expired SENDING rows get the first ceil(limit/2) slots so a
+  * steady PENDING stream (available_at_ms=0) cannot starve takeover; due PENDING fills the rest, then more expired rows.
+  * Each row gets its own token+1/attempts+1 and the database-time 30s lease. Nothing is sent before this commits.
+  */
+ public List<SaleIngressMapper.Dispatch> claimBatch(int limit){
+  int n=Math.max(0,Math.min(200,limit));if(n==0)return List.of();
+  return tx.execute(status->{
+   guard();
+   int quota=(n+1)/2;
+   var expired=db.expired(quota,List.of());
+   var picked=new ArrayList<SaleIngressMapper.Dispatch>(expired);
+   if(picked.size()<n)picked.addAll(db.due(n-picked.size()));
+   if(expired.size()==quota&&picked.size()<n)picked.addAll(db.expired(n-picked.size(),ids(expired)));
+   if(picked.isEmpty())return List.<SaleIngressMapper.Dispatch>of();
+   var ids=ids(picked);
+   if(db.claimAll(ids)!=ids.size())throw new IllegalStateException("Locked dispatch rows changed");
+   faults.failIfArmed("dispatch.beforeClaimCommit");
+   // Rows are row-locked by this transaction, so the read values plus one are the committed claim values.
+   return picked.stream().map(d->new SaleIngressMapper.Dispatch(d.reservationId(),"SENDING",d.attempts()+1,d.token()+1,0)).toList();
+  });
+ }
+ /** Per-item result of one outcome transaction; ids absent from {@code applied} lost their state/token/lease and stay with the protocol. */
+ public record Outcome(List<String> applied,List<String> missed){static final Outcome NONE=new Outcome(List.of(),List.of());}
+ /** One transaction confirms all broker-ACKed claims; each row is checked by id, SENDING, its own token and a live lease. */
+ public Outcome sentBatch(List<SaleIngressMapper.Dispatch> claims){return outcome(claims,"SENT","dispatch.beforeConfirmCommit",true);}
+ /** One transaction returns failed sends to PENDING with the original per-row backoff; same per-row checks. */
+ public Outcome failedBatch(List<SaleIngressMapper.Dispatch> claims){return outcome(claims,"PENDING","dispatch.beforeRetryCommit",false);}
+ private Outcome outcome(List<SaleIngressMapper.Dispatch> claims,String state,String fault,boolean sent){
+  if(claims.isEmpty())return Outcome.NONE;
+  return tx.execute(status->{
+   int changed=sent?db.sentAll(claims):db.retryAll(claims);
+   var applied=db.holding(claims,state);
+   if(applied.size()<changed)throw new IllegalStateException("Dispatch outcome verification lost rows");
+   faults.failIfArmed(fault);
+   var held=new HashSet<>(applied);
+   return new Outcome(List.copyOf(applied),claims.stream().map(SaleIngressMapper.Dispatch::reservationId).filter(id->!held.contains(id)).toList());
+  });
+ }
+ private static List<String> ids(List<SaleIngressMapper.Dispatch> rows){return rows.stream().map(SaleIngressMapper.Dispatch::reservationId).toList();}
  public void sent(SaleIngressMapper.Dispatch d){tx.executeWithoutResult(s->db.sent(d.reservationId(),d.token()));}
  public void failed(SaleIngressMapper.Dispatch d){tx.executeWithoutResult(s->db.retry(d.reservationId(),d.token()));}
 

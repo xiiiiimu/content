@@ -23,6 +23,13 @@ public final class SaleLatency {
  @Name("content.SaleBridgeBatch") @Label("Committed bridge batch") @StackTrace(false)
  public static class BridgeEvent extends Event {public String traceId,newReservationIds,reservationIds;public int readCount,normalCount,newCount;}
  public static void bridgeBatch(int read,java.util.List<String> normal,java.util.List<String> inserted){var c=CURRENT.get();if(c==null)return;var e=new BridgeEvent();if(!e.isEnabled())return;e.traceId=c.id;e.readCount=read;e.normalCount=normal.size();e.newCount=inserted.size();e.newReservationIds=String.join(",",inserted);e.reservationIds=String.join(",",normal);e.commit();}
+ @Name("content.SaleDispatchBatch") @Label("Batch dispatch outcome") @StackTrace(false)
+ public static class DispatchEvent extends Event {public String reservationIds;public int requested,idleSenders,claimed,sent,failed,budgetSkipped,confirmMissed,retryMissed;public long claimMillis,sendMillis,outcomeMillis;public boolean outcomePersisted;}
+ public static void dispatchBatch(int requested,int idle,java.util.List<String> ids,int sent,int failed,int skipped,int confirmMissed,int retryMissed,long claimMillis,long sendMillis,long outcomeMillis,boolean persisted){
+  var e=new DispatchEvent();if(!e.isEnabled())return;
+  e.requested=requested;e.idleSenders=idle;e.claimed=ids.size();e.reservationIds=String.join(",",ids);e.sent=sent;e.failed=failed;e.budgetSkipped=skipped;
+  e.confirmMissed=confirmMissed;e.retryMissed=retryMissed;e.claimMillis=claimMillis;e.sendMillis=sendMillis;e.outcomeMillis=outcomeMillis;e.outcomePersisted=persisted;e.commit();
+ }
  public static final class Scope implements AutoCloseable {
   private final Runnable action;private boolean closed;
   private Scope(Runnable action){this.action=action;}

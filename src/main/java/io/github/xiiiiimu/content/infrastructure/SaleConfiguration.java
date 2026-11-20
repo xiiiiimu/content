@@ -12,6 +12,7 @@ import java.util.UUID;
 
 @Configuration(proxyBeanMethods=false)
 @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
+@Import(SaleConfiguration.Dispatch.class)
 public class SaleConfiguration {
  @Bean SaleRedis saleRedis(FeedRedis redis){return new SaleRedis(redis);}
 
@@ -36,10 +37,28 @@ public class SaleConfiguration {
  @Bean @ConditionalOnProperty(name="content.sale.producer-enabled",havingValue="true")
  SaleMessageSender saleMessageSender(@org.springframework.beans.factory.annotation.Qualifier("saleProducer") DefaultMQProducer saleProducer,
                                      com.fasterxml.jackson.databind.ObjectMapper json,
-                                     @Value("${content.sale.topic:content-sale}")String topic,SaleMapper db,SaleService sales)throws Exception{
+                                     @Value("${content.sale.topic:content-sale}")String topic,SaleMapper db,SaleService sales,
+                                     @Value("${content.sale.producer-warmup-deadline-ms:60000}")long warmupDeadlineMs,
+                                     @Value("${content.sale.producer-warmup-retry-ms:1000}")long warmupRetryMs)throws Exception{
   saleProducer.start();
   var sender=new RocketMqSaleSender(saleProducer,json,topic,db);
-  sales.setSender(sender);
+  // Dispatch sees no sender (rows stay PENDING) until the topic route is resolved and the brokers answered a heartbeat.
+  var impl=saleProducer.getDefaultMQProducerImpl();
+  SaleProducerWarmup.run(
+   ()->{
+    var f=impl.getmQClientFactory();
+    if(!f.updateTopicRouteInfoFromNameServer(topic)&&!f.updateTopicRouteInfoFromNameServer(topic,true,saleProducer))
+     throw new IllegalStateException("sale topic route not available: "+topic);
+    var info=impl.getTopicPublishInfoTable().get(topic);
+    if(info==null||!info.ok())throw new IllegalStateException("sale topic has no writable queue: "+topic);
+   },
+   ()->{
+    var f=impl.getmQClientFactory();
+    if(!f.sendHeartbeatToAllBrokerWithLock())throw new IllegalStateException("broker heartbeat not sent");
+    for(var mq:impl.getTopicPublishInfoTable().get(topic).getMessageQueueList())
+     if(f.findBrokerAddressInPublish(mq.getBrokerName())==null)throw new IllegalStateException("no broker address for "+mq.getBrokerName());
+   },
+   ()->sales.setSender(sender),warmupDeadlineMs,warmupRetryMs);
   return sender;
  }
 
@@ -55,19 +74,39 @@ public class SaleConfiguration {
   return new SaleConsumer(sales,namesrv,topic,timeout,settleDelayMs,consumeThreads,group);
 }
 
+ /**
+  * Default (docs/perf-evidence/commerce/campaign-lock-v26-clean-20261120.md, tier B2): batch dispatch, cap 20,
+  * concurrency 2. With the campaign-row lock fixed (V26), concurrency 1 (tier B) is send-bound; 2 reaches the same
+  * settle-commit ceiling as 4 (tier C) without piling messages into the Broker. "serial" keeps the original one-row
+  * claim/send/confirm loop as a switch.
+  * Not a @Configuration on purpose: it is only reached through the @Import above, so component scanning cannot pick it
+  * up outside the content.media.enabled gate of the enclosing configuration.
+  */
+ @ConditionalOnProperty(name="content.sale.dispatch-mode",havingValue="batch",matchIfMissing=true)
+ public static class Dispatch {
+  @Bean(destroyMethod="close")
+  SaleDispatcher saleDispatcher(SaleService sales,SaleIngress ingress,SaleFaultHooks faults,
+   @Value("${content.sale.dispatch-batch-max:20}")int batchMax,@Value("${content.sale.dispatch-concurrency:2}")int concurrency,
+   @Value("${content.sale.dispatch-slow-start-sends:4}")int slowStartSends){
+   return new SaleDispatcher(ingress,sales::sender,faults,batchMax,concurrency,slowStartSends);
+  }
+ }
+
  @ConditionalOnProperty(name="content.sale.scan-enabled",havingValue="true")
  static class PendingScan {
   @Bean(initMethod="start",destroyMethod="close") SalePendingScanner salePendingScanner(SaleService sales,SaleIngress ingress,
-   @Value("${content.sale.scan-delay-millis:1000}")long delay){return new SalePendingScanner(sales,ingress,delay);}
+   org.springframework.beans.factory.ObjectProvider<SaleDispatcher> dispatcher,
+   @Value("${content.sale.scan-delay-millis:1000}")long delay){return new SalePendingScanner(sales,ingress,dispatcher.getIfAvailable(),delay);}
  }
  static final class SalePendingScanner implements AutoCloseable {
-  private final SaleService sales;private final SaleIngress ingress;private final long delay;
+  private final SaleService sales;private final SaleIngress ingress;private final SaleDispatcher dispatcher;private final long delay;
   private final java.util.concurrent.ScheduledExecutorService workers=java.util.concurrent.Executors.newScheduledThreadPool(2,r->{var t=new Thread(r,"sale-work");t.setDaemon(true);return t;});
   private final java.util.concurrent.atomic.AtomicLong lastWarning=new java.util.concurrent.atomic.AtomicLong();
-  SalePendingScanner(SaleService sales,SaleIngress ingress,long delay){this.sales=sales;this.ingress=ingress;this.delay=Math.max(10,delay);}
+  SalePendingScanner(SaleService sales,SaleIngress ingress,SaleDispatcher dispatcher,long delay){this.sales=sales;this.ingress=ingress;this.dispatcher=dispatcher;this.delay=Math.max(10,delay);}
   void start(){
    workers.scheduleWithFixedDelay(()->run(()->{try(var trace=SaleLatency.begin(null,"bridge-cycle",0,0)){ingress.prepare();ingress.drain(200);ingress.syncJobs(200);}}),0,delay,java.util.concurrent.TimeUnit.MILLISECONDS);
-   workers.scheduleWithFixedDelay(()->run(()->sales.dispatchPending(20)),0,delay,java.util.concurrent.TimeUnit.MILLISECONDS);
+   workers.scheduleWithFixedDelay(()->run(()->{if(dispatcher==null){sales.dispatchPending(20);return;}
+    try{dispatcher.pump(20);}catch(InterruptedException e){Thread.currentThread().interrupt();}}),0,delay,java.util.concurrent.TimeUnit.MILLISECONDS);
   }
   private void run(Runnable task){try{task.run();}catch(Exception e){long now=System.currentTimeMillis(),previous=lastWarning.get();if(now-previous>10000&&lastWarning.compareAndSet(previous,now))org.slf4j.LoggerFactory.getLogger(SalePendingScanner.class).warn("Sale background work will retry: {}",e.getClass().getSimpleName());}}
   public void close(){workers.shutdownNow();}

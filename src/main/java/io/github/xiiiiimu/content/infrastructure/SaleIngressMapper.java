@@ -32,6 +32,27 @@ public interface SaleIngressMapper {
  @Update("UPDATE material_sale_dispatch SET state='PENDING',lease_until_ms=0,available_at_ms="+NOW+"+LEAST(60000,250*POW(2,LEAST(attempts-1,8))) WHERE reservation_id=#{id} AND state='SENDING' AND token=#{token} AND lease_until_ms>"+NOW)
  int retry(@Param("id")String id,@Param("token")long token);
 
+ // Batch dispatch: split ordered scans (V25 indexes), one claim UPDATE, and outcome checks by id+token.
+ String IDS="<foreach collection='ids' item='id' open='(' separator=',' close=')'>#{id}</foreach>";
+ String PAIRS="reservation_id IN <foreach collection='claims' item='c' open='(' separator=',' close=')'>#{c.reservationId}</foreach>"
+  +" AND (reservation_id,token) IN <foreach collection='claims' item='c' open='(' separator=',' close=')'>(#{c.reservationId},#{c.token})</foreach>";
+ @Select("<script>SELECT reservation_id AS reservationId,state,attempts,token,lease_until_ms AS leaseUntilMs FROM material_sale_dispatch FORCE INDEX(ix_sale_dispatch_sending_expired)"
+  +" WHERE state='SENDING' AND lease_until_ms&lt;="+NOW+"<if test='exclude!=null and !exclude.isEmpty()'> AND reservation_id NOT IN <foreach collection='exclude' item='x' open='(' separator=',' close=')'>#{x}</foreach></if>"
+  +" ORDER BY lease_until_ms,reservation_id LIMIT #{n} FOR UPDATE SKIP LOCKED</script>")
+ List<Dispatch> expired(@Param("n")int n,@Param("exclude")List<String> exclude);
+ @Select("SELECT reservation_id AS reservationId,state,attempts,token,lease_until_ms AS leaseUntilMs FROM material_sale_dispatch FORCE INDEX(ix_sale_dispatch_pending_due)"
+  +" WHERE state='PENDING' AND available_at_ms<="+NOW+" ORDER BY available_at_ms,reservation_id LIMIT #{n} FOR UPDATE SKIP LOCKED")
+ List<Dispatch> due(@Param("n")int n);
+ @Update("<script>UPDATE material_sale_dispatch SET state='SENDING',attempts=attempts+1,token=token+1,lease_until_ms="+NOW+"+30000 WHERE reservation_id IN "+IDS+"</script>")
+ int claimAll(@Param("ids")List<String> ids);
+ @Update("<script>UPDATE material_sale_dispatch SET state='SENT',sent_at_ms="+NOW+",lease_until_ms=0 WHERE "+PAIRS+" AND state='SENDING' AND lease_until_ms&gt;"+NOW+"</script>")
+ int sentAll(@Param("claims")List<Dispatch> claims);
+ @Update("<script>UPDATE material_sale_dispatch SET state='PENDING',lease_until_ms=0,available_at_ms="+NOW+"+LEAST(60000,250*POW(2,LEAST(attempts-1,8))) WHERE "+PAIRS+" AND state='SENDING' AND lease_until_ms&gt;"+NOW+"</script>")
+ int retryAll(@Param("claims")List<Dispatch> claims);
+ /** Locking read in the outcome transaction: which ids now hold the expected state with this claim's token. */
+ @Select("<script>SELECT reservation_id FROM material_sale_dispatch WHERE "+PAIRS+" AND state=#{state} FOR UPDATE</script>")
+ List<String> holding(@Param("claims")List<Dispatch> claims,@Param("state")String state);
+
  @Insert("INSERT INTO material_sale_cache_jobs(kind,entity_key) VALUES(#{kind},#{key}) ON DUPLICATE KEY UPDATE revision=revision+1")
  int dirty(@Param("kind")String kind,@Param("key")String key);
  @Select("SELECT kind,entity_key AS entityKey,revision,applied_revision AS appliedRevision FROM material_sale_cache_jobs WHERE revision>applied_revision ORDER BY kind,entity_key LIMIT #{n}") List<CacheJob> jobs(int n);

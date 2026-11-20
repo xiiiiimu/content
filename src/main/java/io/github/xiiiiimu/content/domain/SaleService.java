@@ -30,6 +30,7 @@ public final class SaleService {
   this.visibility=visibility;this.tx=tx;this.syncSettle=syncSettle;this.faults=faults==null?new SaleFaultHooks():faults;
  }
  public void setSender(SaleMessageSender sender){this.sender=sender;}
+ public SaleMessageSender sender(){return sender;}
  public SaleFaultHooks faults(){return faults;}
 
  public CampaignView createCampaign(long merchantId,long postId,long priceCents,int stockCap,long startMs,long endMs){
