@@ -138,8 +138,8 @@ public class FeedConfiguration {
   return new AssistantService(assistant,comments,posts,users,materials,materialService,visibility,tx,events,parser,feedback,giveaways,json);
  }
  @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
- MaterialService materialService(FeedMapper posts,PostAuthoringMapper authoring,UserMapper users,MaterialMapper materials,TransactionTemplate tx,ObjectStore store,VisibilityService visibility,@Value("${content.media.bucket:content-media}")String bucket,@Value("${content.media.ffmpeg-image:}")String ffmpeg,MaterialGrants grants,PipelineObserver observer,org.springframework.beans.factory.ObjectProvider<FeedbackWatchService> feedback,org.springframework.beans.factory.ObjectProvider<GiveawayService> giveaways){
-  return new MaterialService(posts,authoring,users,materials,tx,store,visibility,bucket,ffmpeg,grants,observer,
+ MaterialService materialService(FeedMapper posts,PostAuthoringMapper authoring,UserMapper users,MaterialMapper materials,TransactionTemplate tx,ObjectStore store,VisibilityService visibility,@Value("${content.media.bucket:content-media}")String bucket,@Value("${content.media.ffmpeg-image:}")String ffmpeg,MaterialGrants grants,PipelineObserver observer,org.springframework.beans.factory.ObjectProvider<FeedbackWatchService> feedback,org.springframework.beans.factory.ObjectProvider<GiveawayService> giveaways,PasswordHasher passwordHasher){
+  return new MaterialService(posts,authoring,users,materials,tx,store,visibility,bucket,ffmpeg,grants,observer,passwordHasher,
    id->{var f=feedback.getIfAvailable();if(f!=null)f.onVersionReady(id);},
    q->{var g=giveaways.getIfAvailable();return g!=null && g.hasEntitlement(q[0],q[1],q[2]);});
  }
