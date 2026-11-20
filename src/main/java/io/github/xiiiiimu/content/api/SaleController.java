@@ -56,49 +56,6 @@ public class SaleController {
   sales.unblock(user(p),targetUserId);return Map.of("ok",true);
  }
 
- /** Demo/fault hook: settle a PROCESSING reservation without waiting for MQ (enabled only when configured). */
- @PostMapping("/purchase-requests/{reservationId}/settle")
- @ConditionalOnProperty(name="content.sale.manual-settle",havingValue="true")
- public SaleService.PurchaseView manualSettle(@PathVariable String reservationId,Principal p){
-  sales.getRequest(user(p),reservationId);
-  sales.settle(reservationId);
-  return sales.getRequest(user(p),reservationId);
- }
-
- @PostMapping("/sale-debug/hold-settle")
- @ConditionalOnProperty(name="content.sale.fault-hooks",havingValue="true")
- public Map<String,Object> holdSettle(@RequestBody Map<String,Object> body){
-  boolean arm=body.get("arm")==null || Boolean.parseBoolean(String.valueOf(body.get("arm")));
-  if(arm)sales.faults().armHold(); else sales.faults().releaseHold();
-  return Map.of("holdArmed",sales.faults().holdArmed());
- }
-
- @PostMapping("/sale-debug/fail-after-commit-once")
- @ConditionalOnProperty(name="content.sale.fault-hooks",havingValue="true")
- public Map<String,Object> failAfterCommitOnce(){
-  sales.faults().armFailAfterCommitOnce();
-  return Map.of("armed",true);
- }
-
- @GetMapping("/sale-debug/inflight")
- @ConditionalOnProperty(name="content.sale.fault-hooks",havingValue="true")
- public Map<String,Object> inflight(){
-  var f=sales.faults();
-  return Map.of(
-   "settleInFlight",f.inFlight(),"peakSettleInFlight",f.peakInFlight(),
-   "httpInFlight",f.httpInFlight(),"peakHttpInFlight",f.peakHttpInFlight(),
-   // legacy aliases
-   "inFlight",f.inFlight(),"peakInFlight",f.peakInFlight());
- }
-
- @PostMapping("/sale-debug/reset-inflight-peaks")
- @ConditionalOnProperty(name="content.sale.fault-hooks",havingValue="true")
- public Map<String,Object> resetInflightPeaks(){
-  sales.faults().resetPeakInFlight();
-  sales.faults().resetPeakHttpInFlight();
-  return Map.of("ok",true);
- }
-
  private static String str(Object o){return o==null?null:String.valueOf(o);}
  private static long num(Object o,long d){if(o==null)return d;if(o instanceof Number n)return n.longValue();try{return Long.parseLong(String.valueOf(o));}catch(Exception e){return d;}}
 }
