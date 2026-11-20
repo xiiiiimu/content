@@ -53,6 +53,15 @@ public interface InteractionMapper {
  void bucket(@Param("topic")String topic,@Param("bucket")long bucket,@Param("net")long net,@Param("active")long active);
  @Select("SELECT topic,bucket_start_ms AS bucket,net_events AS net,active_interactions AS active FROM topic_minute_buckets WHERE bucket_start_ms>=#{since} ORDER BY topic,bucket_start_ms")
  List<Bucket> bucketsSince(long since);
+ record LikeEvent(String topic,long at) {}
+ /** The ledger row of a still-counted like (event id like:{post}:{user}), or null. */
+ @Select("SELECT topic,occurred_at_ms AS at FROM topic_event_ledger WHERE event_id=#{id}")
+ LikeEvent likeEvent(String id);
+ @Delete("DELETE FROM topic_event_ledger WHERE event_id=#{id}")
+ int deleteLedger(String id);
+ /** Takes back one counted like from the bucket of the minute it was recorded in; never below zero. Missing (purged) bucket → 0 rows. */
+ @Update("UPDATE topic_minute_buckets SET net_events=GREATEST(net_events-1,0),active_interactions=GREATEST(active_interactions-1,0) WHERE topic=#{topic} AND bucket_start_ms=#{bucket}")
+ int revokeBucket(@Param("topic")String topic,@Param("bucket")long bucket);
  /** Spike check: net of one topic since a time, a primary-key prefix range (topic, bucket_start_ms). */
  @Select("SELECT COALESCE(SUM(net_events),0) FROM topic_minute_buckets WHERE topic=#{topic} AND bucket_start_ms>=#{since}")
  long topicNetSince(@Param("topic")String topic,@Param("since")long since);

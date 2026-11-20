@@ -20,6 +20,27 @@ public final class TrendingService {
    emitSpikeIfNeeded(topic,post);
   });
  }
+ public static String likeEventId(long post,long user){return "like:"+post+":"+user;}
+ /**
+  * A false→true like flip on a post with a topic: one ledger row like:{post}:{user} (at most one per post/user while liked)
+  * and +1 in the current minute bucket. A stale row (legacy data) makes this a no-op instead of a second +1.
+  */
+ public void recordLike(long post,long user,String topic){record(likeEventId(post,user),topic,post,1,"LIKE");}
+ /**
+  * A true→false like flip (unlike, or a dislike that removed the like): deletes that like's ledger row and takes it back
+  * from the bucket of the minute it was counted in, so like/unlike cycles net to zero, never below, and an unlike of an
+  * old like does not subtract from the current window. No ledger row (post had no topic, or row past retention) → no-op.
+  * Joins the caller's transaction; the caller's post_likes row lock serializes flips of the same (post,user).
+  */
+ public boolean revokeLike(long post,long user){
+  String id=likeEventId(post,user);
+  return Boolean.TRUE.equals(tx.execute(status->{
+   var like=db.likeEvent(id);
+   if(like==null || db.deleteLedger(id)!=1)return false;
+   db.revokeBucket(like.topic(),like.at()/60_000L*60_000L);
+   return true;
+  }));
+ }
  /**
   * Production TrendGuard output (ADR-005): same TX as ledger/bucket.
   * Lock order: post/like/stats (caller) → ledger insert → minute-bucket row → {@code trend_topic_serial} FOR UPDATE → risk insert.

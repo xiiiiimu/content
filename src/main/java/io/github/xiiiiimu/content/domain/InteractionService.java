@@ -31,7 +31,7 @@ public final class InteractionService {
    boolean inserted=db.like(post,user,System.currentTimeMillis())==1;
    reconcile(post);
    String topic=inserted?db.postTopic(post):null;
-   if(topic!=null)trending.record("like:"+post+":"+user,topic,post,1,"LIKE");
+   if(topic!=null)trending.recordLike(post,user,topic);
    return new LikeResult(true,db.stats(post).likes());
   });
  }
@@ -40,15 +40,16 @@ public final class InteractionService {
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
    boolean removed=db.unlike(post,user)==1;reconcile(post);
-   String topic=removed?db.postTopic(post):null;
-   if(topic!=null)trending.record("unlike:"+post+":"+user+":"+System.currentTimeMillis(),topic,post,-1,"UNLIKE");
+   // Only a real true→false flip revokes the like's own topic contribution (no separate -1 event).
+   if(removed)trending.revokeLike(post,user);
    return new LikeResult(false,db.stats(post).likes());
   });
  }
  public DislikeResult dislike(long user,long post){
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
-   db.unlike(post,user);
+   // Disliking removes an existing like: that is a true→false like flip as well.
+   if(db.unlike(post,user)==1)trending.revokeLike(post,user);
    db.dislike(post,user,System.currentTimeMillis());
    reconcile(post);
    return new DislikeResult(true,db.stats(post).dislikes());
