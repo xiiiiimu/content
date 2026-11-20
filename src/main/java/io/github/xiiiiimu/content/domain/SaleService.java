@@ -17,6 +17,8 @@ public final class SaleService {
  private final boolean syncSettle;
  private final SaleFaultHooks faults;
  private volatile SaleMessageSender sender;
+ private SaleIngress ingress;
+ public void setIngress(SaleIngress ingress){this.ingress=ingress;}
 
  public SaleService(SaleMapper db,SaleRedis redis,MaterialMapper materials,FeedMapper posts,NotificationMapper notifications,
                     VisibilityService visibility,TransactionTemplate tx,boolean syncSettle){
@@ -31,25 +33,41 @@ public final class SaleService {
  public SaleFaultHooks faults(){return faults;}
 
  public CampaignView createCampaign(long merchantId,long postId,long priceCents,int stockCap,long startMs,long endMs){
+  ingress.prepare();
   var post=posts.post(postId);if(post==null)throw new FeedFailure(404,"POST_NOT_FOUND");
   if(post.authorId()!=merchantId)throw new FeedFailure(403,"POST_FORBIDDEN");
-  if(materials.profile(postId)==null)throw new FeedFailure(404,"NOT_MATERIAL");
+  var profile=materials.profile(postId);
+  if(profile==null)throw new FeedFailure(404,"NOT_MATERIAL");
   if(priceCents<0 || stockCap<=0 || startMs<=0 || endMs<=startMs)throw new FeedFailure(400,"INVALID_CAMPAIGN");
   if(db.openByPost(postId)!=null)throw new FeedFailure(409,"CAMPAIGN_ALREADY_OPEN");
+  if(profile.defaultVersionId()==null)throw new FeedFailure(409,"MATERIAL_VERSION_UNAVAILABLE");
   var row=new SaleMapper.CampaignInsert();
   row.post=postId;row.merchant=merchantId;row.price=priceCents;row.cap=stockCap;row.start=startMs;row.end=endMs;
+  row.version=profile.defaultVersionId();
   row.token=UUID.randomUUID().toString().replace("-","");row.at=System.currentTimeMillis();
-  try{tx.executeWithoutResult(s->{if(db.insertCampaign(row)!=1)throw new IllegalStateException("campaign");});}
-  catch(DuplicateKeyException e){throw new FeedFailure(409,"CAMPAIGN_ALREADY_OPEN");}
-  redis.openCampaign(row.id,postId,merchantId,priceCents,stockCap,startMs,endMs);
+  try{
+   tx.executeWithoutResult(s->{
+    // Offline uses this same author row before changing the post. Serialize
+    // campaign creation with it, then read the current post inside this transaction.
+    posts.author(merchantId);
+    ingress.guard();
+    if(!"PUBLISHED".equals(posts.post(postId).status()))throw new FeedFailure(409,"POST_OFFLINE");
+    if(db.insertCampaign(row)!=1)throw new IllegalStateException("campaign");
+    ingress.dirty("CAMPAIGN",Long.toString(row.id));
+    for(long user:db.giveawayWinnerAccounts(postId))ingress.dirty("OWNER",user+":"+postId);
+   });
+  }catch(DuplicateKeyException e){throw new FeedFailure(409,"CAMPAIGN_ALREADY_OPEN");}
+  for(long user:db.giveawayWinnerAccounts(postId))confirmControl("OWNER",user+":"+postId);
+  confirmControl("CAMPAIGN",Long.toString(row.id));
   return view(db.campaign(row.id));
  }
+ public boolean hasOpenCampaign(long postId){return db.openByPost(postId)!=null;}
 
  public CampaignView closeCampaign(long merchantId,long campaignId){
   var c=db.campaign(campaignId);if(c==null)throw new FeedFailure(404,"CAMPAIGN_NOT_FOUND");
   if(c.merchantId()!=merchantId)throw new FeedFailure(403,"CAMPAIGN_FORBIDDEN");
-  tx.executeWithoutResult(s->db.closeCampaign(campaignId,System.currentTimeMillis()));
-  redis.closeCampaign(campaignId);
+  tx.executeWithoutResult(s->{ingress.guard();db.closeCampaign(campaignId,System.currentTimeMillis());ingress.dirty("CAMPAIGN",Long.toString(campaignId));});
+  if(!ingress.sync("CAMPAIGN",Long.toString(campaignId)))throw new FeedFailure(503,"CONTROL_SYNC_PENDING");
   return view(db.campaign(campaignId));
  }
 
@@ -69,58 +87,51 @@ public final class SaleService {
  }
 
  public PurchaseView purchase(long userId,long campaignId,String clientKey){
+  try(var timing=SaleLatency.phase("purchase.total")){
+  SaleLatency.correlate(clientKey,null);
+  if(userId<=0)throw new FeedFailure(401,"UNAUTHENTICATED");
   if(clientKey==null || clientKey.isBlank() || clientKey.length()>128)throw new FeedFailure(400,"INVALID_CLIENT_KEY");
-  if(redis.gatewayPaused())throw new FeedFailure(503,"GATEWAY_PAUSED");
-  var existing=db.byClient(userId,clientKey);
-  if(existing!=null)return toPurchase(existing);
-  var campaign=db.campaign(campaignId);if(campaign==null)throw new FeedFailure(404,"CAMPAIGN_NOT_FOUND");
-  if(!"OPEN".equals(campaign.state()))throw new FeedFailure(409,"CAMPAIGN_CLOSED");
-  visibility.read(userId,campaign.postId()).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
-  String candidateId=UUID.randomUUID().toString().replace("-","");
-  var lua=redis.reserve(campaignId,userId,candidateId,clientKey,System.currentTimeMillis());
-  if("REJECT".equals(lua.status()))throw new FeedFailure(409,lua.detail()==null?"RESERVE_REJECTED":lua.detail());
-  if("EXISTING".equals(lua.status())){
-   var req=db.request(lua.reservationId());
-   if(req!=null)return toPurchase(req);
-  }
-  final String reservationId=lua.reservationId()!=null?lua.reservationId():candidateId;
   try{
-   long at=System.currentTimeMillis();
-   tx.executeWithoutResult(s->db.insertRequest(reservationId,campaignId,campaign.postId(),campaign.merchantId(),userId,clientKey,campaign.priceCents(),at));
-  }catch(DuplicateKeyException e){
-   var again=db.byClient(userId,clientKey);if(again!=null)return toPurchase(again);
-   throw e;
-  }
-  if(syncSettle){
-   settle(reservationId);
-   return toPurchase(db.request(reservationId));
-  }
-  // Accept path must not block on RocketMQ producer RTT: under 200-way mixed, sync send + settle JDBC
-  // contention pushed MIX-purchase past JMeter TimeoutMs=20000 (Read timed out). Leave mq_sent unset;
-  // SalePendingScanner.flushPending owns durable send (scan-enabled=true in commerce JVM).
-  var req=db.request(reservationId);
-  return new PurchaseView(req.reservationId(),"PROCESSING",req.rejectReason(),req.orderId(),req.campaignId(),req.postId());
- }
-
- private void enqueue(String reservationId){
-  if(sender!=null){
-   try{sender.send(reservationId);db.markMqSent(reservationId,System.currentTimeMillis());}
-   catch(Exception e){/* pending sender / tick will retry */}
+   var result=redis.entry().reserve(campaignId,userId,UUID.randomUUID().toString().replace("-",""),clientKey);
+   if("UNAVAILABLE".equals(result.status()))throw new FeedFailure(503,result.detail());
+   if("REJECT".equals(result.status()))throw new FeedFailure("CAMPAIGN_NOT_FOUND".equals(result.detail())?404:409,result.detail());
+   SaleLatency.correlate(clientKey,result.request().reservationId());
+   return cacheView(result.request());
+  }catch(io.lettuce.core.RedisException e){throw new FeedFailure(503,"SALE_CACHE_UNAVAILABLE");}
   }
  }
+ private PurchaseView cacheView(SaleEntryRedis.Request r){return new PurchaseView(r.reservationId(),r.state(),r.rejectReason(),r.orderId(),r.campaignId(),r.postId());}
 
  public void flushPending(int limit){
-  for(var req:db.pendingMq(Math.max(1,limit))){
-   try{
-    if(sender!=null)sender.send(req.reservationId());
-    db.markMqSent(req.reservationId(),System.currentTimeMillis());
-    if(syncSettle)settle(req.reservationId());
-   }catch(Exception ignored){}
+  ingress.prepare();ingress.drain(limit);ingress.syncJobs(limit);
+  dispatchPending(limit);
+ }
+ public void dispatchPending(int limit){
+  if(sender==null)return;
+  for(int i=0;i<Math.min(200,Math.max(1,limit));i++){
+   try(var trace=SaleLatency.begin(null,"dispatch",0,0)){
+    io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.Dispatch claim;
+    try(var phase=SaleLatency.phase("dispatch.claim")){claim=ingress.claim();}
+    if(claim==null)return;
+    SaleLatency.correlate(null,claim.reservationId());
+    try{
+     try(var phase=SaleLatency.phase("mq.send")){sender.send(claim.reservationId());}
+     try(var phase=SaleLatency.phase("mq.ack.success")){};
+     faults.failIfArmed("dispatch.afterAck");
+     try(var phase=SaleLatency.phase("dispatch.confirm")){ingress.sent(claim);}
+    }catch(Exception e){try(var phase=SaleLatency.phase("dispatch.retry")){ingress.failed(claim);}}
+   }
   }
  }
 
  public PurchaseView getRequest(long userId,String reservationId){
-  var req=db.request(reservationId);if(req==null)throw new FeedFailure(404,"REQUEST_NOT_FOUND");
+  try{var cached=redis.entry().request(reservationId);if(cached!=null){if(cached.userId()!=userId)throw new FeedFailure(403,"REQUEST_FORBIDDEN");
+   if("REJECTED".equals(cached.state())&&"INGRESS_QUARANTINED".equals(cached.rejectReason())&&!redis.entry().quarantineReleased(reservationId))cached=new SaleEntryRedis.Request(cached.reservationId(),cached.campaignId(),cached.postId(),cached.merchantId(),cached.userId(),cached.clientKey(),cached.priceCents(),"PROCESSING",null,null,cached.createdAtMs());
+   return cacheView(cached);}}
+  catch(io.lettuce.core.RedisException ignored){/* Committed MySQL remains queryable during Redis outage. */}
+  var req=db.request(reservationId);
+  if(req==null){var canonical=ingress.legacyCanonical(reservationId);if(canonical!=null)req=db.request(canonical);}
+  if(req==null)throw new FeedFailure(404,"REQUEST_NOT_FOUND");
   if(req.userId()!=userId)throw new FeedFailure(403,"REQUEST_FORBIDDEN");
   return toPurchase(req);
  }
@@ -146,69 +157,89 @@ public final class SaleService {
  public void settle(String reservationId){
   faults.awaitHoldIfArmed(120);
   faults.enterInFlight();
-  try{settleBody(reservationId);}
+  try(var trace=SaleLatency.begin("settle-"+reservationId,"settle",0,0)){SaleLatency.correlate(null,reservationId);settleBody(reservationId);SaleLatency.status(200);}
   finally{faults.leaveInFlight();}
  }
 
  private void settleBody(String reservationId){
   Boolean release=tx.execute(status->{
-   var req=db.lockRequest(reservationId);if(req==null)return false;
+   ingress.guard();
+   boolean ingressBlocked=ingress.blocked(reservationId);
+   var req=db.lockRequest(reservationId);if(req==null)throw new FeedFailure(503,"REQUEST_NOT_PERSISTED");
+   SaleLatency.correlate(req.clientKey(),reservationId);
    if(!"PROCESSING".equals(req.state())){db.insertReceipt(reservationId,req.state(),System.currentTimeMillis());return false;}
+   if(ingressBlocked)return false; // Durable isolation, never a late successful order or an unproven release.
    if(db.receipt(reservationId)!=null)return false;
+   // Upsert then FOR UPDATE the account/material decision row before campaign lock.
+   // Refunds and giveaway awards take the same lock, so ownership is stable here.
    db.touchLock(req.userId(),req.postId(),System.currentTimeMillis());
    db.lockDecision(req.userId(),req.postId());
+   boolean alreadyOwns=db.alreadyOwnsMaterial(req.userId(),req.postId());
    var campaign=db.lockCampaign(req.campaignId());
    long at=System.currentTimeMillis();
+   // Dynamic blacklist remains authoritative in MySQL even if Redis deny cache lags.
    if(db.activeBlacklist(req.merchantId(),req.userId())>0){
     reject(req,"BLACKLISTED",at);return true;
    }
-   var existingOrder=db.orderByUserPost(req.userId(),req.postId());
-   if(existingOrder!=null){reject(req,"ALREADY_OWNED",at);return true;}
-   var ents=db.activeEntitlements(req.userId(),req.postId());
-   if(ents.stream().anyMatch(e->"GIVEAWAY".equals(e.sourceKind()))){reject(req,"ALREADY_OWNED",at);return true;}
+   if(alreadyOwns){reject(req,"ALREADY_OWNED",at);return true;}
    if(campaign==null || !"OPEN".equals(campaign.state())){reject(req,"CAMPAIGN_CLOSED",at);return true;}
+   if(!"PUBLISHED".equals(Optional.ofNullable(posts.post(req.postId())).map(FeedMapper.Post::status).orElse(null))){reject(req,"POST_OFFLINE",at);return true;}
    if(at<campaign.startMs()){reject(req,"NOT_STARTED",at);return true;}
    if(at>campaign.endMs()){reject(req,"ENDED",at);return true;}
+   Long version=campaign.frozenVersionId();
+   if(version==null){
+    var profile=materials.profile(req.postId());
+    version=profile==null?null:profile.defaultVersionId();
+   }
+   if(version==null)throw new IllegalStateException("Campaign settlement requires a material version");
    if(db.tryIncrementSold(campaign.id(),at)!=1){reject(req,"SOLD_OUT",at);return true;}
    var order=new SaleMapper.OrderInsert();
    order.reservationId=req.reservationId();order.campaignId=req.campaignId();order.postId=req.postId();
    order.merchantId=req.merchantId();order.userId=req.userId();order.priceCents=req.priceCents();order.paidAt=at;
    try{db.insertOrder(order);}
    catch(DuplicateKeyException e){reject(req,"ALREADY_OWNED",at);db.tryDecrementSold(campaign.id(),at);return true;}
-   var profile=materials.profile(req.postId());
-   Long version=profile==null?null:profile.defaultVersionId();
-   if(version!=null){
-    var ent=new SaleMapper.EntitlementInsert();
-    ent.account=req.userId();ent.post=req.postId();ent.version=version;ent.license="DOWNLOAD";
-    ent.kind="PURCHASE";ent.source=order.id;ent.at=at;
-    try{db.insertEntitlement(ent);}catch(DuplicateKeyException ignored){}
-   }
-   db.finishRequest(reservationId,"SUCCEEDED",null,order.id,at);
-   db.insertReceipt(reservationId,"SUCCEEDED",at);
+   var ent=new SaleMapper.EntitlementInsert();
+   ent.account=req.userId();ent.post=req.postId();ent.version=version;ent.license="DOWNLOAD";
+   ent.kind="PURCHASE";ent.source=order.id;ent.at=at;
+   if(db.insertEntitlement(ent)!=1 || db.finishRequest(reservationId,"SUCCEEDED",null,order.id,at)!=1
+      || db.insertReceipt(reservationId,"SUCCEEDED",at)!=1)throw new IllegalStateException("Incomplete purchase settlement");
+   ingress.dirty("OWNER",req.userId()+":"+req.postId());ingress.dirty("REQUEST",reservationId);faults.failIfArmed("settle.beforeCommit");
    return false;
   });
   var req=db.request(reservationId);
   if(req==null)return;
-  if(Boolean.TRUE.equals(release))redis.release(req.campaignId(),reservationId,req.userId(),req.rejectReason());
-  else if("SUCCEEDED".equals(req.state()))redis.markSucceeded(req.campaignId(),reservationId);
+  ingress.bestEffort("REQUEST",reservationId);ingress.bestEffort("OWNER",req.userId()+":"+req.postId());
  }
 
  private void reject(SaleMapper.PurchaseRequest req,String reason,long at){
   db.finishRequest(req.reservationId(),"REJECTED",reason,null,at);
   db.insertReceipt(req.reservationId(),"REJECTED:"+reason,at);
+  ingress.dirty("REQUEST",req.reservationId());ingress.dirty("OWNER",req.userId()+":"+req.postId());
  }
 
  public void block(long merchantId,long targetUserId,String reason){
   if(targetUserId<=0 || targetUserId==merchantId)throw new FeedFailure(400,"INVALID_TARGET");
-  db.upsertBlacklist(merchantId,targetUserId,reason==null?"":reason,merchantId,System.currentTimeMillis());
+  long at=System.currentTimeMillis();
+  tx.executeWithoutResult(s->{ingress.guard();db.upsertBlacklist(merchantId,targetUserId,reason==null?"":reason,merchantId,at);ingress.dirty("BLACKLIST",merchantId+":"+targetUserId);});
+  confirmControl("BLACKLIST",merchantId+":"+targetUserId);
  }
  public void unblock(long merchantId,long targetUserId){
-  db.revokeBlacklist(merchantId,targetUserId,System.currentTimeMillis());
+  tx.executeWithoutResult(s->{ingress.guard();db.revokeBlacklist(merchantId,targetUserId,System.currentTimeMillis());ingress.dirty("BLACKLIST",merchantId+":"+targetUserId);});
+  confirmControl("BLACKLIST",merchantId+":"+targetUserId);
+ }
+ private void confirmControl(String kind,String key){try{if(!ingress.sync(kind,key))throw new FeedFailure(503,"CONTROL_SYNC_PENDING");}catch(io.lettuce.core.RedisException e){throw new FeedFailure(503,"CONTROL_SYNC_PENDING");}}
+ /** Joins the authoritative offline transaction; no Redis operation can roll it back after commit. */
+ public void offlineInTransaction(long post){
+  var campaigns=db.openCampaignIdsForPost(post);
+  if(campaigns.isEmpty())return; // Unrelated material operations need no sale runtime.
+  ingress.guard();
+  for(long id:campaigns){db.closeCampaign(id,System.currentTimeMillis());ingress.dirty("CAMPAIGN",Long.toString(id));ingress.afterCommit("CAMPAIGN",Long.toString(id));}
  }
  public boolean isBlocked(long merchantId,long targetUserId){return db.activeBlacklist(merchantId,targetUserId)>0;}
 
  public long requestRefund(long buyerId,long orderId){
   return tx.execute(status->{
+   ingress.guard();
    var o=db.lockOrder(orderId);if(o==null)throw new FeedFailure(404,"ORDER_NOT_FOUND");
    if(o.userId()!=buyerId)throw new FeedFailure(403,"ORDER_FORBIDDEN");
    if(!"PAID".equals(o.state()))throw new FeedFailure(409,"ORDER_NOT_PAID");
@@ -224,6 +255,7 @@ public final class SaleService {
  }
  public OrderView forceRefund(long actorId,long orderId){
   Long refundId=tx.execute(status->{
+   ingress.guard();
    var o=db.lockOrder(orderId);if(o==null)throw new FeedFailure(404,"ORDER_NOT_FOUND");
    if(o.merchantId()!=actorId && o.userId()!=actorId)throw new FeedFailure(403,"ORDER_FORBIDDEN");
    if(!"PAID".equals(o.state()))throw new FeedFailure(409,"ORDER_NOT_PAID");
@@ -238,39 +270,33 @@ public final class SaleService {
 
  private OrderView completeRefund(long actorId,long refundId,boolean forced){
   long[] meta=tx.execute(status->{
-   var rr=db.lockRefund(refundId);if(rr==null)throw new FeedFailure(404,"REFUND_NOT_FOUND");
+   ingress.guard();
+   var snapshot=db.refund(refundId);if(snapshot==null)throw new FeedFailure(404,"REFUND_NOT_FOUND");
+   var before=db.order(snapshot.orderId());if(before==null)throw new FeedFailure(404,"ORDER_NOT_FOUND");
+   if(before.merchantId()!=actorId&&!forced)throw new FeedFailure(403,"ORDER_FORBIDDEN");
+   db.touchLock(before.userId(),before.postId(),System.currentTimeMillis());db.lockDecision(before.userId(),before.postId());
+   var rr=db.lockRefund(refundId);var o=db.lockOrder(rr.orderId());
+   if("SUCCEEDED".equals(rr.state()))return new long[]{o.id(),o.campaignId(),o.userId(),0};
    if(!"PENDING".equals(rr.state()))throw new FeedFailure(409,"REFUND_NOT_PENDING");
-   var o=db.lockOrder(rr.orderId());if(o==null)throw new FeedFailure(404,"ORDER_NOT_FOUND");
-   if(o.merchantId()!=actorId && !forced)throw new FeedFailure(403,"ORDER_FORBIDDEN");
-   db.touchLock(o.userId(),o.postId(),System.currentTimeMillis());
-   db.lockDecision(o.userId(),o.postId());
    long at=System.currentTimeMillis();
    String kind=rr.reasonKind();
    if(forced && !"GIVEAWAY_AUTO".equals(kind))kind="BUYER_FORCED";
    if(db.markRefunded(o.id(),kind,at)!=1)throw new FeedFailure(409,"ALREADY_REFUNDED");
    db.revokePurchaseEntitlement(o.id(),o.userId(),at);
    var c=db.lockCampaign(o.campaignId());
-   boolean restoreRedis=c!=null && "OPEN".equals(c.state());
+   boolean restoreRedis=c!=null && "OPEN".equals(c.state()) && at<=c.endMs();
    if(restoreRedis)db.tryDecrementSold(c.id(),at);
    db.finishRefund(refundId,"SUCCEEDED",actorId,1,at);
+   ingress.recordRefundRestore(refundId,restoreRedis);ingress.dirty("OWNER",o.userId()+":"+o.postId());
    String dedupe="order-refund:"+o.id()+":"+kind;
    long synthetic=Math.floorMod(Objects.hash(o.id(),kind),1_000_000_000)+4_000_000_000L;
    notifications.insertWithMeta(o.userId(),synthetic,"ORDER_REFUNDED",o.merchantId(),o.postId(),0L,null,null,dedupe,at);
    return new long[]{o.id(),o.campaignId(),o.userId(),restoreRedis?1:0};
   });
-  if(meta[3]==1){
-   try{restoreRedisStock(meta[1],meta[0],meta[2]);}catch(Exception ignored){}
-  }
+  ingress.bestEffort("REFUND",Long.toString(refundId));
+  var latest=db.order(meta[0]);ingress.bestEffort("OWNER",latest.userId()+":"+latest.postId());
   return toOrder(db.order(meta[0]));
  }
-
- /** Idempotent stock restore after refund while campaign still OPEN. */
- private void restoreRedisStock(long campaignId,long orderId,long userId){
-  String rid="refund-stock-"+orderId;
-  redis.connectionSeedForRelease(campaignId,rid,userId);
-  redis.release(campaignId,rid,userId,"REFUND_STOCK");
- }
-
  /**
   * Called under giveaway award lock path: if winner has PAID order on post, auto-refund once.
   * Must be invoked while account_material_decision_locks is held by caller OR we lock here.

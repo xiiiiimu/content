@@ -12,6 +12,7 @@ import java.util.UUID;
  public final class SaleConsumer implements AutoCloseable {
  private final SaleService sales;private final String namesrv;private final String topic;private final int metadataTimeout;
  private final long settleDelayMs;private final int consumeThreads;
+ private final String group;
  private DefaultMQPushConsumer consumer;
  public SaleConsumer(SaleService sales,String namesrv,String topic,int metadataTimeout){
   this(sales,namesrv,topic,metadataTimeout,0,20);
@@ -20,14 +21,18 @@ import java.util.UUID;
   this(sales,namesrv,topic,metadataTimeout,settleDelayMs,20);
  }
  public SaleConsumer(SaleService sales,String namesrv,String topic,int metadataTimeout,long settleDelayMs,int consumeThreads){
+  this(sales,namesrv,topic,metadataTimeout,settleDelayMs,consumeThreads,"content-sale-v1");
+ }
+ public SaleConsumer(SaleService sales,String namesrv,String topic,int metadataTimeout,long settleDelayMs,int consumeThreads,String group){
   this.sales=sales;this.namesrv=namesrv;this.topic=topic;this.metadataTimeout=metadataTimeout;
   this.settleDelayMs=Math.max(0,settleDelayMs);this.consumeThreads=Math.max(4,consumeThreads);
+  this.group=group;
  }
  public synchronized void start()throws Exception{
   if(consumer!=null)return;
   Exception last=null;
   for(int attempt=0;attempt<5;attempt++){
-   var c=new DefaultMQPushConsumer("content-sale-v1");
+   var c=new DefaultMQPushConsumer(group);
    c.setNamesrvAddr(namesrv);c.setInstanceName(UUID.randomUUID().toString());c.setVipChannelEnabled(false);
    c.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_LAST_OFFSET);
    c.setMqClientApiTimeout(metadataTimeout);
@@ -43,7 +48,7 @@ import java.util.UUID;
       if(reservationId==null || reservationId.isBlank()){
        var node=new ObjectMapper().readTree(body);reservationId=node.path("reservationId").asText();
       }
-      sales.settle(reservationId);
+      sales.faults().recordDelivery(reservationId);sales.settle(reservationId);
       // After durable commit: optional one-shot failure before ACK to force MQ redelivery.
       sales.faults().maybeFailAfterCommit();
      }

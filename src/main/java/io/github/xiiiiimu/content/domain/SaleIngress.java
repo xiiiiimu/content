@@ -1,0 +1,141 @@
+package io.github.xiiiiimu.content.domain;
+
+import io.github.xiiiiimu.content.infrastructure.*;
+import io.lettuce.core.RedisException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.transaction.support.TransactionTemplate;
+import java.util.*;
+
+/** Real Redis Stream -> request/outbox bridge, fenced recovery and durable cache synchronization. */
+public final class SaleIngress {
+ private final SaleIngressMapper db;private final SaleMapper sales;private final SaleEntryRedis cache;private final TransactionTemplate tx;private final SaleFaultHooks faults;
+ private final String consumer=UUID.randomUUID().toString();
+ private final SaleBridgeBatch bridge;
+ public SaleIngress(SaleIngressMapper db,SaleMapper sales,SaleEntryRedis cache,TransactionTemplate tx,SaleFaultHooks faults,SaleBridgeMapper batches,int batchSize){this.db=db;this.sales=sales;this.cache=cache;this.tx=tx;this.faults=faults;this.bridge=new SaleBridgeBatch(batches,db,sales,cache,tx,faults,batchSize);}
+ public SaleEntryRedis cache(){return cache;}
+ public String legacyCanonical(String id){return db.legacyCanonical(id);}
+ public boolean winner(long user,long post){return db.winner(user,post)>0;}
+ public void guard(){var r=db.guard();if(r==null||!"RUNNING".equals(r.state())||bridge.unknownHolds())throw new FeedFailure(503,"SALE_RECOVERING");}
+ public boolean blocked(String id){return bridge.blocked(id);}
+ public void dirty(String kind,String key){db.dirty(kind,key);}
+ public boolean healthy(){
+  var r=db.runtime();return r!=null&&"RUNNING".equals(r.state())&&cache.ready(r.generation())&&Objects.equals(r.redisRunId(),cache.runId());
+ }
+ public void prepare(){try(var trace=SaleLatency.begin(null,"bridge-prepare",0,0)){if(healthy())return;recover();if(!healthy())throw new FeedFailure(503,"SALE_RECOVERING");}}
+ public static SaleEntryRedis.Request request(SaleIngressMapper.RestoreRequest r){return new SaleEntryRedis.Request(r.reservationId(),r.campaignId(),r.postId(),r.merchantId(),r.userId(),r.clientKey(),r.priceCents(),r.state(),r.rejectReason(),r.orderId(),r.createdAtMs());}
+
+ public void drain(int limit){drain(consumer,limit,30000);}
+ public void drain(String executor,int limit,long minIdle){
+  bridge.drain(executor,limit,minIdle);
+ }
+ private void persist(SaleEntryRedis.Request r,long generation,String recoveryOwner){
+  if(r==null||r.userId()<=0||r.clientKey()==null||r.clientKey().isBlank()||r.clientKey().length()>128||!r.reservationId().matches("[a-f0-9]{32}"))throw new IllegalStateException("Invalid ingress identity");
+  faults.failIfArmed("stream.beforePersist");
+  tx.executeWithoutResult(status->{
+   var control=db.guard();
+   if(recoveryOwner==null){
+    if(!"RUNNING".equals(control.state())||control.generation()!=generation){if(sales.request(r.reservationId())!=null)return;throw new FeedFailure(503,"STALE_INGRESS_GENERATION");}
+   }else if(!"RECOVERING".equals(control.state())||control.generation()!=generation||!recoveryOwner.equals(control.owner())||control.leaseUntilMs()<=db.now())throw new FeedFailure(503,"RECOVERY_FENCED");
+   var campaign=sales.campaign(r.campaignId());
+   if(campaign==null||campaign.postId()!=r.postId()||campaign.merchantId()!=r.merchantId()||campaign.priceCents()!=r.priceCents())throw new IllegalStateException("Ingress campaign snapshot mismatch");
+   var existing=sales.request(r.reservationId());
+   if(existing==null){
+    try{sales.insertRequest(r.reservationId(),r.campaignId(),r.postId(),r.merchantId(),r.userId(),r.clientKey(),r.priceCents(),r.createdAtMs());}
+    catch(DuplicateKeyException e){var replay=sales.byClient(r.userId(),r.clientKey());if(replay==null||!replay.reservationId().equals(r.reservationId()))throw e;}
+   }
+   db.enqueue(r.reservationId());faults.failIfArmed("stream.beforeCommit");
+  });
+ }
+ public SaleIngressMapper.Dispatch claim(){return tx.execute(status->{guard();var d=db.next();if(d==null)return null;db.claim(d.reservationId());return db.dispatch(d.reservationId());});}
+ public void sent(SaleIngressMapper.Dispatch d){tx.executeWithoutResult(s->db.sent(d.reservationId(),d.token()));}
+ public void failed(SaleIngressMapper.Dispatch d){tx.executeWithoutResult(s->db.retry(d.reservationId(),d.token()));}
+
+ public void syncJobs(int limit){try(var trace=SaleLatency.begin(null,"bridge-cache-sync",0,0)){for(var job:db.jobs(Math.max(1,Math.min(limit,200)))){try{sync(job.kind(),job.entityKey());}catch(RedisException e){return;}}}}
+ public boolean sync(String kind,String key){return Boolean.TRUE.equals(tx.execute(status->{
+  var runtime=db.guard();if(!"RUNNING".equals(runtime.state()))return false;
+  var job=db.job(kind,key);if(job==null||job.appliedRevision()==job.revision())return true;
+  Map<String,String> fields=new LinkedHashMap<>();SaleEntryRedis.Request request=null;Long refund=null;boolean restore=false;long campaignId=0;
+  switch(kind){
+   case "CAMPAIGN"->{var c=sales.campaign(Long.parseLong(key));if(c!=null)fields.putAll(SaleEntryRedis.campaignFields(c,db.reserved(c.id()),db.published(c.postId())==1));}
+   case "BLACKLIST"->{var pair=key.split(":");long merchant=Long.parseLong(pair[0]),user=Long.parseLong(pair[1]);fields.put("b:"+key,sales.activeBlacklist(merchant,user)>0?"1":"0");}
+   case "OWNER"->{var pair=key.split(":");long user=Long.parseLong(pair[0]),post=Long.parseLong(pair[1]);var order=sales.orderByUserPost(user,post);fields.put("o:"+key,db.winner(user,post)>0?"GIVEAWAY":order==null?"":order.reservationId());}
+   case "REQUEST"->{var r=db.request(key);if(r!=null)request=request(r);}
+   case "REFUND"->{var r=db.refund(Long.parseLong(key));if(r!=null){refund=r.orderId();restore=r.restoreStock();campaignId=r.campaignId();}}
+   default->throw new IllegalStateException("Unknown cache job");
+  }
+  faults.failIfArmed("controls.beforeApply");
+  if(!cache.apply(runtime.generation(),job,fields,request,refund,restore,campaignId))return false;
+  db.applied(kind,key,job.revision());return true;
+ }));}
+ public void bestEffort(String kind,String key){try{sync(kind,key);}catch(RedisException ignored){/* Durable job retries after reconnect. */}}
+ public void afterCommit(String kind,String key){
+  if(!org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive()){bestEffort(kind,key);return;}
+  org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(new org.springframework.transaction.support.TransactionSynchronization(){
+   @Override public void afterCommit(){
+    var fresh=new TransactionTemplate(Objects.requireNonNull(tx.getTransactionManager()));
+    fresh.setPropagationBehavior(org.springframework.transaction.TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+    fresh.executeWithoutResult(status->bestEffort(kind,key));
+   }
+  });
+ }
+
+ /** Called outside a transaction; every page is bounded and the recovery lease is renewed. */
+ public synchronized void recover(){
+  String owner=UUID.randomUUID().toString();
+  Long generation=tx.execute(status->{var r=db.lockRuntime();
+   if("RECOVERING".equals(r.state())&&r.leaseUntilMs()>db.now())return null;
+   if("RUNNING".equals(r.state())&&cache.ready(r.generation())&&Objects.equals(cache.runId(),r.redisRunId()))return null;
+   db.begin(owner);return db.runtime().generation();});
+  if(generation==null)return;
+  cache.fence(generation);String runId=cache.runId();
+  // Persist all available old-generation pending/new messages before deriving inventory.
+  bridge.recover("recover-"+owner,generation,owner);
+  importLegacy(generation,owner);
+  String stage=cache.staging(generation);
+  long after=0;for(;;){renew(generation,owner);var ids=db.campaigns(after);if(ids.isEmpty())break;
+   for(long id:ids){var c=sales.campaign(id);cache.put(stage,SaleEntryRedis.campaignFields(c,db.reserved(id)+bridge.held(id),db.published(c.postId())==1));after=id;}}
+  String cursor="";for(;;){renew(generation,owner);var rows=db.requests(cursor);if(rows.isEmpty())break;
+   for(var r:rows){cache.restoreRequest(stage,request(r));cursor=r.reservationId();}}
+  // Giveaway ownership wins over purchase replay for a NEW clientKey.
+  after=0;for(;;){renew(generation,owner);var ids=db.campaigns(after);if(ids.isEmpty())break;
+   for(long id:ids){var c=sales.campaign(id);for(long user:db.winners(c.postId()))cache.put(stage,Map.of("o:"+user+":"+c.postId(),"GIVEAWAY"));after=id;}}
+  long merchant=0,user=0;for(;;){renew(generation,owner);var rows=db.blocks(merchant,user);if(rows.isEmpty())break;
+   Map<String,String> fields=new LinkedHashMap<>();for(var b:rows){fields.put("b:"+b.merchantId()+":"+b.userId(),"1");merchant=b.merchantId();user=b.userId();}cache.put(stage,fields);}
+  after=0;for(;;){renew(generation,owner);var ids=db.refunds(after);if(ids.isEmpty())break;Map<String,String> fields=new LinkedHashMap<>();for(long id:ids){fields.put("refund:"+id,"1");after=id;}cache.put(stage,fields);}
+  bridge.restore(stage,generation,owner);
+  renew(generation,owner);faults.failIfArmed("recovery.beforeInstall");cache.install(stage,generation);
+  bridge.reconciled(generation,owner);
+  if(db.finish(generation,owner,runId)!=1)throw new FeedFailure(503,"RECOVERY_FENCED");
+  cache.publish(generation,runId);syncJobs(200);
+ }
+ private void renew(long generation,String owner){if(db.renew(generation,owner)!=1)throw new FeedFailure(503,"RECOVERY_FENCED");}
+ private void importLegacy(long generation,String owner){
+  long after=0;for(;;){renew(generation,owner);var ids=db.campaigns(after);if(ids.isEmpty())return;
+   for(long id:ids){var c=sales.campaign(id);String cursor=Optional.ofNullable(db.legacyCursor(id)).orElse("0-0");
+    for(;;){renew(generation,owner);var messages=cache.legacy(id,cursor);if(messages.isEmpty())break;
+     for(var m:messages){String rid=m.getBody().get("reservationId");
+      if(rid!=null&&sales.request(rid)==null&&"PROCESSING".equals(cache.commands().hget("sale:{"+id+"}:r:"+rid,"state"))){
+       persistLegacy(new SaleEntryRedis.Request(rid,id,c.postId(),c.merchantId(),Long.parseLong(m.getBody().get("userId")),m.getBody().get("clientKey"),c.priceCents(),"PROCESSING",null,null,db.now()),m.getId(),generation,owner);
+      }
+      cursor=m.getId();db.saveLegacyCursor(id,cursor);
+     }
+    }after=id;
+   }
+  }
+ }
+ private void persistLegacy(SaleEntryRedis.Request r,String stream,long generation,String owner){
+  if(r.userId()<=0||r.clientKey()==null||r.clientKey().isBlank()||r.clientKey().length()>128||!r.reservationId().matches("[a-f0-9]{32}"))throw new IllegalStateException("Invalid legacy ingress identity");
+  tx.executeWithoutResult(status->{
+   var control=db.guard();
+   if(!"RECOVERING".equals(control.state())||control.generation()!=generation||!owner.equals(control.owner())||control.leaseUntilMs()<=db.now())throw new FeedFailure(503,"RECOVERY_FENCED");
+   var canonical=sales.byClient(r.userId(),r.clientKey());
+   if(canonical!=null&&!canonical.reservationId().equals(r.reservationId())){
+    db.legacyReplay(r.reservationId(),r.campaignId(),stream,canonical.reservationId(),r.userId(),r.clientKey(),cache.encode(r),cache.encode(request(db.request(canonical.reservationId()))));
+    if(!canonical.reservationId().equals(db.legacyCanonical(r.reservationId())))throw new IllegalStateException("Legacy replay audit identity changed");
+   }else persist(r,generation,owner);
+   // Audit/request durability and migration progress commit together.
+   db.saveLegacyCursor(r.campaignId(),stream);
+  });
+ }
+ public void recordRefundRestore(long refund,boolean restore){db.refundRestore(refund,restore);dirty("REFUND",Long.toString(refund));}
+}

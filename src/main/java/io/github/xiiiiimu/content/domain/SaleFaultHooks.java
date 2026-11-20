@@ -18,6 +18,15 @@ public final class SaleFaultHooks {
  /** HTTP request in-flight (servlet filter); separate from settle in-flight. */
  private final AtomicLong httpInFlight=new AtomicLong();
  private final AtomicLong peakHttpInFlight=new AtomicLong();
+ private final java.util.concurrent.ConcurrentHashMap<String,AtomicBoolean> failures=new java.util.concurrent.ConcurrentHashMap<>();
+ private final java.util.concurrent.atomic.AtomicReference<String> watchedReservation=new java.util.concurrent.atomic.AtomicReference<>();
+ private final AtomicLong watchedDeliveries=new AtomicLong();
+ public void watchDeliveries(String id){watchedReservation.set(id);watchedDeliveries.set(0);}
+ public void recordDelivery(String id){if(id!=null&&id.equals(watchedReservation.get()))watchedDeliveries.incrementAndGet();}
+ public long watchedDeliveries(){return watchedDeliveries.get();}
+ public void armFailure(String point){failures.put(point,new AtomicBoolean(true));}
+ public void resetFailures(){failures.clear();failAfterCommitOnce.set(false);watchedReservation.set(null);watchedDeliveries.set(0);}
+ public void failIfArmed(String point){var armed=failures.get(point);if(armed!=null&&armed.compareAndSet(true,false))throw new IllegalStateException("INJECTED_"+point);}
 
  public void armHold(){
   CountDownLatch next=new CountDownLatch(1);

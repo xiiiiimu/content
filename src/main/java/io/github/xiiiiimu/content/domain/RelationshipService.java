@@ -6,6 +6,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.*;
 
 public final class RelationshipService {
+ private java.util.function.LongConsumer offlineHandler=id->{};
+ public void setOfflineHandler(java.util.function.LongConsumer handler){offlineHandler=handler;}
  private final FeedMapper db;private final TransactionTemplate tx;private final ObjectMapper json;private final int historyLimit;private final long window;private final PostDetailService details;
  public RelationshipService(FeedMapper db,TransactionTemplate tx,ObjectMapper json,int historyLimit,long window,PostDetailService details){
   if(historyLimit<0 || historyLimit>100 || window<=0)throw new IllegalArgumentException("Invalid history bounds");
@@ -33,6 +35,7 @@ public final class RelationshipService {
   tx.executeWithoutResult(status->{requireWritable(db.gate());var existing=db.post(post);if(existing==null)throw new FeedFailure(404,"POST_NOT_FOUND");
    if(existing.authorId()!=author)throw new FeedFailure(403,"POST_FORBIDDEN");db.author(author);
    if(db.offline(author,post,version)!=1)throw new FeedFailure(409,"POST_STATE_CONFLICT");
+   offlineHandler.accept(post);
    emit("PostOfflined",post,Map.of("postId",post,"authorId",author,"postVersion",Math.addExact(version,1)));
   });
   // Invalidation accelerates cache drop but never authorizes; authority already flipped in MySQL.

@@ -14,13 +14,14 @@ public final class RocketMqSaleSender implements SaleMessageSender {
   this.producer=producer;this.json=json;this.topic=topic;this.db=db;
  }
  @Override public void send(String reservationId)throws Exception{
-  var req=db.request(reservationId);if(req==null)return;
+  var req=db.request(reservationId);if(req==null)throw new IllegalStateException("Missing durable sale dispatch request");
   String body=json.writeValueAsString(Map.of(
    "reservationId",req.reservationId(),"campaignId",req.campaignId(),"userId",req.userId(),
    "postId",req.postId(),"merchantId",req.merchantId(),"clientKey",req.clientKey(),"priceCents",req.priceCents()
   ));
   var message=new Message(topic,"PurchaseSettle",reservationId,body.getBytes(StandardCharsets.UTF_8));
-  producer.send(message,10_000);
+  var result=producer.send(message,10_000);
+  if(result==null||result.getSendStatus()!=org.apache.rocketmq.client.producer.SendStatus.SEND_OK)throw new IllegalStateException("Sale broker ACK was not SEND_OK");
  }
 
  /** No-op sender used when MQ is disabled; settle is invoked synchronously by SaleService. */

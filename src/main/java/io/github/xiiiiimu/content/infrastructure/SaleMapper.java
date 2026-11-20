@@ -6,7 +6,7 @@ import java.util.List;
 @Mapper
 public interface SaleMapper {
  record Campaign(long id,long postId,long merchantId,long priceCents,int stockCap,int soldCount,
-                 long startMs,long endMs,String state,String linkToken,Integer openGuard) {}
+                 long startMs,long endMs,String state,String linkToken,Integer openGuard,Long frozenVersionId) {}
  record PurchaseRequest(String reservationId,long campaignId,long postId,long merchantId,long userId,
                         String clientKey,long priceCents,String state,String rejectReason,Long orderId) {}
  record Order(long id,String reservationId,long campaignId,long postId,long merchantId,long userId,
@@ -15,37 +15,37 @@ public interface SaleMapper {
  record Entitlement(long id,long accountId,long postId,long versionId,String license,String sourceKind,long sourceId,String state) {}
 
  @Insert("""
-  INSERT INTO material_sale_campaigns(post_id,merchant_id,price_cents,stock_cap,sold_count,start_ms,end_ms,state,link_token,open_guard,created_at_ms,updated_at_ms)
-  VALUES(#{post},#{merchant},#{price},#{cap},0,#{start},#{end},'OPEN',#{token},1,#{at},#{at})
+  INSERT INTO material_sale_campaigns(post_id,merchant_id,price_cents,stock_cap,sold_count,start_ms,end_ms,state,link_token,open_guard,created_at_ms,updated_at_ms,frozen_version_id)
+  VALUES(#{post},#{merchant},#{price},#{cap},0,#{start},#{end},'OPEN',#{token},1,#{at},#{at},#{version})
   """)
  @Options(useGeneratedKeys=true,keyProperty="id")
  int insertCampaign(CampaignInsert row);
- class CampaignInsert { public long id; public long post; public long merchant; public long price; public int cap; public long start; public long end; public String token; public long at; }
+ class CampaignInsert { public long id; public long post; public long merchant; public long price; public int cap; public long start; public long end; public String token; public long at; public Long version; }
 
  @Select("""
   SELECT id,post_id AS postId,merchant_id AS merchantId,price_cents AS priceCents,stock_cap AS stockCap,sold_count AS soldCount,
-         start_ms AS startMs,end_ms AS endMs,state,link_token AS linkToken,open_guard AS openGuard
+         start_ms AS startMs,end_ms AS endMs,state,link_token AS linkToken,open_guard AS openGuard,frozen_version_id AS frozenVersionId
   FROM material_sale_campaigns WHERE id=#{id}
   """)
  Campaign campaign(long id);
 
  @Select("""
   SELECT id,post_id AS postId,merchant_id AS merchantId,price_cents AS priceCents,stock_cap AS stockCap,sold_count AS soldCount,
-         start_ms AS startMs,end_ms AS endMs,state,link_token AS linkToken,open_guard AS openGuard
+         start_ms AS startMs,end_ms AS endMs,state,link_token AS linkToken,open_guard AS openGuard,frozen_version_id AS frozenVersionId
   FROM material_sale_campaigns WHERE id=#{id} FOR UPDATE
   """)
  Campaign lockCampaign(long id);
 
  @Select("""
   SELECT id,post_id AS postId,merchant_id AS merchantId,price_cents AS priceCents,stock_cap AS stockCap,sold_count AS soldCount,
-         start_ms AS startMs,end_ms AS endMs,state,link_token AS linkToken,open_guard AS openGuard
+         start_ms AS startMs,end_ms AS endMs,state,link_token AS linkToken,open_guard AS openGuard,frozen_version_id AS frozenVersionId
   FROM material_sale_campaigns WHERE post_id=#{post} AND state='OPEN' LIMIT 1
   """)
  Campaign openByPost(long post);
 
  @Select("""
   SELECT id,post_id AS postId,merchant_id AS merchantId,price_cents AS priceCents,stock_cap AS stockCap,sold_count AS soldCount,
-         start_ms AS startMs,end_ms AS endMs,state,link_token AS linkToken,open_guard AS openGuard
+         start_ms AS startMs,end_ms AS endMs,state,link_token AS linkToken,open_guard AS openGuard,frozen_version_id AS frozenVersionId
   FROM material_sale_campaigns WHERE link_token=#{token} LIMIT 1
   """)
  Campaign byToken(String token);
@@ -87,16 +87,6 @@ public interface SaleMapper {
   FROM material_purchase_requests WHERE user_id=#{user} AND client_key=#{key} LIMIT 1
   """)
  PurchaseRequest byClient(@Param("user")long user,@Param("key")String key);
-
- @Select("""
-  SELECT reservation_id AS reservationId,campaign_id AS campaignId,post_id AS postId,merchant_id AS merchantId,user_id AS userId,
-         client_key AS clientKey,price_cents AS priceCents,state,reject_reason AS rejectReason,order_id AS orderId
-  FROM material_purchase_requests WHERE state='PROCESSING' AND (mq_sent_at_ms IS NULL OR mq_sent_at_ms=0) ORDER BY created_at_ms LIMIT #{limit}
-  """)
- List<PurchaseRequest> pendingMq(int limit);
-
- @Update("UPDATE material_purchase_requests SET mq_sent_at_ms=#{at},updated_at_ms=#{at} WHERE reservation_id=#{id} AND state='PROCESSING'")
- int markMqSent(@Param("id")String id,@Param("at")long at);
 
  @Update("""
   UPDATE material_purchase_requests SET state=#{state},reject_reason=#{reason},order_id=#{order},updated_at_ms=#{at}
@@ -152,6 +142,7 @@ public interface SaleMapper {
   FROM material_refund_requests WHERE id=#{id} FOR UPDATE
   """)
  RefundRequest lockRefund(long id);
+ @Select("SELECT id,order_id AS orderId,reason_kind AS reasonKind,state,requester_id AS requesterId,resolver_id AS resolverId FROM material_refund_requests WHERE id=#{id}") RefundRequest refund(long id);
 
  @Select("""
   SELECT id,order_id AS orderId,reason_kind AS reasonKind,state,requester_id AS requesterId,resolver_id AS resolverId
@@ -184,6 +175,45 @@ public interface SaleMapper {
  @Select("SELECT COUNT(*) FROM merchant_blacklist WHERE merchant_id=#{merchant} AND target_user_id=#{target} AND revoked_at_ms IS NULL")
  int activeBlacklist(@Param("merchant")long merchant,@Param("target")long target);
 
+ @Select("SELECT target_user_id FROM merchant_blacklist WHERE merchant_id=#{merchant} AND revoked_at_ms IS NULL")
+ List<Long> activeBlacklistTargets(long merchant);
+
+ @Select("""
+  SELECT COUNT(*) FROM giveaways
+  WHERE post_id=#{post} AND state NOT IN ('COMPLETED','CANCELLED')
+  """)
+ int blockingGiveaways(long post);
+
+ @Select("""
+  SELECT DISTINCT account_id FROM (
+    SELECT w.account_id AS account_id FROM giveaway_winners w
+      JOIN giveaways g ON g.id=w.giveaway_id
+     WHERE g.post_id=#{post} AND g.state IN ('DRAWN','COMPLETED')
+    UNION
+    SELECT e.account_id FROM material_entitlements e
+     WHERE e.post_id=#{post} AND e.source_kind='GIVEAWAY' AND e.state='ACTIVE'
+  ) winners
+  """)
+ List<Long> giveawayWinnerAccounts(long post);
+
+ @Select("SELECT id FROM material_sale_campaigns WHERE merchant_id=#{merchant} AND state='OPEN'")
+ List<Long> openCampaignIdsForMerchant(long merchant);
+ @Select("SELECT id FROM material_sale_campaigns WHERE post_id=#{post} AND state='OPEN'") List<Long> openCampaignIdsForPost(long post);
+
+ @Insert("""
+  INSERT INTO material_sale_eligibility_blocks(campaign_id,user_id,reason,created_at_ms)
+  VALUES(#{campaign},#{user},#{reason},#{at})
+  ON DUPLICATE KEY UPDATE reason=VALUES(reason),created_at_ms=VALUES(created_at_ms)
+  """)
+ int upsertEligibilityBlock(@Param("campaign")long campaign,@Param("user")long user,@Param("reason")String reason,@Param("at")long at);
+
+ @Delete("DELETE FROM material_sale_eligibility_blocks WHERE campaign_id=#{campaign} AND user_id=#{user}")
+ int deleteEligibilityBlock(@Param("campaign")long campaign,@Param("user")long user);
+
+ @Select("SELECT user_id AS userId, reason FROM material_sale_eligibility_blocks WHERE campaign_id=#{campaign}")
+ List<EligibilityBlock> eligibilityBlocks(long campaign);
+ record EligibilityBlock(long userId,String reason) {}
+
  @Insert("""
   INSERT INTO account_material_decision_locks(account_id,post_id,updated_at_ms) VALUES(#{account},#{post},#{at})
   ON DUPLICATE KEY UPDATE updated_at_ms=VALUES(updated_at_ms)
@@ -214,6 +244,13 @@ public interface SaleMapper {
  int revokePurchaseEntitlement(@Param("order")long order,@Param("account")long account,@Param("at")long at);
 
  @Select("""
+  SELECT EXISTS(SELECT 1 FROM material_orders WHERE user_id=#{account} AND post_id=#{post})
+      OR EXISTS(SELECT 1 FROM material_entitlements
+                WHERE account_id=#{account} AND post_id=#{post} AND state='ACTIVE' AND source_kind='GIVEAWAY')
+  """)
+ boolean alreadyOwnsMaterial(@Param("account")long account,@Param("post")long post);
+
+ @Select("""
   SELECT id,account_id AS accountId,post_id AS postId,version_id AS versionId,license,source_kind AS sourceKind,source_id AS sourceId,state
   FROM material_entitlements WHERE account_id=#{account} AND post_id=#{post} AND state='ACTIVE'
   """)
@@ -225,7 +262,7 @@ public interface SaleMapper {
     AND (#{post} IS NULL OR post_id=#{post})
     AND (
       state='PAID'
-      OR (state='REFUNDED' AND refund_reason='GIVEAWAY_AUTO')
+      OR (state='REFUNDED' AND refund_reason IN ('GIVEAWAY_AUTO','GIVEAWAY_REFUND'))
     )
     AND (#{start} IS NULL OR paid_at_ms>=#{start})
     AND (#{end} IS NULL OR paid_at_ms<=#{end})
