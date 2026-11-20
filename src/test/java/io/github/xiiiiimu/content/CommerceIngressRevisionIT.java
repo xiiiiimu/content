@@ -58,6 +58,11 @@ class CommerceIngressRevisionIT {
  }
  record Fixture(long author,long buyer,long post,SaleService.CampaignView campaign){}
  Fixture fixture(boolean follow,String mode){
+  var m=unsold(follow,mode);long now=System.currentTimeMillis();
+  return new Fixture(m.author,m.buyer,m.post,sales.createCampaign(m.author,m.post,100,2,now-1000,now+3600000));
+ }
+ /** Published material that has never had a sale campaign; leaves the sale runtime untouched. */
+ Fixture unsold(boolean follow,String mode){
   String suffix=UUID.randomUUID().toString().replace("-","").substring(0,12);
   long author=auth.register("jma"+suffix,"test-author-password").userId();
   long buyer=auth.register("jmb"+suffix,"test-buyer-password").userId();
@@ -66,8 +71,62 @@ class CommerceIngressRevisionIT {
   for(int i=0;i<8;i++)materials.tick();
   publish.publish(author,material.postId(),UUID.randomUUID().toString(),0);
   if(follow)follows.change(buyer,author,true);
+  return new Fixture(author,buyer,material.postId(),null);
+ }
+ /** Sealed one-winner LIKE giveaway on f.post whose only candidate is f.buyer. */
+ long sealedGiveaway(Fixture f,String tag)throws Exception{
+  interactions.like(f.buyer,f.post,"drone");
+  var comment=interactions.comment(f.author,f.post,"开奖 "+tag,tag+"-"+f.post,"drone",null,null,null);
+  long deadline=System.currentTimeMillis()+1000;
+  var command=new AssistantParser.GiveawayCommand("{\"op\":\"ALL\",\"children\":[{\"type\":\"LIKE\"}]}","Asia/Shanghai",null,deadline,1,"DEFAULT","DOWNLOAD",tag);
+  giveaways.createFromAssistant(f.author,f.post,comment.commentId(),command);
+  long giveaway=db.queryForObject("SELECT id FROM giveaways WHERE source_comment_id=?",Long.class,comment.commentId());
+  while(System.currentTimeMillis()<=deadline)Thread.sleep(20);
+  giveaways.seal(giveaway);
+  return giveaway;
+ }
+ int activeGiveawayEntitlements(Fixture f){
+  return db.queryForObject("SELECT COUNT(*) FROM material_entitlements WHERE post_id=? AND account_id=? AND source_kind='GIVEAWAY' AND state='ACTIVE'",Integer.class,f.post,f.buyer);
+ }
+ String runtimeState(){return db.queryForObject("SELECT state FROM material_sale_runtime WHERE id=1",String.class);}
+
+ // CI d90666c: AssistantFlowIT drew a giveaway on a material that never had a sale while the runtime was RECOVERING
+ // (nothing had prepared it) and the award failed with SALE_RECOVERING.
+ @Test void giveawayOnMaterialWithoutSaleAwardsWhileSaleRuntimeIsNotRunning()throws Exception{
+  var f=unsold(true,"PUBLIC_PREVIEW");
+  long giveaway=sealedGiveaway(f,"no-sale");
+  assertThat(runtimeState()).as("precondition: sale runtime not prepared").isEqualTo("RECOVERING");
+  giveaways.draw(giveaway);
+  assertThat(activeGiveawayEntitlements(f)).isEqualTo(1);
+  assertThat(db.queryForObject("SELECT state FROM giveaways WHERE id=?",String.class,giveaway)).isEqualTo("COMPLETED");
+  assertThat(runtimeState()).as("the award neither needs nor touches the sale runtime").isEqualTo("RECOVERING");
+  assertThat(db.queryForObject("SELECT COUNT(*) FROM material_sale_cache_jobs WHERE kind='OWNER' AND entity_key=?",Integer.class,f.buyer+":"+f.post))
+   .as("no sale cache work for a material with no sale").isZero();
+  // A campaign created after the award still knows the winner owns the material.
   long now=System.currentTimeMillis();
-  return new Fixture(author,buyer,material.postId(),sales.createCampaign(author,material.postId(),100,2,now-1000,now+3600000));
+  var campaign=sales.createCampaign(f.author,f.post,100,2,now-1000,now+3600000);
+  assertThatThrownBy(()->sales.purchase(f.buyer,campaign.id(),"after-award")).isInstanceOfSatisfying(FeedFailure.class,
+   e->{assertThat(e.status).isEqualTo(409);assertThat(e.code).isEqualTo("ALREADY_OWNED");});
+ }
+ @Test void giveawayOnMaterialWithCampaignIsStillRefusedWhileSaleRuntimeRecovers()throws Exception{
+  var f=fixture(true,"PUBLIC_PREVIEW");
+  long giveaway=sealedGiveaway(f,"sale-recovering");
+  db.update("UPDATE material_sale_runtime SET state='RECOVERING' WHERE id=1");
+  assertThatThrownBy(()->giveaways.draw(giveaway)).isInstanceOfSatisfying(FeedFailure.class,
+   e->{assertThat(e.status).isEqualTo(503);assertThat(e.code).isEqualTo("SALE_RECOVERING");});
+  assertThat(activeGiveawayEntitlements(f)).isZero();
+  assertThat(db.queryForObject("SELECT state FROM giveaways WHERE id=?",String.class,giveaway)).isEqualTo("SEALED");
+ }
+ @Test void giveawayForWinnerHoldingAnOrderIsStillRefusedWhileSaleRuntimeRecovers()throws Exception{
+  var f=fixture(true,"PUBLIC_PREVIEW");
+  var r=sales.purchase(f.buyer,f.campaign.id(),"order-before-draw");ingress.drain(10);sales.settle(r.reservationId());
+  assertThat(db.queryForObject("SELECT state FROM material_orders WHERE user_id=? AND post_id=?",String.class,f.buyer,f.post)).isEqualTo("PAID");
+  long giveaway=sealedGiveaway(f,"order-recovering");
+  db.update("UPDATE material_sale_runtime SET state='RECOVERING' WHERE id=1");
+  assertThatThrownBy(()->giveaways.draw(giveaway)).isInstanceOfSatisfying(FeedFailure.class,
+   e->{assertThat(e.status).isEqualTo(503);assertThat(e.code).isEqualTo("SALE_RECOVERING");});
+  assertThat(activeGiveawayEntitlements(f)).isZero();
+  assertThat(db.queryForObject("SELECT state FROM material_orders WHERE user_id=? AND post_id=?",String.class,f.buyer,f.post)).isEqualTo("PAID");
  }
  @Test void loggedInNonFollowerWithRestrictedPreviewCanBuyWithoutEntrySql()throws Exception{
   var f=fixture(false,"AUTHOR_ONLY");

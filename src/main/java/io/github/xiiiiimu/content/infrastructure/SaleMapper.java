@@ -202,6 +202,9 @@ public interface SaleMapper {
  @Select("SELECT id FROM material_sale_campaigns WHERE merchant_id=#{merchant} AND state='OPEN'")
  List<Long> openCampaignIdsForMerchant(long merchant);
  @Select("SELECT id FROM material_sale_campaigns WHERE post_id=#{post} AND state='OPEN'") List<Long> openCampaignIdsForPost(long post);
+ /** The material has had a campaign in any state, or the account holds an order for it. */
+ @Select("SELECT EXISTS(SELECT 1 FROM material_sale_campaigns WHERE post_id=#{post}) OR EXISTS(SELECT 1 FROM material_orders WHERE user_id=#{account} AND post_id=#{post})")
+ boolean saleLinked(@Param("account")long account,@Param("post")long post);
 
  @Insert("""
   INSERT INTO material_sale_eligibility_blocks(campaign_id,user_id,reason,created_at_ms)

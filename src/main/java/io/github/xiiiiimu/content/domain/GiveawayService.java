@@ -119,7 +119,7 @@ public final class GiveawayService {
   for(var w:db.winners(g.id())){
    if(w.entitlementId()!=null)continue;
    SaleService bridge=sales==null?null:sales.get();
-   if(bridge!=null)bridge.lockForGiveawayAward(w.accountId(),g.postId());
+   boolean saleLinked=bridge!=null&&bridge.lockForGiveawayAward(w.accountId(),g.postId());
    var ent=new GiveawayMapper.EntitlementInsert();
    ent.account=w.accountId();ent.post=g.postId();ent.version=g.rewardVersionId();ent.license=g.rewardLicense();
    ent.kind="GIVEAWAY";ent.source=g.id();ent.at=System.currentTimeMillis();
@@ -128,7 +128,7 @@ public final class GiveawayService {
     if(existing!=null)ent.id=existing.id();
    }
    if(ent.id>0)db.setWinnerEntitlement(g.id(),w.accountId(),ent.id,System.currentTimeMillis());
-   if(bridge!=null)bridge.giveawayAwarded(w.accountId(),g.postId(),g.id());
+   if(bridge!=null)bridge.giveawayAwarded(w.accountId(),g.postId(),g.id(),saleLinked);
    String dedupe="giveaway-win:"+g.id()+":"+w.accountId();
    long synthetic=Math.floorMod(Objects.hash(g.id(),w.accountId()),1_000_000_000)+3_000_000_000L;
    notifications.insertWithMeta(w.accountId(),synthetic,"GIVEAWAY_WIN",g.authorId(),g.postId(),g.sourceCommentId(),

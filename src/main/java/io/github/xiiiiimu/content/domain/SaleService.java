@@ -356,8 +356,25 @@ public final class SaleService {
   var latest=db.order(meta[0]);ingress.bestEffort("OWNER",latest.userId()+":"+latest.postId());
   return toOrder(db.order(meta[0]));
  }
- public void lockForGiveawayAward(long account,long post){ingress.guard();db.touchLock(account,post,System.currentTimeMillis());db.lockDecision(account,post);}
- public void giveawayAwarded(long account,long post,long giveaway){
+ /**
+  * Locks (account, post) for a giveaway award. The sale runtime is required only when the material is linked to a sale:
+  * it has had a campaign, or the winner holds an order for it (same rule as offlineInTransaction). With no link there is
+  * no sale cache state to keep consistent, so the award proceeds even while the runtime is not RUNNING.
+  * Skipping the guard is safe when a campaign is created later, even concurrently: createCampaign seeds OWNER from the
+  * committed winners, and any purchase that still gets through is settled under this same decision lock, where the
+  * ownership check rejects it as ALREADY_OWNED. Orders only come from campaigns and campaigns are never deleted, so an
+  * order for the winner always implies a committed campaign this read sees. The check is a plain read made before
+  * guard() so the lock order (runtime row, then decision row) stays the same as in settle.
+  * @return whether the award is sale-linked; pass it to {@link #giveawayAwarded}.
+  */
+ public boolean lockForGiveawayAward(long account,long post){
+  boolean saleLinked=db.saleLinked(account,post);
+  if(saleLinked)ingress.guard();
+  db.touchLock(account,post,System.currentTimeMillis());db.lockDecision(account,post);
+  return saleLinked;
+ }
+ public void giveawayAwarded(long account,long post,long giveaway,boolean saleLinked){
+  if(!saleLinked)return; // No campaign and no order: no OWNER cache entry and no refund notice to produce.
   ingress.dirty("OWNER",account+":"+post);
   ingress.afterCommit("OWNER",account+":"+post);
   var order=db.orderByUserPost(account,post);
