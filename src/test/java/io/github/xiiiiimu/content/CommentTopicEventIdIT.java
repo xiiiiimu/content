@@ -15,14 +15,13 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Hardening A10 reproduction: the comment topic event id is "comment:"+idempotencyKey. Comment idempotency is per
+ * Hardening A10: the comment topic event id used to be "comment:"+idempotencyKey. Comment idempotency is per
  * (user, key), but topic_event_ledger.event_id is global, so a second user's comment with the same key (on any post,
- * any topic) is created yet its topic +1 is dropped by INSERT IGNORE.
- * Disabled until the fix is decided; the failing run is kept in target/hardening-a/A10-repro-*.log.
+ * any topic) was created yet its topic +1 was dropped by INSERT IGNORE. Fix (decided): the event id is
+ * "comment:"+commentId, so every created comment counts exactly once and a replay records nothing.
  */
 @SpringBootTest @Testcontainers
 @org.springframework.test.annotation.DirtiesContext(classMode=org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
-@org.junit.jupiter.api.Disabled("A10: reproduces the lost topic event; fix awaits a decision (docs/hardening-plan.md A10)")
 class CommentTopicEventIdIT {
  @Container static final MySQLContainer<?> MYSQL=new MySQLContainer<>("mysql:8.4");
  @Container static final GenericContainer<?> REDIS=new GenericContainer<>("redis:7.4").withExposedPorts(6379).withCommand("redis-server","--maxmemory-policy","noeviction");
@@ -48,5 +47,10 @@ class CommentTopicEventIdIT {
   assertThat(b.replay()).isFalse();
   assertThat(net("sports")).isEqualTo(1);
   assertThat(net("music")).as("second user's comment on a music post counts once").isEqualTo(1);
+  var replay=interactions.comment(2102,110102,"second","k-1","music");
+  assertThat(replay.replay()).isTrue();assertThat(replay.commentId()).isEqualTo(b.commentId());
+  assertThat(net("music")).as("a replay does not count again").isEqualTo(1);
+  assertThat(db.queryForObject("SELECT COUNT(*) FROM topic_event_ledger WHERE event_id IN (?,?)",Integer.class,
+   "comment:"+a.commentId(),"comment:"+b.commentId())).as("event id is comment:<commentId>").isEqualTo(2);
  }
 }

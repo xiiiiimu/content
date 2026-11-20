@@ -118,7 +118,9 @@ public final class InteractionService {
    if(db.comment(post,user,parentId,version,offset,body,key,System.currentTimeMillis())!=1)throw new IllegalStateException("comment insert failed");
    var created=db.existingComment(user,key);reconcile(post);
    String topic=db.postTopic(post);
-   if(topic!=null)trending.record("comment:"+key,topic,post,1,"COMMENT");
+   // Hardening A10: one ledger row per created comment. The idempotency key is only unique per user, so it cannot be
+   // the event id; a replay returns before this point and records nothing.
+   if(topic!=null)trending.record("comment:"+created.id(),topic,post,1,"COMMENT");
    Map<String,Object> fields=new LinkedHashMap<>();
    fields.put("postId",post);fields.put("commentId",created.id());fields.put("actorUserId",user);
    fields.put("postAuthorId",view.authorId());fields.put("occurredAtMs",created.createdAtMs());
