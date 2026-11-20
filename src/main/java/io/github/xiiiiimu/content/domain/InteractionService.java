@@ -7,7 +7,8 @@ import java.util.*;
 public final class InteractionService {
  public record LikeResult(boolean liked,long likeCount) {}
  public record DislikeResult(boolean disliked,long dislikeCount) {}
- public record ReportResult(long reportId,long reportCount) {}
+ /** {@code replay} = this reporter had already reported the post; reportId is that first report. */
+ public record ReportResult(long reportId,long reportCount,boolean replay) {}
  public record CommentResult(long commentId,long commentCount,boolean replay,Long parentId,Long materialVersionId,Long offsetMs,Long acceptedAtMs) {}
  public record CommentView(long commentId,long userId,Long parentId,Long materialVersionId,Long offsetMs,Long acceptedAtMs,String body,long createdAtMs) {}
  private final VisibilityService visibility;private final InteractionMapper db;private final TransactionTemplate tx;private final TrendingService trending;private final RelationshipService events;
@@ -66,10 +67,14 @@ public final class InteractionService {
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   if(reason==null || reason.isBlank() || reason.length()>64)throw new FeedFailure(400,"INVALID_REQUEST");
   if(detail!=null && detail.length()>1000)throw new FeedFailure(400,"INVALID_REQUEST");
+  // Hardening A3: one report per (post, reporter). A concurrent repeat waits on the unique key until the first commits
+  // (READ COMMITTED), then inserts nothing and reads the committed first row; counts are recomputed only on a new row.
   return tx.execute(status->{
-   db.report(post,user,reason,detail==null?"":detail,contextJson,System.currentTimeMillis());
-   reconcile(post);
-   return new ReportResult(0,db.stats(post).reports());
+   boolean inserted=db.report(post,user,reason,detail==null?"":detail,contextJson,System.currentTimeMillis())==1;
+   long count=inserted?reconcile(post).reports():currentReports(post);
+   Long id=db.reportId(post,user);
+   if(id==null)throw new IllegalStateException("report row missing after insert for post "+post);
+   return new ReportResult(id,count,!inserted);
   });
  }
  public CommentResult comment(long user,long post,String body,String key,String topic){return comment(user,post,body,key,topic,null,null,null);}
@@ -134,6 +139,7 @@ public final class InteractionService {
    .map(c->new CommentView(c.id(),c.userId(),c.parentId(),c.materialVersionId(),c.offsetMs(),c.acceptedAtMs(),c.body(),c.createdAtMs()))
    .toList();
  }
+ private long currentReports(long post){var s=db.stats(post);return s==null?db.reportCount(post):s.reports();}
  public InteractionMapper.Stats reconcile(long post){
   long likes=db.likeCount(post),comments=db.commentCount(post),dislikes=db.dislikeCount(post),reports=db.reportCount(post);
   db.upsertStats(post,likes,dislikes,comments,reports);return db.stats(post);

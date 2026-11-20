@@ -20,9 +20,14 @@ public interface InteractionMapper {
  @Insert("INSERT IGNORE INTO post_dislikes(post_id,user_id,created_at_ms) VALUES(#{post},#{user},#{at})") int dislike(@Param("post")long post,@Param("user")long user,@Param("at")long at);
  @Delete("DELETE FROM post_dislikes WHERE post_id=#{post} AND user_id=#{user}") int undislike(@Param("post")long post,@Param("user")long user);
  @Select("SELECT COUNT(*) FROM post_dislikes WHERE post_id=#{post}") long dislikeCount(long post);
- @Insert("INSERT INTO post_reports(post_id,reporter_user_id,reason,detail,context_json,created_at_ms) VALUES(#{post},#{user},#{reason},#{detail},#{context},#{at})")
+ /**
+  * One report per (post, reporter) (V29 uq_report_post_reporter): 1 = inserted, 0 = the reporter already reported this post.
+  * ON DUPLICATE KEY UPDATE id=id instead of INSERT IGNORE so every other error (bad JSON, truncation) still fails the statement.
+  */
+ @Insert("INSERT INTO post_reports(post_id,reporter_user_id,reason,detail,context_json,created_at_ms) VALUES(#{post},#{user},#{reason},#{detail},#{context},#{at}) ON DUPLICATE KEY UPDATE id=id")
  int report(@Param("post")long post,@Param("user")long user,@Param("reason")String reason,@Param("detail")String detail,@Param("context")String context,@Param("at")long at);
  @Select("SELECT COUNT(*) FROM post_reports WHERE post_id=#{post}") long reportCount(long post);
+ @Select("SELECT id FROM post_reports WHERE post_id=#{post} AND reporter_user_id=#{user}") Long reportId(@Param("post")long post,@Param("user")long user);
  @Insert("""
   INSERT INTO post_comments(post_id,user_id,parent_id,material_version_id,offset_ms,body,idempotency_key,created_at_ms)
   VALUES(#{post},#{user},#{parent},#{version},#{offset},#{body},#{key},#{at})
