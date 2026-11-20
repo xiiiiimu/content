@@ -45,16 +45,36 @@ public final class TrendingService {
   * Production TrendGuard output (ADR-005): same TX as ledger/bucket.
   * Lock order: post/like/stats (caller) → ledger insert → minute-bucket row → {@code trend_topic_serial} FOR UPDATE → risk insert.
   * Single-topic serial lock avoids deadlock; concurrent txs serialize so threshold emit does not require a later interaction.
+  * <p>Once this process knows the (topic, hour) spike row exists, later interactions skip the serial lock, the scan and the
+  * insert (round-1 R9). "Known" means: our insert committed (marked after commit, so a rollback never suppresses the real
+  * emit) or the insert hit the unique business key (a committed row from another transaction or node).
   */
  void emitSpikeIfNeeded(String topic,long post){
   if(spikeThreshold<=0 || risks==null)return;
+  long now=System.currentTimeMillis();
+  long hour=now/3_600_000L*3_600_000L;
+  if(reported.contains(topic,hour))return;
   risks.lockTopicForEmit(topic);
-  long since=Math.max(0,System.currentTimeMillis()-3_600_000L);
+  long since=Math.max(0,now-3_600_000L);
   long net=db.topicNetSince(topic,since);
   if(net<spikeThreshold)return;
-  long hour=System.currentTimeMillis()/3_600_000L*3_600_000L;
   String id=TrendGuardService.spikeEventId(topic,hour);
-  risks.recordInCurrentTx(id,topic,TrendGuardService.KIND_TOPIC_SPIKE,hour,post,"net_events_1h>="+spikeThreshold+";net="+net);
+  boolean inserted=risks.recordInCurrentTx(id,topic,TrendGuardService.KIND_TOPIC_SPIKE,hour,post,"net_events_1h>="+spikeThreshold+";net="+net);
+  if(!inserted)reported.add(topic,hour);
+  else if(org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive())
+   org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(new org.springframework.transaction.support.TransactionSynchronization(){
+    @Override public void afterCommit(){reported.add(topic,hour);}
+   });
+ }
+ private final ReportedSpikes reported=new ReportedSpikes();
+ /** Per-process memory of reported (topic, clock hour) spike windows; keeps only the current and previous hour. */
+ static final class ReportedSpikes {
+  private final java.util.concurrent.ConcurrentHashMap<Long,Set<String>> byHour=new java.util.concurrent.ConcurrentHashMap<>();
+  boolean contains(String topic,long hour){var s=byHour.get(hour);return s!=null && s.contains(topic);}
+  void add(String topic,long hour){
+   byHour.computeIfAbsent(hour,h->java.util.concurrent.ConcurrentHashMap.newKeySet()).add(topic);
+   byHour.keySet().removeIf(h->h<hour-3_600_000L);
+  }
  }
  /** Ranking scores come from MySQL buckets only. Content lists use {@link #topicPosts}. */
  public List<Entry> window(String metric,long windowMillis,long viewer){
