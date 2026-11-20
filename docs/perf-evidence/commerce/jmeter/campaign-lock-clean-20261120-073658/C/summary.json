@@ -1,0 +1,151 @@
+{
+  "config": {
+    "runId": "C",
+    "campaignId": 164,
+    "postId": 177,
+    "warmCampaignId": 165,
+    "count": 3600,
+    "stock": 4000,
+    "rate": 60,
+    "workers": 64,
+    "windowSec": 60,
+    "timeoutMs": 30000,
+    "loopsPerBuyer": 1,
+    "sameJvmWarmup": true,
+    "heap": "128m/384m",
+    "clientJfr": false,
+    "clientThreadDump": false,
+    "temporarySystemSleepPrevention": true,
+    "hostInterruptionInvalidatesRunMs": 30000,
+    "sourceRevision": "V24-bridge-batch",
+    "backendPid": 38596,
+    "bridgeBatchSize": 20,
+    "dispatchProfile": "C:batch,20,4",
+    "brokerLagSampler": {
+      "intervalMs": 5000,
+      "group": "content-sale-v1",
+      "firstOkEpochMs": 1795132483072
+    },
+    "requireSuccessfulSettlementRoot": true,
+    "jarSha256": "6924c4880b0de067ad92fa6ec4c96fc8edc3623134437f6d6afb4e6ad01d2e5e",
+    "warmupSettlementPoll": "Each worker, 1 second interval, 60 second bound, outside formal; same HTTP POST sampler/thread",
+    "finalResultPolling": "After formal HTTP only; fair round-robin, concurrency16, max100 calls/batch, >=1s between batches, global120s deadline. Per-request interval grows with outstanding set. No per-request starvation; actual attempt timestamps archived.",
+    "drainObservationLimitSec": 3600,
+    "observerIntervalSec": 2,
+    "pacer": "One serialized coordinator; Windows park leaves 16ms headroom then spins; at400/s may use one CPU core, captured in host load, never subtracted",
+    "serverJfr": "Only custom sale events + GC pause + DataLoss, no stacks/environment/JVM properties",
+    "hostMemoryBefore": {
+      "observedAtMs": 1795132473260,
+      "memoryLoadPercent": 71,
+      "totalPhysicalBytes": 16864305152,
+      "availablePhysicalBytes": 4805898240,
+      "commitLimitBytes": 27647553536,
+      "availableCommitBytes": 3737907200
+    },
+    "diskFreeBytesBefore": 6039810048
+  },
+  "window": {
+    "startEpochMs": 1795132503889,
+    "endEpochMs": 1795132563889,
+    "targetRate": 60,
+    "workers": 64,
+    "sameJvm": true,
+    "sameHttpSamplerAndThreads": true,
+    "deadlinePolicy": "No catch-up; serialized minimum-spaced permits"
+  },
+  "windowSeconds": 60.0,
+  "samples": 3597,
+  "warmSamples": 64,
+  "requestStartSpanMs": 59989,
+  "requestArrivalRate": 59.94432312590642,
+  "windowStarts": 3597,
+  "windowStartQps": 59.95,
+  "outsideFixedWindowStarts": 0,
+  "normalBusinessCompletionQps": 59.95,
+  "groups": {
+    "accepted": {
+      "count": 3597,
+      "windowCompleted": 3597,
+      "elapsed": {
+        "count": 3597,
+        "p50": 5,
+        "p95": 15,
+        "p99": 27,
+        "max": 89
+      },
+      "Latency": {
+        "count": 3597,
+        "p50": 5,
+        "p95": 15,
+        "p99": 26,
+        "max": 89
+      },
+      "Connect": {
+        "count": 3597,
+        "p50": 0,
+        "p95": 0,
+        "p99": 1,
+        "max": 3
+      },
+      "completionQps": 59.95
+    },
+    "soldOut": {
+      "count": 0,
+      "windowCompleted": 0,
+      "elapsed": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "max": null
+      },
+      "Latency": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "max": null
+      },
+      "Connect": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "max": null
+      },
+      "completionQps": 0.0
+    }
+  },
+  "httpStatuses": {
+    "200": 3597
+  },
+  "systemErrors": [],
+  "paidOrders": 3597,
+  "remainingStock": 403,
+  "activeEntitlements": 3597,
+  "processingLeft": 0,
+  "drainConfirmedAfterLastHttpSec": 69.401,
+  "drainObservationNote": "Confirmation upper bound includes post-load polling and reconciliation, not exact queue empty instant; use observations for tighter bracket.",
+  "windowCommittedTps": 25.683333333333334,
+  "fullCommittedTps": 28.270523047903485,
+  "clientObservedSucceededMs": {
+    "count": 3597,
+    "p50": 54868,
+    "p95": 84291,
+    "p99": 113568,
+    "max": 124676
+  },
+  "checks": {
+    "noOrphanReferences": true,
+    "sampleCount": true,
+    "uniqueBuyers": true,
+    "noSystemErrors": true,
+    "noReconciliationMismatch": true,
+    "ledgerInvariant": true,
+    "drained": true,
+    "redisInventory": true,
+    "replays": true
+  },
+  "correctnessPass": true,
+  "reconciliationMismatches": []
+}

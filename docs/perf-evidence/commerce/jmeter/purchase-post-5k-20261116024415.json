@@ -1,0 +1,233 @@
+{
+  "runStamp": "20261116024415",
+  "configuredThreads": 5000,
+  "policy": {
+    "noSilentDownscale": true,
+    "reportMeasuredNotConfigured": true,
+    "noAutoFallbackToLowerBand": true,
+    "remoteInjectorNotUsed": true
+  },
+  "tomcatRemediation": {
+    "before": {
+      "note": "limited run pinned peakHttpInFlight at threads.max",
+      "evidencePeakHttp": 800,
+      "threadsMax": 800,
+      "acceptCount": 2000
+    },
+    "after": {
+      "note": "in-stock after bump; CONNECT_FAIL still high — backlog/OS/client herd, not thread-pool pin",
+      "evidencePeakHttp": 477,
+      "threadsMax": 5000,
+      "acceptCount": 5000
+    }
+  },
+  "runs": [
+    {
+      "band": "purchase-5k-limited-t5000",
+      "kind": "limited-stock-firstbuy-barrier",
+      "dir": "purchase-5k-limited-t5000-purchase-t5000-20261116023232",
+      "configuredThreads": 5000,
+      "measuredPeakActiveThreads": 5000.0,
+      "underLaunch": false,
+      "note": "Do not treat configuredThreads as achieved concurrency; use measuredPeakActiveThreads",
+      "startBarrier": {
+        "readyCount": 5000,
+        "configuredGroupSize": 5000,
+        "releaseEpochMs": 1794767695339,
+        "timedOut": false,
+        "firstArrivedSeen": 5000
+      },
+      "peakHttpInFlight": 800.0,
+      "peakSettleInFlight": 0.0,
+      "emitSpanMs": 21822,
+      "samples": 5000,
+      "classification": {
+        "postPurchaseSamples": 5000,
+        "windowSec": 51.139,
+        "emitSpanSec": 21.822,
+        "requestQps": 97.77,
+        "soldOut": 870,
+        "soldOutQps": 17.01,
+        "soldOutP95": 29569,
+        "soldOutP99": 29903,
+        "acceptHttpOk": 753,
+        "acceptQps": 14.72,
+        "acceptP95": 29094,
+        "acceptP99": 29623,
+        "overallP95": 30027,
+        "overallP99": 31643,
+        "systemErrors": 3377,
+        "timeouts": 648,
+        "connectFail": 1945,
+        "http5xx": 784,
+        "bizOther": 0,
+        "peakAllThreads": 5000.0
+      },
+      "campaignId": 71,
+      "stockCap": 100,
+      "reconcile": {
+        "sold": 61,
+        "paid": 61,
+        "succReq": 61,
+        "ents": 61,
+        "processing": 0,
+        "stockCap": 100,
+        "byState": "SUCCEEDED\t61",
+        "ok": true
+      },
+      "bottleneck": {
+        "evidence": "peakHttpInFlight==Tomcat threads.max (800); CONNECT_FAIL+HTTP_503+TIMEOUT dominate",
+        "tomcatThreadsMaxAtRun": 800,
+        "connectFail": 1945,
+        "http5xx": 784,
+        "timeouts": 648,
+        "leftoverStock": 39,
+        "acceptHttpOkVsSettled": "753 vs 61"
+      },
+      "summarizeJtl": {
+        "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\purchase-5k-limited-t5000-purchase-t5000-20261116023232\\results.jtl",
+        "samples": 5000,
+        "spanSec": 21.822,
+        "requestQps": 229.13,
+        "acceptQps": 34.51,
+        "businessRejects": 870,
+        "systemErrors": 3377,
+        "connectFail": 1945,
+        "timeouts": 648,
+        "http503": 518,
+        "ok": 753,
+        "p50Ms": 12472,
+        "p95Ms": 30027,
+        "p99Ms": 31643,
+        "byLabel": [
+          {
+            "windowSec": 21.822,
+            "qps": 229.13,
+            "p95": 30027,
+            "activeQps": 229.13,
+            "p99": 31643,
+            "label": "POST-purchase",
+            "p50": 12472,
+            "activeWindowSec": 21.822,
+            "n": 5000
+          }
+        ],
+        "byClass": [
+          {
+            "count": 870,
+            "cls": "BIZ:"
+          },
+          {
+            "count": 1945,
+            "cls": "CONNECT_FAIL"
+          },
+          {
+            "count": 518,
+            "cls": "HTTP_503"
+          },
+          {
+            "count": 753,
+            "cls": "OK"
+          },
+          {
+            "count": 266,
+            "cls": "SYSTEM"
+          },
+          {
+            "count": 648,
+            "cls": "TIMEOUT"
+          }
+        ],
+        "qpsNote": "byLabel.qps = n / whole-run spanSec; byLabel.activeQps = n / label start-ts span (optional)"
+      }
+    },
+    {
+      "band": "purchase-5k-stock-t5000",
+      "kind": "in-stock-firstbuy-barrier",
+      "dir": "purchase-5k-stock-t5000-purchase-t5000-20261116025653",
+      "configuredThreads": 5000,
+      "measuredPeakActiveThreads": 5000.0,
+      "underLaunch": false,
+      "note": "Do not treat configuredThreads as achieved concurrency; use measuredPeakActiveThreads",
+      "startBarrier": {
+        "readyCount": 5000,
+        "configuredGroupSize": 5000,
+        "releaseEpochMs": 1794769149396,
+        "timedOut": false,
+        "firstArrivedSeen": 5000
+      },
+      "peakHttpInFlight": 477.0,
+      "peakSettleInFlight": 0.0,
+      "emitSpanMs": 32764,
+      "samples": 5000,
+      "hostBefore": {
+        "at": "2026-11-16T02:56:50.6091412+08:00",
+        "freeRamGB": 2.02,
+        "totalRamGB": 15.7,
+        "cpuLoad": 42.0
+      },
+      "hostAfter": {
+        "at": "2026-11-16T03:00:36.9501666+08:00",
+        "freeRamGB": 1.87,
+        "totalRamGB": 15.7,
+        "cpuLoad": 10.0
+      },
+      "classification": {
+        "postPurchaseSamples": 5000,
+        "windowSec": 56.197,
+        "emitSpanSec": 32.764,
+        "requestQps": 88.97,
+        "soldOut": 0,
+        "soldOutQps": 0.0,
+        "soldOutP95": null,
+        "soldOutP99": null,
+        "acceptHttpOk": 571,
+        "acceptQps": 10.16,
+        "acceptP95": 27732,
+        "acceptP99": 29506,
+        "overallP95": 30012,
+        "overallP99": 39375,
+        "idempotentReplay": 0,
+        "bizOther": 12,
+        "systemErrors": 4417,
+        "timeouts": 322,
+        "connectFail": 3606,
+        "http5xx": 489,
+        "peakAllThreads": 5000.0
+      },
+      "campaignId": 72,
+      "stockCap": 5000,
+      "drain": {
+        "drainSec": 11.741,
+        "processingLeft": 0,
+        "peakProcessingObserved": 133
+      },
+      "reconcile": {
+        "sold": 357,
+        "paid": 357,
+        "succReq": 357,
+        "ents": 357,
+        "processing": 0,
+        "stockCap": 5000,
+        "requestTotal": 357,
+        "byState": "SUCCEEDED\t357",
+        "ok": true
+      },
+      "throughput": {
+        "label": "in-stock-firstbuy-barrier",
+        "uniqueProcessingAccepts": 357,
+        "acceptQpsFromHttp": 10.16,
+        "soldOutQps": 0.0,
+        "requestQps": 88.97,
+        "paidInFormalWindow": 0,
+        "settleSteadyTps": 0.0,
+        "paidThroughDrain": 357,
+        "settleFullTps": 1.45,
+        "formalWindowSec": 195.085,
+        "fullWallSec": 246.991,
+        "backlogPeakProcessing": 133,
+        "drainSec": 11.741
+      }
+    }
+  ]
+}

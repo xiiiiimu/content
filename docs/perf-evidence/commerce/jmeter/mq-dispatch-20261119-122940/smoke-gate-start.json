@@ -1,0 +1,44 @@
+{
+  "label": "smoke-start",
+  "memoryBefore": {
+    "atLocal": "2026-11-19T12:29:49.196234+08:00",
+    "freeMiB": 3994,
+    "totalMiB": 16083
+  },
+  "minFreeMiB": 3072,
+  "runningTestcontainers": [],
+  "dockerHealth": {
+    "content-namesrv-1": "healthy 0",
+    "content-broker-1": "healthy 0"
+  },
+  "brokerProbes": [
+    {
+      "probe": 1,
+      "ok": true,
+      "rc": 0,
+      "elapsedMs": 4906,
+      "at": "2026-11-19T12:29:54.396071+08:00"
+    },
+    {
+      "probe": 2,
+      "ok": true,
+      "rc": 0,
+      "elapsedMs": 7829,
+      "at": "2026-11-19T12:30:07.224771+08:00"
+    },
+    {
+      "probe": 3,
+      "ok": true,
+      "rc": 0,
+      "elapsedMs": 4781,
+      "at": "2026-11-19T12:30:17.007555+08:00"
+    }
+  ],
+  "memoryAfter": {
+    "atLocal": "2026-11-19T12:30:18.968390+08:00",
+    "freeMiB": 3994,
+    "totalMiB": 16083
+  },
+  "failures": [],
+  "pass": true
+}

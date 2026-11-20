@@ -1,0 +1,101 @@
+{
+ "path": "accept",
+ "levels": [
+  100,
+  200,
+  400
+ ],
+ "seconds": 20,
+ "rest": 15,
+ "warmup": [
+  50,
+  10
+ ],
+ "expectedRtMs": 200,
+ "vuCap": 4000,
+ "vus": {
+  "100": 60,
+  "200": 120,
+  "400": 240
+ },
+ "buyers": 4000,
+ "k6Affinity": "0xfc00",
+ "k6Cpus": [
+  10,
+  11,
+  12,
+  13,
+  14,
+  15
+ ],
+ "backendAffinity": "0x3ff",
+ "backendCpus": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9
+ ],
+ "dockerVm": "not pinned",
+ "k6": "tools\\k6-v0.55.0\\k6-v0.55.0-windows-amd64\\k6.exe",
+ "tool": "k6 v0.55.0 constant-arrival-rate",
+ "holdStages": "200",
+ "drainTimeoutSec": 1800,
+ "backendPid": 45388,
+ "backendAffinityObserved": 1023,
+ "seedSec": 56.3,
+ "campaigns": {
+  "warmup": [
+   {
+    "campaignId": 151,
+    "postId": 164
+   }
+  ],
+  "L100": [
+   {
+    "campaignId": 152,
+    "postId": 165
+   }
+  ],
+  "L200": [
+   {
+    "campaignId": 153,
+    "postId": 166
+   },
+   {
+    "campaignId": 154,
+    "postId": 167
+   }
+  ],
+  "L200-hold": [
+   {
+    "campaignId": 155,
+    "postId": 168
+   },
+   {
+    "campaignId": 156,
+    "postId": 169
+   }
+  ],
+  "L400": [
+   {
+    "campaignId": 157,
+    "postId": 170
+   },
+   {
+    "campaignId": 158,
+    "postId": 171
+   },
+   {
+    "campaignId": 159,
+    "postId": 172
+   }
+  ]
+ },
+ "loginSec": 111.4
+}

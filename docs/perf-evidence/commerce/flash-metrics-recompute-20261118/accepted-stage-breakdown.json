@@ -1,0 +1,83 @@
+{
+  "note": "accepted requests only; same host clock (JMeter, backend JVM/JFR); mqSentAtMs from request row (V22 and earlier still wrote it); c97 excluded because some mqSentAtMs are 0",
+  "runs": {
+    "c94-probe": {
+      "serverReceivedToServerResponse": {
+        "n": 100,
+        "p50": 655,
+        "p95": 1087,
+        "p99": 1116,
+        "max": 1121
+      },
+      "serverResponseToClientSampleEnd": {
+        "n": 100,
+        "p50": 25517,
+        "p95": 26706,
+        "p99": 26987,
+        "max": 26995
+      },
+      "requestPersistedToMqSent": {
+        "n": 100,
+        "p50": 8927,
+        "p95": 13791,
+        "p99": 14294,
+        "max": 14356
+      },
+      "mqSentToSettlementStart": {
+        "n": 100,
+        "p50": 892,
+        "p95": 4069,
+        "p99": 4373,
+        "max": 4468
+      },
+      "settlementStartToCommitReturned": {
+        "n": 100,
+        "p50": 2539,
+        "p95": 4897,
+        "p99": 5168,
+        "max": 5254
+      },
+      "persistedSpanMs": 858,
+      "mqSentSpanMs": 15057
+    },
+    "c101-ingress-v2": {
+      "serverReceivedToServerResponse": {
+        "n": 100,
+        "p50": 1003,
+        "p95": 1151,
+        "p99": 1167,
+        "max": 1170
+      },
+      "serverResponseToClientSampleEnd": {
+        "n": 100,
+        "p50": 28570,
+        "p95": 31004,
+        "p99": 31078,
+        "max": 31170
+      },
+      "requestPersistedToMqSent": {
+        "n": 100,
+        "p50": 49630,
+        "p95": 77683,
+        "p99": 79671,
+        "max": 80788
+      },
+      "mqSentToSettlementStart": {
+        "n": 100,
+        "p50": -24,
+        "p95": 23,
+        "p99": 139,
+        "max": 335
+      },
+      "settlementStartToCommitReturned": {
+        "n": 100,
+        "p50": 376,
+        "p95": 1059,
+        "p99": 1172,
+        "max": 1173
+      },
+      "persistedSpanMs": 858,
+      "mqSentSpanMs": 65721
+    }
+  }
+}

@@ -1,0 +1,626 @@
+{
+  "rollingOneSecondMaxStarts": 61,
+  "perSecond": [
+    {
+      "epochSecond": 1795020117,
+      "starts": 19,
+      "completed200": 17
+    },
+    {
+      "epochSecond": 1795020118,
+      "completed200": 45,
+      "starts": 45
+    },
+    {
+      "epochSecond": 1795020119,
+      "completed200": 57,
+      "starts": 56
+    },
+    {
+      "epochSecond": 1795020120,
+      "completed200": 58,
+      "starts": 58
+    },
+    {
+      "epochSecond": 1795020121,
+      "completed200": 48,
+      "starts": 47
+    },
+    {
+      "epochSecond": 1795020122,
+      "starts": 55,
+      "completed200": 54
+    },
+    {
+      "epochSecond": 1795020123,
+      "completed200": 60,
+      "starts": 59
+    },
+    {
+      "epochSecond": 1795020124,
+      "starts": 59,
+      "completed200": 58
+    },
+    {
+      "epochSecond": 1795020125,
+      "completed200": 59,
+      "starts": 59
+    },
+    {
+      "epochSecond": 1795020126,
+      "completed200": 55,
+      "starts": 55
+    },
+    {
+      "epochSecond": 1795020127,
+      "completed200": 56,
+      "starts": 55
+    },
+    {
+      "epochSecond": 1795020128,
+      "starts": 59,
+      "completed200": 59
+    },
+    {
+      "epochSecond": 1795020129,
+      "starts": 59,
+      "completed200": 59
+    },
+    {
+      "epochSecond": 1795020130,
+      "starts": 59,
+      "completed200": 58
+    },
+    {
+      "epochSecond": 1795020131,
+      "completed200": 56,
+      "starts": 56
+    },
+    {
+      "epochSecond": 1795020132,
+      "completed200": 54,
+      "starts": 55
+    },
+    {
+      "epochSecond": 1795020133,
+      "completed200": 55,
+      "starts": 54
+    },
+    {
+      "epochSecond": 1795020134,
+      "completed200": 59,
+      "starts": 59
+    },
+    {
+      "epochSecond": 1795020135,
+      "completed200": 56,
+      "starts": 57
+    },
+    {
+      "epochSecond": 1795020136,
+      "completed200": 60,
+      "starts": 58
+    },
+    {
+      "epochSecond": 1795020137,
+      "starts": 60,
+      "completed200": 59
+    },
+    {
+      "epochSecond": 1795020138,
+      "completed200": 60,
+      "starts": 60
+    },
+    {
+      "epochSecond": 1795020139,
+      "completed200": 60,
+      "starts": 59
+    },
+    {
+      "epochSecond": 1795020140,
+      "starts": 60,
+      "completed200": 60
+    },
+    {
+      "epochSecond": 1795020141,
+      "starts": 57,
+      "completed200": 56
+    },
+    {
+      "epochSecond": 1795020142,
+      "completed200": 60,
+      "starts": 60
+    },
+    {
+      "epochSecond": 1795020143,
+      "completed200": 59,
+      "starts": 58
+    },
+    {
+      "epochSecond": 1795020144,
+      "starts": 60,
+      "completed200": 60
+    },
+    {
+      "epochSecond": 1795020145,
+      "starts": 59,
+      "completed200": 58
+    },
+    {
+      "epochSecond": 1795020146,
+      "completed200": 59,
+      "starts": 58
+    },
+    {
+      "epochSecond": 1795020147,
+      "starts": 60,
+      "completed200": 59
+    },
+    {
+      "epochSecond": 1795020148,
+      "completed200": 60,
+      "starts": 59
+    },
+    {
+      "epochSecond": 1795020149,
+      "starts": 60,
+      "completed200": 59
+    },
+    {
+      "epochSecond": 1795020150,
+      "completed200": 48,
+      "starts": 51
+    },
+    {
+      "epochSecond": 1795020151,
+      "completed200": 49,
+      "starts": 51
+    },
+    {
+      "epochSecond": 1795020152,
+      "completed200": 58,
+      "starts": 54
+    },
+    {
+      "epochSecond": 1795020153,
+      "completed200": 53,
+      "starts": 52
+    },
+    {
+      "epochSecond": 1795020154,
+      "completed200": 57,
+      "starts": 56
+    },
+    {
+      "epochSecond": 1795020155,
+      "starts": 60,
+      "completed200": 59
+    },
+    {
+      "epochSecond": 1795020156,
+      "completed200": 55,
+      "starts": 55
+    },
+    {
+      "epochSecond": 1795020157,
+      "completed200": 60,
+      "starts": 60
+    },
+    {
+      "epochSecond": 1795020158,
+      "completed200": 58,
+      "starts": 57
+    },
+    {
+      "epochSecond": 1795020159,
+      "starts": 60,
+      "completed200": 60
+    },
+    {
+      "epochSecond": 1795020160,
+      "starts": 59,
+      "completed200": 59
+    },
+    {
+      "epochSecond": 1795020161,
+      "starts": 57,
+      "completed200": 57
+    },
+    {
+      "epochSecond": 1795020162,
+      "starts": 58,
+      "completed200": 57
+    },
+    {
+      "epochSecond": 1795020163,
+      "completed200": 59,
+      "starts": 58
+    },
+    {
+      "epochSecond": 1795020164,
+      "starts": 55,
+      "completed200": 53
+    },
+    {
+      "epochSecond": 1795020165,
+      "completed200": 62,
+      "starts": 60
+    },
+    {
+      "epochSecond": 1795020166,
+      "starts": 48,
+      "completed200": 45
+    },
+    {
+      "epochSecond": 1795020167,
+      "completed200": 60,
+      "starts": 57
+    },
+    {
+      "epochSecond": 1795020168,
+      "starts": 57,
+      "completed200": 56
+    },
+    {
+      "epochSecond": 1795020169,
+      "completed200": 57,
+      "starts": 57
+    },
+    {
+      "epochSecond": 1795020170,
+      "completed200": 56,
+      "starts": 55
+    },
+    {
+      "epochSecond": 1795020171,
+      "starts": 45,
+      "completed200": 43
+    },
+    {
+      "epochSecond": 1795020172,
+      "completed200": 57,
+      "starts": 57
+    },
+    {
+      "epochSecond": 1795020173,
+      "completed200": 54,
+      "starts": 53
+    },
+    {
+      "epochSecond": 1795020174,
+      "completed200": 60,
+      "starts": 59
+    },
+    {
+      "epochSecond": 1795020175,
+      "starts": 60,
+      "completed200": 59
+    },
+    {
+      "epochSecond": 1795020176,
+      "completed200": 58,
+      "starts": 58
+    },
+    {
+      "epochSecond": 1795020177,
+      "completed200": 39,
+      "starts": 38
+    }
+  ],
+  "httpSegmentsByCodeMs": {
+    "200": {
+      "samplerStartToAppEnterMs": {
+        "count": 3400,
+        "p50": 2,
+        "p95": 12,
+        "p99": 27,
+        "max": 57
+      },
+      "appEnterToAppExitMs": {
+        "count": 3400,
+        "p50": 9,
+        "p95": 38,
+        "p99": 71,
+        "max": 152
+      },
+      "appExitToHttpSamplerEndMs": {
+        "count": 3400,
+        "p50": 1,
+        "p95": 2,
+        "p99": 6,
+        "max": 25
+      }
+    }
+  },
+  "httpPhaseMs": {
+    "auth.verify": {
+      "count": 3400,
+      "p50": 0,
+      "p95": 1,
+      "p99": 1,
+      "max": 9
+    },
+    "redis.reserve.lua": {
+      "count": 3400,
+      "p50": 6,
+      "p95": 32,
+      "p99": 58,
+      "max": 148
+    },
+    "purchase.total": {
+      "count": 3400,
+      "p50": 6,
+      "p95": 33,
+      "p99": 60,
+      "max": 148
+    }
+  },
+  "observedHttpWindowMs": 60001,
+  "plannedWindowFirstSamplerOffsetMs": 5,
+  "dispatchPhasesMs": {
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.sent": {
+      "count": 1066,
+      "p50": 10,
+      "p95": 36,
+      "p99": 58,
+      "max": 103
+    },
+    "jdbc.commit": {
+      "count": 2132,
+      "p50": 20,
+      "p95": 38,
+      "p99": 51,
+      "max": 128
+    },
+    "dispatch.confirm": {
+      "count": 1066,
+      "p50": 57,
+      "p95": 150,
+      "p99": 227,
+      "max": 333
+    },
+    "jdbc.acquire": {
+      "count": 3198,
+      "p50": 0,
+      "p95": 0,
+      "p99": 1,
+      "max": 6
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard": {
+      "count": 1066,
+      "p50": 5,
+      "p95": 17,
+      "p99": 36,
+      "max": 121
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.next": {
+      "count": 1066,
+      "p50": 6,
+      "p95": 19,
+      "p99": 33,
+      "max": 105
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.claim": {
+      "count": 1066,
+      "p50": 9,
+      "p95": 33,
+      "p99": 70,
+      "max": 149
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dispatch": {
+      "count": 1066,
+      "p50": 5,
+      "p95": 18,
+      "p99": 31,
+      "max": 63
+    },
+    "dispatch.claim": {
+      "count": 1066,
+      "p50": 71,
+      "p95": 191,
+      "p99": 298,
+      "max": 462
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request": {
+      "count": 1066,
+      "p50": 5,
+      "p95": 17,
+      "p99": 31,
+      "max": 79
+    },
+    "mq.send": {
+      "count": 1066,
+      "p50": 12,
+      "p95": 37,
+      "p99": 66,
+      "max": 113
+    },
+    "mq.ack.success": {
+      "count": 1066,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "max": 1
+    }
+  },
+  "ackConfirmationSqlStatements": [
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.sent"
+  ],
+  "settlementRootStartToMainCommitReturnedMs": {
+    "count": 1066,
+    "p50": 182,
+    "p95": 448,
+    "p99": 632,
+    "max": 912
+  },
+  "campaignLockReturnToMainCommitReturnMs": {
+    "count": 1066,
+    "p50": 105,
+    "p95": 269,
+    "p99": 393,
+    "max": 691
+  },
+  "lockDurationCaveat": "Return-to-commit is a lower bound on lock holding; SQL lockCampaign includes query/RTT as well as possible lock wait.",
+  "resourcePeaks": {
+    "/actuator/metrics/sale.http.queue.depth": 1.0,
+    "/actuator/metrics/tomcat.threads.current": 100.0,
+    "/actuator/metrics/tomcat.threads.busy": 25.0,
+    "/actuator/metrics/tomcat.threads.config.max": 100.0,
+    "/actuator/metrics/tomcat.connections.current": 73.0,
+    "/actuator/metrics/tomcat.connections.config.max": 20000.0,
+    "/actuator/metrics/jvm.memory.used?tag=area:heap": 216316384.0,
+    "/actuator/metrics/jvm.memory.max?tag=area:heap": 4217372670.0,
+    "/actuator/metrics/process.cpu.usage": 0.09722442837653526,
+    "/actuator/metrics/jvm.threads.live": 265.0,
+    "/actuator/metrics/jvm.threads.states?tag=state:runnable": 62.0,
+    "/actuator/metrics/jvm.threads.states?tag=state:blocked": 29.0,
+    "/actuator/metrics/jvm.threads.states?tag=state:waiting": 189.0,
+    "/actuator/metrics/jvm.threads.states?tag=state:timed-waiting": 62.0,
+    "/actuator/metrics/hikaricp.connections.active": 6.0,
+    "/actuator/metrics/hikaricp.connections.pending": 0,
+    "/actuator/metrics/hikaricp.connections": 34.0,
+    "/actuator/metrics/hikaricp.connections.max": 120.0,
+    "/actuator/metrics/hikaricp.connections.min": 30.0,
+    "/actuator/metrics/hikaricp.connections.idle": 31.0
+  },
+  "unavailableMetricSampleCounts": {},
+  "sampledLockWaitTableObservations": {
+    "material_sale_campaigns": 34
+  },
+  "processingPeak": 18,
+  "streamLagPeakGlobal": 2902,
+  "streamPendingPeakGlobal": 200,
+  "dispatchPendingPeak": 17,
+  "firstObservedFullyDrainedAfterLastHttp": null,
+  "drainAfterLastHttpSecUpperBound": null,
+  "windowEdges": {
+    "start": {
+      "startEpochMs": 1795020117729,
+      "database": {
+        "campaign": [
+          [
+            "2",
+            "2",
+            "0",
+            "0"
+          ]
+        ],
+        "cacheJobs": [
+          [
+            "0"
+          ]
+        ],
+        "receipts": [
+          [
+            "0"
+          ]
+        ],
+        "dispatch": [
+          [
+            "2",
+            "1",
+            "1",
+            "0",
+            "1"
+          ]
+        ],
+        "lockWaitsByTable": [],
+        "campaignForUpdateDigest": [
+          [
+            "1",
+            "528",
+            "22988726567000"
+          ]
+        ],
+        "appAccountTransactions": [
+          [
+            "463281",
+            "2258285538651000"
+          ]
+        ]
+      },
+      "redis": {
+        "globalStreamLag": 76,
+        "campaignStock": 3919,
+        "globalStreamLength": 723,
+        "globalStreamPending": 0,
+        "ready": "1"
+      },
+      "endEpochMs": 1795020119503,
+      "sampleStartOffsetFromBoundaryMs": 48,
+      "sampleEndOffsetFromBoundaryMs": 1822
+    },
+    "end": {
+      "startEpochMs": 1795020177730,
+      "database": {
+        "campaign": [
+          [
+            "364",
+            "10",
+            "354",
+            "355"
+          ]
+        ],
+        "cacheJobs": [
+          [
+            "2"
+          ]
+        ],
+        "receipts": [
+          [
+            "354"
+          ]
+        ],
+        "dispatch": [
+          [
+            "364",
+            "8",
+            "1",
+            "355",
+            "1"
+          ]
+        ],
+        "lockWaitsByTable": [],
+        "campaignForUpdateDigest": [
+          [
+            "1",
+            "883",
+            "25683818462000"
+          ]
+        ],
+        "appAccountTransactions": [
+          [
+            "466449",
+            "2431783279792000"
+          ]
+        ]
+      },
+      "redis": {
+        "globalStreamLag": 2902,
+        "campaignStock": 600,
+        "globalStreamLength": 4042,
+        "globalStreamPending": 131,
+        "ready": "1"
+      },
+      "endEpochMs": 1795020179095,
+      "sampleStartOffsetFromBoundaryMs": 49,
+      "sampleEndOffsetFromBoundaryMs": 1414
+    }
+  },
+  "windowPaidAtRecordOrders": 352,
+  "clientPollCalls": 11200,
+  "clientPollSeconds": 120.614,
+  "clientPollAverageQps": 92.85820883147893,
+  "clientPollObservedSucceeded": 910,
+  "clientPollAcceptedTotal": 3400,
+  "clientPollIntervalsMs": {
+    "count": 7800,
+    "p50": 30110,
+    "p95": 34178,
+    "p99": 34457,
+    "max": 37057
+  },
+  "clientReservationsWithPollError": 0,
+  "hostMinimumAvailableCommitBytes": 2008322048,
+  "maxObserverStartGapMs": 2875
+}

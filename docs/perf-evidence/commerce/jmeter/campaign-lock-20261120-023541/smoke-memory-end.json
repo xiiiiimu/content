@@ -1,0 +1,16 @@
+{
+  "label": "smoke-end",
+  "memoryBefore": {
+    "atLocal": "2026-11-20T02:40:17.379067+08:00",
+    "freeMiB": 4078,
+    "totalMiB": 16083
+  },
+  "minFreeMiB": 3072,
+  "memoryAfter": {
+    "atLocal": "2026-11-20T02:40:19.617240+08:00",
+    "freeMiB": 4121,
+    "totalMiB": 16083
+  },
+  "failures": [],
+  "pass": true
+}

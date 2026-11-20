@@ -1,0 +1,8 @@
+{
+  "innodb_flush_log_at_trx_commit": "1",
+  "innodb_lock_wait_timeout": "50",
+  "long_query_time": "10.000000",
+  "performance_schema": "ON",
+  "slow_query_log": "OFF",
+  "sync_binlog": "1"
+}

@@ -1,0 +1,35 @@
+{
+  "configuredThreads": 5000,
+  "peakActiveThreadsObserved": 1090.0,
+  "jmeterElapsedSec": 112.709,
+  "cpuLoadPctBefore": 81.0,
+  "cpuLoadPctAfter": 8.0,
+  "freeMemMBBefore": 1872.9,
+  "freeMemMBAfter": 2428.5,
+  "totalMemMB": 16083.1,
+  "httpInFlight": {
+    "endSnapshot": {
+      "peakHttpInFlight": 441,
+      "inFlight": 20,
+      "peakSettleInFlight": 20,
+      "peakInFlight": 20,
+      "httpInFlight": 0,
+      "settleInFlight": 20
+    },
+    "observedPeakHttpInFlight": 441.0,
+    "measurement": "SaleHttpInFlightFilter + GET /api/sale-debug/inflight peakHttpInFlight (polled ~200ms)"
+  },
+  "settleInFlight": {
+    "endSnapshot": {
+      "peakHttpInFlight": 441,
+      "inFlight": 20,
+      "peakSettleInFlight": 20,
+      "peakInFlight": 20,
+      "httpInFlight": 0,
+      "settleInFlight": 20
+    },
+    "observedPeakSettleInFlight": 20.0,
+    "measurement": "SaleFaultHooks settle enter/leave; peakSettleInFlight"
+  },
+  "note": "Do not treat -Jthreads as capacity ceiling. Connection-refused at ramp = CONNECT_FAIL system error."
+}

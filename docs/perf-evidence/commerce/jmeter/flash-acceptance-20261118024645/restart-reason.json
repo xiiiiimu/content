@@ -1,0 +1,6 @@
+{
+  "pid": 22208,
+  "java": "C:\\Program Files\\Java\\jdk-21.0.11\\bin\\java.exe",
+  "started": "2026-11-18T00:33:42.23635+08:00",
+  "reason": "Use requested Java 17 and enable local read-only metrics; same JAR and same admission limits"
+}

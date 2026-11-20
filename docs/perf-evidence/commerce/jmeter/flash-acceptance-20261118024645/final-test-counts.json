@@ -1,0 +1,81 @@
+{
+  "unit": {
+    "tests": 51,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "classes": [
+      {
+        "name": "io.github.xiiiiimu.content.ContentApplicationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.github.xiiiiimu.content.domain.FfmpegTranscoderExecTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1
+      },
+      {
+        "name": "io.github.xiiiiimu.content.FeedMemberCodecTest",
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.github.xiiiiimu.content.FeedMergerTest",
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.github.xiiiiimu.content.FeedTokensTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.github.xiiiiimu.content.RelayPolicyTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.github.xiiiiimu.content.WindowsListenBacklogTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ]
+  },
+  "integration": {
+    "tests": 10,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "classes": [
+      {
+        "name": "io.github.xiiiiimu.content.MaterialCommercePurchaseIT",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "name": "io.github.xiiiiimu.content.MaterialCommerceRefundBlacklistIT",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ]
+  }
+}

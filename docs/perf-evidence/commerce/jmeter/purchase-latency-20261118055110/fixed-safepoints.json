@@ -1,0 +1,202 @@
+{
+  "available": true,
+  "httpStartMs": 1794956230423,
+  "httpEndMs": 1794956298561,
+  "allJvmLifetime": {
+    "Cleanup": {
+      "count": 48,
+      "sumReachingMs": 12181.096995999998,
+      "maxReachingMs": 5139.4746,
+      "sumAtSafepointMs": 449.892001,
+      "maxTotalMs": 5139.8909
+    },
+    "G1CollectForAllocation": {
+      "count": 57,
+      "sumReachingMs": 3711.3803980000002,
+      "maxReachingMs": 1256.059499,
+      "sumAtSafepointMs": 4340.372001,
+      "maxTotalMs": 1282.6526
+    },
+    "CollectForMetadataAllocation": {
+      "count": 1,
+      "sumReachingMs": 0.009,
+      "maxReachingMs": 0.009,
+      "sumAtSafepointMs": 39.6911,
+      "maxTotalMs": 41.2447
+    },
+    "G1PauseRemark": {
+      "count": 6,
+      "sumReachingMs": 249.06050199999999,
+      "maxReachingMs": 111.7256,
+      "sumAtSafepointMs": 342.410699,
+      "maxTotalMs": 213.7247
+    },
+    "G1PauseCleanup": {
+      "count": 6,
+      "sumReachingMs": 210.207401,
+      "maxReachingMs": 124.0619,
+      "sumAtSafepointMs": 102.515803,
+      "maxTotalMs": 146.3176
+    },
+    "ICBufferFull": {
+      "count": 767,
+      "sumReachingMs": 16658.712800999983,
+      "maxReachingMs": 2042.603701,
+      "sumAtSafepointMs": 2504.0818870000003,
+      "maxTotalMs": 2356.8556
+    },
+    "G1CollectFull": {
+      "count": 1,
+      "sumReachingMs": 0.0085,
+      "maxReachingMs": 0.0085,
+      "sumAtSafepointMs": 63.148799,
+      "maxTotalMs": 63.198399
+    }
+  },
+  "overlappingHttpWindow": {
+    "Cleanup": {
+      "count": 15,
+      "sumReachingMs": 7991.7840989999995,
+      "maxReachingMs": 5139.4746,
+      "sumAtSafepointMs": 305.605504,
+      "maxTotalMs": 5139.8909
+    },
+    "G1CollectForAllocation": {
+      "count": 9,
+      "sumReachingMs": 1674.3282,
+      "maxReachingMs": 1256.059499,
+      "sumAtSafepointMs": 1449.6741000000002,
+      "maxTotalMs": 1282.6526
+    },
+    "ICBufferFull": {
+      "count": 762,
+      "sumReachingMs": 16642.36610099998,
+      "maxReachingMs": 2042.603701,
+      "sumAtSafepointMs": 2503.158088,
+      "maxTotalMs": 2356.8556
+    }
+  },
+  "longest": [
+    {
+      "operation": "Cleanup",
+      "startMs": 1794956240683.1091,
+      "endMs": 1794956245823.0,
+      "reachingMs": 5139.4746,
+      "atSafepointMs": 0.305201,
+      "totalMs": 5139.8909
+    },
+    {
+      "operation": "ICBufferFull",
+      "startMs": 1794956275244.1443,
+      "endMs": 1794956277601.0,
+      "reachingMs": 2042.603701,
+      "atSafepointMs": 314.170799,
+      "totalMs": 2356.8556
+    },
+    {
+      "operation": "G1CollectForAllocation",
+      "startMs": 1794956256395.3474,
+      "endMs": 1794956257678.0,
+      "reachingMs": 1256.059499,
+      "atSafepointMs": 26.2016,
+      "totalMs": 1282.6526
+    },
+    {
+      "operation": "ICBufferFull",
+      "startMs": 1794956280250.531,
+      "endMs": 1794956281080.0,
+      "reachingMs": 484.9823,
+      "atSafepointMs": 343.689,
+      "totalMs": 829.4691
+    },
+    {
+      "operation": "ICBufferFull",
+      "startMs": 1794956278102.139,
+      "endMs": 1794956278895.0,
+      "reachingMs": 759.568999,
+      "atSafepointMs": 33.2459,
+      "totalMs": 792.8612
+    },
+    {
+      "operation": "ICBufferFull",
+      "startMs": 1794956294869.481,
+      "endMs": 1794956295640.0,
+      "reachingMs": 764.4079,
+      "atSafepointMs": 6.078301,
+      "totalMs": 770.5191
+    },
+    {
+      "operation": "G1CollectForAllocation",
+      "startMs": 1794956258144.0874,
+      "endMs": 1794956258740.0,
+      "reachingMs": 95.2819,
+      "atSafepointMs": 500.5918,
+      "totalMs": 595.9125
+    },
+    {
+      "operation": "ICBufferFull",
+      "startMs": 1794956297175.0364,
+      "endMs": 1794956297738.0,
+      "reachingMs": 542.2791,
+      "atSafepointMs": 20.650901,
+      "totalMs": 562.9636
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794956235783.1672,
+      "endMs": 1794956236244.0,
+      "reachingMs": 449.686301,
+      "atSafepointMs": 11.1219,
+      "totalMs": 460.832701
+    },
+    {
+      "operation": "ICBufferFull",
+      "startMs": 1794956298091.7344,
+      "endMs": 1794956298544.0,
+      "reachingMs": 443.693701,
+      "atSafepointMs": 8.5578,
+      "totalMs": 452.265701
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794956289931.9307,
+      "endMs": 1794956290374.0,
+      "reachingMs": 438.6743,
+      "atSafepointMs": 3.351001,
+      "totalMs": 442.0694
+    },
+    {
+      "operation": "ICBufferFull",
+      "startMs": 1794956290789.6367,
+      "endMs": 1794956291182.0,
+      "reachingMs": 373.236499,
+      "atSafepointMs": 19.1115,
+      "totalMs": 392.3634
+    },
+    {
+      "operation": "ICBufferFull",
+      "startMs": 1794956291589.2654,
+      "endMs": 1794956291961.0,
+      "reachingMs": 360.901001,
+      "atSafepointMs": 10.7997,
+      "totalMs": 371.734701
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794956255177.7249,
+      "endMs": 1794956255525.0,
+      "reachingMs": 308.8509,
+      "atSafepointMs": 38.382,
+      "totalMs": 347.2752
+    },
+    {
+      "operation": "G1CollectForAllocation",
+      "startMs": 1794956252821.0664,
+      "endMs": 1794956253155.0,
+      "reachingMs": 21.411899,
+      "atSafepointMs": 312.4579,
+      "totalMs": 333.9336
+    }
+  ],
+  "caveat": "Reaching safepoint is synchronization delay, not all threads stopped. AtSafepoint is distinct from GC pause. Do not add them to overlapping JFR wait durations."
+}

@@ -1,0 +1,7 @@
+{
+  "isolation": "REPEATABLE-READ",
+  "processing": 0,
+  "held": 0,
+  "dispatchPending": 0,
+  "cacheJobsPending": 0
+}

@@ -1,0 +1,8 @@
+{
+  "runId": "v23-perf-20261118-234151-A",
+  "validPerformanceRun": false,
+  "formalSamples": 0,
+  "failureReasons": [
+    "Preflight rejected token lifetime, no JMeter launched"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\baseline200-retest-order-t200-20261115082221\\results.jtl",
+  "samples": 1586,
+  "spanSec": 11.922,
+  "requestQps": 133.03,
+  "acceptQps": 132.02,
+  "businessRejects": 0,
+  "systemErrors": 12,
+  "connectFail": 0,
+  "timeouts": 0,
+  "ok": 1574,
+  "p50Ms": 959,
+  "p95Ms": 3587,
+  "p99Ms": 5136,
+  "byLabel": [
+    {
+      "p95": 3587,
+      "qps": 133.03,
+      "n": 1586,
+      "label": "GET-order-me"
+    }
+  ],
+  "byClass": [
+    {
+      "cls": "OK",
+      "count": 1574
+    },
+    {
+      "cls": "SYSTEM",
+      "count": 12
+    }
+  ]
+}

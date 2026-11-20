@@ -1,0 +1,31 @@
+{
+  "runId": "v23-perf-20261118-234151-A1",
+  "campaignId": 104,
+  "postId": 117,
+  "warmCampaignId": 103,
+  "count": 2000,
+  "stock": 100,
+  "rate": 400,
+  "workers": 128,
+  "windowSec": 0,
+  "timeoutMs": 30000,
+  "loopsPerBuyer": 1,
+  "sameJvmWarmup": true,
+  "heap": "128m/384m",
+  "clientJfr": false,
+  "clientThreadDump": false,
+  "sourceRevision": "V23",
+  "jarSha256": "376b7ae3cf209dec1f36993c81d27685ab6de3014a687fdeee642d521c54efa5",
+  "warmupSettlementPoll": "Each worker, 1 second interval, 60 second bound, outside formal; same HTTP POST sampler/thread",
+  "finalResultPolling": "After formal HTTP only; concurrency16, 1s retry per request, global120s deadline; observation latency includes delayed polling start",
+  "observerIntervalSec": 2,
+  "serverJfr": "Only custom sale events + GC pause + DataLoss, no stacks/environment/JVM properties",
+  "hostMemoryBefore": {
+    "observedAtMs": 1795017503490,
+    "memoryLoadPercent": 84,
+    "totalPhysicalBytes": 16864305152,
+    "availablePhysicalBytes": 2622349312,
+    "commitLimitBytes": 28727582720,
+    "availableCommitBytes": 1712422912
+  }
+}

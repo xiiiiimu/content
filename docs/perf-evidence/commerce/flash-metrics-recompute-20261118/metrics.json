@@ -1,0 +1,648 @@
+[
+  {
+    "run": "c91-indy-final",
+    "campaign": 91,
+    "build": "pre-ingress-v2 (HEAD dd2ab17 + worktree, flash-sale-final)",
+    "synchronyValid": true,
+    "observationNote": "official 5000 PASS run; no JFR",
+    "jtlCheck": {
+      "samples": 5000,
+      "firstStartMs": 1794947828297,
+      "lastEndMs": 1794947872681,
+      "statusCounts": {
+        "409": 4900,
+        "200": 100
+      }
+    },
+    "window": {
+      "startMs": 1794947828297,
+      "endMs": 1794947872681,
+      "seconds": 44.384,
+      "samplerStartSpanMs": 3898
+    },
+    "counts": {
+      "accepted": 100,
+      "soldOut": 4900,
+      "otherBusinessReject": 0,
+      "replay": 0,
+      "http5xx": 0,
+      "readTimeout": 0,
+      "connectTimeout": 0,
+      "connectFailure": 0,
+      "auth401": 0
+    },
+    "completionQps": {
+      "normalBusinessTotal": 112.653,
+      "accepted": 2.253,
+      "soldOut": 110.4,
+      "otherBusinessReject": 0.0,
+      "replay": 0.0,
+      "errorsTotal": 0.0,
+      "peak1sNormalCompletions": 734
+    },
+    "postLatencyMs": {
+      "soldOut": {
+        "n": 4900,
+        "p50": 25114,
+        "p95": 41115,
+        "p99": 43998,
+        "max": 44345
+      },
+      "accepted": {
+        "n": 100,
+        "p50": 8444,
+        "p95": 11516,
+        "p99": 12130,
+        "max": 12176
+      }
+    },
+    "postLatencyAllMs": {
+      "n": 5000,
+      "p50": 24926,
+      "p95": 41049,
+      "p99": 43967,
+      "max": 44345
+    },
+    "orderTps": {
+      "source": "MISSING: no per-order commit timestamp in this run",
+      "ordersTotal": 100,
+      "windowTps": null,
+      "fullRunTpsInclConfirmationWait": null,
+      "paidAtRecordPoint": {
+        "note": "paid_at is written before commit; record-point only",
+        "insideWindow": 100,
+        "tpsToLastPaidAt": 2.494
+      },
+      "drainConfirmedTps": 2.131
+    },
+    "e2eLatencyMs": {
+      "acceptedToCommitted": null,
+      "note": "MISSING commit time; accepted e2e not computable",
+      "finalReject": {
+        "n": 4900,
+        "p50": 25114,
+        "p95": 41115,
+        "p99": 43998,
+        "max": 44345
+      }
+    }
+  },
+  {
+    "run": "c92-diagnostic",
+    "campaign": 92,
+    "build": "pre-ingress-v2 + diag instrumentation",
+    "synchronyValid": false,
+    "observationNote": "server JFR; start span 51.4s INVALID",
+    "jtlCheck": {
+      "samples": 5000,
+      "firstStartMs": 1794954376650,
+      "lastEndMs": 1794954444398,
+      "statusCounts": {
+        "409": 4900,
+        "200": 100
+      }
+    },
+    "window": {
+      "startMs": 1794954376650,
+      "endMs": 1794954444398,
+      "seconds": 67.748,
+      "samplerStartSpanMs": 51443
+    },
+    "counts": {
+      "accepted": 100,
+      "soldOut": 4900,
+      "otherBusinessReject": 0,
+      "replay": 0,
+      "http5xx": 0,
+      "readTimeout": 0,
+      "connectTimeout": 0,
+      "connectFailure": 0,
+      "auth401": 0
+    },
+    "completionQps": {
+      "normalBusinessTotal": 73.803,
+      "accepted": 1.476,
+      "soldOut": 72.327,
+      "otherBusinessReject": 0.0,
+      "replay": 0.0,
+      "errorsTotal": 0.0,
+      "peak1sNormalCompletions": 1222
+    },
+    "postLatencyMs": {
+      "soldOut": {
+        "n": 4900,
+        "p50": 59078,
+        "p95": 64572,
+        "p99": 66278,
+        "max": 66314
+      },
+      "accepted": {
+        "n": 100,
+        "p50": 61338,
+        "p95": 64096,
+        "p99": 64108,
+        "max": 65369
+      }
+    },
+    "postLatencyAllMs": {
+      "n": 5000,
+      "p50": 59094,
+      "p95": 64564,
+      "p99": 66278,
+      "max": 66314
+    },
+    "orderTps": {
+      "source": "JFR settlement transaction commit returned (order+stock+entitlement+request terminal+receipt in one tx)",
+      "ordersTotal": 100,
+      "committedInsideWindow": 100,
+      "windowTps": 1.476,
+      "fullRunTpsInclConfirmationWait": 1.646,
+      "settleSegment": {
+        "firstCommitAfterT0Ms": 19974,
+        "lastCommitAfterT0Ms": 60742,
+        "lastCommitMinusWindowEndMs": -7006,
+        "tpsBetweenFirstAndLastCommit": 2.428
+      }
+    },
+    "e2eLatencyMs": {
+      "acceptedToCommitted": {
+        "n": 100,
+        "p50": 40953,
+        "p95": 58234,
+        "p99": 59201,
+        "max": 59776
+      },
+      "finalReject": {
+        "n": 4900,
+        "p50": 59078,
+        "p95": 64572,
+        "p99": 66278,
+        "max": 66314
+      },
+      "allFinalOutcomes": {
+        "n": 5000,
+        "p50": 58913,
+        "p95": 64564,
+        "p99": 66278,
+        "max": 66314
+      },
+      "excludedNoFinalOutcome": 0,
+      "postEndToCommitMs": {
+        "n": 100,
+        "p50": -17669,
+        "p95": -5184,
+        "p99": -4470,
+        "max": -4267
+      },
+      "note": "accepted end = server-observed commit; JMeter purchase scenario does not poll, so this is not client-observed"
+    }
+  },
+  {
+    "run": "c94-probe",
+    "campaign": 94,
+    "build": "pre-ingress-v2 + diag instrumentation",
+    "synchronyValid": true,
+    "observationNote": "server+client JFR and one thread dump (~2.2s perturbation)",
+    "jtlCheck": {
+      "samples": 5000,
+      "firstStartMs": 1794955180800,
+      "lastEndMs": 1794955217978,
+      "statusCounts": {
+        "409": 4900,
+        "200": 100
+      }
+    },
+    "window": {
+      "startMs": 1794955180800,
+      "endMs": 1794955217978,
+      "seconds": 37.178,
+      "samplerStartSpanMs": 2920
+    },
+    "counts": {
+      "accepted": 100,
+      "soldOut": 4900,
+      "otherBusinessReject": 0,
+      "replay": 0,
+      "http5xx": 0,
+      "readTimeout": 0,
+      "connectTimeout": 0,
+      "connectFailure": 0,
+      "auth401": 0
+    },
+    "completionQps": {
+      "normalBusinessTotal": 134.488,
+      "accepted": 2.69,
+      "soldOut": 131.798,
+      "otherBusinessReject": 0.0,
+      "replay": 0.0,
+      "errorsTotal": 0.0,
+      "peak1sNormalCompletions": 3153
+    },
+    "postLatencyMs": {
+      "soldOut": {
+        "n": 4900,
+        "p50": 35304,
+        "p95": 36969,
+        "p99": 37088,
+        "max": 37158
+      },
+      "accepted": {
+        "n": 100,
+        "p50": 35749,
+        "p95": 36703,
+        "p99": 36951,
+        "max": 36971
+      }
+    },
+    "postLatencyAllMs": {
+      "n": 5000,
+      "p50": 35305,
+      "p95": 36968,
+      "p99": 37087,
+      "max": 37158
+    },
+    "orderTps": {
+      "source": "JFR settlement transaction commit returned (order+stock+entitlement+request terminal+receipt in one tx)",
+      "ordersTotal": 100,
+      "committedInsideWindow": 100,
+      "windowTps": 2.69,
+      "fullRunTpsInclConfirmationWait": 3.323,
+      "settleSegment": {
+        "firstCommitAfterT0Ms": 10488,
+        "lastCommitAfterT0Ms": 30090,
+        "lastCommitMinusWindowEndMs": -7088,
+        "tpsBetweenFirstAndLastCommit": 5.05
+      }
+    },
+    "e2eLatencyMs": {
+      "acceptedToCommitted": {
+        "n": 100,
+        "p50": 23701,
+        "p95": 28945,
+        "p99": 29457,
+        "max": 29517
+      },
+      "finalReject": {
+        "n": 4900,
+        "p50": 35304,
+        "p95": 36969,
+        "p99": 37088,
+        "max": 37158
+      },
+      "allFinalOutcomes": {
+        "n": 5000,
+        "p50": 35262,
+        "p95": 36967,
+        "p99": 37087,
+        "max": 37158
+      },
+      "excludedNoFinalOutcome": 0,
+      "postEndToCommitMs": {
+        "n": 100,
+        "p50": -11583,
+        "p95": -6960,
+        "p99": -6671,
+        "max": -6653
+      },
+      "note": "accepted end = server-observed commit; JMeter purchase scenario does not poll, so this is not client-observed"
+    }
+  },
+  {
+    "run": "c95-fixed",
+    "campaign": 95,
+    "build": "pre-ingress-v2 + diag instrumentation",
+    "synchronyValid": false,
+    "observationNote": "start span 65.8s INVALID",
+    "jtlCheck": {
+      "samples": 5000,
+      "firstStartMs": 1794956230423,
+      "lastEndMs": 1794956298561,
+      "statusCounts": {
+        "200": 100,
+        "409": 4900
+      }
+    },
+    "window": {
+      "startMs": 1794956230423,
+      "endMs": 1794956298561,
+      "seconds": 68.138,
+      "samplerStartSpanMs": 65791
+    },
+    "counts": {
+      "accepted": 100,
+      "soldOut": 4900,
+      "otherBusinessReject": 0,
+      "replay": 0,
+      "http5xx": 0,
+      "readTimeout": 0,
+      "connectTimeout": 0,
+      "connectFailure": 0,
+      "auth401": 0
+    },
+    "completionQps": {
+      "normalBusinessTotal": 73.38,
+      "accepted": 1.468,
+      "soldOut": 71.913,
+      "otherBusinessReject": 0.0,
+      "replay": 0.0,
+      "errorsTotal": 0.0,
+      "peak1sNormalCompletions": 833
+    },
+    "postLatencyMs": {
+      "accepted": {
+        "n": 100,
+        "p50": 487,
+        "p95": 1854,
+        "p99": 1905,
+        "max": 1943
+      },
+      "soldOut": {
+        "n": 4900,
+        "p50": 7022,
+        "p95": 28505,
+        "p99": 35403,
+        "max": 46970
+      }
+    },
+    "postLatencyAllMs": {
+      "n": 5000,
+      "p50": 6803,
+      "p95": 28454,
+      "p99": 35360,
+      "max": 46970
+    },
+    "orderTps": {
+      "source": "JFR settlement transaction commit returned (order+stock+entitlement+request terminal+receipt in one tx)",
+      "ordersTotal": 100,
+      "committedInsideWindow": 100,
+      "windowTps": 1.468,
+      "fullRunTpsInclConfirmationWait": 6.156,
+      "settleSegment": {
+        "firstCommitAfterT0Ms": 319,
+        "lastCommitAfterT0Ms": 16245,
+        "lastCommitMinusWindowEndMs": -51893,
+        "tpsBetweenFirstAndLastCommit": 6.216
+      }
+    },
+    "e2eLatencyMs": {
+      "acceptedToCommitted": {
+        "n": 100,
+        "p50": 8804,
+        "p95": 14306,
+        "p99": 14614,
+        "max": 15008
+      },
+      "finalReject": {
+        "n": 4900,
+        "p50": 7022,
+        "p95": 28505,
+        "p99": 35403,
+        "max": 46970
+      },
+      "allFinalOutcomes": {
+        "n": 5000,
+        "p50": 7102,
+        "p95": 28454,
+        "p99": 35360,
+        "max": 46970
+      },
+      "excludedNoFinalOutcome": 0,
+      "postEndToCommitMs": {
+        "n": 100,
+        "p50": 8528,
+        "p95": 12601,
+        "p99": 13050,
+        "max": 13152
+      },
+      "note": "accepted end = server-observed commit; JMeter purchase scenario does not poll, so this is not client-observed"
+    }
+  },
+  {
+    "run": "c97-ic-off",
+    "campaign": 97,
+    "build": "pre-ingress-v2 + diag instrumentation",
+    "synchronyValid": false,
+    "observationNote": "start span 28.7s INVALID",
+    "jtlCheck": {
+      "samples": 5000,
+      "firstStartMs": 1794957798239,
+      "lastEndMs": 1794957832334,
+      "statusCounts": {
+        "409": 4900,
+        "200": 100
+      }
+    },
+    "window": {
+      "startMs": 1794957798239,
+      "endMs": 1794957832334,
+      "seconds": 34.095,
+      "samplerStartSpanMs": 28737
+    },
+    "counts": {
+      "accepted": 100,
+      "soldOut": 4900,
+      "otherBusinessReject": 0,
+      "replay": 0,
+      "http5xx": 0,
+      "readTimeout": 0,
+      "connectTimeout": 0,
+      "connectFailure": 0,
+      "auth401": 0
+    },
+    "completionQps": {
+      "normalBusinessTotal": 146.649,
+      "accepted": 2.933,
+      "soldOut": 143.716,
+      "otherBusinessReject": 0.0,
+      "replay": 0.0,
+      "errorsTotal": 0.0,
+      "peak1sNormalCompletions": 1540
+    },
+    "postLatencyMs": {
+      "soldOut": {
+        "n": 4900,
+        "p50": 28825,
+        "p95": 33346,
+        "p99": 33687,
+        "max": 34020
+      },
+      "accepted": {
+        "n": 100,
+        "p50": 29099,
+        "p95": 29453,
+        "p99": 29454,
+        "max": 29455
+      }
+    },
+    "postLatencyAllMs": {
+      "n": 5000,
+      "p50": 28856,
+      "p95": 33339,
+      "p99": 33686,
+      "max": 34020
+    },
+    "orderTps": {
+      "source": "JFR settlement transaction commit returned (order+stock+entitlement+request terminal+receipt in one tx)",
+      "ordersTotal": 100,
+      "committedInsideWindow": 100,
+      "windowTps": 2.933,
+      "fullRunTpsInclConfirmationWait": 3.733,
+      "settleSegment": {
+        "firstCommitAfterT0Ms": 4445,
+        "lastCommitAfterT0Ms": 26792,
+        "lastCommitMinusWindowEndMs": -7303,
+        "tpsBetweenFirstAndLastCommit": 4.43
+      }
+    },
+    "e2eLatencyMs": {
+      "acceptedToCommitted": {
+        "n": 100,
+        "p50": 17392,
+        "p95": 25281,
+        "p99": 26111,
+        "max": 26479
+      },
+      "finalReject": {
+        "n": 4900,
+        "p50": 28825,
+        "p95": 33346,
+        "p99": 33687,
+        "max": 34020
+      },
+      "allFinalOutcomes": {
+        "n": 5000,
+        "p50": 28764,
+        "p95": 33339,
+        "p99": 33686,
+        "max": 34020
+      },
+      "excludedNoFinalOutcome": 0,
+      "postEndToCommitMs": {
+        "n": 100,
+        "p50": -11499,
+        "p95": -3876,
+        "p99": -2848,
+        "max": -2733
+      },
+      "note": "accepted end = server-observed commit; JMeter purchase scenario does not poll, so this is not client-observed"
+    }
+  },
+  {
+    "run": "c101-ingress-v2",
+    "campaign": 101,
+    "build": "ingress-v2 V22 (before V23 ACK lock fix)",
+    "synchronyValid": false,
+    "observationNote": "start span 96.1s, 151 ConnectTimeout INVALID",
+    "jtlCheck": {
+      "samples": 5000,
+      "firstStartMs": 1794977900254,
+      "lastEndMs": 1794977996400,
+      "statusCounts": {
+        "409": 4749,
+        "200": 100,
+        "Non HTTP response code: org.apache.http.conn.ConnectTimeoutException": 151
+      }
+    },
+    "window": {
+      "startMs": 1794977900254,
+      "endMs": 1794977996400,
+      "seconds": 96.146,
+      "samplerStartSpanMs": 96134
+    },
+    "counts": {
+      "accepted": 100,
+      "soldOut": 4749,
+      "otherBusinessReject": 0,
+      "replay": 0,
+      "http5xx": 0,
+      "readTimeout": 0,
+      "connectTimeout": 151,
+      "connectFailure": 0,
+      "auth401": 0
+    },
+    "completionQps": {
+      "normalBusinessTotal": 50.434,
+      "accepted": 1.04,
+      "soldOut": 49.394,
+      "otherBusinessReject": 0.0,
+      "replay": 0.0,
+      "errorsTotal": 1.571,
+      "peak1sNormalCompletions": 326
+    },
+    "postLatencyMs": {
+      "soldOut": {
+        "n": 4749,
+        "p50": 187,
+        "p95": 59968,
+        "p99": 65032,
+        "max": 69308
+      },
+      "accepted": {
+        "n": 100,
+        "p50": 30295,
+        "p95": 31640,
+        "p99": 36947,
+        "max": 38114
+      },
+      "connectTimeout": {
+        "n": 151,
+        "p50": 32577,
+        "p95": 37960,
+        "p99": 38595,
+        "max": 38621
+      }
+    },
+    "postLatencyAllMs": {
+      "n": 5000,
+      "p50": 442,
+      "p95": 59846,
+      "p99": 65030,
+      "max": 69308
+    },
+    "orderTps": {
+      "source": "JFR settlement transaction commit returned (order+stock+entitlement+request terminal+receipt in one tx)",
+      "ordersTotal": 100,
+      "committedInsideWindow": 100,
+      "windowTps": 1.04,
+      "fullRunTpsInclConfirmationWait": 1.119,
+      "settleSegment": {
+        "firstCommitAfterT0Ms": 23972,
+        "lastCommitAfterT0Ms": 89349,
+        "lastCommitMinusWindowEndMs": -6797,
+        "tpsBetweenFirstAndLastCommit": 1.514
+      }
+    },
+    "e2eLatencyMs": {
+      "acceptedToCommitted": {
+        "n": 100,
+        "p50": 51088,
+        "p95": 79106,
+        "p99": 81317,
+        "max": 81318
+      },
+      "finalReject": {
+        "n": 4749,
+        "p50": 187,
+        "p95": 59968,
+        "p99": 65032,
+        "max": 69308
+      },
+      "allFinalOutcomes": {
+        "n": 4849,
+        "p50": 284,
+        "p95": 60808,
+        "p99": 65380,
+        "max": 81318
+      },
+      "excludedNoFinalOutcome": 151,
+      "postEndToCommitMs": {
+        "n": 100,
+        "p50": 29029,
+        "p95": 69517,
+        "p99": 77207,
+        "max": 77706
+      },
+      "note": "accepted end = server-observed commit; JMeter purchase scenario does not poll, so this is not client-observed"
+    }
+  }
+]

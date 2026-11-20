@@ -1,0 +1,77 @@
+{
+  "configuredThreads": 5000,
+  "campaignId": 101,
+  "postId": 114,
+  "readyCount": 5000,
+  "barrierTimedOut": false,
+  "samples": 5000,
+  "uniqueUsers": 5000,
+  "requestStartSpanMs": 96134,
+  "syncStartSpanLimitMs": 5000,
+  "synchronyValid": false,
+  "firstRequestStartMs": 1794977900254,
+  "lastHttpCompletionMs": 1794977996400,
+  "barrierReleaseEpochMs": 1794977880257,
+  "requestQps": 52.01073501570724,
+  "httpCompletionQps": 50.43371539117592,
+  "sampleCompletionQps": 52.00424354627337,
+  "http200Qps": 1.0400848709254675,
+  "qpsDefinitions": {
+    "requestQps": "all JTL sample starts / (last start - first start); HTTP sampler start, not NIC wire timestamp",
+    "httpCompletionQps": "HTTP responses only / (last sample completion - first start); excludes connection errors",
+    "http200Qps": "HTTP 200 / (last completion - first start)",
+    "finalPaidTps": "unique PAID orders / (last recorded paid_at - first HTTP start); paid_at is transaction-record time, not commit timestamp",
+    "fullRunPaidTps": "unique PAID / (confirmed drain observation - first HTTP start)"
+  },
+  "httpStatusCounts": {
+    "409": 4749,
+    "200": 100,
+    "Non HTTP response code: org.apache.http.conn.ConnectTimeoutException": 151
+  },
+  "http401": 0,
+  "http5xx": 0,
+  "businessRejects": {
+    "SOLD_OUT": 4749
+  },
+  "httpErrorCodes": {
+    "SOLD_OUT": 4749
+  },
+  "connectFailures": 0,
+  "timeouts": 151,
+  "p50Ms": 442,
+  "p95Ms": 59846,
+  "p99Ms": 65030,
+  "paidOrders": 100,
+  "remainingStock": 0,
+  "activeEntitlements": 100,
+  "duplicateOrders": 0,
+  "duplicateEntitlements": 0,
+  "processingLeft": 0,
+  "redisRemainingStock": 0,
+  "redisProcessingLeft": 0,
+  "drainAfterLastHttpSec": 61.722,
+  "finalPaidTps": 1.120573733751681,
+  "fullRunPaidTps": 0.6334405959409127,
+  "observedLastPaidAfterHttpSec": 0,
+  "drainConfirmedAtMs": 1794978058122,
+  "drainMeasurement": "upper bound to first post-HTTP observer confirming all requests/receipts succeeded, or final committed reconciliation snapshot",
+  "pipeline": {
+    "stock": 0,
+    "version": 2,
+    "invalidRequests": 0,
+    "processing": 0,
+    "streamLag": 0,
+    "streamPending": 0,
+    "ready": "1",
+    "dispatchCount": 100,
+    "dispatchPending": 0
+  },
+  "transportBootstrap": null,
+  "pass": false,
+  "failureReasons": [
+    "synchronized request start span exceeds 5000ms",
+    "request timeout",
+    "unexpected HTTP or business rejection",
+    "drain exceeded 30 seconds after last HTTP completion"
+  ]
+}

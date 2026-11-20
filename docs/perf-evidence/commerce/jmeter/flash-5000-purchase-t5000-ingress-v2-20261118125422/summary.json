@@ -1,0 +1,44 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\flash-5000-purchase-t5000-ingress-v2-20261118125422\\results.jtl",
+  "samples": 5000,
+  "spanSec": 96.134,
+  "requestQps": 52.01,
+  "acceptQps": 1.04,
+  "businessRejects": 4749,
+  "systemErrors": 151,
+  "connectFail": 0,
+  "timeouts": 151,
+  "http503": 0,
+  "ok": 100,
+  "p50Ms": 442,
+  "p95Ms": 59846,
+  "p99Ms": 65030,
+  "byLabel": [
+    {
+      "qps": 52.01,
+      "p50": 442,
+      "label": "POST-purchase",
+      "activeQps": 52.01,
+      "activeWindowSec": 96.134,
+      "windowSec": 96.134,
+      "p95": 59846,
+      "n": 5000,
+      "p99": 65030
+    }
+  ],
+  "byClass": [
+    {
+      "cls": "BIZ:",
+      "count": 4749
+    },
+    {
+      "cls": "OK",
+      "count": 100
+    },
+    {
+      "cls": "TIMEOUT",
+      "count": 151
+    }
+  ],
+  "qpsNote": "byLabel.qps = n / whole-run spanSec; byLabel.activeQps = n / label start-ts span (optional)"
+}

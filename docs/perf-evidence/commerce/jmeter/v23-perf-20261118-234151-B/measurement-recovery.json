@@ -1,0 +1,30 @@
+{
+  "cause": "Windows WinError206: reservation argv exceeded command-line limit; fixed using redis-cli -x + stdin. No new purchase load.",
+  "originalObserverLastMs": 1795020304056,
+  "resumedJfrFile": "target/v23-perf-20261118-234151/B-private/resume-server.jfr",
+  "commitKnown": 1066,
+  "commitMissing": 2334,
+  "confirmedWindowCommitOrders": 351,
+  "confirmedWindowCommitTpsLowerBound": 5.85,
+  "canonicalWindowCommittedTps": null,
+  "canonicalFullCommittedTps": null,
+  "reasonForMissing": "Two JFR segments do not cover all per-order commits; no inferred timestamps from paid_at.",
+  "maxPaidOrderId": 14251,
+  "maxPaidOrderCommitEvidence": {
+    "reservationId": "ffec69f01c614cc9b99c25039c9403f6",
+    "clientKey": "jm-c106-u12244",
+    "orderId": "14251",
+    "commitReturnedAtMs": 1795020555831,
+    "paidAtRecordMs": 1795020555752,
+    "httpStartToCommitReturnedMs": 414536,
+    "settleStartMs": 1795020555715,
+    "settleEndMs": 1795020555902
+  },
+  "auxiliaryTotalPaidOverMaxOrderCommitReturnTps": 7.759988131782857,
+  "auxiliaryMetricCaveat": "Uses recorded max-order-ID transaction return; not asserted to be the latest JDBC return of every earlier concurrent transaction. Canonical full TPS remains null.",
+  "drainTimeSec": null,
+  "drainObservedLowerBoundSec": 378.144,
+  "drainObservedUpperBoundSec": 452.673,
+  "drainCaveat": "Wide observation gap. Upper bound is confirmation, not measured backlog duration.",
+  "finalLedgerAndRedisCheckedAtMs": 1795022598320
+}

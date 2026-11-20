@@ -1,0 +1,27 @@
+{
+  "head": "dd2ab174a01288964e51df4bdd01a7fb05d9550e",
+  "branch": "feat/v1.1-material-commerce",
+  "sourceSha256": {
+    "pom.xml": "4dbd95263829242dc0e594eedf2803e5f46d2d65ee30c91909173d6d46b78db8",
+    "infra/jmeter/preflight-commerce.ps1": "e2c16a53b96547075030d0489d84dba492ba60ac53755e819529d0e1cbaa0bab",
+    "infra/jmeter/run-java-commerce.ps1": "1e29979f5984151b9b0954d9fa8c81160e0b9a8f07858dc7c3b631236c225e99",
+    "infra/jmeter/run-commerce-jmeter.ps1": "e86e6a1e543c4d01733e3c2fba2ae661fce694335e59a3c763d6370f9825b51a",
+    "infra/jmeter/commerce-sale.jmx": "2dd08eccf4ed54300fd674402c429be86c5b9831460b6ba187bd5615bf266b20",
+    "infra/jmeter/seed-commerce-data.ps1": "faa2511a4663aaf3418cda9f7f7dee7061958fd8c993413a1f59d0de7164064e",
+    "infra/jmeter/run-flash-acceptance.ps1": "312469ec15e137ef9a98f540077d9574b7b68bd12b1ba7f246196ca742084791",
+    "infra/jmeter/refresh_commerce_tokens.py": "bf95aaf623e99a93d74c92bd7857917948e68ff782da9732c788894e54768d22",
+    "infra/jmeter/flash_acceptance.py": "7bc134cc1a62820d408ec9258259b44e8bc7691a1876f00dc0c0fd9b83fab20b",
+    "infra/jmeter/test_flash_acceptance.py": "c5921c5d36fe747dd16860a8ebfd8504bac2698a5cc4f826acc111c0296084ac",
+    "infra/jmeter/test-jmeter-scripts.groovy": "3681fff82b577f80a76373e7f221a3c132388b42f852ba2319489ede191b374d",
+    "infra/jmeter/purchase_capacity.py": "216b3714c2f4e66c93b18b68b17d59237d2cc83166a152779fbadce4e41b7197",
+    "src/main/java/io/github/xiiiiimu/content/infrastructure/WindowsListenBacklog.java": "fef4b9fc6b2c3bb931684f8ff59c2cd1f691b462aba338178be6599a83cc6751",
+    "src/main/java/io/github/xiiiiimu/content/infrastructure/LocalWindowsNioProtocol.java": "5fb41733135be44b613152472e7cf757de8bae648acd8a8ef20be3b88d1ecf16",
+    "src/main/java/io/github/xiiiiimu/content/infrastructure/LocalWindowsBacklogConfiguration.java": "18629fe8a95bf8489416aacd3f2269c392a19feb6af95b5ba6ff2a31adb22ece",
+    "src/test/java/io/github/xiiiiimu/content/WindowsListenBacklogTest.java": "81d4f8ed78bf8ed2e93c756e39ee01d8ace3ca38cc40d1e7a1b51ac1171abf35",
+    "src/test/java/io/github/xiiiiimu/content/MaterialCommercePurchaseIT.java": "3b2d925a4fa2dc68461822ad1a805de29c5b5c411158f203752d65c9c22b2bec",
+    "src/test/java/io/github/xiiiiimu/content/MaterialCommerceRefundBlacklistIT.java": "181e671806d62e2a966b4894f452ae238a715c0b66df41816638e3d1d44b7d66",
+    "docs/perf-evidence/commerce/flash-sync-contract-20261118.md": "ac106baf40e065bab9d058ad379a92a0263e161c2de64f279de93b893f216629"
+  },
+  "runtimeJarSha256": "179c67e9de96841b04e8a76dc618c7df1554b6d77a0ea94e08d72562af6065d5",
+  "note": "Working tree build; existing uncommitted work retained. Tokens, env files and private input CSVs excluded."
+}

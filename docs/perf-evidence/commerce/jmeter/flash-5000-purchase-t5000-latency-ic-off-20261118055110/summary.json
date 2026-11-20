@@ -1,0 +1,40 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\flash-5000-purchase-t5000-latency-ic-off-20261118055110\\results.jtl",
+  "samples": 5000,
+  "spanSec": 28.737,
+  "requestQps": 173.99,
+  "acceptQps": 3.48,
+  "businessRejects": 4900,
+  "systemErrors": 0,
+  "connectFail": 0,
+  "timeouts": 0,
+  "http503": 0,
+  "ok": 100,
+  "p50Ms": 28856,
+  "p95Ms": 33339,
+  "p99Ms": 33686,
+  "byLabel": [
+    {
+      "activeQps": 173.99,
+      "p99": 33686,
+      "p50": 28856,
+      "p95": 33339,
+      "n": 5000,
+      "qps": 173.99,
+      "activeWindowSec": 28.737,
+      "label": "POST-purchase",
+      "windowSec": 28.737
+    }
+  ],
+  "byClass": [
+    {
+      "count": 4900,
+      "cls": "BIZ:"
+    },
+    {
+      "count": 100,
+      "cls": "OK"
+    }
+  ],
+  "qpsNote": "byLabel.qps = n / whole-run spanSec; byLabel.activeQps = n / label start-ts span (optional)"
+}

@@ -1,0 +1,44 @@
+{
+  "backendJava": "17.0.17",
+  "jmeterJava": "17.0.17",
+  "groovy": "3.0.20",
+  "groovyIndy": true,
+  "jmeterHeap": {
+    "initialMiB": 512,
+    "maxMiB": 3072,
+    "stackKiB": 256
+  },
+  "tomcat": {
+    "maxThreads": 100,
+    "minSpare": 100,
+    "maxConnections": 20000,
+    "acceptCountTarget": 5000,
+    "windowsFirstListenHint": -5000
+  },
+  "hikariMax": 120,
+  "saleConsumersConfigured": 20,
+  "requestConnectTimeoutMs": 30000,
+  "requestResponseTimeoutMs": 30000,
+  "requestTotalWallClockDeadline": null,
+  "barrierTimeoutMs": 120000,
+  "syncStartSpanLimitMs": 5000,
+  "duringRunWindowsCpuAffinity": {
+    "backend": 15,
+    "injector": 65520
+  },
+  "duringRunPriority": {
+    "backend": "AboveNormal",
+    "injector": "BelowNormal"
+  },
+  "postRunPriorityAndAffinityRestored": true,
+  "stock": 100,
+  "loops": 1,
+  "rampSec": 1,
+  "warmupThreads": 0,
+  "purchaseStartsPerSecond": 0,
+  "authTtlMinutes": 15,
+  "preflightMinRemainingSec": 300,
+  "refreshGuaranteeMinRemainingSec": 360,
+  "MQRedisMySqlTransport": "unchanged",
+  "payment": "local simulator; no real money"
+}

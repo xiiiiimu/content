@@ -1,0 +1,141 @@
+{
+  "config": {
+    "runId": "v23-perf-20261118-234151-A3",
+    "campaignId": 108,
+    "postId": 121,
+    "warmCampaignId": 107,
+    "count": 2000,
+    "stock": 100,
+    "rate": 400,
+    "workers": 128,
+    "windowSec": 0,
+    "timeoutMs": 30000,
+    "loopsPerBuyer": 1,
+    "sameJvmWarmup": true,
+    "heap": "128m/384m",
+    "clientJfr": false,
+    "clientThreadDump": false,
+    "temporarySystemSleepPrevention": true,
+    "hostInterruptionInvalidatesRunMs": 30000,
+    "sourceRevision": "V23",
+    "jarSha256": "376b7ae3cf209dec1f36993c81d27685ab6de3014a687fdeee642d521c54efa5",
+    "warmupSettlementPoll": "Each worker, 1 second interval, 60 second bound, outside formal; same HTTP POST sampler/thread",
+    "finalResultPolling": "After formal HTTP only; fair round-robin, concurrency16, max100 calls/batch, >=1s between batches, global120s deadline. Per-request interval grows with outstanding set. No per-request starvation; actual attempt timestamps archived.",
+    "drainObservationLimitSec": 1200,
+    "observerIntervalSec": 2,
+    "pacer": "One serialized coordinator; Windows park leaves 16ms headroom then spins; at400/s may use one CPU core, captured in host load, never subtracted",
+    "serverJfr": "Only custom sale events + GC pause + DataLoss, no stacks/environment/JVM properties",
+    "hostMemoryBefore": {
+      "observedAtMs": 1795019748575,
+      "memoryLoadPercent": 87,
+      "totalPhysicalBytes": 16864305152,
+      "availablePhysicalBytes": 2172379136,
+      "commitLimitBytes": 29807333376,
+      "availableCommitBytes": 2500313088
+    }
+  },
+  "window": {
+    "startEpochMs": 1795019803745,
+    "endEpochMs": 1795019817390,
+    "targetRate": 400,
+    "workers": 128,
+    "sameJvm": true,
+    "sameHttpSamplerAndThreads": true,
+    "deadlinePolicy": "No catch-up; serialized minimum-spaced permits"
+  },
+  "windowSeconds": 13.645,
+  "samples": 2000,
+  "warmSamples": 128,
+  "requestStartSpanMs": 13504,
+  "requestArrivalRate": 148.03021327014218,
+  "windowStarts": 2000,
+  "windowStartQps": 146.57383657017223,
+  "outsideFixedWindowStarts": 0,
+  "normalBusinessCompletionQps": 146.57383657017223,
+  "groups": {
+    "accepted": {
+      "count": 100,
+      "windowCompleted": 100,
+      "elapsed": {
+        "count": 100,
+        "p50": 100,
+        "p95": 224,
+        "p99": 236,
+        "max": 241
+      },
+      "Latency": {
+        "count": 100,
+        "p50": 100,
+        "p95": 223,
+        "p99": 236,
+        "max": 238
+      },
+      "Connect": {
+        "count": 100,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "completionQps": 7.328691828508611
+    },
+    "soldOut": {
+      "count": 1900,
+      "windowCompleted": 1900,
+      "elapsed": {
+        "count": 1900,
+        "p50": 57,
+        "p95": 1891,
+        "p99": 2891,
+        "max": 3154
+      },
+      "Latency": {
+        "count": 1900,
+        "p50": 55,
+        "p95": 1891,
+        "p99": 2890,
+        "max": 3153
+      },
+      "Connect": {
+        "count": 1900,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "completionQps": 139.2451447416636
+    }
+  },
+  "httpStatuses": {
+    "200": 100,
+    "409": 1900
+  },
+  "systemErrors": [],
+  "paidOrders": 100,
+  "remainingStock": 0,
+  "activeEntitlements": 100,
+  "processingLeft": 0,
+  "drainConfirmedAfterLastHttpSec": 21.741,
+  "drainObservationNote": "Confirmation upper bound includes post-load polling and reconciliation, not exact queue empty instant; use observations for tighter bracket.",
+  "windowCommittedTps": 1.0993037742762917,
+  "fullCommittedTps": 3.135877575339459,
+  "clientObservedSucceededMs": {
+    "count": 100,
+    "p50": 24533,
+    "p95": 31063,
+    "p99": 32035,
+    "max": 32050
+  },
+  "checks": {
+    "sampleCount": true,
+    "uniqueBuyers": true,
+    "noSystemErrors": true,
+    "noReconciliationMismatch": true,
+    "ledgerInvariant": true,
+    "drained": true,
+    "redisInventory": true,
+    "replays": true
+  },
+  "correctnessPass": true,
+  "reconciliationMismatches": []
+}

@@ -1,0 +1,61 @@
+{
+  "configuredThreads": 5000,
+  "campaignId": 92,
+  "postId": 105,
+  "readyCount": 5000,
+  "barrierTimedOut": false,
+  "samples": 5000,
+  "uniqueUsers": 5000,
+  "requestStartSpanMs": 51443,
+  "syncStartSpanLimitMs": 5000,
+  "synchronyValid": false,
+  "firstRequestStartMs": 1794954376650,
+  "lastHttpCompletionMs": 1794954444398,
+  "barrierReleaseEpochMs": 1794954344944,
+  "requestQps": 97.19495363800712,
+  "httpCompletionQps": 73.80291669126764,
+  "sampleCompletionQps": 73.80291669126764,
+  "http200Qps": 1.4760583338253528,
+  "qpsDefinitions": {
+    "requestQps": "all JTL sample starts / (last start - first start); HTTP sampler start, not NIC wire timestamp",
+    "httpCompletionQps": "HTTP responses only / (last sample completion - first start); excludes connection errors",
+    "http200Qps": "HTTP 200 / (last completion - first start)",
+    "finalPaidTps": "unique PAID orders / (last recorded paid_at - first HTTP start); paid_at is transaction-record time, not commit timestamp",
+    "fullRunPaidTps": "unique PAID / (confirmed drain observation - first HTTP start)"
+  },
+  "httpStatusCounts": {
+    "409": 4900,
+    "200": 100
+  },
+  "http401": 0,
+  "http5xx": 0,
+  "businessRejects": {
+    "SOLD_OUT": 4900
+  },
+  "httpErrorCodes": {
+    "SOLD_OUT": 4900
+  },
+  "connectFailures": 0,
+  "timeouts": 0,
+  "p50Ms": 59094,
+  "p95Ms": 64564,
+  "p99Ms": 66278,
+  "paidOrders": 100,
+  "remainingStock": 0,
+  "activeEntitlements": 100,
+  "duplicateOrders": 0,
+  "duplicateEntitlements": 0,
+  "processingLeft": 0,
+  "redisRemainingStock": 0,
+  "redisProcessingLeft": 0,
+  "drainAfterLastHttpSec": 2.118,
+  "finalPaidTps": 1.6628421297682,
+  "fullRunPaidTps": 1.4313113674748805,
+  "observedLastPaidAfterHttpSec": 0,
+  "drainConfirmedAtMs": 1794954446516,
+  "drainMeasurement": "upper bound to first post-HTTP observer confirming all requests/receipts succeeded, or final committed reconciliation snapshot",
+  "pass": false,
+  "failureReasons": [
+    "synchronized request start span exceeds 5000ms"
+  ]
+}

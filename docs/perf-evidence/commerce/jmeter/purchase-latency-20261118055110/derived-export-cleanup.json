@@ -1,0 +1,7 @@
+{
+  "originalJfr": "target/flash-observer-latency-probe-20261118055110/injector.jfr",
+  "reason": "Verbose export exhausted E drive; partial JSON never used as evidence; original recording and all test evidence retained",
+  "removedOnlyIncompleteDerivedJson": "E:\\content\\target\\purchase-latency-20261118055110\\injector-events.json",
+  "originalSha256": "D1B4ACFD204FC42BD4F848332963314D3C63029C26F77D8D856A790E8943AF4B",
+  "derivedBytes": 10678018048
+}

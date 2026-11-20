@@ -1,0 +1,944 @@
+{
+ "profile": "B:batch,20,1",
+ "batchMode": true,
+ "claimEvidence": "SaleDispatchBatch events",
+ "jfrDataLoss": 0,
+ "claimSizeDistribution": {
+  "0": 518,
+  "1": 20
+ },
+ "claimsWithRows": 20,
+ "emptyClaims": 518,
+ "outcomes": {
+  "sent": 20,
+  "failed": 0,
+  "budgetSkipped": 0,
+  "confirmMissed": 0,
+  "retryMissed": 0,
+  "outcomeNotPersisted": 0
+ },
+ "leaseUseMs": {
+  "count": 20,
+  "p50": 157,
+  "p95": 588,
+  "p99": 1365,
+  "max": 1365
+ },
+ "leaseViolations": {
+  "budgetSkipped": 0,
+  "confirmMissed": 0,
+  "retryMissed": 0,
+  "outcomeNotPersisted": 0,
+  "leaseUseOver25000Ms": 0
+ },
+ "window": {
+  "sqlTotal": 328,
+  "sqlByStatement": {
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.unknownHoldCurrent": 67,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.claimAll": 15,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.due": 67,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.expired": 67,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard": 67,
+   "dispatch-confirm sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.holding": 15,
+   "dispatch-confirm sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.sentAll": 15,
+   "dispatch-send sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request": 15
+  },
+  "commitsByKind": {
+   "dispatch-claim": 67,
+   "dispatch-confirm": 15
+  },
+  "commitsTotal": 82,
+  "rollbacksByKind": {},
+  "phaseMs": {
+   "dispatch-claim dispatch.claim": {
+    "count": 67,
+    "p50": 39,
+    "p95": 140,
+    "p99": 210,
+    "max": 210
+   },
+   "dispatch-claim jdbc.commit": {
+    "count": 67,
+    "p50": 4,
+    "p95": 31,
+    "p99": 65,
+    "max": 65
+   },
+   "dispatch-confirm dispatch.confirm": {
+    "count": 15,
+    "p50": 60,
+    "p95": 336,
+    "p99": 336,
+    "max": 336
+   },
+   "dispatch-confirm jdbc.commit": {
+    "count": 15,
+    "p50": 24,
+    "p95": 47,
+    "p99": 47,
+    "max": 47
+   },
+   "dispatch-send mq.send": {
+    "count": 15,
+    "p50": 13,
+    "p95": 30,
+    "p99": 30,
+    "max": 30
+   }
+  }
+ },
+ "full": {
+  "sqlTotal": 2228,
+  "sqlByStatement": {
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.unknownHoldCurrent": 537,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.claimAll": 20,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.due": 537,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.expired": 537,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard": 537,
+   "dispatch-confirm sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.holding": 20,
+   "dispatch-confirm sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.sentAll": 20,
+   "dispatch-send sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request": 20
+  },
+  "commitsByKind": {
+   "dispatch-claim": 537,
+   "dispatch-confirm": 20
+  },
+  "commitsTotal": 557,
+  "rollbacksByKind": {},
+  "phaseMs": {
+   "dispatch-claim dispatch.claim": {
+    "count": 537,
+    "p50": 47,
+    "p95": 210,
+    "p99": 372,
+    "max": 509
+   },
+   "dispatch-claim jdbc.commit": {
+    "count": 537,
+    "p50": 4,
+    "p95": 24,
+    "p99": 58,
+    "max": 179
+   },
+   "dispatch-confirm dispatch.confirm": {
+    "count": 20,
+    "p50": 61,
+    "p95": 336,
+    "p99": 940,
+    "max": 940
+   },
+   "dispatch-confirm jdbc.commit": {
+    "count": 20,
+    "p50": 24,
+    "p95": 57,
+    "p99": 86,
+    "max": 86
+   },
+   "dispatch-send mq.send": {
+    "count": 20,
+    "p50": 13,
+    "p95": 47,
+    "p99": 162,
+    "max": 162
+   }
+  }
+ },
+ "settle": {
+  "transactionsMs": {
+   "count": 20,
+   "p50": 356,
+   "p95": 919,
+   "p99": 1240,
+   "max": 1240
+  },
+  "commitMs": {
+   "count": 60,
+   "p50": 21,
+   "p95": 103,
+   "p99": 321,
+   "max": 321
+  },
+  "committedInWindow": 15
+ },
+ "lockWaits": {
+  "samplesWithWaits": 0,
+  "samples": 49,
+  "observedWaitsByTable": {},
+  "peakPerSampleByTable": {},
+  "note": "Discrete samples; repeated observations of one wait are counted again. Absence is not proof of no waits."
+ },
+ "backlog": {
+  "peaks": {
+   "streamLag": {
+    "value": 4,
+    "atMs": 1795113581812
+   },
+   "mqPending": {
+    "value": 1,
+    "atMs": 1795113595098
+   },
+   "processing": {
+    "value": 1,
+    "atMs": 1795113595098
+   },
+   "brokerBacklog": {
+    "value": 4,
+    "atMs": 1795113600569
+   }
+  },
+  "edges": {
+   "windowStart": {
+    "streamLag": {
+     "value": 1,
+     "offsetMs": -507
+    },
+    "mqPending": {
+     "value": 0,
+     "offsetMs": -507
+    },
+    "processing": {
+     "value": 0,
+     "offsetMs": -507
+    },
+    "brokerBacklog": {
+     "value": 4,
+     "offsetMs": -964
+    }
+   },
+   "windowEnd": {
+    "streamLag": {
+     "value": 0,
+     "offsetMs": 130
+    },
+    "mqPending": {
+     "value": 0,
+     "offsetMs": 130
+    },
+    "processing": {
+     "value": 0,
+     "offsetMs": 130
+    },
+    "brokerBacklog": {
+     "value": 4,
+     "offsetMs": 1505
+    }
+   }
+  },
+  "lagSamples": 15,
+  "lagSamplesOk": 15,
+  "lagIntervalMs": 5000,
+  "firstObservedDrainAfterWindowMs": 130,
+  "brokerBacklogScope": "Whole consumer group on the topic (all campaigns); only this workload runs during the tier."
+ },
+ "series": [
+  {
+   "atMs": 1795113502137,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4270
+  },
+  {
+   "atMs": 1795113504289,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4197
+  },
+  {
+   "atMs": 1795113506401,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4177
+  },
+  {
+   "atMs": 1795113508399,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4116
+  },
+  {
+   "atMs": 1795113510418,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4132
+  },
+  {
+   "atMs": 1795113512442,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4099
+  },
+  {
+   "atMs": 1795113514458,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4117
+  },
+  {
+   "atMs": 1795113516574,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4072
+  },
+  {
+   "atMs": 1795113518623,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4092
+  },
+  {
+   "atMs": 1795113520723,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4103
+  },
+  {
+   "atMs": 1795113522800,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4077
+  },
+  {
+   "atMs": 1795113524810,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4096
+  },
+  {
+   "atMs": 1795113526928,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4104
+  },
+  {
+   "atMs": 1795113529049,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4099
+  },
+  {
+   "atMs": 1795113531070,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4076
+  },
+  {
+   "atMs": 1795113533132,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4093
+  },
+  {
+   "atMs": 1795113535181,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4107
+  },
+  {
+   "atMs": 1795113537233,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4093
+  },
+  {
+   "atMs": 1795113539255,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4056
+  },
+  {
+   "atMs": 1795113541323,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4040
+  },
+  {
+   "atMs": 1795113543459,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4044
+  },
+  {
+   "atMs": 1795113545579,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4055
+  },
+  {
+   "atMs": 1795113547749,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4027
+  },
+  {
+   "atMs": 1795113549796,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4048
+  },
+  {
+   "atMs": 1795113551851,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4053
+  },
+  {
+   "atMs": 1795113553841,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4066
+  },
+  {
+   "atMs": 1795113555989,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4056
+  },
+  {
+   "atMs": 1795113558104,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4054
+  },
+  {
+   "atMs": 1795113560178,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4002
+  },
+  {
+   "atMs": 1795113562266,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3970
+  },
+  {
+   "atMs": 1795113564394,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3980
+  },
+  {
+   "atMs": 1795113566510,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3954
+  },
+  {
+   "atMs": 1795113569220,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3920
+  },
+  {
+   "atMs": 1795113571342,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3917
+  },
+  {
+   "atMs": 1795113573464,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3900
+  },
+  {
+   "atMs": 1795113575578,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3869
+  },
+  {
+   "atMs": 1795113577610,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3805
+  },
+  {
+   "atMs": 1795113579702,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3852
+  },
+  {
+   "atMs": 1795113581812,
+   "streamLag": 4,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3825
+  },
+  {
+   "atMs": 1795113584264,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3814
+  },
+  {
+   "atMs": 1795113586917,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3815
+  },
+  {
+   "atMs": 1795113588951,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3825
+  },
+  {
+   "atMs": 1795113591021,
+   "streamLag": 1,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3832
+  },
+  {
+   "atMs": 1795113593094,
+   "streamLag": 1,
+   "streamPending": 0,
+   "mqPending": 1,
+   "sending": 1,
+   "processing": 1,
+   "receipts": 4,
+   "freeMiB": 3799
+  },
+  {
+   "atMs": 1795113595098,
+   "streamLag": 0,
+   "streamPending": 1,
+   "mqPending": 1,
+   "sending": 0,
+   "processing": 1,
+   "receipts": 8,
+   "freeMiB": 3818
+  },
+  {
+   "atMs": 1795113597186,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 12,
+   "freeMiB": 3829
+  },
+  {
+   "atMs": 1795113599194,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 16,
+   "freeMiB": 3838
+  },
+  {
+   "atMs": 1795113601327,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 16,
+   "freeMiB": 4007
+  },
+  {
+   "atMs": 1795113603435,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 16,
+   "freeMiB": 4025
+  }
+ ],
+ "brokerLagSeries": [
+  {
+   "atMs": 1795113530452,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795113535454,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795113540456,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795113545457,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795113550460,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795113555461,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795113560551,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795113565553,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795113570557,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795113575558,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795113580560,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795113585563,
+   "brokerBacklog": 1,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795113590564,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795113595566,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795113600569,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  }
+ ],
+ "batches": [
+  {
+   "atMs": 1795113586597,
+   "requested": 1,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 1365
+  },
+  {
+   "atMs": 1795113586929,
+   "requested": 1,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 330
+  },
+  {
+   "atMs": 1795113587469,
+   "requested": 1,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 531
+  },
+  {
+   "atMs": 1795113588059,
+   "requested": 1,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 588
+  },
+  {
+   "atMs": 1795113592385,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 253
+  },
+  {
+   "atMs": 1795113592770,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 165
+  },
+  {
+   "atMs": 1795113592920,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 148
+  },
+  {
+   "atMs": 1795113593804,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 157
+  },
+  {
+   "atMs": 1795113594483,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 493
+  },
+  {
+   "atMs": 1795113594704,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 140
+  },
+  {
+   "atMs": 1795113594820,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795113595772,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 178
+  },
+  {
+   "atMs": 1795113596060,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 172
+  },
+  {
+   "atMs": 1795113596490,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 115
+  },
+  {
+   "atMs": 1795113596722,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 86
+  },
+  {
+   "atMs": 1795113597234,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 85
+  },
+  {
+   "atMs": 1795113597782,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 133
+  },
+  {
+   "atMs": 1795113598178,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 58
+  },
+  {
+   "atMs": 1795113598728,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 83
+  },
+  {
+   "atMs": 1795113599914,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 161
+  }
+ ]
+}

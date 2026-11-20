@@ -1,0 +1,20 @@
+{
+  "observedAtMs": 1794975919893,
+  "legacyCampaign": 71,
+  "legacyCursor": "1794767704746-0",
+  "blockedStreamId": "1794767704746-1",
+  "legacyFields": {
+    "reservationId": "01dbd21c7a334a2eaf32dd0b8c1d707f",
+    "userId": "13721",
+    "clientKey": "jm-13721"
+  },
+  "legacyRedisState": "PROCESSING",
+  "canonical": [
+    [
+      "128fe8a9291344d8beabac630abc2155",
+      "72",
+      "SUCCEEDED",
+      "85"
+    ]
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "pid": 24820,
+  "readOnly": true,
+  "readiness": "UP",
+  "liveness": "UP",
+  "sha256": "376b7ae3cf209dec1f36993c81d27685ab6de3014a687fdeee642d521c54efa5",
+  "jar": "E:\\content\\target\\commerce-revision-20261118082417\\runtime\\content-v23-376b7ae3cf20.jar"
+}

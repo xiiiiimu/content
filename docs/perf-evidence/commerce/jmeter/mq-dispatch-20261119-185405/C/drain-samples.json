@@ -1,0 +1,222 @@
+[
+  {
+    "atMs": 1795087151344,
+    "pendingAggregate": 1718,
+    "paid": 1787
+  },
+  {
+    "atMs": 1795087155466,
+    "pendingAggregate": 1651,
+    "paid": 1820
+  },
+  {
+    "atMs": 1795087158919,
+    "pendingAggregate": 1615,
+    "paid": 1859
+  },
+  {
+    "atMs": 1795087162282,
+    "pendingAggregate": 1572,
+    "paid": 1899
+  },
+  {
+    "atMs": 1795087165922,
+    "pendingAggregate": 1532,
+    "paid": 1940
+  },
+  {
+    "atMs": 1795087169044,
+    "pendingAggregate": 1526,
+    "paid": 1983
+  },
+  {
+    "atMs": 1795087172958,
+    "pendingAggregate": 1481,
+    "paid": 2017
+  },
+  {
+    "atMs": 1795087176826,
+    "pendingAggregate": 1458,
+    "paid": 2046
+  },
+  {
+    "atMs": 1795087180386,
+    "pendingAggregate": 1432,
+    "paid": 2089
+  },
+  {
+    "atMs": 1795087183837,
+    "pendingAggregate": 1343,
+    "paid": 2134
+  },
+  {
+    "atMs": 1795087187237,
+    "pendingAggregate": 1300,
+    "paid": 2176
+  },
+  {
+    "atMs": 1795087191144,
+    "pendingAggregate": 1296,
+    "paid": 2208
+  },
+  {
+    "atMs": 1795087194442,
+    "pendingAggregate": 1259,
+    "paid": 2246
+  },
+  {
+    "atMs": 1795087198419,
+    "pendingAggregate": 1223,
+    "paid": 2284
+  },
+  {
+    "atMs": 1795087202185,
+    "pendingAggregate": 1185,
+    "paid": 2323
+  },
+  {
+    "atMs": 1795087206033,
+    "pendingAggregate": 1112,
+    "paid": 2360
+  },
+  {
+    "atMs": 1795087209998,
+    "pendingAggregate": 1118,
+    "paid": 2392
+  },
+  {
+    "atMs": 1795087213693,
+    "pendingAggregate": 1068,
+    "paid": 2434
+  },
+  {
+    "atMs": 1795087217204,
+    "pendingAggregate": 1040,
+    "paid": 2472
+  },
+  {
+    "atMs": 1795087220636,
+    "pendingAggregate": 967,
+    "paid": 2514
+  },
+  {
+    "atMs": 1795087225116,
+    "pendingAggregate": 914,
+    "paid": 2558
+  },
+  {
+    "atMs": 1795087229784,
+    "pendingAggregate": 869,
+    "paid": 2599
+  },
+  {
+    "atMs": 1795087233456,
+    "pendingAggregate": 853,
+    "paid": 2649
+  },
+  {
+    "atMs": 1795087236828,
+    "pendingAggregate": 831,
+    "paid": 2689
+  },
+  {
+    "atMs": 1795087240160,
+    "pendingAggregate": 785,
+    "paid": 2733
+  },
+  {
+    "atMs": 1795087244499,
+    "pendingAggregate": 751,
+    "paid": 2769
+  },
+  {
+    "atMs": 1795087247853,
+    "pendingAggregate": 698,
+    "paid": 2807
+  },
+  {
+    "atMs": 1795087251214,
+    "pendingAggregate": 657,
+    "paid": 2848
+  },
+  {
+    "atMs": 1795087254170,
+    "pendingAggregate": 629,
+    "paid": 2891
+  },
+  {
+    "atMs": 1795087257555,
+    "pendingAggregate": 588,
+    "paid": 2931
+  },
+  {
+    "atMs": 1795087261620,
+    "pendingAggregate": 531,
+    "paid": 2975
+  },
+  {
+    "atMs": 1795087265385,
+    "pendingAggregate": 490,
+    "paid": 3012
+  },
+  {
+    "atMs": 1795087268552,
+    "pendingAggregate": 415,
+    "paid": 3058
+  },
+  {
+    "atMs": 1795087271906,
+    "pendingAggregate": 400,
+    "paid": 3105
+  },
+  {
+    "atMs": 1795087275855,
+    "pendingAggregate": 367,
+    "paid": 3141
+  },
+  {
+    "atMs": 1795087279961,
+    "pendingAggregate": 331,
+    "paid": 3180
+  },
+  {
+    "atMs": 1795087283344,
+    "pendingAggregate": 291,
+    "paid": 3220
+  },
+  {
+    "atMs": 1795087286796,
+    "pendingAggregate": 244,
+    "paid": 3263
+  },
+  {
+    "atMs": 1795087290227,
+    "pendingAggregate": 201,
+    "paid": 3305
+  },
+  {
+    "atMs": 1795087293620,
+    "pendingAggregate": 158,
+    "paid": 3352
+  },
+  {
+    "atMs": 1795087297500,
+    "pendingAggregate": 113,
+    "paid": 3389
+  },
+  {
+    "atMs": 1795087300911,
+    "pendingAggregate": 94,
+    "paid": 3428
+  },
+  {
+    "atMs": 1795087304452,
+    "pendingAggregate": 9,
+    "paid": 3474
+  },
+  {
+    "atMs": 1795087307396,
+    "pendingAggregate": 0,
+    "paid": 3482
+  }
+]

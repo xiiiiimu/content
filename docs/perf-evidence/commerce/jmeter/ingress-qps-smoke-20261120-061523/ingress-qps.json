@@ -1,0 +1,571 @@
+{
+ "plan": {
+  "path": "soldout",
+  "levels": [
+   50
+  ],
+  "seconds": 5,
+  "rest": 3,
+  "expectedRtMs": 50,
+  "vus": {
+   "50": 10
+  },
+  "stock": 4,
+  "loadBuyers": 20,
+  "k6Affinity": "0xfc00",
+  "k6Cpus": [
+   10,
+   11,
+   12,
+   13,
+   14,
+   15
+  ],
+  "backendAffinity": "0x3ff",
+  "backendCpus": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9
+  ],
+  "dockerVm": "not pinned",
+  "k6": "tools\\k6-v0.55.0\\k6-v0.55.0-windows-amd64\\k6.exe",
+  "tool": "k6 v0.55.0 constant-arrival-rate",
+  "backendPid": 15120,
+  "backendAffinityObserved": 1023,
+  "campaignId": 143,
+  "postId": 156,
+  "loginSec": 0.9,
+  "soldOutAtMs": 1795126604846
+ },
+ "levels": [
+  {
+   "targetRate": 20,
+   "requests": 61,
+   "droppedIterations": 0,
+   "actualRate": 20.3,
+   "actualPct": 101.67,
+   "completedQps": {
+    "accepted": 0.0,
+    "soldOut": 20.3,
+    "otherReject": 0.0,
+    "http503": 0.0,
+    "http5xxOther": 0.0,
+    "timeout": 0.0,
+    "connFail": 0.0
+   },
+   "counts": {
+    "accepted": 0,
+    "soldOut": 61,
+    "otherReject": 0,
+    "http503": 0,
+    "http5xxOther": 0,
+    "timeout": 0,
+    "connFail": 0
+   },
+   "otherRejectDetail": {},
+   "httpMs": {
+    "p50": 5.3847,
+    "p95": 30.4315,
+    "p99": 51.387739999999994,
+    "max": 55.2413,
+    "avg": 8.400752459016395
+   },
+   "stage": "warmup",
+   "vus": 10,
+   "windowStartMs": 1795126610005,
+   "windowEndMs": 1795126613005,
+   "k6Rc": 0,
+   "k6AffinityObserved": "",
+   "access": {
+    "appMs": {
+     "n": 60,
+     "p50": 4.827,
+     "p95": 24.812,
+     "p99": 48.496,
+     "max": 48.496,
+     "mean": 7.396
+    },
+    "beginEndMs": {
+     "n": 60,
+     "p50": 5,
+     "p95": 25,
+     "p99": 49,
+     "max": 49,
+     "mean": 7.45
+    },
+    "statuses": {
+     "409": 60
+    }
+   },
+   "env": {
+    "samples": 3,
+    "cpuTotalPct": {
+     "n": 3,
+     "p50": 25.0,
+     "p95": 30.0,
+     "p99": 30.0,
+     "max": 30.0,
+     "mean": 23.0
+    },
+    "effectiveMHz": {
+     "n": 3,
+     "p50": 2870.0,
+     "p95": 2886.0,
+     "p99": 2886.0,
+     "max": 2886.0,
+     "mean": 2813.333
+    },
+    "pctOfMaxFrequency": {
+     "n": 3,
+     "p50": 79.0,
+     "p95": 80.0,
+     "p99": 80.0,
+     "max": 80.0,
+     "mean": 79.0
+    },
+    "processCores": {
+     "wmiPrvSE": {
+      "n": 3,
+      "p50": 0.15,
+      "p95": 0.15,
+      "p99": 0.15,
+      "max": 0.15,
+      "mean": 0.133
+     },
+     "vmmem": {
+      "n": 3,
+      "p50": 0.42,
+      "p95": 0.47,
+      "p99": 0.47,
+      "max": 0.47,
+      "mean": 0.383
+     },
+     "samplerPwsh": {
+      "n": 3,
+      "p50": 0.0,
+      "p95": 0.15,
+      "p99": 0.15,
+      "max": 0.15,
+      "mean": 0.05
+     },
+     "k6": {
+      "n": 2,
+      "p50": 0.0,
+      "p95": 0.05,
+      "p99": 0.05,
+      "max": 0.05,
+      "mean": 0.025
+     },
+     "dockerBackend": {
+      "n": 3,
+      "p50": 0.1,
+      "p95": 0.1,
+      "p99": 0.1,
+      "max": 0.1,
+      "mean": 0.083
+     },
+     "backend": {
+      "n": 3,
+      "p50": 0.21,
+      "p95": 0.46,
+      "p99": 0.46,
+      "max": 0.46,
+      "mean": 0.273
+     },
+     "samplerPython": {
+      "n": 3,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+     }
+    },
+    "dockerCpuPct": {
+     "content-minio-1": {
+      "n": 6,
+      "p50": 0.12,
+      "p95": 2.97,
+      "p99": 2.97,
+      "max": 2.97,
+      "mean": 1.04
+     },
+     "content-mysql-1": {
+      "n": 6,
+      "p50": 23.03,
+      "p95": 23.83,
+      "p99": 23.83,
+      "max": 23.83,
+      "mean": 21.723
+     },
+     "content-redis-1": {
+      "n": 6,
+      "p50": 1.98,
+      "p95": 4.09,
+      "p99": 4.09,
+      "max": 4.09,
+      "mean": 2.283
+     },
+     "content-broker-1": {
+      "n": 6,
+      "p50": 5.85,
+      "p95": 6.62,
+      "p99": 6.62,
+      "max": 6.62,
+      "mean": 5.617
+     },
+     "content-namesrv-1": {
+      "n": 6,
+      "p50": 0.19,
+      "p95": 6.43,
+      "p99": 6.43,
+      "max": 6.43,
+      "mean": 2.257
+     }
+    },
+    "redis": {
+     "scriptCallsPerSec": {
+      "n": 3,
+      "p50": 20,
+      "p95": 20,
+      "p99": 20,
+      "max": 20,
+      "mean": 14.667
+     },
+     "scriptUsecPerCall": {
+      "n": 3,
+      "p50": 228.8,
+      "p95": 539.1,
+      "p99": 539.1,
+      "max": 539.1,
+      "mean": 317.067
+     },
+     "opsPerSec": {
+      "n": 3,
+      "p50": 452,
+      "p95": 598,
+      "p99": 598,
+      "max": 598,
+      "mean": 389.0
+     },
+     "usedMemoryBytes": {
+      "n": 3,
+      "p50": 47159848,
+      "p95": 47180128,
+      "p99": 47180128,
+      "max": 47180128,
+      "mean": 47161592.0
+     },
+     "streamLength": {
+      "n": 3,
+      "p50": 40814,
+      "p95": 40814,
+      "p99": 40814,
+      "max": 40814,
+      "mean": 40814.0
+     },
+     "groupLag": {
+      "n": 3,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "max": 0,
+      "mean": 0.0
+     },
+     "groupPending": {
+      "n": 3,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "max": 0,
+      "mean": 0.0
+     }
+    },
+    "slowlog": {}
+   },
+   "verdict": {
+    "errorRate": 0.0,
+    "errors": 0,
+    "k6CoresP95": 0.05,
+    "injectorSaturated": false,
+    "valid": true,
+    "knee": {
+     "p99Over200ms": false,
+     "errorRateOver0.1pct": false,
+     "arrivalUnder95pct": false
+    },
+    "clean": true
+   }
+  },
+  {
+   "targetRate": 50,
+   "requests": 251,
+   "droppedIterations": 0,
+   "actualRate": 50.2,
+   "actualPct": 100.4,
+   "completedQps": {
+    "accepted": 0.0,
+    "soldOut": 50.2,
+    "otherReject": 0.0,
+    "http503": 0.0,
+    "http5xxOther": 0.0,
+    "timeout": 0.0,
+    "connFail": 0.0
+   },
+   "counts": {
+    "accepted": 0,
+    "soldOut": 251,
+    "otherReject": 0,
+    "http503": 0,
+    "http5xxOther": 0,
+    "timeout": 0,
+    "connFail": 0
+   },
+   "otherRejectDetail": {},
+   "httpMs": {
+    "p50": 4.8891,
+    "p95": 7.87075,
+    "p99": 12.4814,
+    "max": 18.1056,
+    "avg": 5.068226693227094
+   },
+   "stage": "L50",
+   "vus": 10,
+   "windowStartMs": 1795126616614,
+   "windowEndMs": 1795126621614,
+   "k6Rc": 0,
+   "k6AffinityObserved": "26708:64512",
+   "access": {
+    "appMs": {
+     "n": 250,
+     "p50": 4.289,
+     "p95": 6.946,
+     "p99": 10.096,
+     "max": 17.64,
+     "mean": 4.475
+    },
+    "beginEndMs": {
+     "n": 250,
+     "p50": 4,
+     "p95": 7,
+     "p99": 10,
+     "max": 18,
+     "mean": 4.496
+    },
+    "statuses": {
+     "409": 250
+    }
+   },
+   "env": {
+    "samples": 5,
+    "cpuTotalPct": {
+     "n": 5,
+     "p50": 28.0,
+     "p95": 38.0,
+     "p99": 38.0,
+     "max": 38.0,
+     "mean": 27.6
+    },
+    "effectiveMHz": {
+     "n": 5,
+     "p50": 2515.0,
+     "p95": 2988.0,
+     "p99": 2988.0,
+     "max": 2988.0,
+     "mean": 2552.2
+    },
+    "pctOfMaxFrequency": {
+     "n": 5,
+     "p50": 80.0,
+     "p95": 80.0,
+     "p99": 80.0,
+     "max": 80.0,
+     "mean": 78.4
+    },
+    "processCores": {
+     "wmiPrvSE": {
+      "n": 5,
+      "p50": 0.14,
+      "p95": 0.19,
+      "p99": 0.19,
+      "max": 0.19,
+      "mean": 0.126
+     },
+     "vmmem": {
+      "n": 5,
+      "p50": 3.2,
+      "p95": 4.51,
+      "p99": 4.51,
+      "max": 4.51,
+      "mean": 2.588
+     },
+     "samplerPwsh": {
+      "n": 5,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+     },
+     "k6": {
+      "n": 4,
+      "p50": 0.09,
+      "p95": 0.15,
+      "p99": 0.15,
+      "max": 0.15,
+      "mean": 0.108
+     },
+     "dockerBackend": {
+      "n": 5,
+      "p50": 0.1,
+      "p95": 0.83,
+      "p99": 0.83,
+      "max": 0.83,
+      "mean": 0.234
+     },
+     "backend": {
+      "n": 5,
+      "p50": 0.51,
+      "p95": 0.73,
+      "p99": 0.73,
+      "max": 0.73,
+      "mean": 0.5
+     },
+     "samplerPython": {
+      "n": 5,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+     }
+    },
+    "dockerCpuPct": {
+     "content-minio-1": {
+      "n": 10,
+      "p50": 0.04,
+      "p95": 5.15,
+      "p99": 5.15,
+      "max": 5.15,
+      "mean": 0.769
+     },
+     "content-mysql-1": {
+      "n": 10,
+      "p50": 22.15,
+      "p95": 33.99,
+      "p99": 33.99,
+      "max": 33.99,
+      "mean": 25.076
+     },
+     "content-redis-1": {
+      "n": 10,
+      "p50": 2.55,
+      "p95": 6.33,
+      "p99": 6.33,
+      "max": 6.33,
+      "mean": 2.714
+     },
+     "content-broker-1": {
+      "n": 10,
+      "p50": 6.98,
+      "p95": 227.37,
+      "p99": 227.37,
+      "max": 227.37,
+      "mean": 62.05
+     },
+     "content-namesrv-1": {
+      "n": 10,
+      "p50": 2.94,
+      "p95": 8.6,
+      "p99": 8.6,
+      "max": 8.6,
+      "mean": 2.886
+     }
+    },
+    "redis": {
+     "scriptCallsPerSec": {
+      "n": 5,
+      "p50": 50,
+      "p95": 51,
+      "p99": 51,
+      "max": 51,
+      "mean": 46.4
+     },
+     "scriptUsecPerCall": {
+      "n": 5,
+      "p50": 161.0,
+      "p95": 193.9,
+      "p99": 193.9,
+      "max": 193.9,
+      "mean": 162.14
+     },
+     "opsPerSec": {
+      "n": 5,
+      "p50": 1366,
+      "p95": 1378,
+      "p99": 1378,
+      "max": 1378,
+      "mean": 1196.6
+     },
+     "usedMemoryBytes": {
+      "n": 5,
+      "p50": 47155600,
+      "p95": 47155600,
+      "p99": 47155600,
+      "max": 47155600,
+      "mean": 47154155.2
+     },
+     "streamLength": {
+      "n": 5,
+      "p50": 40814,
+      "p95": 40814,
+      "p99": 40814,
+      "max": 40814,
+      "mean": 40814.0
+     },
+     "groupLag": {
+      "n": 5,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "max": 0,
+      "mean": 0.0
+     },
+     "groupPending": {
+      "n": 5,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "max": 0,
+      "mean": 0.0
+     }
+    },
+    "slowlog": {}
+   },
+   "verdict": {
+    "errorRate": 0.0,
+    "errors": 0,
+    "k6CoresP95": 0.15,
+    "injectorSaturated": false,
+    "valid": true,
+    "knee": {
+     "p99Over200ms": false,
+     "errorRateOver0.1pct": false,
+     "arrivalUnder95pct": false
+    },
+    "clean": true
+   }
+  }
+ ],
+ "sustainableEntryQps": 50,
+ "tokenSets": 1,
+ "tokenSecretsArchived": false,
+ "finishedMs": 1795126640762
+}

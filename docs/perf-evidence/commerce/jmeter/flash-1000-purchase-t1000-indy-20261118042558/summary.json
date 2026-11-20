@@ -1,0 +1,40 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\flash-1000-purchase-t1000-indy-20261118042558\\results.jtl",
+  "samples": 1000,
+  "spanSec": 0.913,
+  "requestQps": 1095.29,
+  "acceptQps": 109.53,
+  "businessRejects": 900,
+  "systemErrors": 0,
+  "connectFail": 0,
+  "timeouts": 0,
+  "http503": 0,
+  "ok": 100,
+  "p50Ms": 6351,
+  "p95Ms": 7214,
+  "p99Ms": 7267,
+  "byLabel": [
+    {
+      "p95": 7214,
+      "windowSec": 0.913,
+      "activeQps": 1095.29,
+      "label": "POST-purchase",
+      "p99": 7267,
+      "n": 1000,
+      "activeWindowSec": 0.913,
+      "p50": 6351,
+      "qps": 1095.29
+    }
+  ],
+  "byClass": [
+    {
+      "cls": "BIZ:",
+      "count": 900
+    },
+    {
+      "cls": "OK",
+      "count": 100
+    }
+  ],
+  "qpsNote": "byLabel.qps = n / whole-run spanSec; byLabel.activeQps = n / label start-ts span (optional)"
+}

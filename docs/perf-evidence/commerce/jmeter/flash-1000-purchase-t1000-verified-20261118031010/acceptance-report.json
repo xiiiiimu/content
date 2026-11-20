@@ -1,0 +1,56 @@
+{
+  "configuredThreads": 1000,
+  "campaignId": 85,
+  "postId": 98,
+  "readyCount": 1000,
+  "barrierTimedOut": false,
+  "samples": 1000,
+  "uniqueUsers": 1000,
+  "requestStartSpanMs": 1231,
+  "requestQps": 812.3476848090983,
+  "httpCompletionQps": 26.170593498359676,
+  "sampleCompletionQps": 74.56009543692215,
+  "http200Qps": 7.456009543692216,
+  "qpsDefinitions": {
+    "requestQps": "all JTL sample starts / (last start - first start); HTTP sampler start, not NIC wire timestamp",
+    "httpCompletionQps": "HTTP responses only / (last sample completion - first start); excludes connection errors",
+    "http200Qps": "HTTP 200 / (last completion - first start)",
+    "finalPaidTps": "unique PAID orders / (last recorded paid_at - first HTTP start); paid_at is transaction-record time, not commit timestamp",
+    "fullRunPaidTps": "unique PAID / (confirmed drain observation - first HTTP start)"
+  },
+  "httpStatusCounts": {
+    "Non HTTP response code: org.apache.http.conn.HttpHostConnectException": 649,
+    "200": 100,
+    "500": 3,
+    "409": 248
+  },
+  "http401": 0,
+  "http5xx": 3,
+  "businessRejects": {
+    "UNCLASSIFIED": 3,
+    "SOLD_OUT": 248
+  },
+  "connectFailures": 649,
+  "timeouts": 0,
+  "p50Ms": 2087,
+  "p95Ms": 11386,
+  "p99Ms": 12314,
+  "paidOrders": 100,
+  "remainingStock": 0,
+  "activeEntitlements": 100,
+  "duplicateOrders": 0,
+  "duplicateEntitlements": 0,
+  "processingLeft": 0,
+  "redisRemainingStock": 0,
+  "redisProcessingLeft": 0,
+  "drainAfterLastHttpSec": 30.285,
+  "finalPaidTps": 2.424477525093342,
+  "fullRunPaidTps": 2.288486623795684,
+  "observedLastPaidAfterHttpSec": 27.834,
+  "drainMeasurement": "upper bound from last HTTP completion to a committed database snapshot confirming zero unfinished work",
+  "pass": false,
+  "failureReasons": [
+    "connection failure",
+    "unexpected HTTP or business rejection"
+  ]
+}

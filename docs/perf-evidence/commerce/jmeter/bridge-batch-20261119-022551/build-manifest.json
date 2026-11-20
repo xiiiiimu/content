@@ -1,0 +1,773 @@
+{
+  "sourceFileCount": 190,
+  "sourceSnapshotMatchesWorkingTree": true,
+  "jar": {
+    "path": "E:\\content\\target\\bridge-batch-20261119-022551\\runtime\\content-v24-c1c7cd41f07c.jar",
+    "sha256": "c1c7cd41f07c565582d89fad3e4445e3cd0822c5e6fbf6a3260df07cd9ee83d8"
+  },
+  "gitHead": "dd2ab174a01288964e51df4bdd01a7fb05d9550e",
+  "gitBranch": "feat/v1.1-material-commerce",
+  "stagedDiffUnchangedFromV23Snapshot": true,
+  "files": [
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/AssistantController.java",
+      "sha256": "972aca1b24d270268178aaf09afc3908c0b6e765a15df3c181938c13c7d8c723"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/AuthController.java",
+      "sha256": "a197306fbd20d7b58c29370627f9e4696d09e5eced5ed2853052e2ff74188d52"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/ContentPrincipal.java",
+      "sha256": "b932b721dc71e1f63c6875061023468b20e3f633ffdcbfc7276c6d2e7a1248e9"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/FeedController.java",
+      "sha256": "5ac41146b429ae54b492c43eec4f5d24d4871e9dcefe1de133fa367bacdef2ff"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/FeedErrors.java",
+      "sha256": "610a9ce98d96007f6e624c12b8e8b58130e8829d8d0df9ffd0156c5813ca8368"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/FeedIdentityFilter.java",
+      "sha256": "577dcd1aa713703e249e32b45df395af3d7a1462d1627b07bbc78a5dd5e3ce11"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/InteractionController.java",
+      "sha256": "cc945bc3e7fce06e057f0082b5879fd564b32a653af20a918ac7ef4341e99620"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/MaterialController.java",
+      "sha256": "f077d7cd5df236e17b19969aac3e5437158037b8ca4e76c18e54ca6105f863b3"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/MediaController.java",
+      "sha256": "6bae7f0d12171ce0473d8099e4917e367f73b94936355a44604f4f8afcdf0519"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/MediaObjectController.java",
+      "sha256": "e0e0508900121de1721cdf43496b3e94165157da204cf18787012041974592dd"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/NotificationController.java",
+      "sha256": "01f0a11efbc5b7fe17f9b6e4a0062b6b7f606bae8fb5a0befec25d572177b9ab"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/package-info.java",
+      "sha256": "869d4c092b727f576225e54bc94b03b3f05931d56a5a17ea41af49513df6f95b"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/PostAuthoringController.java",
+      "sha256": "d195c2130d75981a479070e6baaf672eb5df9de83997a00265060b2e0b45d050"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/PostController.java",
+      "sha256": "17fc7d6e482a7cbd0b5a44f6ab663fa94c6991e43b42f5ba68350bbf3210745e"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/PublishController.java",
+      "sha256": "9a5b3ad4f59859486844094eddd9b83a23f568f1d6395e4cb5de3f822faa1619"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/PublishExceptionHandler.java",
+      "sha256": "2eed651fd66c0505a02db2448876d68eb5190c70059661dcf9c0bc11f011d878"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/SaleController.java",
+      "sha256": "0ffa5d9fa69d3f4171621948b393b1fd9b07423a899e6a3c3ee34c26bc326085"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/SaleGiveawayDebugController.java",
+      "sha256": "b106abcc03d943cd88e1eca7ea5f7bc30978bada88ba4b059454bd70a8861334"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/api/TrendGuardController.java",
+      "sha256": "7dc4b122a227855dbc9b61635192ac32ff7956f1cc9e7a334a133400f3b797a0"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/ContentApplication.java",
+      "sha256": "457e187b519d1ed1453ed00ed7dce1e642eb5461156bbebabd2c1c754f11f5ef"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/AssistantParser.java",
+      "sha256": "dd61ef6d462f2cd18b679d4e4cc7f4427aeda26229af1b84445fd17dd3218adf"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/AssistantService.java",
+      "sha256": "d1c9109bff8d0674684e13f78c41728b458a6050eb39e1aae5d69422b17cf54f"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/AuthoritativeVisibility.java",
+      "sha256": "4449cb1717111a315e195fa325ec372c1c259b32a86089f2bbc3234a15dba9b2"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/AuthService.java",
+      "sha256": "ee85eb0450aed439d30c78c6bd0b05e5130586a536e47c70f0a2a43d0db93f14"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/CachedPostDetails.java",
+      "sha256": "ecc8ccd967716d7fe63b96e41817a4f7e86433448b567591baa63dd018090b02"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/CandidateIndexUnavailableException.java",
+      "sha256": "d9777cb830c54ead0c9256071a735274619441df268bfa14207b453ad4e3e683"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/CandidateSlice.java",
+      "sha256": "43df2b64aeaa943b114c0c3d9bd5dd450538aeae899117cd8c04e895b5368469"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/DeliveryLease.java",
+      "sha256": "e22b12657b7fd32ea73dc80156d378b51929a8d565d9bb93d0fbb266258c8cee"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/DeliveryStore.java",
+      "sha256": "1503f60667b029f9b52595e3fafe6381299ba6fb1a7e8ccf9c7d7f54d4a3d634"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/DistributionInbox.java",
+      "sha256": "29e15997726bef8cde664aa6d3e714e2d22d85ad5228351973115897055c5dc1"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/DistributionWorker.java",
+      "sha256": "2ce394b7d29eba49a822fdee19109d25caacab65002af353cab45ee62c315df6"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/EligibilityRegistry.java",
+      "sha256": "6b44f9685211ff1dbe1e72ccf720f8f4594a21ecff96d868a53551911e0802aa"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/FeedbackWatchService.java",
+      "sha256": "93a9dff930f3e61309cbcb1464dbc6a18a64abfc789483737e28406bea3de4cf"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/FeedCandidate.java",
+      "sha256": "bc2f3be85dd8422a97933aec1e4fc805e1d8db374e19a83772d0972923cc2c80"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/FeedFailure.java",
+      "sha256": "19b4d929d8e6a8da1040bf195acc17dc5e2e207bf3dc52412de9db1910328cc1"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/FeedMemberCodec.java",
+      "sha256": "34a2972d1ec1b15b4409ec3d6436e06e693d79ab3890a474ac6c589858149328"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/FeedMerger.java",
+      "sha256": "2d831d37b38200593bf6e96476d2257f18dfa471b53753293ea999327283b918"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/FeedModes.java",
+      "sha256": "fd0484f8707242397b3145a687ad321209a4426631ad6c0c2ff76ac81edb2fc5"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/FeedRecovery.java",
+      "sha256": "25cece7551aae3253679b6446be76c4385b4cf67970cc6d3a9b02a79131c6620"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/FeedTokens.java",
+      "sha256": "0233c0711ff7b0e33664c1148e95e26f8683bc0e4d581ac9b6f487205b0f41e6"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/FeedTrimmer.java",
+      "sha256": "4b8a1829aa48d70f0c69413653bff4eeb6f2161db51362e776e6d8d0c18a2cbe"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/FfmpegTranscoder.java",
+      "sha256": "d2a547590badd4065f802972b09e619466698fe59ab26b33f993489d8b244754"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/FollowingFeed.java",
+      "sha256": "04f86c72b43f1d4c77bdd4749cc4c0edf54b0cc025ba9d100b064e35030f71a4"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/GiveawayService.java",
+      "sha256": "7ff738a6431e7f90f6e996b06059d3fa0ae33c1cf366bf36ec40d3ce23f0f8b4"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/HttpAssistantParser.java",
+      "sha256": "8b973969bffb68b98831495c16db59b187db5c5f9584ed0066523d14d8f5ebbf"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/InteractionService.java",
+      "sha256": "76b6f7d6e37e9cfad98818172ce784ec1c6edb2e9999ec68ecc15e119d33a063"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/MaterialGrants.java",
+      "sha256": "c927b0d9dd6998a079ea20d6e6728a16ea2581d915161ef87f6d59ca35b79acc"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/MaterialService.java",
+      "sha256": "622760e82631e474476a048fbb36a80718466a5274203dbb27500f38f2cded18"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/MediaService.java",
+      "sha256": "27ef70f8e773000af2762e81b309d8814bf117d7d4ec72a4eef3b871cb7c010b"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/NotificationService.java",
+      "sha256": "465617fe742811d592a790e336826c16e086d8b9ee582c959b3ac8d516deccf4"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/ObjectStore.java",
+      "sha256": "f9f455bc8289c22d8aac40192de2c0c2c46d7ecbaf1ff6a9ce12b45761cf9efc"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/package-info.java",
+      "sha256": "e65b0b1e102c2188555db91a3483280e731c9f2776a65a70acfcf25633be2ebf"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/PipelineObserver.java",
+      "sha256": "a58ac4e6fe5696c24942f2ba19a4fb840d18ccf4c5bc8a0aea22dadf80bb3939"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/PipelineReconcile.java",
+      "sha256": "bc68133d0b5b8f633e815b8ed6047e1bb2bb54cf405f5f295f05f9d105c23057"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/PostAuthoringService.java",
+      "sha256": "3f6ea2283740ec82f1bda10bfadac055cca0aa5a80433f9450edcf6538225f83"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/PostDetailService.java",
+      "sha256": "c2fe62a30e166ef56d4fe4c3847eeaf0ada76598d0923bda1ebab4960fd19c4b"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/Publication.java",
+      "sha256": "056131f067980fee4c8bc4705abbcd99db2b2d655ca8568b765344ef38cda707"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/PublishFailure.java",
+      "sha256": "fbfb8bfb23bd12e6f031f0c177734de8f8cf32b669093c4edaa13b489d1f4aeb"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/PublishRepository.java",
+      "sha256": "0d898b49bca4b117a335ecc781266a0a162b0e0552e13c736994621d338ecc39"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/PublishService.java",
+      "sha256": "d982f742c1fc726e5065bbc513d11e365dfa5d5b79744df9d76193df867ee613"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/PublishTransaction.java",
+      "sha256": "5f5032f8d805f4d66b76668fb502e738ea2e7c5faaaff59e617f6b27cc8dce1f"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/RecoveryRunner.java",
+      "sha256": "d0df446245f631bff0a323b6b9165b5ee97c0396bb4829f20dcc4f8eec121b85"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/RelationshipService.java",
+      "sha256": "29296647211b383dba571b1a7ace8eeea6358c8aa6919247808401e3b103b33d"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/RelayLease.java",
+      "sha256": "2ce6e40c4debed238d281b091429a159ce0f6596a6e9948b191cf65852ebdf6d"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/RelayObserver.java",
+      "sha256": "c168dd69dea70ef646c0d340c1bb536314c29f090e8b7d2c02ca90051bc50845"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/RelayRunner.java",
+      "sha256": "6f75e6e07fd7818a7198c3e5b2f395f6fb698f7e3645e5258e6187066b617400"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/RelaySender.java",
+      "sha256": "cc8a7223bed27dc6b036a856d66cb9a6331a66a9f68b5037389f270b31a45da1"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/RelayStore.java",
+      "sha256": "63a32719ffd7a96c44fdae4b18ad633ac9c56b9e1b0eea76542fffd4c68e9503"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/SaleBridgeBatch.java",
+      "sha256": "13a3b6d981a5ff4365d59e3622c8961eb613425ce5681eb0e40c392d1c7dfe67"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/SaleFaultHooks.java",
+      "sha256": "2554172aba8f56c25374a0f9e63ced8d1b3607d8b092427850462f031722a391"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/SaleIngress.java",
+      "sha256": "1cb086dc2ceffeb8b8f5591c50ca57115e00e65e6c87a01433597287585aa51a"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/SaleMessageSender.java",
+      "sha256": "5c5e6d14afb6c5b306ee6b74eb1ce3558866522d45a50e7dbe931b628995da89"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/SaleService.java",
+      "sha256": "3f409bcee5b0c8537219b54dfbb9c065fbd841807755207dd8f286e9c1c790ac"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/StubAssistantParser.java",
+      "sha256": "0d32b6952af62778662c4e47b8665be50562a7cf235775687ba907a7bfe7fd00"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/TrendGuardService.java",
+      "sha256": "5fd23583dd401e4d4f1abc7a71868d4494711feb837060d9e327b459008d87df"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/TrendingService.java",
+      "sha256": "0db29bf9927d675d772c3761b63c61e8d76102b570adf1c736d660caa23b0255"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/domain/VisibilityService.java",
+      "sha256": "36f78d24d1ab08abf4c6101200c4373ac8b0b1d8aec45181c90852c58cab040c"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/AssistantMapper.java",
+      "sha256": "e0d16e82fcb291fed861f9e4271a58c1fca8b37b57506023bcacb64c0daaeb56"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/DeliveryMapper.java",
+      "sha256": "deed433a671cbe078fa7ad27aba01589285e9e781ff04efb055f88ca885ecb51"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/FeedConfiguration.java",
+      "sha256": "6ad85162e355e7ac7b6fa3fd555dd2bed968c0005f5fd00d2e1bcf4a07334d13"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/FeedMapper.java",
+      "sha256": "fe6adf32dcc7159cf722f22a831f96cb1d576fb737667b15b7c6ee1ba029b9ec"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/FeedRedis.java",
+      "sha256": "5df992051d8ac68f558ee694fb0ad21b3a5585922e046aa7bff7d1c856babe20"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/GiveawayMapper.java",
+      "sha256": "b77af2e3deca964001f3e62b1f6fd1669f1591f469ac78e1f5c797b7197fce2c"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/HttpS3ObjectStore.java",
+      "sha256": "b584f35b0350f5920098761f8e250b4b1c84d537863cfc9b2e0eacb58f81ce3f"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/InboxMapper.java",
+      "sha256": "3e7b002489f0e7ba2e1b4d085c30b511ca36503d5abf8b8fcabd270cddd621dd"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/InteractionMapper.java",
+      "sha256": "e3a553450715503267ce277b6fbe7bfe54d3d11ffa0a27159ab04f6c69fd7c25"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/LocalWindowsBacklogConfiguration.java",
+      "sha256": "18629fe8a95bf8489416aacd3f2269c392a19feb6af95b5ba6ff2a31adb22ece"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/LocalWindowsNioProtocol.java",
+      "sha256": "0ee8333989c77d1910a8d282e0dfc8b15ee7b7b6ede1f5eff40b8ecd2e46b54c"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/MaterialMapper.java",
+      "sha256": "86deed4cc6e55c27e38ef3ef47ba79c1fbe5519fe624cc8723459d269a1aec80"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/MediaMapper.java",
+      "sha256": "c66bf721308efd6e93afee735777e3b54150f711aadeeb5787b1cc8f60114758"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/ModeMapper.java",
+      "sha256": "37a5f4317c83e1928ee3098d1b4d4ae917b7ba06c8f4a255cca03fe4fcf3c917"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/MyBatisRelayStore.java",
+      "sha256": "e2c17ccd2227436896c4a969e114ff39fe8879b28ba32908785373b3c5896966"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/NotificationMapper.java",
+      "sha256": "7ad472ad781c44469bf4bb95b7517c62148e38410d43ec786ea20e33534761bf"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/package-info.java",
+      "sha256": "681371173134ead7c4004f30c2a6f751be551ac26b9311755500beb84232632a"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/PostAuthoringMapper.java",
+      "sha256": "739f0468f9c5abf0bdab8a2db8ac038f58f431cbdd8c19a51143547aa4ba3617"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/PublishMapper.java",
+      "sha256": "afa28909cbba595a47269bce08ef4c08f3f4bd746d3a80e3ffe671b7448d1ed7"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/RecoveryMapper.java",
+      "sha256": "83810a6cc9ac65252991046c43db8d1e8a461f17dd50e42fd9e5784c8c50af90"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/RedisCandidateSource.java",
+      "sha256": "de89a163e9e97af53393c5d45ad03bbc8dbe11b69615e1bacdebb9eebc72b4dd"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/RedisFeedCandidateStore.java",
+      "sha256": "43b7412733592d65698a335bbc8be1878439257b246c74729e2a3d2b65b503a9"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/RelayMapper.java",
+      "sha256": "dd25b8baf82be02b8eb3cdec7b54f463b57b287924661bd48f13135fac234b65"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/RelaySettings.java",
+      "sha256": "61db75392d774b013e5208928097684f1e008ff2f9faf5242ad8ca41ee7d069f"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/RocketMqRelaySender.java",
+      "sha256": "6dedd439741c45e10bc571953e9e530e70f932959f278634a0173a771deae76e"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/RocketMqSaleSender.java",
+      "sha256": "3f1c49f6d745fd75eed7e23b7b6b6639c05e3b791c9990bb9f1f87d4ddbf0d2e"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/SaleBridgeMapper.java",
+      "sha256": "385c00edfb0435a32ab51e553ed7e24ddf048f719cf95bc1b809ec7970204df5"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/SaleConfiguration.java",
+      "sha256": "0d9944155ac849fa8f6d5e3643ca16ded5ff067fba669927322ef3311bb9a6fa"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/SaleEntryRedis.java",
+      "sha256": "5dba052ba5d691e284b6dfbbd2e94c42e97755027d24ab0b865c6d1691752645"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/SaleHttpInFlightFilter.java",
+      "sha256": "16cba11936f035ea0c453ac4c0aac794cf16def3d73eeb571f3abbb100bf4394"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/SaleIngressMapper.java",
+      "sha256": "6c32003e97d85178e5a1a2198f656a493f9b42c26c45e5599f27bede57144cd0"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/SaleLatency.java",
+      "sha256": "67f4736cbacfa4f61a1609f07d2d94627230d996c4e37853fa62756e3519691e"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/SaleLatencyConfiguration.java",
+      "sha256": "0f6ed53a68e8985055a35bbc66104fb3821cd6be14ef70d7baab93af02c5ecc7"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/SaleMapper.java",
+      "sha256": "edf665d136e514608ff0493044e0b9db05d634997bbcba6f13bb0fa18a23a43c"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/SaleRedis.java",
+      "sha256": "9a49039028e1f9ce6d196d9662394a4ddc8701e14b74f74a9d690306deac428e"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/TrendGuardMapper.java",
+      "sha256": "11b4256cebf4cbe23b90de20adcb37b4f74263a2f1c1474ef1df2936133b5703"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/UserMapper.java",
+      "sha256": "826e75d8138b61b3cd0b7aac34e1e497dc14e449db8b17c76d26a555fbf4524d"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/infrastructure/WindowsListenBacklog.java",
+      "sha256": "fef4b9fc6b2c3bb931684f8ff59c2cd1f691b462aba338178be6599a83cc6751"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/worker/FeedOpsCommand.java",
+      "sha256": "10f01d2050674177357bfcf970928c677f2852a16f0345f5a0779e6978e2b38f"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/worker/MediaScanConfiguration.java",
+      "sha256": "06e1ee5c1439a15f4c8cf18f7c5911697f3240ed860f062a17b8436341c43c6a"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/worker/OutboxRelay.java",
+      "sha256": "023938c7a48113bd620191ffe0ceefbddafea6d1dd50d3629652be4417b775b4"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/worker/OutboxReplayCommand.java",
+      "sha256": "7284baf89d4cedcf6af4bb816ec7069eaa9b2e507ec9a2a53907b70cbb43fca1"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/worker/package-info.java",
+      "sha256": "e0c843827776ef647c4e9896a9676eb7bc041dd7f64db50220150d33730dd9a0"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/worker/PipelineConfiguration.java",
+      "sha256": "dda612685b98b83e46c9c63cae8cc74f3d488bd9704e63b1b1985b5af458486d"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/worker/PipelineConsumer.java",
+      "sha256": "51ef17ae37d818fcf500f0e212c515e76c4f20cf25c7f0a5a558f864ded334f9"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/worker/RelayConfiguration.java",
+      "sha256": "c1f1d0d1a220f96a13272312472dd019d944f59d8d1379d1ae43ce100bb8182c"
+    },
+    {
+      "path": "src/main/java/io/github/xiiiiimu/content/worker/SaleConsumer.java",
+      "sha256": "143129a477bc9ec4f586ff4f6a477685a74f141eb815c4f3b78ed33a5e144aca"
+    },
+    {
+      "path": "src/main/resources/application-pipeline.yml",
+      "sha256": "2b29d567367e5df0b0b4775aed49b26c6d9e04d0f0b48efa262498fc53dbcc7a"
+    },
+    {
+      "path": "src/main/resources/application.yml",
+      "sha256": "016b18986c58dd01b66cd9e44b790788940c9c00a07d02b1d435a5ceb765b49e"
+    },
+    {
+      "path": "src/main/resources/db/migration/V10__trendguard_risk_events.sql",
+      "sha256": "24d524e28518c5f6046ae8f479bfd1f8445840b870a25881881ef50eb053c3c6"
+    },
+    {
+      "path": "src/main/resources/db/migration/V11__trendguard_risk_hardening.sql",
+      "sha256": "0cea342db52d94e886f5f7b031705119b4726ca4b519af3a93b08e8b70683fa5"
+    },
+    {
+      "path": "src/main/resources/db/migration/V12__trendguard_serial_and_unique.sql",
+      "sha256": "58e3a5d53692add2e6486660ccdb02bf3b1b7eac2d6e4dfc6538f8665570e706"
+    },
+    {
+      "path": "src/main/resources/db/migration/V13__community_users_comments_notifications.sql",
+      "sha256": "8be1e81799bfb020d0daabd99a3064385170b162d8c8e384dd9c6c80e7cfaba6"
+    },
+    {
+      "path": "src/main/resources/db/migration/V14__material_posts.sql",
+      "sha256": "8286e9dbb1d3c9eee35a0024d6cf3a051f8f910d8160dbdfd1353759869c7f4b"
+    },
+    {
+      "path": "src/main/resources/db/migration/V15__material_assistant_batch1.sql",
+      "sha256": "2560e4bfda7ebc40e5432f602c1d8340f1dac107a86f96b1ee388826c37ec2ae"
+    },
+    {
+      "path": "src/main/resources/db/migration/V16__material_assistant_batch2.sql",
+      "sha256": "16f247e71b45a48815885d2d87c1bf20388d643e003793e801a20a79510a59b9"
+    },
+    {
+      "path": "src/main/resources/db/migration/V17__material_commerce.sql",
+      "sha256": "4e8140318b98c15467094d3d0044f3688041f0711d939d47e74046ec1e0c3c37"
+    },
+    {
+      "path": "src/main/resources/db/migration/V18__sale_campaign_frozen_version.sql",
+      "sha256": "3b3328a39426d7db527a7e3c3ec246ae8e428e078cc2c861629376cd18e4bc1d"
+    },
+    {
+      "path": "src/main/resources/db/migration/V19__sale_eligibility_blocks.sql",
+      "sha256": "ad9f66b482ff7a60e8ac65bb3f82023d0b23b868323911a92471234b043a9827"
+    },
+    {
+      "path": "src/main/resources/db/migration/V1__content_baseline.sql",
+      "sha256": "73d81c3c04fbb27df026d909fc2916c6d25c2b58a51459f350638df56d2dc2ab"
+    },
+    {
+      "path": "src/main/resources/db/migration/V20__commerce_stream_dispatch_and_refund.sql",
+      "sha256": "dc3588ff1a709924578dd932cf29529a1bdf6ac228b533121c0000edd8c98a12"
+    },
+    {
+      "path": "src/main/resources/db/migration/V21__purchase_client_key_exact_identity.sql",
+      "sha256": "0ab2022d1d55f31277009fb137a9730101b4d7f92a01b2a99f59b884ba389e1a"
+    },
+    {
+      "path": "src/main/resources/db/migration/V22__sale_legacy_client_replay_audit.sql",
+      "sha256": "3b62d567f6aa38f4e22151c850254870a1bad4b73344a21f60bfe08f1bc47918"
+    },
+    {
+      "path": "src/main/resources/db/migration/V23__sale_dispatch_ack_timestamp.sql",
+      "sha256": "2cbe63b71f5baa1ef4621e4735559cbcce2e505b84aeb9e904417efde14a0854"
+    },
+    {
+      "path": "src/main/resources/db/migration/V24__sale_bridge_quarantine.sql",
+      "sha256": "7e5053d1aaa15f140fef2f276774cf177d794adbbab657a7c31fb7b1ec400567"
+    },
+    {
+      "path": "src/main/resources/db/migration/V2__idempotent_publication.sql",
+      "sha256": "96db2f6b056a22dabdea323fdf3bc9b6cfa2782ceeba18654de602e79774181a"
+    },
+    {
+      "path": "src/main/resources/db/migration/V3__outbox_relay.sql",
+      "sha256": "612d40c8eb97998324ec428781e2cb51aad0f58e830e9f62463e1c400fcd45ae"
+    },
+    {
+      "path": "src/main/resources/db/migration/V4__production_feed_control.sql",
+      "sha256": "9dfdd2e19e8b6db66e537a3377906a16f4b13b67e3f0ccb42bd72bd07bf0f53b"
+    },
+    {
+      "path": "src/main/resources/db/migration/V5__durable_distribution.sql",
+      "sha256": "a464468e35525b476d59c61a0b8dae312120c0e5a1dd2c9b3e301659ab1328ff"
+    },
+    {
+      "path": "src/main/resources/db/migration/V6__mode_coverage_and_recovery.sql",
+      "sha256": "873f3601beab7284041cc641c030c35a928e3e9b88e7fc513343e74d40158a1e"
+    },
+    {
+      "path": "src/main/resources/db/migration/V7__interactions_trending_media.sql",
+      "sha256": "5debe0d78fe48c1af1323832ec13f4eee7c42c63c59fbc40d35e55a9bc62c7c4"
+    },
+    {
+      "path": "src/main/resources/db/migration/V8__media_ffmpeg_artifacts.sql",
+      "sha256": "0e35c69ee8a147dca8cb4456870b4e25953cb8a3132470f2c4b007635da40d53"
+    },
+    {
+      "path": "src/main/resources/db/migration/V9__delivery_attempt_claim_indexes.sql",
+      "sha256": "b85a2380d280467f768dd53e7e73a867252302048216a803bbb267b4e707f66a"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/AssistantFlowIT.java",
+      "sha256": "1513b6667f97def21a3a9034e711b13dd7f37677dec7cb240d8017b85970218d"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/CommerceIngressRevisionIT.java",
+      "sha256": "efaf6019452aafe1e78b799a1cc08ef6dd1635b7b731d0b25b073809622c4321"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/CommerceRealMqIT.java",
+      "sha256": "56c66e96599fa99bc4674d4820869846382e58cea1421b1a3f4af4e7b86fa7d3"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/CommunityFlowIT.java",
+      "sha256": "6f2744c0cd801c83848cb4d70a299aaf1807cc73ca35fc5a728c2efd03e773f2"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/ContentApplicationTest.java",
+      "sha256": "d9a41540e7deaa12bdd6b5ef21af558ab1ab8f5146214f7c29f1458651ebfae2"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/DeliveryExhaustedClaimIT.java",
+      "sha256": "7d6d1e0f46f9bbc01b93d85dd6bd5cbcc004a3648ec283c57132e74737e56f76"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/DeliveryWorkerIT.java",
+      "sha256": "d83d66e5358600669666073332c0b03bb639a49648e45411745edba6018d3eff"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/DistributionIT.java",
+      "sha256": "184231bccaa15776e42fbf29d7223ee6f214006fc0e532fd494498cbb0c57567"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/domain/FfmpegTranscoderExecTest.java",
+      "sha256": "e02bd6efa20a708c0cc7c9a5c1eabcd6124dcb60474a159cda6ff19ddde14c1b"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/FeedMemberCodecTest.java",
+      "sha256": "a39df8479e1fd51aa3e1a9e7bb7c82e2b1e72e341e7e5afd76f92b1073a5f277"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/FeedMergeIT.java",
+      "sha256": "de8db730de8d0f5f84fc46c58d4c473f3782baef0782b6c86bc7b1084288122f"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/FeedMergerTest.java",
+      "sha256": "cbf062fc43899fb03183ae1fa54aac27ca6bba3e72ae435344e38d4624829213"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/FeedTokensTest.java",
+      "sha256": "920eda3bdd6c8c9b44a3f1b4a1f56d42b3e8c5aa1372422939ac3d8c6a43b124"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/FixedHostPortGuard.java",
+      "sha256": "062362c46587ebf7573b38049c06c2fcc4d84521b18836c25878ef193cb6ea93"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/InteractionsAndTrendingIT.java",
+      "sha256": "16eda8d682acc3c4fa45de62f31f5e4347e82859eee05c92f5f6039f285551f2"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/MaterialCommercePurchaseIT.java",
+      "sha256": "32915f043d963434e5037da3575337b36900654c39ae69a769ab86da9c6287e4"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/MaterialCommerceRefundBlacklistIT.java",
+      "sha256": "0b64c44935dcba95d3a4a2ba7e414a371a4752ddf91426160f59fe8515f5668e"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/MaterialFlowIT.java",
+      "sha256": "56ba4ff899a9993c3788627a2b25636935902b0eb3d8fd629a3b245b74e91630"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/MediaFfmpegIT.java",
+      "sha256": "0427736eba13897e21f2a2c0217fc856b1336d1b86c9ac21a80ee9bb16164ca0"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/MediaMinioIT.java",
+      "sha256": "bcff4a18c6ddff030b621a209b878bb881ca84413e6e82c0e2911012aa5523e2"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/MediaPipelineIT.java",
+      "sha256": "27465a72aed6f6f3e941b4302677d32e311ec002a564fa758b4ead07c459dcdd"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/MySqlMigrationIT.java",
+      "sha256": "eec4f9b2893ce5edb43b49431bd7789e8952820f293e591c05eaceea08c45b9c"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/OutboxRelayIT.java",
+      "sha256": "95d64b9845c96508cc1198a70a9ac583d05607a7d1f36b4a1d9e8b28926feda6"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/PerfHarnessIT.java",
+      "sha256": "2044ed703220d306d30a74369aef4a21b20b44a3627712b0925bb26538d693f9"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/PipelineFaultProcess.java",
+      "sha256": "9a9b44254c221b5848ccb78d138cd97a178f2d267f071d7fc79bfb525684c3b0"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/PipelineMqFixture.java",
+      "sha256": "6da0f66783041fe3927008ecd06db623ba53984d1c36ad285f19cb26b49166a5"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/PipelineProcesses.java",
+      "sha256": "a9d5ed89080359bfb0b4d6c49f50675ffcd3efc5347252fde99e96b7f8afb6bd"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/ProductionFeedIT.java",
+      "sha256": "6214f1b42fa2d80bc0275e8def33cd3e5cf809129c7c38676d969a87139d63af"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/PublishPostIT.java",
+      "sha256": "a6851b6d3df4fb12f148725510ce2e277bb3646f501d986569f20a2a03efcf61"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/RecoveryAndModesIT.java",
+      "sha256": "564c97f5aeb320a835c6c330b306580d7c9374a3d5143abe31e22195a377a373"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/RedisFeedCandidateStoreIT.java",
+      "sha256": "4a67a6f95e5732cd80b46b79d5b959ced547a5147f73630df995e5a7c67f55ce"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/RelayCrashProcess.java",
+      "sha256": "8063ca41ec7655effaebda795832e85b5d8fbfc472523559f95ca63c05343315"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/RelayMqFixture.java",
+      "sha256": "947ef68dd6ea8e3393442f50042d8569e6b2b8dea687e63fc7f36e6e4cde7c7d"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/RelayPolicyTest.java",
+      "sha256": "b43713e22d2218f64c2e8433f2b86e30f4cb91b39c1bb6fe938de550f5b54b52"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/ReliabilityMatrixIT.java",
+      "sha256": "83b6b89ea8c1458be04ebd6b9d3926590f5992bdc5aa9754efab190270ddd4fb"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/SaleLatencyTest.java",
+      "sha256": "47fd11a47371d5c2030600fd52bdcf18e8be634fc724f208bf74920b879108f3"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/TrendGuardIT.java",
+      "sha256": "aae0d006bb75f722ca4b75d1306588b73f93b1d035ed1f9b54da5db0d505d9a9"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/TrendGuardRiskIT.java",
+      "sha256": "380232ecf9d4da2c64bbea2f2045ecde5c0dbc1931fe568727e75002491b9fd4"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/VisibilityAndOfflineIT.java",
+      "sha256": "6c7d325e43f63013353ed84f7b3e40230a6ae620f236d6946eb9bed9b172f709"
+    },
+    {
+      "path": "src/test/java/io/github/xiiiiimu/content/WindowsListenBacklogTest.java",
+      "sha256": "81d4f8ed78bf8ed2e93c756e39ee01d8ace3ca38cc40d1e7a1b51ac1171abf35"
+    }
+  ]
+}

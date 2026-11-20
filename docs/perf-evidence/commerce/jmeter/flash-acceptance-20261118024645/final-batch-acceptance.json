@@ -1,0 +1,220 @@
+{
+  "pass": true,
+  "failureReasons": [],
+  "rounds": [
+    {
+      "configuredThreads": 1000,
+      "campaignId": 90,
+      "postId": 103,
+      "readyCount": 1000,
+      "barrierTimedOut": false,
+      "samples": 1000,
+      "uniqueUsers": 1000,
+      "requestStartSpanMs": 913,
+      "syncStartSpanLimitMs": 5000,
+      "synchronyValid": true,
+      "firstRequestStartMs": 1794947225946,
+      "lastHttpCompletionMs": 1794947233306,
+      "barrierReleaseEpochMs": 1794947216316,
+      "requestQps": 1095.2902519167578,
+      "httpCompletionQps": 135.8695652173913,
+      "sampleCompletionQps": 135.8695652173913,
+      "http200Qps": 13.586956521739129,
+      "qpsDefinitions": {
+        "requestQps": "all JTL sample starts / (last start - first start); HTTP sampler start, not NIC wire timestamp",
+        "httpCompletionQps": "HTTP responses only / (last sample completion - first start); excludes connection errors",
+        "http200Qps": "HTTP 200 / (last completion - first start)",
+        "finalPaidTps": "unique PAID orders / (last recorded paid_at - first HTTP start); paid_at is transaction-record time, not commit timestamp",
+        "fullRunPaidTps": "unique PAID / (confirmed drain observation - first HTTP start)"
+      },
+      "httpStatusCounts": {
+        "200": 100,
+        "409": 900
+      },
+      "http401": 0,
+      "http5xx": 0,
+      "businessRejects": {
+        "SOLD_OUT": 900
+      },
+      "httpErrorCodes": {
+        "SOLD_OUT": 900
+      },
+      "connectFailures": 0,
+      "timeouts": 0,
+      "p50Ms": 6351,
+      "p95Ms": 7214,
+      "p99Ms": 7267,
+      "paidOrders": 100,
+      "remainingStock": 0,
+      "activeEntitlements": 100,
+      "duplicateOrders": 0,
+      "duplicateEntitlements": 0,
+      "processingLeft": 0,
+      "redisRemainingStock": 0,
+      "redisProcessingLeft": 0,
+      "drainAfterLastHttpSec": 9.477,
+      "finalPaidTps": 6.696578048617157,
+      "fullRunPaidTps": 5.939300350418721,
+      "observedLastPaidAfterHttpSec": 7.573,
+      "drainConfirmedAtMs": 1794947242783,
+      "drainMeasurement": "upper bound to first post-HTTP observer confirming all requests/receipts succeeded, or final committed reconciliation snapshot",
+      "pass": true,
+      "failureReasons": [],
+      "evidencePath": "jmeter/flash-1000-purchase-t1000-indy-20261118042558"
+    },
+    {
+      "configuredThreads": 5000,
+      "campaignId": 91,
+      "postId": 104,
+      "readyCount": 5000,
+      "barrierTimedOut": false,
+      "samples": 5000,
+      "uniqueUsers": 5000,
+      "requestStartSpanMs": 3898,
+      "syncStartSpanLimitMs": 5000,
+      "synchronyValid": true,
+      "firstRequestStartMs": 1794947828297,
+      "lastHttpCompletionMs": 1794947872681,
+      "barrierReleaseEpochMs": 1794947799269,
+      "requestQps": 1282.7090815802976,
+      "httpCompletionQps": 112.65320836337419,
+      "sampleCompletionQps": 112.65320836337419,
+      "http200Qps": 2.2530641672674836,
+      "qpsDefinitions": {
+        "requestQps": "all JTL sample starts / (last start - first start); HTTP sampler start, not NIC wire timestamp",
+        "httpCompletionQps": "HTTP responses only / (last sample completion - first start); excludes connection errors",
+        "http200Qps": "HTTP 200 / (last completion - first start)",
+        "finalPaidTps": "unique PAID orders / (last recorded paid_at - first HTTP start); paid_at is transaction-record time, not commit timestamp",
+        "fullRunPaidTps": "unique PAID / (confirmed drain observation - first HTTP start)"
+      },
+      "httpStatusCounts": {
+        "409": 4900,
+        "200": 100
+      },
+      "http401": 0,
+      "http5xx": 0,
+      "businessRejects": {
+        "SOLD_OUT": 4900
+      },
+      "httpErrorCodes": {
+        "SOLD_OUT": 4900
+      },
+      "connectFailures": 0,
+      "timeouts": 0,
+      "p50Ms": 24926,
+      "p95Ms": 41049,
+      "p99Ms": 43967,
+      "paidOrders": 100,
+      "remainingStock": 0,
+      "activeEntitlements": 100,
+      "duplicateOrders": 0,
+      "duplicateEntitlements": 0,
+      "processingLeft": 0,
+      "redisRemainingStock": 0,
+      "redisProcessingLeft": 0,
+      "drainAfterLastHttpSec": 2.547,
+      "finalPaidTps": 2.493579033987482,
+      "fullRunPaidTps": 2.1307877522320005,
+      "observedLastPaidAfterHttpSec": 0,
+      "drainConfirmedAtMs": 1794947875228,
+      "drainMeasurement": "upper bound to first post-HTTP observer confirming all requests/receipts succeeded, or final committed reconciliation snapshot",
+      "pass": true,
+      "failureReasons": [],
+      "evidencePath": "jmeter/flash-5000-purchase-t5000-indy-20261118043509"
+    }
+  ],
+  "testCounts": {
+    "unit": {
+      "tests": 51,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "classes": [
+        {
+          "name": "io.github.xiiiiimu.content.ContentApplicationTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "name": "io.github.xiiiiimu.content.domain.FfmpegTranscoderExecTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 1
+        },
+        {
+          "name": "io.github.xiiiiimu.content.FeedMemberCodecTest",
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "name": "io.github.xiiiiimu.content.FeedMergerTest",
+          "tests": 19,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "name": "io.github.xiiiiimu.content.FeedTokensTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "name": "io.github.xiiiiimu.content.RelayPolicyTest",
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "name": "io.github.xiiiiimu.content.WindowsListenBacklogTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    "integration": {
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "classes": [
+        {
+          "name": "io.github.xiiiiimu.content.MaterialCommercePurchaseIT",
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "name": "io.github.xiiiiimu.content.MaterialCommerceRefundBlacklistIT",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    }
+  },
+  "pythonUnitTests": {
+    "passed": 10,
+    "failed": 0
+  },
+  "groovyScriptChecks": {
+    "compiled": 8,
+    "executedPurchaseScripts": 6,
+    "httpPerformed": false
+  },
+  "ci": "not run; no commit or push authorized",
+  "businessPayment": "simulated",
+  "scope": "Windows local one-campaign limited-stock purchase; not sustained 5000 TPS",
+  "sourceHead": "dd2ab174a01288964e51df4bdd01a7fb05d9550e"
+}

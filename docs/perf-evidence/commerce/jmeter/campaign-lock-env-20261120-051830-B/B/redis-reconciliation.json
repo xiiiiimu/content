@@ -1,0 +1,12 @@
+{
+  "stock": 608,
+  "version": 2,
+  "invalidRequests": 0,
+  "processing": 0,
+  "streamLag": 0,
+  "streamPending": 0,
+  "ready": "1",
+  "dispatchCount": 3392,
+  "dispatchPending": 0,
+  "cacheJobsPending": 0
+}

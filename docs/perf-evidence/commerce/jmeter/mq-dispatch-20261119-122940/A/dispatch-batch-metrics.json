@@ -1,0 +1,4065 @@
+{
+ "profile": "A:serial,20,1",
+ "batchMode": false,
+ "claimEvidence": "serial dispatch traces",
+ "jfrDataLoss": 0,
+ "claimSizeDistribution": {
+  "0": 279,
+  "1": 3512
+ },
+ "claimsWithRows": 3512,
+ "emptyClaims": 279,
+ "outcomes": {
+  "failed": 1,
+  "sent": 3511
+ },
+ "leaseUseMs": {
+  "count": 3512,
+  "p50": 128,
+  "p95": 353,
+  "p99": 527,
+  "max": 11786
+ },
+ "leaseViolations": {
+  "budgetSkipped": 0,
+  "confirmMissed": 0,
+  "retryMissed": 0,
+  "outcomeNotPersisted": 0,
+  "leaseUseOver25000Ms": 0
+ },
+ "window": {
+  "sqlTotal": 2345,
+  "sqlByStatement": {
+   "dispatch sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.unknownHoldCurrent": 336,
+   "dispatch sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.claim": 334,
+   "dispatch sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dispatch": 334,
+   "dispatch sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard": 336,
+   "dispatch sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.next": 337,
+   "dispatch sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.sent": 334,
+   "dispatch sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request": 334
+  },
+  "commitsByKind": {
+   "dispatch": 670
+  },
+  "commitsTotal": 670,
+  "rollbacksByKind": {},
+  "phaseMs": {
+   "dispatch dispatch.claim": {
+    "count": 336,
+    "p50": 73,
+    "p95": 221,
+    "p99": 400,
+    "max": 566
+   },
+   "dispatch dispatch.confirm": {
+    "count": 334,
+    "p50": 50,
+    "p95": 155,
+    "p99": 384,
+    "max": 646
+   },
+   "dispatch jdbc.commit": {
+    "count": 670,
+    "p50": 27,
+    "p95": 64,
+    "p99": 145,
+    "max": 213
+   },
+   "dispatch mq.send": {
+    "count": 334,
+    "p50": 8,
+    "p95": 31,
+    "p99": 70,
+    "max": 424
+   }
+  }
+ },
+ "full": {
+  "sqlTotal": 25421,
+  "sqlByStatement": {
+   "dispatch sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.unknownHoldCurrent": 3791,
+   "dispatch sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.claim": 3512,
+   "dispatch sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dispatch": 3512,
+   "dispatch sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard": 3791,
+   "dispatch sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.next": 3791,
+   "dispatch sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.retry": 1,
+   "dispatch sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.sent": 3511,
+   "dispatch sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request": 3512
+  },
+  "commitsByKind": {
+   "dispatch": 7303
+  },
+  "commitsTotal": 7303,
+  "rollbacksByKind": {},
+  "phaseMs": {
+   "dispatch dispatch.claim": {
+    "count": 3791,
+    "p50": 72,
+    "p95": 217,
+    "p99": 335,
+    "max": 875
+   },
+   "dispatch dispatch.confirm": {
+    "count": 3511,
+    "p50": 45,
+    "p95": 124,
+    "p99": 216,
+    "max": 646
+   },
+   "dispatch dispatch.retry": {
+    "count": 1,
+    "p50": 38,
+    "p95": 38,
+    "p99": 38,
+    "max": 38
+   },
+   "dispatch jdbc.commit": {
+    "count": 7303,
+    "p50": 25,
+    "p95": 56,
+    "p99": 99,
+    "max": 292
+   },
+   "dispatch mq.send": {
+    "count": 3512,
+    "p50": 8,
+    "p95": 24,
+    "p99": 45,
+    "max": 11352
+   }
+  }
+ },
+ "settle": {
+  "transactionsMs": {
+   "count": 3511,
+   "p50": 256,
+   "p95": 654,
+   "p99": 916,
+   "max": 2607
+  },
+  "commitMs": {
+   "count": 10533,
+   "p50": 26,
+   "p95": 56,
+   "p99": 104,
+   "max": 364
+  },
+  "committedInWindow": 332
+ },
+ "lockWaits": {
+  "samplesWithWaits": 23,
+  "samples": 320,
+  "observedWaitsByTable": {
+   "material_sale_cache_jobs": 22,
+   "material_sale_campaigns": 1
+  },
+  "peakPerSampleByTable": {
+   "material_sale_cache_jobs": 1,
+   "material_sale_campaigns": 1
+  },
+  "note": "Discrete samples; repeated observations of one wait are counted again. Absence is not proof of no waits."
+ },
+ "backlog": {
+  "peaks": {
+   "streamLag": {
+    "value": 655,
+    "atMs": 1795063353068
+   },
+   "mqPending": {
+    "value": 3046,
+    "atMs": 1795063392403
+   },
+   "processing": {
+    "value": 3047,
+    "atMs": 1795063392403
+   },
+   "brokerBacklog": {
+    "value": 5,
+    "atMs": 1795063639699
+   }
+  },
+  "edges": {
+   "windowStart": {
+    "streamLag": {
+     "value": 0,
+     "offsetMs": -653
+    },
+    "mqPending": {
+     "value": 0,
+     "offsetMs": -653
+    },
+    "processing": {
+     "value": 0,
+     "offsetMs": -653
+    },
+    "brokerBacklog": {
+     "value": 4,
+     "offsetMs": 1390
+    }
+   },
+   "windowEnd": {
+    "streamLag": {
+     "value": 573,
+     "offsetMs": -600
+    },
+    "mqPending": {
+     "value": 2539,
+     "offsetMs": -600
+    },
+    "processing": {
+     "value": 2540,
+     "offsetMs": -600
+    },
+    "brokerBacklog": {
+     "value": 4,
+     "offsetMs": 1541
+    }
+   }
+  },
+  "lagSamples": 128,
+  "lagSamplesOk": 127,
+  "lagIntervalMs": 5000,
+  "firstObservedDrainAfterWindowMs": 491948,
+  "brokerBacklogScope": "Whole consumer group on the topic (all campaigns); only this workload runs during the tier."
+ },
+ "series": [
+  {
+   "atMs": 1795063217224,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4221
+  },
+  {
+   "atMs": 1795063219472,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4094
+  },
+  {
+   "atMs": 1795063221564,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4059
+  },
+  {
+   "atMs": 1795063223614,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4095
+  },
+  {
+   "atMs": 1795063225725,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4055
+  },
+  {
+   "atMs": 1795063227757,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4060
+  },
+  {
+   "atMs": 1795063229865,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4025
+  },
+  {
+   "atMs": 1795063231856,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4011
+  },
+  {
+   "atMs": 1795063233953,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4070
+  },
+  {
+   "atMs": 1795063236035,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4060
+  },
+  {
+   "atMs": 1795063238169,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4063
+  },
+  {
+   "atMs": 1795063240235,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4070
+  },
+  {
+   "atMs": 1795063242240,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4066
+  },
+  {
+   "atMs": 1795063244281,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4096
+  },
+  {
+   "atMs": 1795063246286,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4070
+  },
+  {
+   "atMs": 1795063248284,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4068
+  },
+  {
+   "atMs": 1795063250285,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4057
+  },
+  {
+   "atMs": 1795063252418,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4052
+  },
+  {
+   "atMs": 1795063254428,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3997
+  },
+  {
+   "atMs": 1795063257433,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3938
+  },
+  {
+   "atMs": 1795063259746,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3943
+  },
+  {
+   "atMs": 1795063261734,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3931
+  },
+  {
+   "atMs": 1795063263803,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3969
+  },
+  {
+   "atMs": 1795063265817,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3892
+  },
+  {
+   "atMs": 1795063267940,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3905
+  },
+  {
+   "atMs": 1795063269969,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3826
+  },
+  {
+   "atMs": 1795063272107,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3867
+  },
+  {
+   "atMs": 1795063274177,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3852
+  },
+  {
+   "atMs": 1795063276220,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3844
+  },
+  {
+   "atMs": 1795063278237,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3838
+  },
+  {
+   "atMs": 1795063280336,
+   "streamLag": 44,
+   "streamPending": 20,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3804
+  },
+  {
+   "atMs": 1795063282482,
+   "streamLag": 44,
+   "streamPending": 20,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3733
+  },
+  {
+   "atMs": 1795063284524,
+   "streamLag": 24,
+   "streamPending": 20,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3735
+  },
+  {
+   "atMs": 1795063286542,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3702
+  },
+  {
+   "atMs": 1795063288678,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3708
+  },
+  {
+   "atMs": 1795063290763,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3700
+  },
+  {
+   "atMs": 1795063292890,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3765
+  },
+  {
+   "atMs": 1795063294951,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3755
+  },
+  {
+   "atMs": 1795063297099,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3724
+  },
+  {
+   "atMs": 1795063299195,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3711
+  },
+  {
+   "atMs": 1795063301220,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3712
+  },
+  {
+   "atMs": 1795063303293,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3680
+  },
+  {
+   "atMs": 1795063305372,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3642
+  },
+  {
+   "atMs": 1795063307429,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3637
+  },
+  {
+   "atMs": 1795063309485,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3692
+  },
+  {
+   "atMs": 1795063311583,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3688
+  },
+  {
+   "atMs": 1795063313636,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3708
+  },
+  {
+   "atMs": 1795063315759,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3707
+  },
+  {
+   "atMs": 1795063317851,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3734
+  },
+  {
+   "atMs": 1795063319930,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3696
+  },
+  {
+   "atMs": 1795063322011,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 3705
+  },
+  {
+   "atMs": 1795063324042,
+   "streamLag": 86,
+   "streamPending": 20,
+   "mqPending": 28,
+   "sending": 1,
+   "processing": 29,
+   "receipts": 5,
+   "freeMiB": 3731
+  },
+  {
+   "atMs": 1795063326049,
+   "streamLag": 157,
+   "streamPending": 20,
+   "mqPending": 45,
+   "sending": 1,
+   "processing": 46,
+   "receipts": 8,
+   "freeMiB": 3695
+  },
+  {
+   "atMs": 1795063328051,
+   "streamLag": 265,
+   "streamPending": 0,
+   "mqPending": 62,
+   "sending": 1,
+   "processing": 63,
+   "receipts": 11,
+   "freeMiB": 3667
+  },
+  {
+   "atMs": 1795063330303,
+   "streamLag": 278,
+   "streamPending": 20,
+   "mqPending": 78,
+   "sending": 0,
+   "processing": 80,
+   "receipts": 14,
+   "freeMiB": 3682
+  },
+  {
+   "atMs": 1795063332340,
+   "streamLag": 338,
+   "streamPending": 20,
+   "mqPending": 151,
+   "sending": 0,
+   "processing": 132,
+   "receipts": 22,
+   "freeMiB": 3699
+  },
+  {
+   "atMs": 1795063334458,
+   "streamLag": 405,
+   "streamPending": 0,
+   "mqPending": 200,
+   "sending": 1,
+   "processing": 201,
+   "receipts": 33,
+   "freeMiB": 3685
+  },
+  {
+   "atMs": 1795063336541,
+   "streamLag": 407,
+   "streamPending": 20,
+   "mqPending": 269,
+   "sending": 0,
+   "processing": 271,
+   "receipts": 44,
+   "freeMiB": 3637
+  },
+  {
+   "atMs": 1795063338594,
+   "streamLag": 460,
+   "streamPending": 20,
+   "mqPending": 355,
+   "sending": 0,
+   "processing": 356,
+   "receipts": 58,
+   "freeMiB": 3663
+  },
+  {
+   "atMs": 1795063340639,
+   "streamLag": 494,
+   "streamPending": 0,
+   "mqPending": 425,
+   "sending": 0,
+   "processing": 426,
+   "receipts": 68,
+   "freeMiB": 3659
+  },
+  {
+   "atMs": 1795063342773,
+   "streamLag": 510,
+   "streamPending": 0,
+   "mqPending": 513,
+   "sending": 1,
+   "processing": 514,
+   "receipts": 81,
+   "freeMiB": 3682
+  },
+  {
+   "atMs": 1795063344876,
+   "streamLag": 516,
+   "streamPending": 20,
+   "mqPending": 616,
+   "sending": 0,
+   "processing": 618,
+   "receipts": 97,
+   "freeMiB": 3637
+  },
+  {
+   "atMs": 1795063346913,
+   "streamLag": 551,
+   "streamPending": 20,
+   "mqPending": 688,
+   "sending": 1,
+   "processing": 689,
+   "receipts": 106,
+   "freeMiB": 3657
+  },
+  {
+   "atMs": 1795063348973,
+   "streamLag": 618,
+   "streamPending": 0,
+   "mqPending": 759,
+   "sending": 1,
+   "processing": 759,
+   "receipts": 115,
+   "freeMiB": 3640
+  },
+  {
+   "atMs": 1795063350991,
+   "streamLag": 648,
+   "streamPending": 20,
+   "mqPending": 810,
+   "sending": 0,
+   "processing": 811,
+   "receipts": 123,
+   "freeMiB": 3635
+  },
+  {
+   "atMs": 1795063353068,
+   "streamLag": 655,
+   "streamPending": 0,
+   "mqPending": 935,
+   "sending": 0,
+   "processing": 936,
+   "receipts": 138,
+   "freeMiB": 3660
+  },
+  {
+   "atMs": 1795063355137,
+   "streamLag": 644,
+   "streamPending": 0,
+   "mqPending": 1042,
+   "sending": 0,
+   "processing": 1043,
+   "receipts": 151,
+   "freeMiB": 3641
+  },
+  {
+   "atMs": 1795063357264,
+   "streamLag": 589,
+   "streamPending": 0,
+   "mqPending": 1203,
+   "sending": 1,
+   "processing": 1204,
+   "receipts": 170,
+   "freeMiB": 3653
+  },
+  {
+   "atMs": 1795063359317,
+   "streamLag": 606,
+   "streamPending": 0,
+   "mqPending": 1289,
+   "sending": 0,
+   "processing": 1290,
+   "receipts": 184,
+   "freeMiB": 3678
+  },
+  {
+   "atMs": 1795063361316,
+   "streamLag": 584,
+   "streamPending": 0,
+   "mqPending": 1413,
+   "sending": 0,
+   "processing": 1414,
+   "receipts": 200,
+   "freeMiB": 3698
+  },
+  {
+   "atMs": 1795063363335,
+   "streamLag": 545,
+   "streamPending": 0,
+   "mqPending": 1554,
+   "sending": 0,
+   "processing": 1555,
+   "receipts": 219,
+   "freeMiB": 3692
+  },
+  {
+   "atMs": 1795063365420,
+   "streamLag": 575,
+   "streamPending": 20,
+   "mqPending": 1663,
+   "sending": 1,
+   "processing": 1664,
+   "receipts": 231,
+   "freeMiB": 3665
+  },
+  {
+   "atMs": 1795063367455,
+   "streamLag": 595,
+   "streamPending": 20,
+   "mqPending": 1752,
+   "sending": 0,
+   "processing": 1733,
+   "receipts": 241,
+   "freeMiB": 3658
+  },
+  {
+   "atMs": 1795063369575,
+   "streamLag": 628,
+   "streamPending": 20,
+   "mqPending": 1824,
+   "sending": 0,
+   "processing": 1805,
+   "receipts": 249,
+   "freeMiB": 3638
+  },
+  {
+   "atMs": 1795063371706,
+   "streamLag": 600,
+   "streamPending": 0,
+   "mqPending": 1948,
+   "sending": 0,
+   "processing": 1949,
+   "receipts": 265,
+   "freeMiB": 3673
+  },
+  {
+   "atMs": 1795063373829,
+   "streamLag": 566,
+   "streamPending": 20,
+   "mqPending": 2091,
+   "sending": 0,
+   "processing": 2072,
+   "receipts": 282,
+   "freeMiB": 3660
+  },
+  {
+   "atMs": 1795063375876,
+   "streamLag": 555,
+   "streamPending": 20,
+   "mqPending": 2217,
+   "sending": 1,
+   "processing": 2218,
+   "receipts": 296,
+   "freeMiB": 3648
+  },
+  {
+   "atMs": 1795063378011,
+   "streamLag": 553,
+   "streamPending": 20,
+   "mqPending": 2341,
+   "sending": 0,
+   "processing": 2343,
+   "receipts": 312,
+   "freeMiB": 3644
+  },
+  {
+   "atMs": 1795063380055,
+   "streamLag": 579,
+   "streamPending": 0,
+   "mqPending": 2413,
+   "sending": 0,
+   "processing": 2414,
+   "receipts": 320,
+   "freeMiB": 3656
+  },
+  {
+   "atMs": 1795063382064,
+   "streamLag": 573,
+   "streamPending": 0,
+   "mqPending": 2539,
+   "sending": 1,
+   "processing": 2540,
+   "receipts": 335,
+   "freeMiB": 3640
+  },
+  {
+   "atMs": 1795063384137,
+   "streamLag": 493,
+   "streamPending": 0,
+   "mqPending": 2610,
+   "sending": 0,
+   "processing": 2611,
+   "receipts": 343,
+   "freeMiB": 3673
+  },
+  {
+   "atMs": 1795063386198,
+   "streamLag": 393,
+   "streamPending": 0,
+   "mqPending": 2701,
+   "sending": 1,
+   "processing": 2702,
+   "receipts": 352,
+   "freeMiB": 3895
+  },
+  {
+   "atMs": 1795063388309,
+   "streamLag": 253,
+   "streamPending": 0,
+   "mqPending": 2827,
+   "sending": 0,
+   "processing": 2828,
+   "receipts": 366,
+   "freeMiB": 3906
+  },
+  {
+   "atMs": 1795063390325,
+   "streamLag": 173,
+   "streamPending": 0,
+   "mqPending": 2899,
+   "sending": 0,
+   "processing": 2900,
+   "receipts": 374,
+   "freeMiB": 3872
+  },
+  {
+   "atMs": 1795063392403,
+   "streamLag": 13,
+   "streamPending": 20,
+   "mqPending": 3046,
+   "sending": 0,
+   "processing": 3047,
+   "receipts": 387,
+   "freeMiB": 3914
+  },
+  {
+   "atMs": 1795063394543,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 3043,
+   "sending": 0,
+   "processing": 3045,
+   "receipts": 403,
+   "freeMiB": 3931
+  },
+  {
+   "atMs": 1795063396593,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 3029,
+   "sending": 0,
+   "processing": 3030,
+   "receipts": 418,
+   "freeMiB": 3903
+  },
+  {
+   "atMs": 1795063398721,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 3013,
+   "sending": 0,
+   "processing": 3014,
+   "receipts": 433,
+   "freeMiB": 3873
+  },
+  {
+   "atMs": 1795063400867,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 3003,
+   "sending": 0,
+   "processing": 3004,
+   "receipts": 444,
+   "freeMiB": 3886
+  },
+  {
+   "atMs": 1795063402884,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2993,
+   "sending": 1,
+   "processing": 2994,
+   "receipts": 454,
+   "freeMiB": 3891
+  },
+  {
+   "atMs": 1795063404978,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2983,
+   "sending": 0,
+   "processing": 2984,
+   "receipts": 463,
+   "freeMiB": 3886
+  },
+  {
+   "atMs": 1795063407012,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2968,
+   "sending": 0,
+   "processing": 2969,
+   "receipts": 478,
+   "freeMiB": 3879
+  },
+  {
+   "atMs": 1795063409162,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2955,
+   "sending": 1,
+   "processing": 2956,
+   "receipts": 492,
+   "freeMiB": 3856
+  },
+  {
+   "atMs": 1795063411290,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2940,
+   "sending": 0,
+   "processing": 2941,
+   "receipts": 506,
+   "freeMiB": 3931
+  },
+  {
+   "atMs": 1795063413317,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2923,
+   "sending": 0,
+   "processing": 2924,
+   "receipts": 523,
+   "freeMiB": 3933
+  },
+  {
+   "atMs": 1795063415362,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2910,
+   "sending": 0,
+   "processing": 2911,
+   "receipts": 536,
+   "freeMiB": 3905
+  },
+  {
+   "atMs": 1795063417371,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2894,
+   "sending": 0,
+   "processing": 2895,
+   "receipts": 553,
+   "freeMiB": 3920
+  },
+  {
+   "atMs": 1795063419470,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2885,
+   "sending": 0,
+   "processing": 2886,
+   "receipts": 561,
+   "freeMiB": 3892
+  },
+  {
+   "atMs": 1795063421510,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2876,
+   "sending": 0,
+   "processing": 2877,
+   "receipts": 570,
+   "freeMiB": 3894
+  },
+  {
+   "atMs": 1795063423563,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2868,
+   "sending": 0,
+   "processing": 2869,
+   "receipts": 578,
+   "freeMiB": 4061
+  },
+  {
+   "atMs": 1795063425598,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2857,
+   "sending": 0,
+   "processing": 2858,
+   "receipts": 589,
+   "freeMiB": 4084
+  },
+  {
+   "atMs": 1795063427717,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2841,
+   "sending": 0,
+   "processing": 2842,
+   "receipts": 605,
+   "freeMiB": 4072
+  },
+  {
+   "atMs": 1795063429761,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2831,
+   "sending": 1,
+   "processing": 2831,
+   "receipts": 616,
+   "freeMiB": 4044
+  },
+  {
+   "atMs": 1795063431866,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2819,
+   "sending": 0,
+   "processing": 2820,
+   "receipts": 627,
+   "freeMiB": 4061
+  },
+  {
+   "atMs": 1795063433972,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2806,
+   "sending": 0,
+   "processing": 2807,
+   "receipts": 640,
+   "freeMiB": 4033
+  },
+  {
+   "atMs": 1795063436012,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2795,
+   "sending": 1,
+   "processing": 2796,
+   "receipts": 652,
+   "freeMiB": 4021
+  },
+  {
+   "atMs": 1795063438130,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2784,
+   "sending": 0,
+   "processing": 2785,
+   "receipts": 662,
+   "freeMiB": 4041
+  },
+  {
+   "atMs": 1795063440132,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2777,
+   "sending": 1,
+   "processing": 2778,
+   "receipts": 670,
+   "freeMiB": 4002
+  },
+  {
+   "atMs": 1795063442140,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2767,
+   "sending": 1,
+   "processing": 2767,
+   "receipts": 680,
+   "freeMiB": 4040
+  },
+  {
+   "atMs": 1795063444266,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2748,
+   "sending": 1,
+   "processing": 2749,
+   "receipts": 699,
+   "freeMiB": 4038
+  },
+  {
+   "atMs": 1795063446382,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2733,
+   "sending": 1,
+   "processing": 2734,
+   "receipts": 713,
+   "freeMiB": 4017
+  },
+  {
+   "atMs": 1795063448443,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2714,
+   "sending": 0,
+   "processing": 2716,
+   "receipts": 732,
+   "freeMiB": 4009
+  },
+  {
+   "atMs": 1795063450461,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2702,
+   "sending": 0,
+   "processing": 2703,
+   "receipts": 744,
+   "freeMiB": 4005
+  },
+  {
+   "atMs": 1795063452452,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2686,
+   "sending": 0,
+   "processing": 2687,
+   "receipts": 760,
+   "freeMiB": 4032
+  },
+  {
+   "atMs": 1795063454505,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2672,
+   "sending": 1,
+   "processing": 2673,
+   "receipts": 774,
+   "freeMiB": 4025
+  },
+  {
+   "atMs": 1795063456573,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2664,
+   "sending": 1,
+   "processing": 2665,
+   "receipts": 783,
+   "freeMiB": 3999
+  },
+  {
+   "atMs": 1795063458683,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2654,
+   "sending": 0,
+   "processing": 2655,
+   "receipts": 792,
+   "freeMiB": 3999
+  },
+  {
+   "atMs": 1795063460751,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2641,
+   "sending": 1,
+   "processing": 2642,
+   "receipts": 806,
+   "freeMiB": 3980
+  },
+  {
+   "atMs": 1795063462888,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2625,
+   "sending": 0,
+   "processing": 2627,
+   "receipts": 821,
+   "freeMiB": 4024
+  },
+  {
+   "atMs": 1795063465063,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2607,
+   "sending": 0,
+   "processing": 2608,
+   "receipts": 839,
+   "freeMiB": 4012
+  },
+  {
+   "atMs": 1795063467161,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2591,
+   "sending": 0,
+   "processing": 2593,
+   "receipts": 855,
+   "freeMiB": 4032
+  },
+  {
+   "atMs": 1795063469290,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2577,
+   "sending": 0,
+   "processing": 2578,
+   "receipts": 869,
+   "freeMiB": 3975
+  },
+  {
+   "atMs": 1795063471427,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2560,
+   "sending": 1,
+   "processing": 2561,
+   "receipts": 887,
+   "freeMiB": 4025
+  },
+  {
+   "atMs": 1795063473431,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2547,
+   "sending": 1,
+   "processing": 2548,
+   "receipts": 899,
+   "freeMiB": 4025
+  },
+  {
+   "atMs": 1795063475563,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2536,
+   "sending": 0,
+   "processing": 2537,
+   "receipts": 910,
+   "freeMiB": 4012
+  },
+  {
+   "atMs": 1795063477611,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2522,
+   "sending": 0,
+   "processing": 2523,
+   "receipts": 924,
+   "freeMiB": 4022
+  },
+  {
+   "atMs": 1795063479667,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2510,
+   "sending": 1,
+   "processing": 2511,
+   "receipts": 937,
+   "freeMiB": 3988
+  },
+  {
+   "atMs": 1795063481801,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2492,
+   "sending": 1,
+   "processing": 2493,
+   "receipts": 955,
+   "freeMiB": 4034
+  },
+  {
+   "atMs": 1795063483831,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2475,
+   "sending": 1,
+   "processing": 2476,
+   "receipts": 972,
+   "freeMiB": 4015
+  },
+  {
+   "atMs": 1795063485950,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2459,
+   "sending": 0,
+   "processing": 2460,
+   "receipts": 987,
+   "freeMiB": 4005
+  },
+  {
+   "atMs": 1795063487973,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2442,
+   "sending": 0,
+   "processing": 2443,
+   "receipts": 1004,
+   "freeMiB": 4009
+  },
+  {
+   "atMs": 1795063489967,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2430,
+   "sending": 0,
+   "processing": 2431,
+   "receipts": 1016,
+   "freeMiB": 3964
+  },
+  {
+   "atMs": 1795063492029,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2422,
+   "sending": 0,
+   "processing": 2423,
+   "receipts": 1024,
+   "freeMiB": 4005
+  },
+  {
+   "atMs": 1795063494066,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2412,
+   "sending": 0,
+   "processing": 2414,
+   "receipts": 1034,
+   "freeMiB": 3991
+  },
+  {
+   "atMs": 1795063496181,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2405,
+   "sending": 1,
+   "processing": 2406,
+   "receipts": 1041,
+   "freeMiB": 4000
+  },
+  {
+   "atMs": 1795063498212,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2390,
+   "sending": 1,
+   "processing": 2391,
+   "receipts": 1056,
+   "freeMiB": 4013
+  },
+  {
+   "atMs": 1795063500203,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2380,
+   "sending": 1,
+   "processing": 2381,
+   "receipts": 1067,
+   "freeMiB": 3965
+  },
+  {
+   "atMs": 1795063502248,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2367,
+   "sending": 0,
+   "processing": 2368,
+   "receipts": 1079,
+   "freeMiB": 3982
+  },
+  {
+   "atMs": 1795063504305,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2355,
+   "sending": 0,
+   "processing": 2356,
+   "receipts": 1091,
+   "freeMiB": 3966
+  },
+  {
+   "atMs": 1795063506299,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2344,
+   "sending": 1,
+   "processing": 2345,
+   "receipts": 1102,
+   "freeMiB": 3969
+  },
+  {
+   "atMs": 1795063508400,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2331,
+   "sending": 0,
+   "processing": 2332,
+   "receipts": 1115,
+   "freeMiB": 3975
+  },
+  {
+   "atMs": 1795063510391,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2324,
+   "sending": 1,
+   "processing": 2325,
+   "receipts": 1123,
+   "freeMiB": 3938
+  },
+  {
+   "atMs": 1795063512437,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2315,
+   "sending": 0,
+   "processing": 2316,
+   "receipts": 1131,
+   "freeMiB": 3962
+  },
+  {
+   "atMs": 1795063514539,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2305,
+   "sending": 1,
+   "processing": 2306,
+   "receipts": 1141,
+   "freeMiB": 3938
+  },
+  {
+   "atMs": 1795063516554,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2295,
+   "sending": 0,
+   "processing": 2296,
+   "receipts": 1151,
+   "freeMiB": 3957
+  },
+  {
+   "atMs": 1795063518674,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2283,
+   "sending": 1,
+   "processing": 2284,
+   "receipts": 1163,
+   "freeMiB": 3934
+  },
+  {
+   "atMs": 1795063520783,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2275,
+   "sending": 0,
+   "processing": 2277,
+   "receipts": 1171,
+   "freeMiB": 3889
+  },
+  {
+   "atMs": 1795063522855,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2265,
+   "sending": 0,
+   "processing": 2266,
+   "receipts": 1181,
+   "freeMiB": 3903
+  },
+  {
+   "atMs": 1795063524969,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2254,
+   "sending": 1,
+   "processing": 2255,
+   "receipts": 1193,
+   "freeMiB": 3891
+  },
+  {
+   "atMs": 1795063527078,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2244,
+   "sending": 0,
+   "processing": 2245,
+   "receipts": 1202,
+   "freeMiB": 3907
+  },
+  {
+   "atMs": 1795063529086,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2238,
+   "sending": 0,
+   "processing": 2239,
+   "receipts": 1208,
+   "freeMiB": 3893
+  },
+  {
+   "atMs": 1795063531162,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2229,
+   "sending": 1,
+   "processing": 2230,
+   "receipts": 1218,
+   "freeMiB": 3879
+  },
+  {
+   "atMs": 1795063533223,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2220,
+   "sending": 0,
+   "processing": 2222,
+   "receipts": 1226,
+   "freeMiB": 3856
+  },
+  {
+   "atMs": 1795063535322,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2212,
+   "sending": 1,
+   "processing": 2213,
+   "receipts": 1234,
+   "freeMiB": 3883
+  },
+  {
+   "atMs": 1795063537431,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2199,
+   "sending": 0,
+   "processing": 2201,
+   "receipts": 1247,
+   "freeMiB": 3871
+  },
+  {
+   "atMs": 1795063539420,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2188,
+   "sending": 0,
+   "processing": 2190,
+   "receipts": 1258,
+   "freeMiB": 3856
+  },
+  {
+   "atMs": 1795063541548,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2177,
+   "sending": 0,
+   "processing": 2178,
+   "receipts": 1269,
+   "freeMiB": 3859
+  },
+  {
+   "atMs": 1795063543597,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2165,
+   "sending": 1,
+   "processing": 2166,
+   "receipts": 1282,
+   "freeMiB": 3836
+  },
+  {
+   "atMs": 1795063545645,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2158,
+   "sending": 0,
+   "processing": 2160,
+   "receipts": 1288,
+   "freeMiB": 3862
+  },
+  {
+   "atMs": 1795063547661,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2149,
+   "sending": 0,
+   "processing": 2151,
+   "receipts": 1297,
+   "freeMiB": 3847
+  },
+  {
+   "atMs": 1795063549678,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2145,
+   "sending": 0,
+   "processing": 2147,
+   "receipts": 1301,
+   "freeMiB": 3814
+  },
+  {
+   "atMs": 1795063551877,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2140,
+   "sending": 1,
+   "processing": 2141,
+   "receipts": 1306,
+   "freeMiB": 3824
+  },
+  {
+   "atMs": 1795063553921,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2129,
+   "sending": 0,
+   "processing": 2130,
+   "receipts": 1317,
+   "freeMiB": 3831
+  },
+  {
+   "atMs": 1795063555923,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2123,
+   "sending": 1,
+   "processing": 2123,
+   "receipts": 1324,
+   "freeMiB": 3810
+  },
+  {
+   "atMs": 1795063558041,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2113,
+   "sending": 1,
+   "processing": 2114,
+   "receipts": 1333,
+   "freeMiB": 3821
+  },
+  {
+   "atMs": 1795063560081,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2106,
+   "sending": 1,
+   "processing": 2107,
+   "receipts": 1340,
+   "freeMiB": 3796
+  },
+  {
+   "atMs": 1795063562202,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2094,
+   "sending": 0,
+   "processing": 2096,
+   "receipts": 1352,
+   "freeMiB": 3824
+  },
+  {
+   "atMs": 1795063564206,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2086,
+   "sending": 1,
+   "processing": 2087,
+   "receipts": 1361,
+   "freeMiB": 3831
+  },
+  {
+   "atMs": 1795063566270,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2078,
+   "sending": 1,
+   "processing": 2079,
+   "receipts": 1369,
+   "freeMiB": 3811
+  },
+  {
+   "atMs": 1795063568263,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2070,
+   "sending": 1,
+   "processing": 2071,
+   "receipts": 1376,
+   "freeMiB": 3815
+  },
+  {
+   "atMs": 1795063570367,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2063,
+   "sending": 1,
+   "processing": 2064,
+   "receipts": 1383,
+   "freeMiB": 3774
+  },
+  {
+   "atMs": 1795063572455,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2052,
+   "sending": 1,
+   "processing": 2053,
+   "receipts": 1395,
+   "freeMiB": 3811
+  },
+  {
+   "atMs": 1795063574515,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2043,
+   "sending": 0,
+   "processing": 2045,
+   "receipts": 1403,
+   "freeMiB": 3744
+  },
+  {
+   "atMs": 1795063576617,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2037,
+   "sending": 1,
+   "processing": 2038,
+   "receipts": 1409,
+   "freeMiB": 3787
+  },
+  {
+   "atMs": 1795063578626,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2027,
+   "sending": 0,
+   "processing": 2028,
+   "receipts": 1419,
+   "freeMiB": 3769
+  },
+  {
+   "atMs": 1795063580663,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2021,
+   "sending": 1,
+   "processing": 2022,
+   "receipts": 1426,
+   "freeMiB": 3775
+  },
+  {
+   "atMs": 1795063582732,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2013,
+   "sending": 0,
+   "processing": 2014,
+   "receipts": 1433,
+   "freeMiB": 3773
+  },
+  {
+   "atMs": 1795063584844,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2007,
+   "sending": 1,
+   "processing": 2008,
+   "receipts": 1440,
+   "freeMiB": 3755
+  },
+  {
+   "atMs": 1795063586991,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 2000,
+   "sending": 1,
+   "processing": 2001,
+   "receipts": 1446,
+   "freeMiB": 3750
+  },
+  {
+   "atMs": 1795063589115,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1993,
+   "sending": 0,
+   "processing": 1994,
+   "receipts": 1453,
+   "freeMiB": 3735
+  },
+  {
+   "atMs": 1795063591202,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1983,
+   "sending": 0,
+   "processing": 1984,
+   "receipts": 1463,
+   "freeMiB": 3763
+  },
+  {
+   "atMs": 1795063593275,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1971,
+   "sending": 1,
+   "processing": 1972,
+   "receipts": 1475,
+   "freeMiB": 3773
+  },
+  {
+   "atMs": 1795063595288,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1960,
+   "sending": 1,
+   "processing": 1961,
+   "receipts": 1486,
+   "freeMiB": 3779
+  },
+  {
+   "atMs": 1795063597356,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1947,
+   "sending": 0,
+   "processing": 1948,
+   "receipts": 1499,
+   "freeMiB": 3807
+  },
+  {
+   "atMs": 1795063599381,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1937,
+   "sending": 0,
+   "processing": 1938,
+   "receipts": 1509,
+   "freeMiB": 3787
+  },
+  {
+   "atMs": 1795063601493,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1928,
+   "sending": 0,
+   "processing": 1930,
+   "receipts": 1518,
+   "freeMiB": 3797
+  },
+  {
+   "atMs": 1795063603533,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1919,
+   "sending": 1,
+   "processing": 1920,
+   "receipts": 1527,
+   "freeMiB": 3813
+  },
+  {
+   "atMs": 1795063605589,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1910,
+   "sending": 0,
+   "processing": 1911,
+   "receipts": 1536,
+   "freeMiB": 3800
+  },
+  {
+   "atMs": 1795063607707,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1900,
+   "sending": 1,
+   "processing": 1901,
+   "receipts": 1546,
+   "freeMiB": 3790
+  },
+  {
+   "atMs": 1795063609826,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1887,
+   "sending": 0,
+   "processing": 1888,
+   "receipts": 1559,
+   "freeMiB": 3780
+  },
+  {
+   "atMs": 1795063611965,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1878,
+   "sending": 0,
+   "processing": 1879,
+   "receipts": 1568,
+   "freeMiB": 3795
+  },
+  {
+   "atMs": 1795063614066,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1870,
+   "sending": 0,
+   "processing": 1872,
+   "receipts": 1576,
+   "freeMiB": 3747
+  },
+  {
+   "atMs": 1795063616195,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1860,
+   "sending": 0,
+   "processing": 1861,
+   "receipts": 1586,
+   "freeMiB": 3778
+  },
+  {
+   "atMs": 1795063618202,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1847,
+   "sending": 0,
+   "processing": 1849,
+   "receipts": 1599,
+   "freeMiB": 3789
+  },
+  {
+   "atMs": 1795063620276,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1840,
+   "sending": 0,
+   "processing": 1842,
+   "receipts": 1605,
+   "freeMiB": 3756
+  },
+  {
+   "atMs": 1795063622282,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1831,
+   "sending": 0,
+   "processing": 1832,
+   "receipts": 1615,
+   "freeMiB": 3765
+  },
+  {
+   "atMs": 1795063624396,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1821,
+   "sending": 0,
+   "processing": 1823,
+   "receipts": 1625,
+   "freeMiB": 3744
+  },
+  {
+   "atMs": 1795063626417,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1812,
+   "sending": 1,
+   "processing": 1813,
+   "receipts": 1634,
+   "freeMiB": 3773
+  },
+  {
+   "atMs": 1795063628515,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1795,
+   "sending": 1,
+   "processing": 1796,
+   "receipts": 1651,
+   "freeMiB": 3758
+  },
+  {
+   "atMs": 1795063630619,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1784,
+   "sending": 1,
+   "processing": 1785,
+   "receipts": 1663,
+   "freeMiB": 3755
+  },
+  {
+   "atMs": 1795063632740,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1769,
+   "sending": 0,
+   "processing": 1770,
+   "receipts": 1677,
+   "freeMiB": 3789
+  },
+  {
+   "atMs": 1795063634858,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1754,
+   "sending": 0,
+   "processing": 1755,
+   "receipts": 1692,
+   "freeMiB": 3767
+  },
+  {
+   "atMs": 1795063636934,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1749,
+   "sending": 1,
+   "processing": 1750,
+   "receipts": 1697,
+   "freeMiB": 3788
+  },
+  {
+   "atMs": 1795063639051,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1744,
+   "sending": 1,
+   "processing": 1745,
+   "receipts": 1703,
+   "freeMiB": 3779
+  },
+  {
+   "atMs": 1795063641104,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1736,
+   "sending": 1,
+   "processing": 1737,
+   "receipts": 1710,
+   "freeMiB": 3767
+  },
+  {
+   "atMs": 1795063643186,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1724,
+   "sending": 0,
+   "processing": 1726,
+   "receipts": 1722,
+   "freeMiB": 3776
+  },
+  {
+   "atMs": 1795063645238,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1711,
+   "sending": 1,
+   "processing": 1712,
+   "receipts": 1735,
+   "freeMiB": 3784
+  },
+  {
+   "atMs": 1795063647322,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1698,
+   "sending": 0,
+   "processing": 1700,
+   "receipts": 1748,
+   "freeMiB": 3791
+  },
+  {
+   "atMs": 1795063649357,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1690,
+   "sending": 1,
+   "processing": 1691,
+   "receipts": 1756,
+   "freeMiB": 3759
+  },
+  {
+   "atMs": 1795063651414,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1682,
+   "sending": 0,
+   "processing": 1683,
+   "receipts": 1764,
+   "freeMiB": 3762
+  },
+  {
+   "atMs": 1795063653406,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1674,
+   "sending": 1,
+   "processing": 1675,
+   "receipts": 1772,
+   "freeMiB": 3738
+  },
+  {
+   "atMs": 1795063655488,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1668,
+   "sending": 0,
+   "processing": 1670,
+   "receipts": 1778,
+   "freeMiB": 3705
+  },
+  {
+   "atMs": 1795063657599,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1660,
+   "sending": 0,
+   "processing": 1662,
+   "receipts": 1786,
+   "freeMiB": 3727
+  },
+  {
+   "atMs": 1795063659591,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1650,
+   "sending": 0,
+   "processing": 1652,
+   "receipts": 1796,
+   "freeMiB": 3747
+  },
+  {
+   "atMs": 1795063661611,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1639,
+   "sending": 0,
+   "processing": 1641,
+   "receipts": 1807,
+   "freeMiB": 3752
+  },
+  {
+   "atMs": 1795063663728,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1623,
+   "sending": 1,
+   "processing": 1624,
+   "receipts": 1823,
+   "freeMiB": 3753
+  },
+  {
+   "atMs": 1795063665796,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1611,
+   "sending": 0,
+   "processing": 1613,
+   "receipts": 1835,
+   "freeMiB": 3749
+  },
+  {
+   "atMs": 1795063667895,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1594,
+   "sending": 0,
+   "processing": 1596,
+   "receipts": 1852,
+   "freeMiB": 3760
+  },
+  {
+   "atMs": 1795063669918,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1584,
+   "sending": 1,
+   "processing": 1585,
+   "receipts": 1863,
+   "freeMiB": 3730
+  },
+  {
+   "atMs": 1795063671956,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1569,
+   "sending": 1,
+   "processing": 1571,
+   "receipts": 1877,
+   "freeMiB": 3748
+  },
+  {
+   "atMs": 1795063674022,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1554,
+   "sending": 0,
+   "processing": 1556,
+   "receipts": 1892,
+   "freeMiB": 3756
+  },
+  {
+   "atMs": 1795063676124,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1549,
+   "sending": 1,
+   "processing": 1550,
+   "receipts": 1897,
+   "freeMiB": 3735
+  },
+  {
+   "atMs": 1795063678151,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1540,
+   "sending": 0,
+   "processing": 1541,
+   "receipts": 1906,
+   "freeMiB": 3731
+  },
+  {
+   "atMs": 1795063680253,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1531,
+   "sending": 1,
+   "processing": 1532,
+   "receipts": 1915,
+   "freeMiB": 3712
+  },
+  {
+   "atMs": 1795063682270,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1516,
+   "sending": 0,
+   "processing": 1518,
+   "receipts": 1930,
+   "freeMiB": 3765
+  },
+  {
+   "atMs": 1795063684356,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1497,
+   "sending": 0,
+   "processing": 1499,
+   "receipts": 1949,
+   "freeMiB": 3751
+  },
+  {
+   "atMs": 1795063686393,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1481,
+   "sending": 1,
+   "processing": 1482,
+   "receipts": 1966,
+   "freeMiB": 3733
+  },
+  {
+   "atMs": 1795063688390,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1465,
+   "sending": 1,
+   "processing": 1466,
+   "receipts": 1981,
+   "freeMiB": 3734
+  },
+  {
+   "atMs": 1795063690446,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1454,
+   "sending": 1,
+   "processing": 1455,
+   "receipts": 1992,
+   "freeMiB": 3709
+  },
+  {
+   "atMs": 1795063692572,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1442,
+   "sending": 1,
+   "processing": 1443,
+   "receipts": 2004,
+   "freeMiB": 3764
+  },
+  {
+   "atMs": 1795063694571,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1428,
+   "sending": 1,
+   "processing": 1429,
+   "receipts": 2019,
+   "freeMiB": 3749
+  },
+  {
+   "atMs": 1795063696565,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1412,
+   "sending": 1,
+   "processing": 1413,
+   "receipts": 2034,
+   "freeMiB": 3738
+  },
+  {
+   "atMs": 1795063698703,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1393,
+   "sending": 0,
+   "processing": 1395,
+   "receipts": 2053,
+   "freeMiB": 3720
+  },
+  {
+   "atMs": 1795063700726,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1379,
+   "sending": 0,
+   "processing": 1380,
+   "receipts": 2067,
+   "freeMiB": 3719
+  },
+  {
+   "atMs": 1795063702908,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1359,
+   "sending": 0,
+   "processing": 1361,
+   "receipts": 2087,
+   "freeMiB": 3745
+  },
+  {
+   "atMs": 1795063704970,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1340,
+   "sending": 0,
+   "processing": 1342,
+   "receipts": 2106,
+   "freeMiB": 3731
+  },
+  {
+   "atMs": 1795063707034,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1324,
+   "sending": 0,
+   "processing": 1326,
+   "receipts": 2122,
+   "freeMiB": 3729
+  },
+  {
+   "atMs": 1795063709155,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1315,
+   "sending": 0,
+   "processing": 1317,
+   "receipts": 2131,
+   "freeMiB": 3732
+  },
+  {
+   "atMs": 1795063711272,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1304,
+   "sending": 1,
+   "processing": 1305,
+   "receipts": 2142,
+   "freeMiB": 3705
+  },
+  {
+   "atMs": 1795063713341,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1288,
+   "sending": 1,
+   "processing": 1289,
+   "receipts": 2159,
+   "freeMiB": 3725
+  },
+  {
+   "atMs": 1795063715354,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1271,
+   "sending": 0,
+   "processing": 1272,
+   "receipts": 2175,
+   "freeMiB": 3722
+  },
+  {
+   "atMs": 1795063717470,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1255,
+   "sending": 1,
+   "processing": 1256,
+   "receipts": 2192,
+   "freeMiB": 3723
+  },
+  {
+   "atMs": 1795063719509,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1242,
+   "sending": 0,
+   "processing": 1244,
+   "receipts": 2204,
+   "freeMiB": 3690
+  },
+  {
+   "atMs": 1795063721558,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1226,
+   "sending": 0,
+   "processing": 1227,
+   "receipts": 2220,
+   "freeMiB": 3726
+  },
+  {
+   "atMs": 1795063723547,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1207,
+   "sending": 0,
+   "processing": 1208,
+   "receipts": 2239,
+   "freeMiB": 3734
+  },
+  {
+   "atMs": 1795063725630,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1195,
+   "sending": 1,
+   "processing": 1196,
+   "receipts": 2251,
+   "freeMiB": 3804
+  },
+  {
+   "atMs": 1795063727768,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1183,
+   "sending": 0,
+   "processing": 1185,
+   "receipts": 2263,
+   "freeMiB": 3854
+  },
+  {
+   "atMs": 1795063729788,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1172,
+   "sending": 1,
+   "processing": 1173,
+   "receipts": 2274,
+   "freeMiB": 3843
+  },
+  {
+   "atMs": 1795063731807,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1156,
+   "sending": 0,
+   "processing": 1158,
+   "receipts": 2290,
+   "freeMiB": 3883
+  },
+  {
+   "atMs": 1795063733827,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1136,
+   "sending": 0,
+   "processing": 1138,
+   "receipts": 2310,
+   "freeMiB": 3865
+  },
+  {
+   "atMs": 1795063735894,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1120,
+   "sending": 1,
+   "processing": 1121,
+   "receipts": 2326,
+   "freeMiB": 3895
+  },
+  {
+   "atMs": 1795063738021,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1099,
+   "sending": 1,
+   "processing": 1100,
+   "receipts": 2347,
+   "freeMiB": 3887
+  },
+  {
+   "atMs": 1795063740021,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1084,
+   "sending": 1,
+   "processing": 1085,
+   "receipts": 2362,
+   "freeMiB": 3838
+  },
+  {
+   "atMs": 1795063742088,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1066,
+   "sending": 0,
+   "processing": 1067,
+   "receipts": 2380,
+   "freeMiB": 3885
+  },
+  {
+   "atMs": 1795063744115,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1050,
+   "sending": 0,
+   "processing": 1052,
+   "receipts": 2396,
+   "freeMiB": 3886
+  },
+  {
+   "atMs": 1795063746182,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1037,
+   "sending": 0,
+   "processing": 1038,
+   "receipts": 2409,
+   "freeMiB": 3879
+  },
+  {
+   "atMs": 1795063748231,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1021,
+   "sending": 1,
+   "processing": 1022,
+   "receipts": 2425,
+   "freeMiB": 3881
+  },
+  {
+   "atMs": 1795063750370,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1003,
+   "sending": 0,
+   "processing": 1005,
+   "receipts": 2443,
+   "freeMiB": 3838
+  },
+  {
+   "atMs": 1795063752445,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 986,
+   "sending": 0,
+   "processing": 987,
+   "receipts": 2460,
+   "freeMiB": 3896
+  },
+  {
+   "atMs": 1795063754499,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 966,
+   "sending": 0,
+   "processing": 967,
+   "receipts": 2480,
+   "freeMiB": 3883
+  },
+  {
+   "atMs": 1795063756592,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 947,
+   "sending": 0,
+   "processing": 948,
+   "receipts": 2499,
+   "freeMiB": 3853
+  },
+  {
+   "atMs": 1795063758667,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 928,
+   "sending": 0,
+   "processing": 930,
+   "receipts": 2518,
+   "freeMiB": 3852
+  },
+  {
+   "atMs": 1795063760757,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 917,
+   "sending": 1,
+   "processing": 918,
+   "receipts": 2529,
+   "freeMiB": 3855
+  },
+  {
+   "atMs": 1795063762790,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 903,
+   "sending": 1,
+   "processing": 904,
+   "receipts": 2544,
+   "freeMiB": 3876
+  },
+  {
+   "atMs": 1795063764927,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 888,
+   "sending": 1,
+   "processing": 889,
+   "receipts": 2559,
+   "freeMiB": 3857
+  },
+  {
+   "atMs": 1795063766986,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 869,
+   "sending": 0,
+   "processing": 871,
+   "receipts": 2577,
+   "freeMiB": 3864
+  },
+  {
+   "atMs": 1795063769049,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 853,
+   "sending": 0,
+   "processing": 854,
+   "receipts": 2593,
+   "freeMiB": 3842
+  },
+  {
+   "atMs": 1795063771126,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 835,
+   "sending": 0,
+   "processing": 837,
+   "receipts": 2611,
+   "freeMiB": 3870
+  },
+  {
+   "atMs": 1795063773197,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 814,
+   "sending": 1,
+   "processing": 815,
+   "receipts": 2633,
+   "freeMiB": 3891
+  },
+  {
+   "atMs": 1795063775315,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 794,
+   "sending": 0,
+   "processing": 795,
+   "receipts": 2652,
+   "freeMiB": 3856
+  },
+  {
+   "atMs": 1795063777377,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 776,
+   "sending": 0,
+   "processing": 778,
+   "receipts": 2670,
+   "freeMiB": 3863
+  },
+  {
+   "atMs": 1795063779406,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 766,
+   "sending": 0,
+   "processing": 767,
+   "receipts": 2680,
+   "freeMiB": 3854
+  },
+  {
+   "atMs": 1795063781457,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 755,
+   "sending": 1,
+   "processing": 756,
+   "receipts": 2692,
+   "freeMiB": 3867
+  },
+  {
+   "atMs": 1795063783543,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 739,
+   "sending": 1,
+   "processing": 740,
+   "receipts": 2707,
+   "freeMiB": 3872
+  },
+  {
+   "atMs": 1795063785582,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 720,
+   "sending": 0,
+   "processing": 722,
+   "receipts": 2726,
+   "freeMiB": 3848
+  },
+  {
+   "atMs": 1795063787652,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 699,
+   "sending": 1,
+   "processing": 700,
+   "receipts": 2747,
+   "freeMiB": 3872
+  },
+  {
+   "atMs": 1795063789693,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 684,
+   "sending": 0,
+   "processing": 685,
+   "receipts": 2762,
+   "freeMiB": 3833
+  },
+  {
+   "atMs": 1795063791769,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 662,
+   "sending": 0,
+   "processing": 664,
+   "receipts": 2784,
+   "freeMiB": 3875
+  },
+  {
+   "atMs": 1795063793836,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 643,
+   "sending": 1,
+   "processing": 644,
+   "receipts": 2803,
+   "freeMiB": 3878
+  },
+  {
+   "atMs": 1795063795917,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 625,
+   "sending": 0,
+   "processing": 627,
+   "receipts": 2820,
+   "freeMiB": 3866
+  },
+  {
+   "atMs": 1795063797941,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 612,
+   "sending": 0,
+   "processing": 614,
+   "receipts": 2834,
+   "freeMiB": 3875
+  },
+  {
+   "atMs": 1795063800022,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 601,
+   "sending": 1,
+   "processing": 602,
+   "receipts": 2845,
+   "freeMiB": 3840
+  },
+  {
+   "atMs": 1795063802029,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 583,
+   "sending": 0,
+   "processing": 585,
+   "receipts": 2863,
+   "freeMiB": 3890
+  },
+  {
+   "atMs": 1795063804172,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 562,
+   "sending": 0,
+   "processing": 564,
+   "receipts": 2884,
+   "freeMiB": 3871
+  },
+  {
+   "atMs": 1795063806191,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 544,
+   "sending": 1,
+   "processing": 545,
+   "receipts": 2903,
+   "freeMiB": 3837
+  },
+  {
+   "atMs": 1795063808278,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 524,
+   "sending": 0,
+   "processing": 526,
+   "receipts": 2922,
+   "freeMiB": 3845
+  },
+  {
+   "atMs": 1795063810304,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 509,
+   "sending": 1,
+   "processing": 510,
+   "receipts": 2937,
+   "freeMiB": 3863
+  },
+  {
+   "atMs": 1795063812345,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 488,
+   "sending": 1,
+   "processing": 490,
+   "receipts": 2958,
+   "freeMiB": 3871
+  },
+  {
+   "atMs": 1795063814466,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 472,
+   "sending": 1,
+   "processing": 473,
+   "receipts": 2974,
+   "freeMiB": 3883
+  },
+  {
+   "atMs": 1795063816600,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 458,
+   "sending": 0,
+   "processing": 460,
+   "receipts": 2988,
+   "freeMiB": 3863
+  },
+  {
+   "atMs": 1795063818596,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 445,
+   "sending": 0,
+   "processing": 447,
+   "receipts": 3001,
+   "freeMiB": 3850
+  },
+  {
+   "atMs": 1795063820624,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 428,
+   "sending": 0,
+   "processing": 430,
+   "receipts": 3018,
+   "freeMiB": 3844
+  },
+  {
+   "atMs": 1795063822737,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 409,
+   "sending": 0,
+   "processing": 411,
+   "receipts": 3037,
+   "freeMiB": 3860
+  },
+  {
+   "atMs": 1795063824857,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 390,
+   "sending": 1,
+   "processing": 391,
+   "receipts": 3056,
+   "freeMiB": 3872
+  },
+  {
+   "atMs": 1795063826993,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 370,
+   "sending": 0,
+   "processing": 372,
+   "receipts": 3076,
+   "freeMiB": 3853
+  },
+  {
+   "atMs": 1795063828992,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 356,
+   "sending": 1,
+   "processing": 357,
+   "receipts": 3090,
+   "freeMiB": 3835
+  },
+  {
+   "atMs": 1795063831053,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 342,
+   "sending": 0,
+   "processing": 344,
+   "receipts": 3104,
+   "freeMiB": 3828
+  },
+  {
+   "atMs": 1795063833111,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 331,
+   "sending": 1,
+   "processing": 332,
+   "receipts": 3115,
+   "freeMiB": 3870
+  },
+  {
+   "atMs": 1795063835199,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 318,
+   "sending": 1,
+   "processing": 319,
+   "receipts": 3128,
+   "freeMiB": 3850
+  },
+  {
+   "atMs": 1795063837206,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 304,
+   "sending": 1,
+   "processing": 305,
+   "receipts": 3142,
+   "freeMiB": 3852
+  },
+  {
+   "atMs": 1795063839307,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 287,
+   "sending": 1,
+   "processing": 288,
+   "receipts": 3160,
+   "freeMiB": 3823
+  },
+  {
+   "atMs": 1795063841383,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 270,
+   "sending": 1,
+   "processing": 272,
+   "receipts": 3176,
+   "freeMiB": 3817
+  },
+  {
+   "atMs": 1795063843374,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 252,
+   "sending": 1,
+   "processing": 253,
+   "receipts": 3194,
+   "freeMiB": 3855
+  },
+  {
+   "atMs": 1795063845494,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 230,
+   "sending": 0,
+   "processing": 232,
+   "receipts": 3216,
+   "freeMiB": 3821
+  },
+  {
+   "atMs": 1795063847520,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 214,
+   "sending": 0,
+   "processing": 216,
+   "receipts": 3232,
+   "freeMiB": 3836
+  },
+  {
+   "atMs": 1795063849650,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 201,
+   "sending": 1,
+   "processing": 202,
+   "receipts": 3245,
+   "freeMiB": 3798
+  },
+  {
+   "atMs": 1795063851734,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 189,
+   "sending": 1,
+   "processing": 190,
+   "receipts": 3257,
+   "freeMiB": 3856
+  },
+  {
+   "atMs": 1795063853876,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 171,
+   "sending": 1,
+   "processing": 172,
+   "receipts": 3275,
+   "freeMiB": 3837
+  },
+  {
+   "atMs": 1795063855885,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 154,
+   "sending": 0,
+   "processing": 156,
+   "receipts": 3292,
+   "freeMiB": 3819
+  },
+  {
+   "atMs": 1795063858018,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 132,
+   "sending": 1,
+   "processing": 133,
+   "receipts": 3315,
+   "freeMiB": 3836
+  },
+  {
+   "atMs": 1795063860049,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 115,
+   "sending": 1,
+   "processing": 116,
+   "receipts": 3332,
+   "freeMiB": 3788
+  },
+  {
+   "atMs": 1795063862131,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 97,
+   "sending": 0,
+   "processing": 99,
+   "receipts": 3349,
+   "freeMiB": 3844
+  },
+  {
+   "atMs": 1795063864235,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 74,
+   "sending": 1,
+   "processing": 76,
+   "receipts": 3372,
+   "freeMiB": 3844
+  },
+  {
+   "atMs": 1795063866335,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 52,
+   "sending": 1,
+   "processing": 54,
+   "receipts": 3394,
+   "freeMiB": 3808
+  },
+  {
+   "atMs": 1795063868403,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 40,
+   "sending": 1,
+   "processing": 41,
+   "receipts": 3406,
+   "freeMiB": 3824
+  },
+  {
+   "atMs": 1795063870541,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 29,
+   "sending": 1,
+   "processing": 30,
+   "receipts": 3417,
+   "freeMiB": 3775
+  },
+  {
+   "atMs": 1795063872570,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 17,
+   "sending": 1,
+   "processing": 19,
+   "receipts": 3429,
+   "freeMiB": 3825
+  },
+  {
+   "atMs": 1795063874612,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 3447,
+   "freeMiB": 3812
+  },
+  {
+   "atMs": 1795063876735,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 3447,
+   "freeMiB": 3812
+  },
+  {
+   "atMs": 1795063878871,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 3447,
+   "freeMiB": 3783
+  }
+ ],
+ "brokerLagSeries": [
+  {
+   "atMs": 1795063248823,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795063253842,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795063258856,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795063263868,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795063268881,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795063273885,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795063278896,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795063283943,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795063288956,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795063293964,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795063298975,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795063303999,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063309014,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063314030,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063319041,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063324054,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063329080,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063334087,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063339100,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063344114,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063349128,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063354141,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063359148,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063364155,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063369170,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063374180,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063379193,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063384205,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063389216,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063394232,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063399247,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063404261,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063409272,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063414289,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063419296,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063424311,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063429314,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063434322,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063439335,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063444344,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063449356,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063454360,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063459378,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063464384,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063469388,
+   "brokerBacklog": 5,
+   "pulledNotCommitted": 5
+  },
+  {
+   "atMs": 1795063474396,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063479406,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063484413,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063489419,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063494423,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063499426,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063504440,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063509443,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063514448,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063519455,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063524464,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063529481,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063534496,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063539504,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063544509,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063549515,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063554524,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063559538,
+   "brokerBacklog": 5,
+   "pulledNotCommitted": 5
+  },
+  {
+   "atMs": 1795063564549,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063569553,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063574575,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063579584,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063584593,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063589598,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063594603,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063599621,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063604637,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063609642,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063614657,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063619670,
+   "brokerBacklog": 5,
+   "pulledNotCommitted": 5
+  },
+  {
+   "atMs": 1795063624677,
+   "brokerBacklog": 5,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063629681,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063634695,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063639699,
+   "brokerBacklog": 5,
+   "pulledNotCommitted": 5
+  },
+  {
+   "atMs": 1795063644714,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063649719,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063654724,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063659728,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063664734,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063669740,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063674757,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063679786,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063684790,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063689793,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063694799,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063699807,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063704814,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063709819,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063714828,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063719832,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063724843,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063729858,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063734872,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063739874,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063744877,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063749890,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063754898,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063759911,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063764912,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063769914,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063774928,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063779933,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063784945,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063789953,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063794963,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063799969,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063804977,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063809984,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063814993,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063819997,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063825012,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063830025,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063835027,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063840031,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063845038,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063850064,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063855066,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063860077,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063865080,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063870092,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063875106,
+   "brokerBacklog": 4,
+   "pulledNotCommitted": 4
+  },
+  {
+   "atMs": 1795063880128,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  }
+ ],
+ "batches": []
+}

@@ -1,0 +1,130 @@
+[
+  {
+    "epochSecond": 1794947828,
+    "requestStarts": 1225
+  },
+  {
+    "epochSecond": 1794947829,
+    "requestStarts": 1111
+  },
+  {
+    "epochSecond": 1794947830,
+    "requestStarts": 481
+  },
+  {
+    "epochSecond": 1794947831,
+    "requestStarts": 1041
+  },
+  {
+    "epochSecond": 1794947832,
+    "requestStarts": 1142
+  },
+  {
+    "epochSecond": 1794947838,
+    "httpResponses": 93
+  },
+  {
+    "epochSecond": 1794947839,
+    "httpResponses": 166
+  },
+  {
+    "epochSecond": 1794947840,
+    "httpResponses": 198
+  },
+  {
+    "epochSecond": 1794947841,
+    "httpResponses": 88
+  },
+  {
+    "epochSecond": 1794947842,
+    "httpResponses": 58
+  },
+  {
+    "epochSecond": 1794947843,
+    "httpResponses": 571
+  },
+  {
+    "epochSecond": 1794947844,
+    "httpResponses": 261
+  },
+  {
+    "epochSecond": 1794947846,
+    "httpResponses": 16
+  },
+  {
+    "epochSecond": 1794947847,
+    "httpResponses": 18
+  },
+  {
+    "epochSecond": 1794947848,
+    "httpResponses": 132
+  },
+  {
+    "epochSecond": 1794947849,
+    "httpResponses": 73
+  },
+  {
+    "epochSecond": 1794947850,
+    "httpResponses": 101
+  },
+  {
+    "epochSecond": 1794947851,
+    "httpResponses": 142
+  },
+  {
+    "epochSecond": 1794947852,
+    "httpResponses": 104
+  },
+  {
+    "epochSecond": 1794947853,
+    "httpResponses": 197
+  },
+  {
+    "epochSecond": 1794947854,
+    "httpResponses": 139
+  },
+  {
+    "epochSecond": 1794947855,
+    "httpResponses": 310
+  },
+  {
+    "epochSecond": 1794947856,
+    "httpResponses": 245
+  },
+  {
+    "epochSecond": 1794947857,
+    "httpResponses": 185
+  },
+  {
+    "epochSecond": 1794947858,
+    "httpResponses": 174
+  },
+  {
+    "epochSecond": 1794947859,
+    "httpResponses": 364
+  },
+  {
+    "epochSecond": 1794947860,
+    "httpResponses": 31
+  },
+  {
+    "epochSecond": 1794947868,
+    "httpResponses": 734
+  },
+  {
+    "epochSecond": 1794947869,
+    "httpResponses": 242
+  },
+  {
+    "epochSecond": 1794947870,
+    "httpResponses": 97
+  },
+  {
+    "epochSecond": 1794947871,
+    "httpResponses": 1
+  },
+  {
+    "epochSecond": 1794947872,
+    "httpResponses": 260
+  }
+]

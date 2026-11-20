@@ -1,0 +1,13 @@
+{
+    "passed": true,
+    "method": "POST",
+    "path": "/api/sale-campaigns/0/purchase",
+    "credentialsSent": false,
+    "expectedStatus": 401,
+    "actualStatus": "401",
+    "businessCode": "UNAUTHENTICATED",
+    "elapsedMs": 149,
+    "completedAtMs": 1794956168499,
+    "formalSample": false,
+    "successfulPurchases": 0
+}

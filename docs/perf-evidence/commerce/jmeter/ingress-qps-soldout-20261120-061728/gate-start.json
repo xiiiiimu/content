@@ -1,0 +1,44 @@
+{
+  "label": "ingress-start",
+  "memoryBefore": {
+    "atLocal": "2026-11-20T06:17:29.895186+08:00",
+    "freeMiB": 6016,
+    "totalMiB": 16083
+  },
+  "minFreeMiB": 3072,
+  "runningTestcontainers": [],
+  "dockerHealth": {
+    "content-namesrv-1": "healthy 0",
+    "content-broker-1": "healthy 0"
+  },
+  "brokerProbes": [
+    {
+      "probe": 1,
+      "ok": true,
+      "rc": 0,
+      "elapsedMs": 4313,
+      "at": "2026-11-20T06:17:34.433716+08:00"
+    },
+    {
+      "probe": 2,
+      "ok": true,
+      "rc": 0,
+      "elapsedMs": 3984,
+      "at": "2026-11-20T06:17:43.408133+08:00"
+    },
+    {
+      "probe": 3,
+      "ok": true,
+      "rc": 0,
+      "elapsedMs": 3922,
+      "at": "2026-11-20T06:17:52.326563+08:00"
+    }
+  ],
+  "memoryAfter": {
+    "atLocal": "2026-11-20T06:17:52.839616+08:00",
+    "freeMiB": 5956,
+    "totalMiB": 16083
+  },
+  "failures": [],
+  "pass": true
+}

@@ -1,0 +1,188 @@
+{
+  "available": true,
+  "httpStartMs": 1794957798239,
+  "httpEndMs": 1794957832334,
+  "allJvmLifetime": {
+    "Cleanup": {
+      "count": 59,
+      "sumReachingMs": 12067.849,
+      "maxReachingMs": 5718.7038,
+      "sumAtSafepointMs": 943.6783000000001,
+      "maxTotalMs": 5718.8516
+    },
+    "G1CollectForAllocation": {
+      "count": 60,
+      "sumReachingMs": 5130.665899999999,
+      "maxReachingMs": 931.5902,
+      "sumAtSafepointMs": 4587.1786999999995,
+      "maxTotalMs": 1002.9733
+    },
+    "CollectForMetadataAllocation": {
+      "count": 3031,
+      "sumReachingMs": 14158.549600000002,
+      "maxReachingMs": 371.11,
+      "sumAtSafepointMs": 2230.014999999993,
+      "maxTotalMs": 528.4635
+    },
+    "G1PauseRemark": {
+      "count": 9,
+      "sumReachingMs": 550.9394,
+      "maxReachingMs": 442.1134,
+      "sumAtSafepointMs": 631.06,
+      "maxTotalMs": 476.0749
+    },
+    "G1PauseCleanup": {
+      "count": 9,
+      "sumReachingMs": 469.73400000000004,
+      "maxReachingMs": 352.7941,
+      "sumAtSafepointMs": 52.1607,
+      "maxTotalMs": 363.4421
+    },
+    "G1CollectFull": {
+      "count": 1,
+      "sumReachingMs": 0.01,
+      "maxReachingMs": 0.01,
+      "sumAtSafepointMs": 37.5162,
+      "maxTotalMs": 37.6362
+    }
+  },
+  "overlappingHttpWindow": {
+    "G1CollectForAllocation": {
+      "count": 4,
+      "sumReachingMs": 1023.9834000000001,
+      "maxReachingMs": 517.8208,
+      "sumAtSafepointMs": 616.3515,
+      "maxTotalMs": 745.8638
+    },
+    "Cleanup": {
+      "count": 16,
+      "sumReachingMs": 3438.3972,
+      "maxReachingMs": 560.6019,
+      "sumAtSafepointMs": 669.1691000000001,
+      "maxTotalMs": 710.7493
+    }
+  },
+  "longest": [
+    {
+      "operation": "G1CollectForAllocation",
+      "startMs": 1794957825829.1362,
+      "endMs": 1794957826575.0,
+      "reachingMs": 517.8208,
+      "atSafepointMs": 228.028,
+      "totalMs": 745.8638
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794957823473.2507,
+      "endMs": 1794957824184.0,
+      "reachingMs": 549.1494,
+      "atSafepointMs": 161.5721,
+      "totalMs": 710.7493
+    },
+    {
+      "operation": "G1CollectForAllocation",
+      "startMs": 1794957831332.0667,
+      "endMs": 1794957832011.0,
+      "reachingMs": 492.0867,
+      "atSafepointMs": 186.8136,
+      "totalMs": 678.9334
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794957820625.7178,
+      "endMs": 1794957821252.0,
+      "reachingMs": 560.6019,
+      "atSafepointMs": 65.6025,
+      "totalMs": 626.2823
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794957830668.4783,
+      "endMs": 1794957831280.0,
+      "reachingMs": 476.4506,
+      "atSafepointMs": 134.9284,
+      "totalMs": 611.5218
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794957807580.122,
+      "endMs": 1794957808061.0,
+      "reachingMs": 363.9346,
+      "atSafepointMs": 116.8841,
+      "totalMs": 480.8779
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794957804859.3738,
+      "endMs": 1794957805236.0,
+      "reachingMs": 362.6801,
+      "atSafepointMs": 13.8234,
+      "totalMs": 376.6263
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794957806248.4292,
+      "endMs": 1794957806571.0,
+      "reachingMs": 297.9214,
+      "atSafepointMs": 24.5911,
+      "totalMs": 322.5707
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794957803597.256,
+      "endMs": 1794957803848.0,
+      "reachingMs": 234.6358,
+      "atSafepointMs": 15.5914,
+      "totalMs": 250.7439
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794957822271.5889,
+      "endMs": 1794957822456.0,
+      "reachingMs": 88.4437,
+      "atSafepointMs": 95.8753,
+      "totalMs": 184.4112
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794957802427.2317,
+      "endMs": 1794957802577.0,
+      "reachingMs": 140.2237,
+      "atSafepointMs": 9.3451,
+      "totalMs": 149.7684
+    },
+    {
+      "operation": "G1CollectForAllocation",
+      "startMs": 1794957800197.8218,
+      "endMs": 1794957800312.0,
+      "reachingMs": 13.3804,
+      "atSafepointMs": 100.6937,
+      "totalMs": 114.1783
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794957815240.6113,
+      "endMs": 1794957815346.0,
+      "reachingMs": 91.9383,
+      "atSafepointMs": 13.1278,
+      "totalMs": 105.3887
+    },
+    {
+      "operation": "G1CollectForAllocation",
+      "startMs": 1794957798386.4097,
+      "endMs": 1794957798488.0,
+      "reachingMs": 0.6955,
+      "atSafepointMs": 100.8162,
+      "totalMs": 101.5903
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794957801329.6064,
+      "endMs": 1794957801422.0,
+      "reachingMs": 87.287,
+      "atSafepointMs": 4.9713,
+      "totalMs": 92.3936
+    }
+  ],
+  "caveat": "Reaching safepoint is synchronization delay, not all threads stopped. AtSafepoint is distinct from GC pause. Do not add them to overlapping JFR wait durations."
+}
