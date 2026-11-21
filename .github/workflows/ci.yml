@@ -5,10 +5,32 @@ on:
     branches: [main]
 permissions:
   contents: read
-# Hardening D1: three parallel jobs, each capped at 35 minutes. If a job outgrows its cap, split it further instead of
-# raising the timeout. Skipped on purpose (see docs/hardening-plan.md D1): MediaMinioIT (no maintainable official MinIO
-# image) and PerfHarnessIT (performance experiment, not CI).
+# Hardening D1: parallel jobs, Maven jobs capped at 35 minutes, Python at 10 and the frontend at 15. If a job outgrows
+# its cap, split it further instead of raising the timeout. Skipped on purpose (see docs/hardening-plan.md D1):
+# MediaMinioIT (no maintainable official MinIO image) and PerfHarnessIT (performance experiment, not CI).
 jobs:
+  # The frontend is a pnpm project (packageManager in package.json, pnpm-lock.yaml; no package-lock.json), so the
+  # lockfile-exact install is `pnpm install --frozen-lockfile`, the pnpm equivalent of `npm ci`.
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run typecheck
+      - run: pnpm run test
+
   assistant-python:
     runs-on: ubuntu-latest
     timeout-minutes: 10
