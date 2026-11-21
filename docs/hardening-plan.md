@@ -22,7 +22,7 @@
 | A1 | 调试接口仅在显式测试配置下注册 | P0 | 完成 |
 | A2 | 互动/登录/注册限流（已决定） | P0 | 完成 |
 | A3 | 举报去重（已决定） | P0 | 完成 |
-| A4 | 登录 BCrypt 有界线程池 | P0 | 完成（遗留：池大小默认值【需决定】） |
+| A4 | 登录 BCrypt 有界线程池 | P0 | 完成（池大小默认值已决定并修改） |
 | A5 | 评论幂等竞态 | P0 | 完成 |
 | A6 | 注册并发重名返回 409 | P0 | 完成 |
 | A7 | 媒体下载签名密钥去掉公开默认值 | P0 | 完成 |
@@ -30,6 +30,8 @@
 | A9 | 分享密码解锁限流 | P0 | 完成 |
 | A10 | 相同幂等键下评论话题统计丢失（已决定） | P1 | 完成 |
 | A11 | 助手指令的 Java 端校验缺口 | P0 | 未开始（等助手评测基线） |
+| A12 | 反馈 resolve 缺 `versionId` 返回 400 | P2 | 完成 |
+| A13 | 登录时用户不存在也执行 BCrypt | P1 | 完成 |
 | B1 | 同一话题分钟计数热点【需决定】 | P1 | 未开始 |
 | B2 | 计数改为增量更新 + 离线对账（R3） | P1 | 未开始 |
 | B3 | 每次点赞 3 次连接获取 | P1 | 未开始 |
@@ -73,7 +75,7 @@
   2. 显式打开时，端点仍然可用，现有压测和正确性脚本（`run-java-commerce.ps1` 传 `--content.sale.fault-hooks=true`）不受影响。
   3. `SaleFaultHooks` 在关闭时不能被外部触发。
 - **结果**（`0480365`）：钩子移到类级条件的 `SaleFaultHookController`、`SaleManualSettleController`。RED：默认配置下 4 个钩子返回 200、`/settle` 返回 401（已注册），`holdArmed` 为 true；GREEN：`DebugEndpointsDefaultIT`（全部钩子与赠品钩子 404）、`DebugEndpointsEnabledIT`（显式打开时可用）通过。
-- **认证盘点结果**（`caff87e`，`AnonymousAccessIT` 匿名调用全部路由，表格写入 `target/anonymous-access/routes.tsv`）：不需要登录即可访问的只有注册、登录（A2 限流）和带 HMAC 签名的 `GET /api/media/objects`；发现 `GET /api/assistant/tasks/{id}` 匿名可读（→ A8，已修复，KNOWN_FINDINGS 已清空）；签名密钥有公开默认值（→ A7）；分享密码解锁无限流（→ A9）。Actuator 只暴露 health 和索引，env/metrics/beans/configprops/heapdump 均 404。另记两条未立项的小问题：素材反馈 resolve 缺 `versionId` 时 NPE → 500；不存在的用户名登录跳过 BCrypt（响应时间可区分用户是否存在）。
+- **认证盘点结果**（`caff87e`，`AnonymousAccessIT` 匿名调用全部路由，表格写入 `target/anonymous-access/routes.tsv`）：不需要登录即可访问的只有注册、登录（A2 限流）和带 HMAC 签名的 `GET /api/media/objects`；发现 `GET /api/assistant/tasks/{id}` 匿名可读（→ A8，已修复，KNOWN_FINDINGS 已清空）；签名密钥有公开默认值（→ A7）；分享密码解锁无限流（→ A9）。Actuator 只暴露 health 和索引，env/metrics/beans/configprops/heapdump 均 404。另发现两条小问题，已立项并修复：素材反馈 resolve 缺 `versionId` 时 NPE → 500（→ A12）；不存在的用户名登录跳过 BCrypt，响应时间可区分用户是否存在（→ A13）。
 
 ### A2 限流（已决定 2026-11-21）
 - **问题**：点赞/取消/踩、评论、举报、登录、注册都没有限流（R4/R5）；全仓只有 `SaleDispatcher` 有并发闸门。
@@ -114,6 +116,8 @@
 - **验收**：IT 或单元测试证明并发超过池加队列容量时返回 429 而不是排队到超时；正常登录不变；并发压测（与风险清单 D 节同方法）记录改前改后的 CPU、p99、429 比例。
 - **结果**（`b44959c`）：`PasswordHasher`（默认线程 = 核数/2，队列 = 4×线程，等待上限 5 s 后 503 `AUTH_BUSY`），注册的编码移到事务外；`AuthBcryptPoolIT`（1 线程、队列 1、16 并发：部分 429 + Retry-After: 1，其余 200）通过。登录压测见 `docs/perf-evidence/hardening-a-20261121/README.md` §3：隔离运行（仅调高 login-ip）在 200 rps 下改前丢弃 2079 次迭代、p99 5.0 s、CPU 峰值 88.5%，改后无丢弃无 5xx、p99 1.5 s、CPU 峰值 55.8%，成功约 64/s，其余 429。
 - **遗留【需决定】**：16 逻辑核下默认 8 线程，成功吞吐上限约 64–75/s；改前 100 rps 时全部成功，改后 100 rps 有 24% 被 429。是否调整 `content.auth.bcrypt-threads` 默认值（例如按核数减 1），或保持保守默认、部署时按机器配置，请决定。
+- **决定（2026-11-21）**：默认值改为 `max(2, 逻辑核数/2)`，仍可通过 `content.auth.bcrypt-threads` 配置。理由：登录突发时为其他接口保留一半 CPU；更高的登录容量靠横向扩展实例，而不是加大单机线程池；下限 2 保证小机器也能同时处理两个登录。
+- **结果**（`0d171dc`）：`PasswordHasherDefaultsTest`（1/2/3/4 核 → 2，8 核 → 4，16 核 → 8）RED 为 1 核得 1，GREEN 通过；理由写入 `PasswordHasher.defaultThreads` 与 `FeedConfiguration.passwordHasher` 注释。16 核机器上默认值不变（8），上面压测结论仍适用。
 
 ### A5 评论幂等竞态
 - **问题**：`InteractionService.comment` 先 `existingComment` 再 `INSERT`（`:73,92`）。同一个幂等键并发到达时，后到的请求撞唯一键 `uq_comment_idem`，`DuplicateKeyException` 没有被捕获，返回 500（R10）。
@@ -172,6 +176,16 @@
 - **要求**：Java 端对解析结果做完整校验，任何不支持或越权的条件都拒绝或补问，不得静默丢弃。
 - **验收**：等助手评测基线完成后，按评测中的 18 个非法执行样例逐一写 RED（合格 RED：编译通过、环境健康、因缺少校验而执行），再 GREEN；评测端到端汇总（`e2e_summary.py`）非法执行为 0。
 - **前置**：助手评测基线（另一会话的工作，`assistant-python/eval/`、`AssistantEvalE2EIT` 不属于本轮，未完成前不动）。
+
+### A12 反馈 resolve 缺 `versionId` 返回 400（A1 认证盘点发现）
+- **问题**：`POST /api/materials/{post}/feedback/{comment}/resolve` 直接 `((Number)body.get("versionId")).longValue()`，缺字段 NPE、非数字 ClassCastException，均为 500；并且先解析请求体、后检查身份。
+- **验收**：RED/GREEN：缺 `versionId`、`null`、字符串、布尔值，以及非整数 `offsetMs`，都返回 400 `INVALID_REQUEST`；匿名请求仍先返回 401。
+- **结果**（`db3789c`）：RED 为 NullPointerException / ClassCastException（500）；GREEN `FeedbackResolveValidationIT`（6 项）通过。
+
+### A13 登录时用户不存在也执行 BCrypt（A1 认证盘点发现）
+- **问题**：用户名不存在时登录直接返回 401，不做 BCrypt，响应时间可区分账号是否存在。
+- **验收**：RED/GREEN：用户不存在与密码错误两种情况都恰好执行一次 BCrypt（走 A4 线程池），返回相同的 401 `INVALID_CREDENTIALS`。
+- **结果**（`8301157`）：用户不存在时对固定的 cost 10 假哈希执行一次校验（与真实哈希同成本、同线程池）。`PasswordHasher.checks()` 在线程池线程内计数，用来证明两条路径都执行了 BCrypt。RED：用户不存在时计数增加 0；GREEN `LoginUnknownUserBcryptIT`（2 项）通过。附带影响：不存在用户的登录现在也占用 BCrypt 线程池容量，与存在用户一致，仍受 A2 的按 IP / 按用户名限流约束。
 
 ---
 
@@ -299,3 +313,4 @@
 | 2026-11-21 | A | A7（`89f9816`）、A8（`88668db`）、A9（`056a65a`、`3627911`）已修复；A10 已复现（`aa75ca7`），结论与方案待决定 |
 | 2026-11-21 | A | A10 采用方案 1 并修复（`b0d31e0`）；新增 A11（等助手评测基线）；前端评论幂等键并入 D4；完整 IT 改为分批运行（每批 1–2 个测试类，failsafe -Xmx1g，批前可用内存 ≥3GB，批后确认容器退出） |
 | 2026-11-21 | A | 第 A 轮收尾：分批完整 IT 全部通过（`1535a09`，488 用例 0 失败 0 错误 94 跳过，b03 起在重启后续跑）；互动 a/b/c 复测与登录前后压测完成，报告 `docs/perf-evidence/hardening-a-20261121/`；A1–A10 标为完成，A4 遗留池大小默认值待决定，A11 等助手评测基线 |
+| 2026-11-21 | A | A4 池大小默认值改为 max(2, 逻辑核数/2)（`0d171dc`）；新增并修复 A12（`db3789c`）、A13（`8301157`）；相关测试分批运行全部通过（单元测试 + 11 个 IT 类，94 用例 0 失败 0 错误 1 跳过，`target/hardening-a/it-batches-related-8301157-093435`）；删除 target/ 下三个旧 worktree（测试报告已归档到 `target/hardening-a/worktree-reports/`） |
