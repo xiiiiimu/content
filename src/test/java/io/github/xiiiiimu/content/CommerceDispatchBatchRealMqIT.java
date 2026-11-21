@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
 /**
- * Opt-in batch dispatch contracts on the local real Broker (unique topic/group).
+ * Opt-in batch dispatch contracts on a real RocketMQ broker started by Testcontainers ({@link CommerceMqFixture}; unique topic/group).
  * Run only: CONTENT_REAL_MQ_IT=true -Dit.test='CommerceDispatchBatchRealMqIT#realBatch*'.
  */
 @EnabledIfEnvironmentVariable(named="CONTENT_REAL_MQ_IT",matches="true")
@@ -20,15 +20,10 @@ class CommerceDispatchBatchRealMqIT extends CommerceDispatchBatchIT {
  static final String TOPIC="sale-dispatch-batch-"+UUID.randomUUID().toString().replace("-","");
  @DynamicPropertySource static void mq(DynamicPropertyRegistry r){
   r.add("content.sale.producer-enabled",()->"true");r.add("content.sale.consumer-enabled",()->"true");
-  r.add("content.sale.namesrv",()->"127.0.0.1:29876");r.add("content.sale.topic",()->TOPIC);
+  r.add("content.sale.namesrv",CommerceMqFixture::namesrv);r.add("content.sale.topic",()->TOPIC);
   r.add("content.sale.consumer-group",()->TOPIC);r.add("content.sale.consume-threads",()->"4");
  }
- @BeforeAll static void topic()throws Exception{
-  Path log=Path.of("target","commerce-dispatch-batch-topic.log");
-  var p=new ProcessBuilder("docker","exec","content-broker-1","sh","mqadmin","updateTopic","-n","namesrv:9876","-b","127.0.0.1:30911","-t",TOPIC,"-r","4","-w","4")
-   .redirectErrorStream(true).redirectOutput(log.toFile()).start();
-  if(!p.waitFor(60,TimeUnit.SECONDS)||p.exitValue()!=0)throw new IllegalStateException("Real Broker topic setup failed; see "+log);
- }
+ @BeforeAll static void topic()throws Exception{CommerceMqFixture.topic(TOPIC,"commerce-dispatch-batch-topic.log");}
  int orders(String id){return db.queryForObject("SELECT COUNT(*) FROM material_orders WHERE reservation_id=?",Integer.class,id);}
  int receipts(String id){return db.queryForObject("SELECT COUNT(*) FROM material_sale_consume_receipts WHERE reservation_id=?",Integer.class,id);}
 

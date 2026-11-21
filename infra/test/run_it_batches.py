@@ -20,8 +20,8 @@ from pathlib import Path
 ROOT = Path.cwd()
 JAVA_HOME = os.environ.get('CONTENT_JAVA_HOME', 'C:/Users/西木/.jdks/ms-17.0.17')
 ARGLINE = '--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g'
-# Not part of this repository's test suite (another session's uncommitted work); excluded if present.
-EXCLUDE = {'AssistantEvalE2EIT'}
+# Nothing excluded: AssistantEvalE2EIT was committed in c664f49 and runs (skips itself) in CI, so local runs include it too.
+EXCLUDE = set()
 
 
 def main_checkout():

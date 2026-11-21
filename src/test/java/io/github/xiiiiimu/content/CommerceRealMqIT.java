@@ -11,21 +11,16 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.*;
 
-/** Opt-in local real Broker tests. Unique topic/group isolate them from the running application. */
+/** Opt-in real Broker tests on a Testcontainers RocketMQ ({@link CommerceMqFixture}); unique topic/group per suite. */
 @EnabledIfEnvironmentVariable(named="CONTENT_REAL_MQ_IT",matches="true")
 class CommerceRealMqIT extends CommerceIngressRevisionIT {
  static final String TOPIC="sale-revision-"+UUID.randomUUID().toString().replace("-","");
  @DynamicPropertySource static void mq(DynamicPropertyRegistry r){
   r.add("content.sale.producer-enabled",()->"true");r.add("content.sale.consumer-enabled",()->"true");
-  r.add("content.sale.namesrv",()->"127.0.0.1:29876");r.add("content.sale.topic",()->TOPIC);
+  r.add("content.sale.namesrv",CommerceMqFixture::namesrv);r.add("content.sale.topic",()->TOPIC);
   r.add("content.sale.consumer-group",()->TOPIC);r.add("content.sale.consume-threads",()->"4");
  }
- @BeforeAll static void topic()throws Exception{
-  Path log=Path.of("target","commerce-real-mq-topic.log");
-  var p=new ProcessBuilder("docker","exec","content-broker-1","sh","mqadmin","updateTopic","-n","namesrv:9876","-b","127.0.0.1:30911","-t",TOPIC,"-r","4","-w","4")
-   .redirectErrorStream(true).redirectOutput(log.toFile()).start();
-  if(!p.waitFor(60,TimeUnit.SECONDS)||p.exitValue()!=0)throw new IllegalStateException("Real Broker topic setup failed; see "+log);
- }
+ @BeforeAll static void topic()throws Exception{CommerceMqFixture.topic(TOPIC,"commerce-real-mq-topic.log");}
  @Autowired DefaultMQProducer producer;
  @Autowired SaleMapper saleMapper;
  @Test void realBrokerAckThenLostSenderConfirmationAndConsumerAckReplayOneOrder()throws Exception{
