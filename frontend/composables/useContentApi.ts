@@ -9,6 +9,7 @@ import type {
   MaterialSigned,
   MaterialUnlock,
   PageState,
+  PostDraft,
   PostStats,
   RiskEvent,
   SignedMedia,
@@ -56,6 +57,21 @@ export function useContentApi() {
     },
     post(id: number) {
       return request<ContentPost>(`/api/posts/${id}`)
+    },
+    /** D4: body from createPayload (topic optional). */
+    createPost(payload: { body: string, topic?: string }) {
+      return request<PostDraft>('/api/posts', { method: 'POST', body: JSON.stringify(payload) })
+    },
+    /** D4: body from editPayload: topic absent keeps it, a string replaces it, null clears it. */
+    editPost(postId: number, payload: { body: string, expectedVersion: number, topic?: string | null }) {
+      return request<PostDraft>(`/api/posts/${postId}`, { method: 'PATCH', body: JSON.stringify(payload) })
+    },
+    publishPost(postId: number, idempotencyKey: string, expectedVersion: number) {
+      return request<{ postId: number, publishedAtMs: number }>(`/api/posts/${postId}/publish`, {
+        method: 'POST',
+        headers: { 'Idempotency-Key': idempotencyKey },
+        body: JSON.stringify({ expectedVersion }),
+      })
     },
     stats(postId: number) {
       return request<PostStats>(`/api/posts/${postId}/stats`)

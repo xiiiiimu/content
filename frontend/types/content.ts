@@ -16,6 +16,17 @@ export interface ContentPost {
   status: string
 }
 
+/** POST/PATCH /api/posts response (PostAuthoringService.Draft). */
+export interface PostDraft {
+  postId: number
+  authorId: number
+  status: string
+  body: string
+  version: number
+  publishedAtMs: number | null
+  topic: string | null
+}
+
 export interface FeedItem {
   postId: number
   publishedAtMs: number

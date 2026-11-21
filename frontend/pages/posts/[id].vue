@@ -16,6 +16,10 @@ const selectedVersionId = ref<number | null>(null)
 const offsetMs = ref(8000)
 const commentBody = ref('')
 const assistantBody = ref('@助手 ')
+// D4: one key per comment box, reused by retries and rotated only after a successful send.
+const commentKey = createCommentKey('ui')
+const assistantKey = createCommentKey('assistant')
+watch(postId, () => { commentKey.reset(); assistantKey.reset() })
 const feedbackCommentId = ref<number | null>(null)
 const subscribeMsg = ref('')
 const password = ref('')
@@ -105,10 +109,11 @@ async function doCommentAtOffset() {
   if (!selectedVersionId.value || !commentBody.value || busy.value) return
   busy.value = true
   try {
-    await api.comment(postId.value, commentBody.value, `ui-${Date.now()}`, undefined, {
-      versionId: selectedVersionId.value,
+    const versionId = selectedVersionId.value
+    await commentKey.send(key => api.comment(postId.value, commentBody.value, key, undefined, {
+      versionId,
       offsetMs: offsetMs.value,
-    })
+    }))
     commentBody.value = ''
     stats.value = await api.stats(postId.value)
   }
@@ -193,9 +198,9 @@ async function doAssistantComment() {
   if (!assistantBody.value || busy.value) return
   busy.value = true
   try {
-    await api.comment(postId.value, assistantBody.value, `assistant-${Date.now()}`, undefined, {
+    await assistantKey.send(key => api.comment(postId.value, assistantBody.value, key, undefined, {
       parentId: feedbackCommentId.value ?? undefined,
-    })
+    }))
     assistantBody.value = '@助手 '
     stats.value = await api.stats(postId.value)
     comments.value = await api.comments(postId.value)
@@ -328,6 +333,7 @@ watch(postId, () => load())
     <StateBlock v-else-if="status === 'error'" kind="error" :message="`无法显示（${errorCode}）`" @retry="load" />
     <article v-else-if="post" class="px4 py4" data-testid="post-detail">
       <div class="text-sm text-secondary">作者 {{ post.authorId }} · {{ new Date(post.publishedAtMs).toLocaleString() }} · {{ post.status }}</div>
+      <NuxtLink v-if="readerId === post.authorId" :to="`/posts/edit/${post.postId}`" class="btn-text text-sm" data-testid="post-edit-link">编辑正文 / 话题</NuxtLink>
       <p class="mt4 whitespace-pre-wrap break-words text-lg leading-relaxed">{{ post.body || '（无正文）' }}</p>
       <div v-if="media" class="mt4">
         <img :src="media.url" alt="媒体" class="max-w-full rounded-lg border border-base">
