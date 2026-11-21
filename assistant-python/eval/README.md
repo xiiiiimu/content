@@ -1,6 +1,7 @@
 # Assistant intent-parser eval
 
-Scores the **current rule-based parser** (`app/main.py`, `POST /v1/parse`) without changing it.
+Scores the `/v1/parse` parser. The rules parser lives in `app/rules.py` and is the default. The LLM parser lives in
+`app/llm.py` and runs only with an explicit `--parser-mode`.
 
 ## Files
 
@@ -11,6 +12,10 @@ Scores the **current rule-based parser** (`app/main.py`, `POST /v1/parse`) witho
 | `dataset.jsonl` | 281 rows (197 dev / 84 test): `id, split, category, text, context, expected{intent, action, params, unsupported}, note` |
 | `run_eval.py` | calls the real endpoint via TestClient, writes metrics / predictions / errors to `target/assistant-eval/<ts>-<split>/` |
 | `e2e_summary.py` | joins recorded parses with `AssistantEvalE2EIT` output, counts commands Java executed that it should not have |
+| `build_injection.py` → `injection.jsonl` | 16 prompt-injection probes (`split=injection`). Scored separately, never mixed into dev/test. Seen twice by the LLM parser (before and after the inj03 fix), so it is no longer held out |
+| `build_injection_v2.py` → `injection_v2.jsonl` | 10 further probes in other styles (`split=injection_v2`). Frozen before the inj03 fix (`injection_v2.sha256`, sha256 of the LF-normalized file = git blob), first run only after the fix was final. Held out |
+| `compare_runs.py` | rules baseline vs N LLM runs: mean ± stdev per metric, per-row stability across runs |
+| `record_llm_fixtures.py` | records real model responses into `tests/fixtures/llm/` (real API call, explicit run only) |
 
 **The test split must not be used to tune rules.** Iterate on `--split dev`, and run `--split test` only for a reported baseline.
 
@@ -57,6 +62,35 @@ How Java handles the response (`AssistantService.execute`): a non-empty `unsuppo
 - Per-field accuracy on gold-EXECUTE rows. `acc` counts a missed execution or wrong intent as wrong; `acc_cond` covers only rows where the same intent was executed.
   `SEARCH.queryTerms` is lenient (all expected terms present). `SEARCH.queryClean` is strict (no filler tokens, which matters because Java does a single `LIKE`).
 
+## LLM parser (`app/llm.py`)
+
+| env | default | |
+|---|---|---|
+| `CONTENT_ASSISTANT_PARSER_MODE` | `llm_with_fallback` | `rules` / `llm` (failure → 503, Java retries the task) / `llm_with_fallback` (failure → rules, `source=rules_fallback`) |
+| `CONTENT_ASSISTANT_LLM_API_KEY` | — | the only place the key is read from; never written to files or logs. Unset: `llm_with_fallback` warns once and serves rules (`fallbackReason=NO_API_KEY`); `llm` refuses to start |
+| `CONTENT_ASSISTANT_LLM_PROVIDER` | `openai_compatible` | `openai_compatible` (Chat Completions, JSON mode) or `anthropic` (Messages API, JSON schema output) |
+| `CONTENT_ASSISTANT_LLM_MODEL` | `deepseek-flash` (`claude-haiku-5-5` for anthropic) | |
+| `CONTENT_ASSISTANT_LLM_BASE_URL` | `https://api.deepseek.com` (SDK default for anthropic) | |
+| `CONTENT_ASSISTANT_LLM_TIMEOUT_SECONDS` | `10` | per attempt |
+| `CONTENT_ASSISTANT_LLM_MAX_RETRIES` | `1` | capped at 1 (SDK retry on timeout / connection / 429 / 5xx) |
+| `CONTENT_ASSISTANT_LLM_EFFORT` / `_THINKING` | `low` / `disabled` | effort applies to anthropic only. DeepSeek: thinking off via `thinking={"type":"disabled"}`, `temperature=0` |
+
+- Structured output: DeepSeek uses JSON mode (`response_format={"type":"json_object"}`; the prompt contains "json", the schema and examples, and blank content counts as `EMPTY_OUTPUT`). Anthropic uses an `output_config.format` JSON schema. Both are then strictly validated with Pydantic (`extra=forbid`, strict types),
+  then deterministic checks that repeat what Java enforces. Invalid output, an unparseable or offset-less time, a refusal
+  or `max_tokens` all fall back to rules, and each reason is counted (`GET /v1/parser-stats`).
+- `temperature`: DeepSeek gets `0` (only effective in non-thinking mode). It is not sent to Anthropic, because `claude-haiku-5-5` rejects
+  non-default sampling parameters. The report has the measured run-to-run stability.
+- The model writes no user-visible text. Clarify questions are templates chosen by reason code, unsupported conditions
+  come from a fixed list, and keywords/tags must be substrings of the comment.
+- `droppedRequirements` (required): the model lists every ask in the comment that its output does not carry out, with a
+  kind (`CONFLICT` / `UNCLEAR` / `UNSUPPORTED` / `OVERRIDE` / `OVERREACH`). If the list is non-empty, Python never executes:
+  `OVERRIDE`/`OVERREACH` mean refuse, the other kinds mean an `EXECUTE` becomes a clarify question. The model's `quote` is never shown or logged.
+- Override-phrase guard (`app/guard.py`): in the `llm` and `llm_with_fallback` modes, a comment matching 忽略/无视…规则/指令 (or
+  ignore/disregard … instructions/rules) never executes, also when the rules fallback answered. It can only stop an execution,
+  never cause one. Rules mode is left untouched so it stays the baseline.
+- Few-shot examples come only from dev rows (`app/llm_prompt.py`). `tests/test_llm_parser.py` checks the ids and texts.
+- Java must wait longer than Python's worst case (2 × 10 s + backoff). `content.assistant.parse-timeout` defaults to 30 s.
+
 ## Run
 
 ```powershell
@@ -69,6 +103,12 @@ $env:JAVA_HOME="<JDK 17 path, see CLAUDE.md>"
 ../tools/apache-maven-3.9.6/bin/mvn -o -Pintegration "-Dtest=NoSuchTest" "-Dsurefire.failIfNoSpecifiedTests=false" `
   "-Dit.test=AssistantEvalE2EIT" "-Dassistant.eval.cases=<dir>/e2e-cases.jsonl" "-Dassistant.eval.out=<dir>/e2e-results.jsonl" verify
 .venv/Scripts/python.exe eval/e2e_summary.py <dir>          # exit 1 if any illegal execution
+
+# LLM (real API; dev only while iterating, test once for the final version)
+.venv/Scripts/python.exe eval/run_eval.py --parser-mode llm_with_fallback --split dev --emit-e2e --out ../target/assistant-llm/<new-dir>
+.venv/Scripts/python.exe eval/run_eval.py --parser-mode llm_with_fallback --dataset eval/injection.jsonl --split all --emit-e2e --out ../target/assistant-llm/<new-dir>
+.venv/Scripts/python.exe eval/run_eval.py --parser-mode llm_with_fallback --dataset eval/injection_v2.jsonl --split all --emit-e2e --out ../target/assistant-llm/<new-dir>
+.venv/Scripts/python.exe eval/compare_runs.py --out ../target/assistant-llm/<new-dir> --baseline <rules-dir> <llm-1> <llm-2> <llm-3>
 ```
 
 `AssistantEvalE2EIT` skips itself unless both `-D` properties are given. It replays each recorded parse through a local fake `/v1/parse`. The only change it makes is binding `run_eval`'s placeholder parent id 9001 to the real parent id. The cases go through the real comment → assistant_task → `HttpAssistantParser` → `AssistantService` path, with real MySQL, Redis and S3 mock containers.

@@ -1,13 +1,20 @@
-"""Offline evaluation of the rule-based intent parser (app.main) against eval/dataset.jsonl.
+"""Offline evaluation of the intent parser (app.main) against eval/dataset.jsonl.
 
 Usage (from assistant-python/):
-  .venv/Scripts/python.exe eval/run_eval.py                    # dev split (default)
-  .venv/Scripts/python.exe eval/run_eval.py --split test       # held-out; never tune rules on it
+  .venv/Scripts/python.exe eval/run_eval.py                    # rules parser, dev split (default)
+  .venv/Scripts/python.exe eval/run_eval.py --split test       # held-out; never tune rules or prompts on it
   .venv/Scripts/python.exe eval/run_eval.py --split all --emit-e2e
+  .venv/Scripts/python.exe eval/run_eval.py --parser-mode llm_with_fallback --split dev   # REAL API calls
+  .venv/Scripts/python.exe eval/run_eval.py --parser-mode llm_with_fallback --dataset eval/injection.jsonl --split all
+
+Only an explicit --parser-mode llm / llm_with_fallback calls the model (key from CONTENT_ASSISTANT_LLM_API_KEY).
+Per-call telemetry (source, fallback reason, latency, tokens) goes to calls.jsonl and metrics.json["llm"];
+the comment text is not repeated there.
 
 The parser is called through the real FastAPI endpoint (TestClient), with the same request
-shape Java sends (since A11: context = parentKind/parentIsFeedback, nowMs, timezone, postLicenseCommercial, enabledTools). time.time is frozen to the dataset's REF_NOW so that
-relative deadlines ("N秒后") are deterministic; parser logic is not modified.
+shape Java sends (since A11: context = parentKind/parentIsFeedback, nowMs, timezone, postLicenseCommercial, enabledTools).
+The rules parser's clock (app.rules._now_ms) is frozen to the dataset's REF_NOW so that relative deadlines ("N秒后")
+are deterministic; the LLM gets the same reference time through context.nowMs. Parser logic is not modified.
 
 Outputs go to ../target/assistant-eval/<timestamp>-<split>/ (private, not committed):
   predictions.jsonl, errors.jsonl, metrics.json, summary.md, [e2e-cases.jsonl]
@@ -16,6 +23,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import statistics
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
@@ -27,8 +36,6 @@ ROOT = HERE.parent
 sys.path.insert(0, str(ROOT))
 
 from fastapi.testclient import TestClient  # noqa: E402
-
-from app.main import app  # noqa: E402
 
 INTENTS = ["SEARCH", "SUBSCRIBE", "GIVEAWAY", "UNKNOWN"]
 AUTHOR_ID, VIEWER_ID, PARENT_ID, POST_ID = 100, 200, 9001, 1
@@ -75,15 +82,106 @@ def java_context(ctx: dict) -> dict:
     }
 
 
-def call_parser(client: TestClient, rows: list[dict]) -> list[dict]:
+def call_parser(client: TestClient, rows: list[dict], service=None) -> tuple[list[dict], list[dict]]:
+    """Returns (parse results, per-call telemetry). Only the rules clock is frozen: the LLM client keeps real time."""
     now_ms = rows[0]["context"]["nowMs"] if rows else 0
-    out = []
-    with mock.patch("time.time", return_value=now_ms / 1000):
+    out, calls = [], []
+    captured: list = []
+    if service is not None:
+        service.listeners.append(lambda req, res, rec: captured.append(rec))
+    with mock.patch("app.rules._now_ms", return_value=now_ms):
         for i, row in enumerate(rows):
+            captured.clear()
             r = client.post("/v1/parse", json=build_request(i, row))
-            r.raise_for_status()
-            out.append(r.json())
-    return out
+            if r.status_code != 200:  # mode=llm without fallback: record the failure, keep going
+                out.append({"intent": "UNKNOWN", "clarify": None, "search": None, "subscribe": None, "giveaway": None,
+                            "unsupportedTools": [], "source": "error", "fallbackReason": f"HTTP_{r.status_code}"})
+            else:
+                out.append(r.json())
+            rec = captured[0].__dict__ if captured else {}
+            calls.append({"id": row["id"], **{k: v for k, v in rec.items() if k != "extra"}, **(rec.get("extra") or {})})
+            if (i + 1) % 25 == 0:
+                print(f"  {i + 1}/{len(rows)}", flush=True)
+    return out, calls
+
+
+# USD per million tokens, official list prices (queried 2026-11-21; sources in the report):
+# - claude-haiku-5-5: https://platform.claude.com/docs/en/about-claude/pricing (prompts <= 100K tokens)
+# - deepseek-flash: https://api-docs.deepseek.com/quick_start/pricing. Peak = 01:00-04:00 and 06:00-10:00 UTC Mon-Fri;
+#   everything else (weekends included) is off-peak at half price. Chinese public holidays (also off-peak) are not
+#   modelled; no run in this round fell on one.
+PRICES = {
+    "claude-haiku-5-5": {"input": 0.10, "output": 0.50, "cache_read": 0.01, "cache_write_5m": 0.125},
+    "deepseek-flash": {"peak": {"input": 0.30, "cache_read": 0.006, "output": 1.20},
+                       "offpeak": {"input": 0.15, "cache_read": 0.003, "output": 0.60}},
+}
+
+
+def deepseek_peak(ts_utc: str | None) -> bool:
+    if not ts_utc:
+        return True  # unknown time: price conservatively
+    t = datetime.fromisoformat(ts_utc).astimezone(timezone.utc)
+    return t.weekday() < 5 and (1 <= t.hour < 4 or 6 <= t.hour < 10)
+
+
+def call_cost(c: dict, model: str | None) -> float | None:
+    """USD for one call. inputTokens is the full prompt; cacheReadTokens is the cached part of it (DeepSeek hit tokens)
+    or, for Anthropic, reported separately from input_tokens."""
+    pr = PRICES.get(model or "")
+    if pr is None or c.get("inputTokens") is None:
+        return None
+    inp, out, hit = c.get("inputTokens") or 0, c.get("outputTokens") or 0, c.get("cacheReadTokens") or 0
+    if "peak" in pr:
+        t = pr["peak" if deepseek_peak(c.get("startedAtUtc")) else "offpeak"]
+        return ((inp - hit) * t["input"] + hit * t["cache_read"] + out * t["output"]) / 1e6
+    return (inp * pr["input"] + out * pr["output"] + hit * pr["cache_read"]
+            + (c.get("cacheWriteTokens") or 0) * pr["cache_write_5m"]) / 1e6
+
+
+def pctl(xs: list[float], q: float) -> float | None:
+    if not xs:
+        return None
+    xs = sorted(xs)
+    k = (len(xs) - 1) * q
+    lo, hi = int(k), min(int(k) + 1, len(xs) - 1)
+    return xs[lo] + (xs[hi] - xs[lo]) * (k - lo)
+
+
+def llm_stats(calls: list[dict], model: str | None) -> dict:
+    n = len(calls)
+    src = Counter(c.get("source") for c in calls)
+    reasons = Counter(c.get("fallbackReason") for c in calls if c.get("fallbackReason"))
+    lat = [c["latencyMs"] for c in calls if c.get("latencyMs") is not None]
+    tok = {k: sum(c.get(k) or 0 for c in calls) for k in ("inputTokens", "outputTokens", "cacheReadTokens", "cacheWriteTokens")}
+    priced = PRICES.get(model or "")
+    costs = [call_cost(c, model) for c in calls if c.get("inputTokens") is not None]
+    cost = sum(x for x in costs if x is not None) if priced and costs else None
+    peak_calls = sum(deepseek_peak(c.get("startedAtUtc")) for c in calls if c.get("inputTokens") is not None) if priced and "peak" in priced else None
+    return {
+        "calls": n, "sources": dict(src), "fallback_reasons": dict(reasons),
+        "fallback_ratio": (src.get("rules_fallback", 0) / n) if n else None,
+        "latency_ms": {"n": len(lat), "p50": pctl(lat, 0.5), "p95": pctl(lat, 0.95), "max": max(lat) if lat else None,
+                       "mean": statistics.fmean(lat) if lat else None},
+        "tokens": tok,
+        "tokens_per_call": {k: (v / n if n else None) for k, v in tok.items()},
+        "cost_usd": cost, "cost_usd_per_call": (cost / n if cost is not None and n else None),
+        "price_table_usd_per_mtok": priced,
+        "priced_calls": len(costs), "peak_priced_calls": peak_calls,
+        "cache_hit_ratio": (tok["cacheReadTokens"] / tok["inputTokens"]) if tok["inputTokens"] else None,
+    }
+
+
+def llm_summary_lines(metrics: dict) -> str:
+    L, P = metrics["llm"], metrics["parser"]
+    lat = L["latency_ms"]
+
+    def ms(x):
+        return "n/a" if x is None else str(round(x))
+    cost = "n/a" if L["cost_usd"] is None else f"${L['cost_usd']:.4f}"
+    return (f"- 解析模式: {P['mode']}，供应商 {P.get('provider')}，模型 {P.get('model')}，thinking {P.get('thinking')}\n"
+            f"- 来源: {L['sources']}，降级比例 {pct(L['fallback_ratio'])}，降级原因 {L['fallback_reasons']}\n"
+            f"- 延迟 P50/P95/max: {ms(lat['p50'])} / {ms(lat['p95'])} / {ms(lat['max'])} ms\n"
+            f"- token: {L['tokens']}，成本 {cost}\n")
 
 
 def pred_action(p: dict) -> str:
@@ -283,17 +381,43 @@ def main() -> int:
     ap.add_argument("--out", default=None, help="output dir (default ../target/assistant-eval/<ts>-<split>)")
     ap.add_argument("--emit-e2e", action="store_true", help="also write e2e-cases.jsonl for AssistantEvalE2EIT")
     ap.add_argument("--max-errors", type=int, default=400)
+    ap.add_argument("--parser-mode", choices=["rules", "llm", "llm_with_fallback"], default="rules",
+                    help="rules (default, no network) or an LLM mode (real API calls)")
     args = ap.parse_args()
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
+    os.environ["CONTENT_ASSISTANT_PARSER_MODE"] = args.parser_mode
+    if args.parser_mode != "rules" and not os.environ.get("CONTENT_ASSISTANT_LLM_API_KEY", "").strip():
+        print("[warn] CONTENT_ASSISTANT_LLM_API_KEY is not set: every row will be answered by the rules fallback")
+    from app.main import app, service  # noqa: E402  (imported after the mode is set)
 
     rows = load(Path(args.dataset), args.split)
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     out = Path(args.out) if args.out else ROOT.parent / "target" / "assistant-eval" / f"{ts}-{args.split}"
     out.mkdir(parents=True, exist_ok=False)
 
-    preds = call_parser(TestClient(app), rows)
+    preds, calls = call_parser(TestClient(app), rows, service)
     metrics, records, errors = evaluate(rows, preds)
+    # Few-shot examples are dev rows; report dev also without them (they are trivially "seen" by the LLM prompt).
+    from app.llm_prompt import FEW_SHOT_TEXT
+    keep = [i for i, row in enumerate(rows) if row["id"] not in FEW_SHOT_TEXT]
+    if len(keep) < len(rows):
+        sub, _, _ = evaluate([rows[i] for i in keep], [preds[i] for i in keep])
+        metrics["excluding_few_shot"] = {"n": sub["n"], "excluded_ids": sorted(set(r["id"] for r in rows) & set(FEW_SHOT_TEXT)),
+                                         **{k: sub[k] for k in ("intent_accuracy", "intent_macro_f1", "intent_per_class",
+                                                                "action_accuracy", "clarify", "reject_rows",
+                                                                "unsupported_rows", "executed_when_gold_not_execute",
+                                                                "field_accuracy")}}
+    st = service.settings
+    metrics["parser"] = {"mode": args.parser_mode}
+    if args.parser_mode != "rules":
+        metrics["parser"].update({"provider": st.provider, "base_url": st.base_url, "model": st.model,
+                                  "effort": st.effort, "thinking": st.thinking,
+                                  "timeout_s": st.timeout_s, "max_retries": st.max_retries})
+        import hashlib
+        from app.llm import SYSTEM_TEXT
+        metrics["parser"]["system_prompt_sha256"] = hashlib.sha256(SYSTEM_TEXT.encode("utf-8")).hexdigest()
+        metrics["llm"] = llm_stats(calls, st.model)
     metrics["split"] = args.split
     metrics["dataset"] = str(Path(args.dataset).resolve())
     metrics["generatedAtUtc"] = ts
@@ -304,9 +428,12 @@ def main() -> int:
                 f.write(json.dumps(it, ensure_ascii=False) + "\n")
 
     dump("predictions.jsonl", records)
+    dump("calls.jsonl", calls)
     dump("errors.jsonl", errors)
     (out / "metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
     md = summary_md(metrics, errors, args.split, args.max_errors)
+    if "llm" in metrics:
+        md = md.replace("\n## 意图逐类", llm_summary_lines(metrics) + "\n## 意图逐类", 1)
     (out / "summary.md").write_text(md, encoding="utf-8")
     if args.emit_e2e:
         dump("e2e-cases.jsonl", [{"id": r["id"], "category": r["category"], "text": r["text"], "context": row["context"],
