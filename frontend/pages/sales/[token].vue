@@ -24,7 +24,7 @@ async function load() {
 }
 async function purchase() {
   if (!campaign.value || busy.value) return
-  busy.value = true; error.value = ''; message.value = '处理中，受理不等于付款成功'
+  busy.value = true; error.value = ''; message.value = '处理中，受理不等于（模拟）付款成功'
   try {
     const storage = `sale-attempt:${identity.readerId.value}:${campaign.value.id}`
     const key = sessionStorage.getItem(storage) || `web-${crypto.randomUUID()}`
@@ -41,7 +41,7 @@ async function purchase() {
     if (result.state === 'REJECTED') sessionStorage.removeItem(storage)
     await load()
   }
-  catch (e) { error.value = e instanceof ContentApiError ? e.code : '状态未知，可使用同一请求重试'; message.value = '未确认付款结果，请查询订单或使用原请求重试' }
+  catch (e) { error.value = e instanceof ContentApiError ? e.code : '状态未知，可使用同一请求重试'; message.value = '未确认（模拟）付款结果，请查询订单或使用原请求重试' }
   finally { busy.value = false }
 }
 async function original() {
@@ -65,7 +65,8 @@ onMounted(load)
     <p class="mt2 text-secondary">登录即可购买，无须关注作者或取得预览权限。商家限制和限购规则仍适用。</p>
     <p v-if="error" role="alert" class="mt3">{{ error }}</p>
     <section v-if="campaign" class="mt4 space-y-3">
-      <p>素材 #{{ campaign.postId }} · ¥{{ (campaign.priceCents / 100).toFixed(2) }}</p>
+      <p>素材 #{{ campaign.postId }} · ¥{{ (campaign.priceCents / 100).toFixed(2) }}（模拟价格）</p>
+      <p class="text-xs text-secondary" data-testid="simulated-payment-note">支付与退款为模拟实现，不产生真实扣款或退款。</p>
       <p>剩余 {{ campaign.remainingStock ?? campaign.stockCap - campaign.soldCount }} / {{ campaign.stockCap }} · {{ campaign.state }}</p>
       <button class="btn-primary" :disabled="busy || campaign.state !== 'OPEN'" @click="purchase">购买／原请求重试</button>
       <button class="btn-ghost" :disabled="busy" @click="load">刷新订单</button>

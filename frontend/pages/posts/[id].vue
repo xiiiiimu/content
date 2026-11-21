@@ -376,7 +376,7 @@ watch(postId, () => load())
         <div class="mt6 border-t border-base pt4" data-testid="sale-panel">
           <h3 class="text-sm font-medium">限量抢购</h3>
           <div v-if="campaign" class="mt2 text-sm text-secondary">
-            ¥{{ (campaign.priceCents / 100).toFixed(2) }} · 库存 {{ campaign.remainingStock ?? (campaign.stockCap - campaign.soldCount) }}/{{ campaign.stockCap }}
+            ¥{{ (campaign.priceCents / 100).toFixed(2) }}（模拟价格，不产生真实扣款） · 库存 {{ campaign.remainingStock ?? (campaign.stockCap - campaign.soldCount) }}/{{ campaign.stockCap }}
             · {{ campaign.state }} · <NuxtLink :to="`/sales/${campaign.linkToken}`" class="text-primary">打开独立购买页</NuxtLink>
             <button type="button" class="btn-primary ms2" :disabled="busy" @click="doPurchase">抢购</button>
             <span v-if="purchaseState" class="ms2">{{ purchaseState }}</span>

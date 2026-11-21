@@ -160,3 +160,12 @@ Batch ledger: [docs/m4-m6-batch.md](docs/m4-m6-batch.md). Every application read
 Enable media with `content.media.enabled=true` and `content.media.s3-endpoint`. Clients receive HMAC gateway URLs under `/api/media/objects` (TTL capped at 15 minutes); raw object-store endpoints are not client-facing. Official MinIO and real FFmpeg decode/cover verification remain open. Local verify includes `VisibilityAndOfflineIT`, `InteractionsAndTrendingIT` and `MediaPipelineIT`.
 
 Remaining beyond M4–M6: M7 broad shutdown/reconciliation, M8 capacity/performance and M9 TrendGuard. L2/L3 and strict publication-time follower snapshots remain later contracts. Official MinIO image health remains blocked.
+
+## Payments and refunds are simulated
+
+There is **no payment provider integration**. Material sales (v1.1) model payment and refund as internal state only; no money moves and no external service is called.
+
+- A purchase is accepted as `PROCESSING`; when the order lands it is inserted directly as `PAID` (`paid_at_ms` = landing time). There is no payment intent, checkout, provider callback or pending-payment state.
+- `price_cents` is a display/record value set by the author; nothing is charged.
+- Refunds (buyer request + merchant approval, giveaway refund, forced refund) flip the order `PAID → REFUNDED`, revoke the purchase entitlement and return the sold slot once. Nothing is paid back.
+- Before connecting a real provider, at least: a pending-payment state with reservation expiry, callback signature verification, provider-side idempotency (transaction/refund ids), refund pending/failed states, and daily reconciliation against provider statements. Details: [docs/v1.1-material-commerce.md § 支付与退款边界](docs/v1.1-material-commerce.md#支付与退款边界模拟实现).
