@@ -11,6 +11,7 @@ Modelled on infra/jmeter/run_dispatch_regression.py:
 
 Run from the checkout to test (e.g. a fresh worktree); Maven is taken from <main checkout>/tools.
   python infra/test/run_it_batches.py --out target/it-batches-<ts>
+  python infra/test/run_it_batches.py --out target/it-batches-<ts> --classes RateLimitIT,AuthBcryptPoolIT   # subset
 Exit code 0 only when every batch passed.
 """
 import argparse, json, os, re, subprocess, time
@@ -41,8 +42,13 @@ def it_classes():
     return [n for n in names if n not in EXCLUDE]
 
 
-def batches(per_batch):
+def batches(per_batch, only=None):
     its = it_classes()
+    if only:
+        unknown = [c for c in only if c not in its]
+        if unknown:
+            raise SystemExit('unknown IT classes: ' + ','.join(unknown))
+        its = [c for c in its if c in only]
     out = [('b00-unit', None)]
     for i in range(0, len(its), per_batch):
         group = its[i:i + per_batch]
@@ -79,11 +85,12 @@ def main():
     a.add_argument('--per-batch', type=int, default=2, choices=(1, 2))
     a.add_argument('--min-free-mib', type=int, default=3072)
     a.add_argument('--mem-wait-s', type=int, default=600)
+    a.add_argument('--classes', default=None, help='comma-separated IT classes to run (unit batch always runs); default all')
     args = a.parse_args()
     out = Path(args.out); out.mkdir(parents=True, exist_ok=False)
     env = dict(os.environ, JAVA_HOME=JAVA_HOME, MAVEN_OPTS='-Xmx512m')
     env['PATH'] = JAVA_HOME + '/bin' + os.pathsep + env['PATH']
-    plan = batches(args.per_batch)
+    plan = batches(args.per_batch, args.classes.split(',') if args.classes else None)
     (out / 'plan.json').write_text(json.dumps(plan, indent=1), encoding='utf8')
     head = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], capture_output=True, text=True).stdout.strip()
     status = []
