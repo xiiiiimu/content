@@ -38,13 +38,15 @@
 | B4 | 发送端空轮询退避 | P1 | 未开始 |
 | B5 | 抢购缓存同步提交次数【需决定】 | P1 | 未开始 |
 | B6 | 关注潮（R6）与推模式扩散（R7）实测 | P1 | 未开始 |
-| C1 | 只增不减的表和 Redis 结构盘点 | P2 | 未开始 |
-| C2 | 保留策略与清理任务【需决定】 | P2 | 未开始 |
+| C1 | 只增不减的表和 Redis 结构盘点 | P2 | 完成（基于 `703ac60`） |
+| C2 | 保留策略与清理任务（已决定） | P2 | 进行中（已推送，待 CI） |
+| C3 | 抢购 Redis 状态哈希随全部请求增长（C-10） | P1 | 未开始 |
 | D1 | CI 跳过项评估与启用（已决定） | P3 | 完成（CI run 44941020312 通过） |
 | D2 | FFmpeg 超时后的容器清理测试 | P3 | 完成 |
 | D3 | `offlineDuringProcessingFailsLeaseWithoutCompleting` 偶发失败 | P3 | 完成（连续 10 次，置信度有限） |
 | D4 | 前端话题输入框 + 前端测试 | P3 | 完成 |
 | D5 | 支付/退款为模拟实现的文档说明 | P3 | 完成 |
+| D6 | FFmpeg 容器创建前超时的残留（D2 遗留） | P3 | 未开始 |
 | E1 | @助手 接入大模型解析器（多供应商、兜底、注入防护） | — | 完成 |
 
 ---
@@ -255,25 +257,134 @@
 ## 第 C 轮：P2 数据增长
 
 ### C1 盘点只增不减的表和 Redis 结构
-每一项都要说明：哪些行在什么条件下可以删除或归档、幂等和恢复是否依赖它们、建议的保留期。下表是初步分类，**全部待核实**。
+每一项都要说明：哪些行在什么条件下可以删除或归档、幂等和恢复是否依赖它们、建议的保留期。
 
-| 结构 | 初步判断 / 待核实点 |
-|---|---|
-| `outbox_events`、`outbox_replay_audit` | 已发送的行是否还被重放、对账（`PipelineReconcile`）、`consumer_inbox` 校验 payload 时读取（`DistributionInbox.accept` 会读 `outbox_events`）？ |
-| `consumer_inbox`、`feed_event_conflicts` | 消费回执用于去重：保留期必须覆盖 MQ 最大重投窗口 |
-| `feed_delivery_tasks`（DONE/DEAD）、`delivery_replay_audit` | DEAD 行需要保留给人工重放；DONE 行可删除的条件是什么 |
-| `publish_requests` | 发布幂等回执：客户端重试窗口 |
-| `material_purchase_requests`、`material_orders`、`material_refund_requests` | 业务记录，**不删除**，只考虑归档 |
-| `material_sale_dispatch`（MQ 待发送）、`material_sale_consume_receipts`、`material_sale_cache_jobs`、`material_sale_reservation_fences`、`material_sale_legacy_*`、`material_sale_stream_quarantine` | 已确认（SENT/ACK）的行是否还被恢复流程读取；`ON DELETE CASCADE`（V20）的影响 |
-| Redis Stream（`SaleEntryRedis`：`XADD` 没有 `MAXLEN`，只有 `XACK`，从不 `XDEL`/`XTRIM`） | 只能裁剪已确认、并且已经越过最小 pending ID 的条目；与 `XAUTOCLAIM` 接管的关系 |
-| `notifications`、`feedback_notify_log`、`assistant_tasks`、`trend_risk_events`、`follow_history`、`media_tasks` | 按业务保留期 |
-| `topic_minute_buckets`、`topic_event_ledger` | **已由 R2 处理**（48 h，`TopicRetention`）|
-| Redis feed 候选 zset | `FeedTrimmer` 已有裁剪，核实是否覆盖所有键 |
+**结果（2026-11-22，基于 `703ac60` 只读核实）**。保留原则（用户给定）：业务记录不删；幂等和消费回执默认 7 天；已完成的中间态默认 7 天；DEAD 和人工处理记录不自动删；Redis Stream 只裁剪已确认且早于最小 pending 的条目，默认 1 天；通知等默认 180 天；为 B1 预留“只删除已处理数据”的约束。
 
-### C2 保留策略与清理任务【需决定】
+**关键结论**
+1. **Feed 链路三张表必须按事件一起删，顺序 outbox → inbox → DONE 任务（同一事务）**。`DistributionInbox.accept` 先读 `outbox_events`，缺失即判 `OUTBOX_EVENT_CONFLICT`（`DistributionInbox.java:32-33`）；`PipelineReconcile` 会为“SENT 无 inbox”补 inbox、为“inbox=PUSH/HISTORY 无任务”从 outbox payload 补任务（`PipelineReconcile.java:61-74,90-99`）。若先删 DONE 任务而 inbox 仍在，对账会重建任务、**重新扇出旧帖子**。按 outbox → inbox → 任务的顺序，任一中间态最多让 `orphanTasks`（只检测不修改）误报。
+2. **抢购 Redis 状态哈希 `sale:{entry-v2}:state` 随全部购买请求增长，由设计决定**：恢复时从全部 `material_purchase_requests` 重建（`SaleIngress.java:137-138`，`SaleIngressMapper.java:69` 无过滤）。`k:`（用户+clientKey → 请求，跨活动）不可删：删除后用户在新活动重用 clientKey，Redis 放行、MySQL `uq_purchase_client` 冲突 → `CLIENT_KEY_CONFLICT` 隔离 → 活动暂停。可安全清理的只有 `t:<streamId>` 和失败恢复留下的 `stage:<gen>`。
+3. **`material_sale_cache_jobs` 不可删**：删除后行从 `revision=1` 重新开始，而 Redis 仍有更大的 `v:<kind>:<key>`，APPLY 脚本把它当作“已应用”直接返回 1，缓存更新被静默丢弃（`SaleEntryRedis.java:208-210`，`SaleIngressMapper.java:56`）。
+4. **`media_tasks` 的 DONE 行是媒体播放的数据源**（`MediaService.java:70,77` 读 output/cover），属于业务数据。
+5. **`follow_history` 是可见性授权数据**（`FeedMapper.java:40`、`RecoveryMapper.java:26`、`DeliveryMapper.java:32`），不能按时间删，只能删失效 epoch（重新关注 epoch 必 +1，`RelationshipService.java:24`）。
+6. **MQ 重投窗口依赖 broker 默认值**：`infra/docker/broker.conf` 未设 `fileReservedTime`（默认 72 h），consumer 为 `CONSUME_FROM_FIRST_OFFSET`（`PipelineConsumer.java:22`），位点丢失或 `repair-broker-store.ps1` 后可重放最多 72 h；`maxReconsumeTimes` 默认 16（约 4 h 46 min）后进 DLQ（DLQ 同样 72 h）。回执 7 天以此为前提。生产 broker 实际值：缺证据。
+7. Feed 候选 zset 覆盖已核实：所有写入目标都是 follower，关注时必 `initGraph`（`RelationshipService.java:21`），`FeedTrimmer` 遍历 `follow_graph_version` 覆盖全部键；Redis 写入需要 `feed:write-generation`（仅恢复流程设置），`feed_control` 只按 PRIMARY→REBUILDING→READY 转换，Trimmer 只在 READY 运行不留缺口。没有条数上限，`:untrusted` 标记只在恢复时 UNLINK（量很小）。
+
+**Feed / Outbox**
+
+| 结构 | 可删条件 | 依赖流程（代码位置） | 建议 |
+|---|---|---|---|
+| `outbox_events` | `status='SENT'` 且 `sent_at` 早于截止 且 有 `consumer_inbox` 回执 且 无任务或任务为 DONE 且 无 `outbox_replay_audit`（FK，V3）且 无 `feed_event_conflicts` | inbox 校验 `DistributionInbox.java:32`；对账 `PipelineReconcile.java:61,66-70`；DEAD 重放 `RelayMapper.java:25`；`uq_outbox_post_published` 对发布只是双保险（真正的保护是 `posts.status='DRAFT'`，`PublishMapper.java:30`）| SENT 7 天；NEW/RUNNING/DEAD 不删；SENT 但无 inbox 超过 7 天是对账缺口，保留 |
+| `consumer_inbox` | 与 outbox 同事务；事件有 DEAD 任务则保留（否则对账报 orphan） | 去重 `DistributionInbox.java:35`；对账三项扫描 | 7 天，且须 ≥ broker 保留期 + 余量 |
+| `feed_delivery_tasks` | 只删 DONE，与 inbox 同事务；**无完成时间列**（`last_attempt_at` 是领取时间） | `uq_delivery_event` 是建任务的幂等约束（`InboxMapper.java:13`）；DEAD 重放 `DeliveryMapper.java:36` | DONE 7 天；DEAD 不删 |
+| `outbox_replay_audit`、`delivery_replay_audit`、`feed_recovery_audit` | 人工操作记录 | — | 不删 |
+| `feed_event_conflicts` | 人工对账记录，**无“已处理”状态列** | 写入 `DistributionInbox.java:61` | 不删 |
+| `follow_history` | 同一 (follower, followee) 的当前 `follow_epoch` 更大，或当前状态 UNFOLLOWED | 读取都 JOIN `follows` 要求 epoch 一致且 FOLLOWING | 只删失效 epoch，不按时间 |
+| `feed_mode_transitions` | 只读 VERIFYING（`ModeMapper.java:11`），量小 | — | 不删 |
+| `publish_requests` | **无时间列**，只能 JOIN `posts.published_at_ms` | 重试读回执 `PublishTransaction.java:37-41`；删除后同键重试返回 409 `POST_STATE_CONFLICT` 而不是原快照，不会重复发布 | 见【需决定】C-7 |
+
+**抢购（MySQL）**
+
+| 结构 | 可删条件 | 依赖流程 | 建议 |
+|---|---|---|---|
+| `material_purchase_requests`、`material_orders`、`material_refund_requests` | 业务记录 | — | 不删 |
+| `material_sale_dispatch` | `state='SENT'` 且 `sent_at_ms` 早于截止 且 请求为终态；V23 迁移的旧行 `sent_at_ms` 可能为 NULL | Stream 条目重处理时会对已存在请求再 enqueue（`SaleBridgeBatch.java:94,97`）：行已删就多发一条 MQ，消费端因请求非 PROCESSING 忽略（`SaleService.java:197`），无害 | SENT 7 天 |
+| `material_sale_consume_receipts` | 请求为终态 | 结算主要靠请求状态幂等（`SaleService.java:197,251`），回执是第二道保护 | 7 天 |
+| `material_sale_cache_jobs` | 不可删（见结论 3） | `SaleEntryRedis.java:208-210` | 不删 |
+| `material_sale_reservation_fences` | BLOCKED 是隔离决定；ALLOW 每请求一行，可重建，但与 `block()` 竞争（`SaleBridgeMapper.java:25-26`），`reconcileReleases` JOIN 它（`:41`） | — | 不删（收益低） |
+| `material_sale_stream_quarantine` | HOLD/RELEASE_PENDING 未处理；RELEASED/NO_RELEASE 终态；恢复时全量分页读（`SaleBridgeBatch.java:147-155`） | — | 不删（人工处理记录） |
+| `material_sale_legacy_replays` | 审计 | — | 不删 |
+| `material_sale_legacy_streams`、`account_material_decision_locks`、`trend_topic_serial` | 游标行/锁行，删除与加锁竞争 | `SaleMapper.java:224-229` | 不删 |
+| V20 `ON DELETE CASCADE`（dispatch → request） | 只在删除请求时触发；业务记录不删，当前不起作用。将来若归档请求：dispatch 会被静默级联删除，receipts、orders 的 FK 会阻止删除 | — | 记录 |
+
+**通知与其他业务表**
+
+| 结构 | 判断 | 建议 |
+|---|---|---|
+| `notifications` | 删除后 `uq_notif_dedupe`、`uq_notif_event_recipient` 去重失效；触发源都是一次性状态变化（反馈通知除外，见下行） | 180 天 |
+| `feedback_notify_log` | 作者可随时再次 `linkResolution`，每次都走 `maybeNotify`（`FeedbackWatchService.java:53-65,78`）；log 与通知都删掉后再次 resolve 会重复通知 | 见【需决定】C-4 |
+| `assistant_tasks` | `GET /api/assistant/tasks/{id}`（A8）读取；`uq_assistant_trigger` 去重 | 见【需决定】C-2 |
+| `trend_risk_events` | `uq_risk_business` 只在当前窗口有意义；`ix_risk_time` 时间前导索引已有 | 180 天 |
+| `media_tasks` | DONE 是业务数据，DEAD 人工处理 | 不删 |
+| `post_reports`、`giveaway_*`、`material_entitlements`、点赞/收藏等 | 业务与证据 | 不删 |
+| `topic_minute_buckets`、`topic_event_ledger` | 已由 `TopicRetention` 48 h 清理（R2） | 加 B1 水位约束（C-13） |
+
+**Redis**
+
+| 结构 | 现状 | 建议 |
+|---|---|---|
+| `sale:{entry-v2}:stream`（组 `sale-persist-v2`） | 核实：`XADD` 无 MAXLEN，从不 XTRIM/XDEL。正常条目在 MySQL 提交后 ACK（`SaleBridgeBatch.java:65`），隔离条目复制 payload 入表后 ACK（`:133`）；ACK 后条目内容无人再读 | Lua 原子 `XTRIM MINID`，边界 = min(最小 pending ID, last-delivered-id 的下一个, now−1 天)；XAUTOCLAIM 只接管 pending，不受影响 |
+| state 哈希 `t:<streamId>` | 每条目一个字段，从不删除（计划原表未列） | 随 XTRIM 一起 HDEL，**排除**隔离状态 HOLD/RELEASE_PENDING 的条目（释放脚本比对 `t:`，`SaleEntryRedis.java:143`，缺失会永远停在 RELEASE_PENDING、活动持续暂停） |
+| state 哈希 `r:`、`k:`、`o:`、`refund:`、`released:`、`v:` | 随业务记录增长，恢复全量重建；约 591–653 B/请求（见 C3） | 不清理，另立 C3 |
+| `sale:{entry-v2}:stage:<gen>` | 恢复中途失败留下一份完整大小的哈希，无清理（`SaleEntryRedis.java:179`） | 删除 generation < 当前且不属于进行中恢复的 stage |
+| `quarantine-stream:<gen>`、`quarantine-control:<gen>` | 仅在 key 类型异常时由 rename 产生 | 人工处理 |
+| 旧版 `sale:{<id>}:pending`、`sale:{<id>}:r:*` | 每次恢复从游标读（`SaleIngress.java:152-165`） | 见【需决定】C-11 |
+| `feed:v2:{reader}:inbox` | 见结论 7 | 不改 |
+| `rl:v1:*`、`post:detail:v1:*`、`trend:v1:net:*` | 有 PEXPIRE / SETEX 300 / 重建前 DEL | 不需要处理 |
+
+### C2 保留策略与清理任务（已决定）
 - 先给出保留策略（每个结构的保留期、删除条件、归档方式），**确认后再实现**。
 - 清理任务的要求：小批量短事务，READ COMMITTED（参照 `TopicRetention` 的做法），说明锁影响。
 - **验收**：每个清理任务都有测试证明不会删除仍在幂等窗口内或恢复流程需要的数据（例如还在 MQ 重投窗口内的消费回执、未确认的 Stream 条目、DEAD 投递任务）；批大小和间隔可配置；完整 IT 通过。
+
+**清理任务**：每个任务独立开关、批大小、间隔、保留期；每批一个 READ COMMITTED 短事务，按主键顺序取一批 id 再按 id 删除，只对被删行加记录锁、不加间隙锁，与在线写入只可能在已过期的行上相遇，最多等一批。
+
+| 任务 | 删除内容 | 默认保留 |
+|---|---|---|
+| R-FEED | 同事务删除 outbox(SENT) → inbox → DONE 任务，条件见 C1 表 | 7 天 |
+| R-FOLLOW | `follow_history` 失效 epoch | 不按时间 |
+| R-SALE | `material_sale_dispatch`(SENT, 请求终态)、`material_sale_consume_receipts`(请求终态) | 7 天 |
+| R-NOTIFY | `notifications`、`trend_risk_events`（`feedback_notify_log` 按 C-4） | 180 天 |
+| R-STREAM | Stream 中已确认条目按 id `XDEL`（边界同 `XTRIM MINID` 的计算）+ 对应 `t:` HDEL（排除隔离未处理）+ 孤儿 `stage:<gen>` | 1 天 |
+| R-TOPIC | 现有 `TopicRetention` 增加“已处理水位”上限（B1 预留，默认无水位 = 现行为） | 48 h |
+
+**决定（2026-11-22）**：C-1…C-14 全部按推荐执行；补充：C-10 另立 C3（P1）并先补证据；C-6 的旧行保留，记录数量（见下方结果），以后可做一次性人工清理。下面保留各项原文。
+- **C-1 `media_tasks`**：计划原表把它放在“按业务保留期”，但 DONE 是业务数据。推荐：不删。
+- **C-2 `assistant_tasks`**：(a) 视为业务记录不删；(b) 终态保留 180 天后删除，之后查询接口返回 404。推荐 (a)。
+- **C-3 `follow_history`**：推荐只删失效 epoch，不适用 180 天。
+- **C-4 `feedback_notify_log`**：与“幂等 7 天”冲突。推荐：保留 180 天，且只在对应通知（`dedupe_key='feedback-ready:<account>:<comment>:<version>'`）已删除时才删；或接受过期后可能重复通知。
+- **C-5 `feed_delivery_tasks` 缺完成时间**：推荐新增迁移加 `completed_at`（置 DONE 时写入）；已有 DONE 旧行（`completed_at` 为 NULL）用 `last_attempt_at` 近似判断。
+- **C-6 时间为 NULL 的旧行**（outbox SENT 而 `sent_at` NULL；dispatch SENT 而 `sent_at_ms` NULL）：推荐保留不删，不推算时间。
+- **C-7 `publish_requests`**：每帖一行，与 `posts` 同量级；按 7 天删需 JOIN 发布时间，且过期后重试从返回原快照变为 409。推荐：不删。
+- **C-8 `material_sale_cache_jobs`、fences ALLOW、锁行**：推荐不删。
+- **C-9 `feed_event_conflicts`**：无“已处理”状态，永远无法清理。推荐本轮不改，只记录；需要时再加 `resolved_at` 与运维命令。
+- **C-10 抢购 Redis 状态哈希**：只靠清理解决不了（内存和恢复耗时随全部请求线性增长）。推荐：本轮不处理，另开设计项（例如只为未结束活动加载 `r:`，`k:` 必须保留），先补单请求内存占用的证据。
+- **C-11 旧版每活动 Stream/哈希**：推荐本轮不处理（新环境无此类数据）。
+- **C-12 Stream 1 天裁剪 + `t:` + 孤儿 `stage:<gen>`**：推荐纳入本轮。
+- **C-13 B1 约束**：推荐在 `TopicRetention` 加“已处理水位”接口：ledger 截止点 = min(now−48h, 水位)（余量由提供水位的一方扣除），默认无水位（现行为）；B1 选方案 (2) 时由后台聚合器提供水位。撤回点赞立即删 ledger 行（`InteractionMapper.java:65`）在方案 (2) 下的语义留给 B1 决定。
+- **C-14 MQ 保留期**：推荐在 `infra/docker/broker.conf` 显式写 `fileReservedTime=72`，应用侧增加配置 `content.retention.broker-reserved-hours`（默认 72），启动时校验回执保留期 ≥ 它 + 24 h，不满足则拒绝启动。
+
+**结果（`a8758cd`、`6966dc6`、`c536878`；C3 临时措施 `2c665b8`）**
+- **实现**：`FeedRetention`（R-FEED）、`FollowHistoryRetention`（R-FOLLOW）、`SaleRetention`（R-SALE）、`NotificationRetention`（R-NOTIFY）、`SaleStreamRetention`（R-STREAM，脚本在 `SaleEntryRedis.acknowledgedBefore/dropAcknowledged`）、`TopicRetention` 增加已处理水位（C-13，默认 `ALL_PROCESSED` = 现行为）；SQL 集中在 `RetentionMapper`；`RetentionConfiguration` 为每个任务建一个守护线程。V31 给 `feed_delivery_tasks` 加 `completed_at`，`DeliveryMapper.progress` 置 DONE 时写入（C-5）。`infra/docker/broker.conf` 显式 `fileReservedTime=72`，`RetentionBounds.requireCoversBroker` 在启动时校验回执保留期 ≥ broker 保留期 + 24 h（C-14）。
+- **配置**（`content.retention.<job>.*`，job = `feed`、`follow-history`、`notifications`、`sale`、`sale-stream`）：`enabled`（默认 true）、`batch`（500；Stream 上限 1000）、`max-batches`（每次运行最多批数，200）、`interval-millis`（600000，最小 60 s，首次运行在启动后一个间隔）、`retention-millis`（feed/sale 7 天，notifications 180 天，sale-stream 1 天）；`content.retention.broker-reserved-hours`（72）。sale、sale-stream 只在 `content.media.enabled=true`（抢购启用）时创建。保留期对象总会创建，所以即使关掉任务，不安全的保留期也会让启动失败。
+- **锁影响**：每批一个 READ COMMITTED 短事务（复用 `feedTransactions`，超时 15 s）。候选用普通读从索引取（outbox 走 `ix_outbox_retry`，dispatch 走 `ix_sale_dispatch_pending_due`，二者都利用“下次重试/可用时间不晚于发送时间”，不给热表加新索引），批内用 `FOR UPDATE` 重新校验后按主键删除：只对选中的行加记录锁，不加间隙锁。在线写路径不碰这些行（relay 只领 NEW/RUNNING、replay 只动 DEAD、投递 worker 只领 NEW/RUNNING、发送端只领 PENDING/SENDING），冲突最多等一批。R-FOLLOW 的多表 DELETE 会对同一对 (follower, followee) 的 follows 行加一批时长的共享锁。R-SALE 用 `FOR UPDATE OF d,c`，不锁请求行。Redis 每步是一个原子脚本，不在 SQL 事务里做 Redis I/O。
+- **已知限制**：R-FEED/R-SALE 每次运行从索引起点扫描，长期不可删的行（对账缺口、DEAD、审计、冲突）排在前面会占用批次，超过 `batch × max-batches` 时后面的行要等异常行处理掉；R-NOTIFY 遇到第一条未过期的通知就停，排在较新 id 之后的旧行要等前面的行过期；被保留的隔离条目的 `t:` 在其释放后不会被本任务删除，直到下次恢复重建状态。
+- **C-6 计数**（本地开发库，2026-11-22 只读查询，库在 V26；生产数量缺证据）：`outbox_events` SENT 且 `sent_at` 为 NULL：0 / 39,912；`material_sale_dispatch` SENT 且 `sent_at_ms` 为 NULL：0 / 70,702。另有没有 dispatch 行的消费回执（V20 之前的数据，R-SALE 不处理）：10,210 / 80,912。这些行保留，以后可以做一次性人工清理（确认请求为终态、超过保留期后按主键删除）。统计 SQL 在 `RetentionMapper` 末尾。
+- **测试**（RED → GREEN，分批脚本）：
+  - RED（骨架编译通过、容器正常、因缺少行为失败）：`target/hardening-c/red-052247`（`FeedRetentionIT` 6/6 失败）、`red-NotificationRetentionIT-052514`（1/1）、`red-SaleRetentionIT-052716`（3/4；`streamRetentionWithoutConsumerGroupTrimsNothing` 是守卫用例，空实现下即通过）。首个 RED 尝试 `red-052206` 是测试代码编译错误（`XAddArgs.Builder.id` 不存在），不算 RED，日志保留。
+  - GREEN：`target/hardening-c/green-053218`（`FeedRetentionIT` 6/6；同批 `MySqlMigrationIT` 因迁移数断言仍为 30 失败，更新为 31 后通过）、`green-053612`（`MySqlMigrationIT`、`NotificationRetentionIT`、`SaleRetentionIT` 0 失败）。
+  - 覆盖的“不会误删”：7 天内的回执、SENT 无回执、PUSH/HISTORY 回执无任务、DEAD/RUNNING/新近 DONE 任务、DEAD/NEW outbox、`sent_at` 为 NULL、有重放审计或冲突记录的事件；未结算请求、新近回执（dispatch 与回执同删同留）、PENDING/SENDING、无 dispatch 的回执；pending 及其之后的 Stream 条目、未投递条目、1 天内条目、无消费组时不裁剪、隔离未处理条目的 `t:`；正在进行的恢复的 stage；当前 epoch 的 follow_history；仍有通知的 feedback log；B1 水位之后的 ledger。删除后对账三项（orphanTasks、任务缺口、回执缺口）不变。
+  - 完整分批 IT：`it-full-054219` 跑完 unit 与 b01 后被系统以内存不足为由停止（非测试失败）；按决定完整验证交给 CI。报告：`docs/perf-evidence/hardening-c-20261122/README.md`。
+
+### C3 抢购 Redis 状态哈希随全部请求增长（C-10）
+- **问题**：`sale:{entry-v2}:state` 为每个购买请求保存 `r:`（请求 JSON）、`k:`（用户 + clientKey → 请求，跨活动）、`o:`（已购归属），结算后还有 `v:REQUEST:*`、`v:OWNER:*`（直到下次恢复）。恢复时从全部 `material_purchase_requests` 重建（`SaleIngress.java:137-138`，`SaleIngressMapper.java:69` 无过滤），所以内存和恢复时间都随历史请求总数线性增长，C2 的清理无法缩减（只清 `t:` 和孤儿 stage）。
+- **证据（本地开发 Redis，2026-11-22 只读测量；往期压测数据，80,912 个请求）**：
+  - 哈希 333,459 个字段，`MEMORY USAGE … SAMPLES 0` = 62,643,215 B，编码 hashtable。按前缀：`r:` 80,912、`k:` 80,912、`o:` 80,758、`v:` 59,521、`t:` 29,748、`c:` 1,485、`refund:` 120。
+  - 字段名 + 值的原始字节共 44,454,460 B，其余 18,188,755 B 按字段均摊为每字段约 54.5 B 开销（dictEntry、sds 头、分配器取整、桶数组）。
+  - **每个请求约 591 B**（恢复后形态：`r:` + `k:` + `o:`，原始 427 B + 3 个字段开销）；带上结算后的 `v:` 字段约 **653 B**。另外每个未裁剪的 Stream 条目约 273 B，加上它的 `t:` 约 325 B（C2 后 1 天内清掉）。
+  - 方法：用 Lua `HSCAN` 统计各前缀字段数和字节数，用 `MEMORY USAGE` 总量反推每字段开销。是对真实数据的平均估算，不是逐字段精确值。
+- **容量推算**：本地 compose 的 Redis **未设置 maxmemory**（`CONFIG GET maxmemory` = 0），策略 `noeviction`，`appendonly yes`；Docker Desktop VM 总内存 4.80 GiB（与 MySQL、RocketMQ、MinIO 共用），当前 `used_memory` 81.2 MB。
+  - 每 1 GiB 可容纳约 **164 万**个请求（按 653 B）或约 182 万个（按 591 B）。
+  - 如果 Redis 独占整个 VM（不现实的上限）约 776 万个；AOF 重写 fork 的写时复制最坏需要接近两倍内存，实际上限更低。其他容器占用和生产配置：缺证据。
+- **风险**：设置了 maxmemory 时，`noeviction` 下写满后，下单入口 Lua（`HSET`/`XADD`）返回 OOM 错误，抢购入口失败，恢复重建 stage 也会失败（恢复需要额外一份完整大小的 stage 哈希，峰值约为状态哈希的两倍）。**目前未设置 maxmemory**，写满时不会得到干净的写入错误，而是由容器或 VM 内存耗尽触发 OOM kill，影响更大。恢复时间同样随请求总数线性增长（数值缺证据）。
+- **临时措施（2026-11-22，已做）**：开发用 compose 的 Redis 显式设置 `--maxmemory 1gb`，保留 `noeviction`（`infra/docker/compose.yml`；Docker Desktop VM 4.80 GiB 与 MySQL、RocketMQ、MinIO 共用，AOF 重写 fork 另需余量）。验证：`start.ps1` 后四个服务 healthy，`CONFIG GET maxmemory` = 1073741824；临时把上限调到 1mb 时，写入脚本返回 `OOM command not allowed when used memory > 'maxmemory'`，探测 key 没有写入，随后恢复 1gb。入口代码 `SaleEntryRedis.reserve` 抛出的 `RedisException` 由 `SaleService.java:101` 转成 **503 `SALE_CACHE_UNAVAILABLE`**（这一映射是读代码确认，没有在写满状态下实际发 HTTP 请求）。注意：恢复流程需要再建一份完整大小的 stage 哈希，所以接近上限时恢复也会失败；broker 运行时 `fileReservedTime` 确认是 72（RocketMQ 镜像自带的默认 conf 写的是 48，部署时不要用它替换本项目的 conf）。**这只把写满变成可观测的写入失败，根治方向（下面 2–5）仍未实现**；生产环境的 maxmemory 和告警需要另行配置。
+- **可能方向**（待设计，需决定）：
+  1. 给 Redis 设置 maxmemory 和告警（例如用量超过 70%），先让写满变成可观测、可预期的失败；
+  2. 已终结请求的状态迁出 Redis：活动结束后 `r:`、`o:` 只保留在 MySQL，入口对未知请求回源 MySQL；
+  3. 按活动结束时间过期：恢复只加载未结束（含宽限期）活动的 `r:`、`u:`、`o:`；
+  4. `k:` 是跨活动的 clientKey 唯一性，**不能简单删除**（会导致新活动中重用 clientKey 被 Redis 放行、MySQL 冲突、隔离并暂停活动），需要改成按活动作用域或回源 MySQL 判定，涉及入口语义；
+  5. `v:` 字段可以在 cache job 应用后清除，但要和 `material_sale_cache_jobs` 的版本号协议一起设计（见 C1 结论 3）。
+- **验收**（草案）：给出方案对比和推荐，等决定；实现后用同样的方法测量，单请求常驻字节数下降，并且恢复时间不再随历史请求总数增长。
 
 ---
 
@@ -321,6 +432,12 @@
 - 不接入真实支付。在 README 和相关设计文档里如实说明：支付和退款是模拟实现，哪些状态流转是模拟的，接入真实支付前需要补哪些东西（回调验签、对账、幂等）。
 - **验收**：文档更新已提交；代码中没有任何地方暗示接入了真实支付。
 - **结果（`3fa364e`）**：README 与 `docs/v1.1-material-commerce.md`（“支付与退款边界”）列出模拟的状态流转和接入前要补的事项；前端价格和付款提示标明“模拟”；Java/Python 中没有支付渠道相关代码。报告：`docs/perf-evidence/hardening-d-20261122/README.md`。
+
+
+### D6 FFmpeg 容器创建前超时的残留
+- **问题（D2 遗留）**：D2 在超时或中断时按名字 `docker rm -f`（`FfmpegTranscoder.java:94-97`）。如果超时发生在 docker CLI 还没把容器创建出来时，`rm -f` 找不到容器；之后 CLI 被杀但守护进程可能仍完成创建并运行，容器会残留。
+- **建议修法**：定期清理任务，按标签 `io.github.xiiiiimu.content.ffmpeg=1`（`FfmpegTranscoder.java:18`）列出容器，删除创建时间超过运行时间上限（转码超时 + 余量）的容器。
+- **验收**：测试构造一个带本项目标签、超过上限的容器，清理后不存在；未超过上限的容器和不带标签的容器不受影响。
 
 ---
 
@@ -378,3 +495,6 @@
 | 2026-11-22 | D | D2（`90452ce`）、D4（`5e4bad4`）、D5（`3fa364e`）、D3（`ba2cc30`，连续 10 次 0 失败）完成；D1（`2ec9483`）CI 拆为 4 个并行 job、真实 MQ 改用 Testcontainers、`setup-java` v5，本地验证通过，待推送后 CI；分批脚本修复旧 summary 误判并去掉过时的 AssistantEvalE2EIT 排除（`5d25a83`、`2ec9483`）；本地完整分批 IT 547 运行 0 失败 94 跳过。报告 `docs/perf-evidence/hardening-d-20261122/` |
 | 2026-11-22 | D | 推送前补充：`GET /api/posts/{id}` 返回话题、编辑页预填（`0cf18d7`）；CI 新增 `frontend` job（`5d93a28`，pnpm frozen install + typecheck + vitest，15 min）；`CLAUDE.md` 更新（`d64729b`）。D1 仍待推送后 CI |
 | 2026-11-22 | D | CI run `44941020312`（`5f88f18`）5 个 job 首次推送全部通过：frontend 26 s、assistant-python 16 s、maven (a-l) 7m44s、maven (m-z) 8m52s、maven-real-mq 3m07s（95/95）。D1 完成，第 D 轮全部完成 |
+| 2026-11-22 | C | C1 盘点完成并写入 C 节（基于 `703ac60`）；C2 保留策略与拟实现的清理任务给出，C-1…C-14 待确认；新增 D6（D2 遗留：容器创建前超时的残留，未开始） |
+| 2026-11-22 | C | C-1…C-14 按推荐决定；C2 清理任务实现（R-FEED、R-FOLLOW、R-SALE、R-NOTIFY、R-STREAM、TopicRetention 水位、V31 `completed_at`、broker 保留期校验），RED/GREEN 通过；C-6 计数记录；C3 立项（P1）并补 Redis 内存证据；完整分批 IT 被系统内存回收中断，待重跑。未提交 |
+| 2026-11-22 | C | 完整验证改由 CI 承担；开发 Redis 设 `maxmemory 1gb`（C3 临时措施，四个服务 healthy、OOM 时写入被拒已验证）；按主题提交 `a8758cd`、`6966dc6`、`c536878`、`2c665b8` 并推送，待 CI |
