@@ -41,7 +41,10 @@ public final class HttpAssistantParser implements AssistantParser {
     boolOrNull(s,"licenseDownload"),boolOrNull(s,"licenseCommercial"));
   }
   SubscribeCommand subscribe=null;
-  if(n.hasNonNull("subscribe"))subscribe=new SubscribeCommand(n.path("subscribe").path("feedbackCommentId").asLong());
+  if(n.hasNonNull("subscribe")){
+   var sc=n.get("subscribe");
+   subscribe=new SubscribeCommand(sc.path("feedbackCommentId").asLong(),sc.path("action").asText("SUBSCRIBE"),sc.path("target").asText("SELF"));
+  }
   GiveawayCommand giveaway=null;
   if(n.hasNonNull("giveaway")){
    var g=n.get("giveaway");
