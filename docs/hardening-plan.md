@@ -376,3 +376,4 @@
 | 2026-11-21 | A | A11 完成：Java 端独立校验订阅和抽奖，校验失败进入 REJECTED 并回复原因（V30）；解析器上报不支持的条件，并标出取消、替他人、批量；`context` 补全；CI 加 pytest；端到端非法执行 r3 10→0、冒烟 18→0；LATEST_BASELINE 指向 r3 |
 | 2026-11-21 | E | E1 完成：@助手 接入大模型解析器（多供应商，默认 DeepSeek，`llm_with_fallback`），`droppedRequirements` 注入防护；测试集意图 98.8%（规则版 82.1%），执行判定 97.6%（60.7%），E2E 非法执行 0；两组注入集 26 条非法执行 0；Java 解析超时改为 30 s（`c6f37dd`…`572b779`） |
 | 2026-11-22 | D | D2（`90452ce`）、D4（`5e4bad4`）、D5（`3fa364e`）、D3（`ba2cc30`，连续 10 次 0 失败）完成；D1（`2ec9483`）CI 拆为 4 个并行 job、真实 MQ 改用 Testcontainers、`setup-java` v5，本地验证通过，待推送后 CI；分批脚本修复旧 summary 误判并去掉过时的 AssistantEvalE2EIT 排除（`5d25a83`、`2ec9483`）；本地完整分批 IT 547 运行 0 失败 94 跳过。报告 `docs/perf-evidence/hardening-d-20261122/` |
+| 2026-11-22 | D | 推送前补充：`GET /api/posts/{id}` 返回话题、编辑页预填（`0cf18d7`）；CI 新增 `frontend` job（`5d93a28`，pnpm frozen install + typecheck + vitest，15 min）；`CLAUDE.md` 更新（`d64729b`）。D1 仍待推送后 CI |

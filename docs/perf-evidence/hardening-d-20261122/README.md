@@ -14,6 +14,10 @@
 | `3fa364e` | D5 | 文档说明支付、退款为模拟实现；前端价格和付款提示标明“模拟” |
 | `ba2cc30` | D3 | 关闭由测试自己驱动 `tick()` 的 IT 里的后台媒体扫描 |
 | `2ec9483` | D1 | CI 拆成并行 job（每个 35 分钟上限）；真实 MQ 套件改用 Testcontainers；`setup-java` v5 |
+| `e1f46c0` | — | 本报告初稿与计划状态 |
+| `0cf18d7` | 补充 | `GET /api/posts/{id}` 返回话题；编辑页预填当前话题 |
+| `5d93a28` | 补充（D1） | CI 新增 `frontend` job：依赖安装、typecheck、vitest，15 分钟 |
+| `d64729b` | 补充 | `CLAUDE.md`：FFmpeg 清理已验证，补充 MQ / MinIO / FFmpeg 测试的运行方式 |
 
 ## D2 FFmpeg 超时后的容器清理
 
@@ -33,7 +37,7 @@
 
 - **话题输入**：前端此前没有任何发帖或编辑页面，本轮新增：
   - `/posts/new`：正文 + 可选话题 → `POST /api/posts` → 发布。发布失败时保留已建草稿，重试只再次发布（发布用同一个幂等键）。
-  - `/posts/edit/[id]`：`GET /api/posts/{id}` 不返回话题，所以话题框留空表示保持原话题（PATCH 不带 `topic`），填写表示替换，勾选“清除话题”发送 `topic: null`。
+  - `/posts/edit/[id]`：初版时 `GET /api/posts/{id}` 不返回话题，话题框留空表示保持、勾选“清除话题”发送 `topic: null`。推送前的补充（见下文“推送前补充”）改为预填当前话题，去掉了勾选框。
   - 校验与 `PostAuthoringService.normalizeTopic` 一致：去首尾空白、空白即无话题、最长 128、不含控制字符。
   - 导航加“发帖”，帖子页作者可见“编辑正文 / 话题”入口。
 - **评论幂等键**：三个评论框（帖子页的时间点反馈、@助手评论、热点帖评论）改用 `createCommentKey`：打开评论框时生成一次随机 UUID，失败重试复用，成功后才换新键；切换到另一个帖子时重置（后端的键按用户唯一，不按帖子）。
@@ -51,6 +55,7 @@
 
 | job | 内容 | 超时 |
 |---|---|---|
+| `frontend` | `pnpm install --frozen-lockfile` + `pnpm run typecheck` + `pnpm run test`（vitest） | 15 min（推送前补充） |
 | `assistant-python` | `pip install` + `pytest` | 10 min（未变） |
 | `maven (a-l)` | 单元测试 + 类名首字母 A–L 的 IT | 35 min |
 | `maven (m-z)` | 类名首字母 M–Z 的 IT（不跑单元测试） | 35 min |
@@ -73,6 +78,7 @@
 | 其中 A–L | 按批次耗时分摊 | — | ≈19.0 min |
 | 其中 M–Z | 同上 | — | ≈19.9 min |
 | 单元测试 | b00 批 | 通过（1 跳过，见下） | 46–47 s |
+| `frontend` | 已跟踪文件复制到干净目录后按 job 命令运行 | typecheck 通过，vitest 21/21 | 安装 21 s（本机 pnpm 缓存已热）、typecheck 12 s、vitest 3 s |
 
 - **关于 35 分钟**：分批合计 39.7 min 包含 28 次 Maven 启动、编译和每批重复的 `ContentApplicationTest`，比单次调用偏高；CI 实际是一个 job 一次调用。按这个偏保守的口径，拆分后每个分片约 19–20 min，加上 runner 上的拉镜像和依赖下载，仍低于 35 min。**每个 job 在 CI 上的真实耗时：缺证据，等推送后的 CI 运行。**
 - 分批运行时，完整 IT 在 D1 的 Java 改动之后、`ci.yml` 拆分之前完成；之后只改了 `ci.yml`，没有 Java 改动。
@@ -90,6 +96,15 @@
 - 计划里原先写 `FfmpegTranscoderExecTest` “跳过原因待核实”：实际是按操作系统跳过，不依赖 docker 或 ffmpeg 镜像。
 - `AssistantEvalE2EIT` 在 `c664f49` 提交后，分批脚本仍把它当作“未提交的工作”排除；本轮去掉了这条过时的排除，现在本地完整跑与 CI 的范围一致。
 
+## 推送前补充（用户 2026-11-22 决定）
+
+- **读接口返回话题**（`0cf18d7`）：话题是公开信息（话题页已公开列出），所以 `GET /api/posts/{id}` 对所有能看到帖子的读者返回 `topic`，没有话题时为 null；看不到帖子的人仍是 404。`/api/topics/{topic}/posts` 用同一个 `View`，也随之多了这个字段（只增字段）。Redis 详情缓存只用于版本号，没有改。
+  - RED：`PostTopicIT.postDetailReturnsTheTopicToEveryReaderWhoCanSeeThePost` 失败于 `No value at JSON path "$.topic"`（`target/hardening-d/d6-topic-red-030656`）。
+  - GREEN：`PostTopicIT` 和所有用到 `View` 或这些接口的 IT 共 13 个类分 7 批运行，全部通过，115 运行、0 失败（`target/hardening-d/d6-topic-green-031121`）。
+- **编辑页预填**：话题框填入当前话题。不改就不发送 `topic`（保持），改了发送新值，清空发送 null（清除）；“清除话题”勾选框去掉。新增 `editPayloadFromLoaded` 和 `tests/topic-prefill.spec.ts`：RED 3 项失败（`target/hardening-d/d6-fe-red-031026`），GREEN 21/21。
+- **前端 CI job**（`5d93a28`）：要求的是 `npm ci`，但前端是 pnpm 项目（`packageManager: pnpm@9.15.0`，只有 `pnpm-lock.yaml`，没有 `package-lock.json`），`npm ci` 会直接失败。所以用等价的 `pnpm install --frozen-lockfile`，同样严格按锁文件安装。本地在干净目录跑通（`target/hardening-d/d6-fe-ci-local-031415`）。第一次在 `C:\WINDOWS\TEMP` 下跑时 typecheck 因路径大小写（TS1149）失败，属本机环境问题，日志保留在 `d6-fe-ci-local-031215`。actionlint 0 错误。
+- **`CLAUDE.md`**（`d64729b`）：已知边界改为 FFmpeg 清理已在 D2 验证（附遗留窗口）；明确集成测试用 Testcontainers、不依赖 compose；新增“测试运行方式”：真实 MQ 需 `CONTENT_REAL_MQ_IT=true` 并由 Testcontainers 启动，FFmpeg 走 Docker 镜像，MinIO 和 Perf/Eval IT 的开关，CI 超时规则。
+
 ## 其他发现
 
 - 分批脚本：只跑单元测试的批次（b00）不会重写 `failsafe-summary.xml`，`verify` 会读到上一次运行留下的失败结果。D2 GREEN 第一次尝试因此失败（`target/hardening-d/d2-green-attempt1-stale-summary-234541`，是环境问题，不是 RED），已修复（`5d25a83`）。
@@ -100,6 +115,4 @@
 1. 推送后的 CI 结果，以及每个 job 的实际耗时（缺证据）。
 2. D2：容器尚未创建时就超时的理论窗口（见上）。
 3. D3：只连续运行 10 次，置信度有限。
-4. D4：编辑页无法预填当前话题（后端读接口不返回话题）；如有需要，可以让 `GET /api/posts/{id}` 对作者返回 `topic`。
-5. 前端 vitest 没有进 CI（本轮的 D1 决定没有包括它），建议另加一个很小的 job。
-6. `CLAUDE.md` 的“已知边界”仍写着“FFmpeg 超时后的容器清理尚未验证”，D2 之后已不准确；本轮没有改动该文件，请确认是否更新。
+4. 读接口返回话题后，没有做浏览器端手工验证编辑页。
