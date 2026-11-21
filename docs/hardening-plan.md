@@ -39,7 +39,7 @@
 | B5 | 抢购缓存同步提交次数【需决定】 | P1 | 未开始 |
 | B6 | 关注潮（R6）与推模式扩散（R7）实测 | P1 | 未开始 |
 | C1 | 只增不减的表和 Redis 结构盘点 | P2 | 完成（基于 `703ac60`） |
-| C2 | 保留策略与清理任务（已决定） | P2 | 进行中（已推送，待 CI） |
+| C2 | 保留策略与清理任务（已决定） | P2 | 完成（CI run 44953911519 通过） |
 | C3 | 抢购 Redis 状态哈希随全部请求增长（C-10） | P1 | 未开始 |
 | D1 | CI 跳过项评估与启用（已决定） | P3 | 完成（CI run 44941020312 通过） |
 | D2 | FFmpeg 超时后的容器清理测试 | P3 | 完成 |
@@ -364,7 +364,7 @@
   - RED（骨架编译通过、容器正常、因缺少行为失败）：`target/hardening-c/red-052247`（`FeedRetentionIT` 6/6 失败）、`red-NotificationRetentionIT-052514`（1/1）、`red-SaleRetentionIT-052716`（3/4；`streamRetentionWithoutConsumerGroupTrimsNothing` 是守卫用例，空实现下即通过）。首个 RED 尝试 `red-052206` 是测试代码编译错误（`XAddArgs.Builder.id` 不存在），不算 RED，日志保留。
   - GREEN：`target/hardening-c/green-053218`（`FeedRetentionIT` 6/6；同批 `MySqlMigrationIT` 因迁移数断言仍为 30 失败，更新为 31 后通过）、`green-053612`（`MySqlMigrationIT`、`NotificationRetentionIT`、`SaleRetentionIT` 0 失败）。
   - 覆盖的“不会误删”：7 天内的回执、SENT 无回执、PUSH/HISTORY 回执无任务、DEAD/RUNNING/新近 DONE 任务、DEAD/NEW outbox、`sent_at` 为 NULL、有重放审计或冲突记录的事件；未结算请求、新近回执（dispatch 与回执同删同留）、PENDING/SENDING、无 dispatch 的回执；pending 及其之后的 Stream 条目、未投递条目、1 天内条目、无消费组时不裁剪、隔离未处理条目的 `t:`；正在进行的恢复的 stage；当前 epoch 的 follow_history；仍有通知的 feedback log；B1 水位之后的 ledger。删除后对账三项（orphanTasks、任务缺口、回执缺口）不变。
-  - 完整分批 IT：`it-full-054219` 跑完 unit 与 b01 后被系统以内存不足为由停止（非测试失败）；按决定完整验证交给 CI。报告：`docs/perf-evidence/hardening-c-20261122/README.md`。
+  - 完整分批 IT：`it-full-054219` 跑完 unit 与 b01 后被系统以内存不足为由停止（非测试失败）；按决定完整验证交给 CI：run `44953911519`（`803bce9`）5 个 job 全部通过，新增 IT 在 CI 中实际运行（a-l IT 305 → 311，m-z 154 → 159）。报告：`docs/perf-evidence/hardening-c-20261122/README.md`。
 
 ### C3 抢购 Redis 状态哈希随全部请求增长（C-10）
 - **问题**：`sale:{entry-v2}:state` 为每个购买请求保存 `r:`（请求 JSON）、`k:`（用户 + clientKey → 请求，跨活动）、`o:`（已购归属），结算后还有 `v:REQUEST:*`、`v:OWNER:*`（直到下次恢复）。恢复时从全部 `material_purchase_requests` 重建（`SaleIngress.java:137-138`，`SaleIngressMapper.java:69` 无过滤），所以内存和恢复时间都随历史请求总数线性增长，C2 的清理无法缩减（只清 `t:` 和孤儿 stage）。
@@ -498,3 +498,4 @@
 | 2026-11-22 | C | C1 盘点完成并写入 C 节（基于 `703ac60`）；C2 保留策略与拟实现的清理任务给出，C-1…C-14 待确认；新增 D6（D2 遗留：容器创建前超时的残留，未开始） |
 | 2026-11-22 | C | C-1…C-14 按推荐决定；C2 清理任务实现（R-FEED、R-FOLLOW、R-SALE、R-NOTIFY、R-STREAM、TopicRetention 水位、V31 `completed_at`、broker 保留期校验），RED/GREEN 通过；C-6 计数记录；C3 立项（P1）并补 Redis 内存证据；完整分批 IT 被系统内存回收中断，待重跑。未提交 |
 | 2026-11-22 | C | 完整验证改由 CI 承担；开发 Redis 设 `maxmemory 1gb`（C3 临时措施，四个服务 healthy、OOM 时写入被拒已验证）；按主题提交 `a8758cd`、`6966dc6`、`c536878`、`2c665b8` 并推送，待 CI |
+| 2026-11-22 | C | CI run `44953911519`（`803bce9`）5 个 job 全部通过：frontend 24 s、assistant-python 16 s、maven (a-l) 9m00s、maven (m-z) 9m20s、maven-real-mq 2m43s（95/95）；新增 IT 均实际运行。C2 完成；C3（P1）、D6（P3）未开始 |

@@ -2,7 +2,7 @@
 
 > 日期：2026-11-22 · 分支 `feat/v1.1-material-commerce` · 起点 `703ac60`（第 D 轮已推送，CI 两次通过）
 > 原始日志、批次状态、RED 证据都在本地 `target/hardening-c/`（不提交）。本文只记录结论和数字。
-> **状态：已推送，CI 结果见“CI 实际结果”。** 完整验证按决定交给 CI（本机完整分批 IT 被内存回收中断，见“测试”）。
+> **CI 状态：通过。** run `44953911519`（提交 `803bce9`），5 个 job 全部成功，墙钟约 9.5 分钟。 完整验证按决定交给 CI（本机完整分批 IT 被内存回收中断，见“测试”）。
 
 ## 提交
 
@@ -47,6 +47,22 @@
   - `green-053218`：`FeedRetentionIT` 6/6 通过；`MySqlMigrationIT` 2 项失败，原因是迁移数断言仍为 30/29/28，这是新增 V31 的预期影响，更新为 31/30/29。
   - `green-053612`：`MySqlMigrationIT` 3/3、`NotificationRetentionIT` 1/1、`SaleRetentionIT` 4/4 通过。
 - **完整分批 IT（`it-full-054219`）：未完成。** 完成 `b00-unit`（62 运行 / 0 失败 / 1 跳过）、`b01-AnonymousAccess`（44 / 0 / 0）后，在 `b02-AssistantEvalE2E` 期间被 Claude Code 以系统内存不足为由停止（会话空闲时的后台进程回收，不是测试失败）。Testcontainers 容器已由 Ryuk 回收，无残留进程。决定（2026-11-22）：不在本机重跑，完整验证交给 CI（覆盖全部常规测试和真实 MQ 测试，不受本机内存限制）。
+
+## CI 实际结果
+
+run `44953911519`（`803bce9`），第一次推送全部通过：
+
+| job | 耗时 | 上限 | 结果 |
+|---|---|---|---|
+| `frontend` | 24 s | 15 min | vitest 21 passed |
+| `assistant-python` | 16 s | 10 min | 151 passed |
+| `maven (a-l)`（单元 + A–L IT） | 9m00s | 35 min | 62 单元（3 跳过）+ 311 IT（91 跳过），0 失败 |
+| `maven (m-z)` | 9m20s | 35 min | 159 IT（2 跳过），0 失败 |
+| `maven-real-mq`（`CONTENT_REAL_MQ_IT=true`） | 2m43s | 35 min | 95/95 |
+
+- 新增或修改的 IT 都在 CI 中实际运行：`FeedRetentionIT` 6/6、`MySqlMigrationIT` 3/3（a-l）；`SaleRetentionIT` 4/4、`NotificationRetentionIT` 1/1（m-z）。IT 数比第 D 轮多 6（a-l：305 → 311）和 5（m-z：154 → 159），与新增用例数一致。
+- 跳过项与第 D 轮相同（a-l 中 91 个是真实 MQ 套件，在 `maven-real-mq` job 中运行）。
+- 清理任务的 bean 在所有启用 feed 的 IT 上下文中都会创建，所以默认配置下的启动校验（C-14）在整个套件中都通过了。
 
 ## C-6 计数（本地开发库，只读；生产缺证据）
 
