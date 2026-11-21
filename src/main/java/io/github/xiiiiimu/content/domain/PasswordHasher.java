@@ -24,7 +24,13 @@ public final class PasswordHasher implements AutoCloseable {
   this.pool=new ThreadPoolExecutor(threads,threads,0,TimeUnit.MILLISECONDS,q,factory,new ThreadPoolExecutor.AbortPolicy());
   this.waitMillis=waitMillis;
  }
- public static int defaultThreads(){return Math.max(1,Runtime.getRuntime().availableProcessors()/2);}
+ public static int defaultThreads(){return defaultThreads(Runtime.getRuntime().availableProcessors());}
+ /**
+  * Default pool size max(2, logical cores / 2): during a login burst half the cores stay free for every other endpoint,
+  * and at least two logins hash at once on a small machine. Higher login capacity comes from more instances, not a
+  * bigger pool. Override with content.auth.bcrypt-threads.
+  */
+ static int defaultThreads(int logicalCores){return Math.max(2,logicalCores/2);}
 
  public String encode(String raw){return run(()->encoder.encode(raw));}
  public boolean matches(String raw,String hash){return Boolean.TRUE.equals(run(()->encoder.matches(raw,hash)));}

@@ -54,7 +54,12 @@ public class FeedConfiguration {
  @Bean DistributionInbox distributionInbox(InboxMapper inbox,FeedMapper db,TransactionTemplate tx,ObjectMapper json,PipelineObserver observer,NotificationService notifications,org.springframework.beans.factory.ObjectProvider<AssistantService> assistant){
   return new DistributionInbox(inbox,db,tx,json,observer,notifications,()->{var a=assistant.getIfAvailable();if(a!=null)a.tick();});
  }
- /** Hardening A4: bounded BCrypt pool for login/register; threads default max(1, cores/2), queue default 4 x threads. */
+ /**
+  * Hardening A4: bounded BCrypt pool for login, register and share passwords.
+  * content.auth.bcrypt-threads (default max(2, logical cores / 2)): half the CPU stays free for the other endpoints
+  * during a login burst; more login capacity comes from scaling out instances, not from a bigger pool.
+  * content.auth.bcrypt-queue (default 4 x threads); a full pool and queue answers 429 at once.
+  */
  @Bean(destroyMethod="close") PasswordHasher passwordHasher(@Value("${content.auth.bcrypt-threads:0}")int threads,@Value("${content.auth.bcrypt-queue:-1}")int queue,
    @Value("${content.auth.bcrypt-wait-millis:5000}")long waitMillis){
   int t=threads>0?threads:PasswordHasher.defaultThreads();
