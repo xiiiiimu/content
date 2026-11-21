@@ -53,12 +53,11 @@ public final class AssistantService {
    var post=posts.post(claimed.postId());
    boolean author=post!=null && post.authorId()==claimed.actorUserId();
    var parsed=parser.parse(new AssistantParser.Request(claimed.id(),claimed.postId(),claimed.actorUserId(),claimed.parentCommentId(),
-    claimed.body(),author,Map.of()));
-   String reply=execute(claimed,parsed);
-   Long replyId=postAssistantReply(claimed.postId(),claimed.triggerCommentId(),reply);
+    claimed.body(),author,parserContext(claimed.postId(),claimed.parentCommentId())));
+   Outcome outcome=execute(claimed,parsed);
+   Long replyId=postAssistantReply(claimed.postId(),claimed.triggerCommentId(),outcome.reply());
    tx.executeWithoutResult(s->{
-    String state=parsed.clarify()!=null?"CLARIFY":"DONE";
-    if(db.complete(claimed.id(),token,state,parsed.intent(),toJson(parsed),replyId)!=1)throw new FeedFailure(409,"ASSISTANT_FENCED");
+    if(db.complete(claimed.id(),token,outcome.state(),parsed.intent(),toJson(parsed),replyId)!=1)throw new FeedFailure(409,"ASSISTANT_FENCED");
    });
   }catch(Exception e){
    String msg=e.getMessage()==null?"error":e.getMessage();
@@ -66,17 +65,75 @@ public final class AssistantService {
   }
  }
 
- private String execute(AssistantMapper.Task task,AssistantParser.Result parsed)throws Exception{
+ /** Terminal task state plus the one reply posted under the trigger comment. */
+ record Outcome(String state,String reply) {}
+
+ /**
+  * Hardening A11: the parse result is a proposal. Unsupported conditions reject the whole command; every 4xx FeedFailure
+  * raised by the services' own checks becomes a terminal REJECTED (or CLARIFY for a wrong subscribe target) with one reply
+  * giving the reason, instead of a retried failure with no reply. Infrastructure errors still propagate and retry.
+  */
+ private Outcome execute(AssistantMapper.Task task,AssistantParser.Result parsed)throws Exception{
   if(parsed.unsupportedTools()!=null && !parsed.unsupportedTools().isEmpty())
-   return "暂不支持条件："+String.join(",",parsed.unsupportedTools())+"。活动未开放。";
-  if(parsed.clarify()!=null)return parsed.clarify().question();
-  return switch(parsed.intent()){
-   case "SEARCH" -> renderSearch(task.actorUserId(),parsed.search());
-   case "SUBSCRIBE" -> feedback.subscribe(task.actorUserId(),parsed.subscribe().feedbackCommentId());
-   case "GIVEAWAY" -> giveaways.createFromAssistant(task.actorUserId(),task.postId(),task.triggerCommentId(),parsed.giveaway());
-   default -> "暂未识别意图，请说明找素材、蹲改进或抽奖。";
-  };
+   return new Outcome("REJECTED","暂不支持条件："+String.join(",",parsed.unsupportedTools())+"。活动未开放。");
+  if(parsed.clarify()!=null)return new Outcome("CLARIFY",parsed.clarify().question());
+  try{
+   return switch(parsed.intent()){
+    case "SEARCH" -> new Outcome("DONE",renderSearch(task.actorUserId(),parsed.search()));
+    case "SUBSCRIBE" -> new Outcome("DONE",feedback.fromAssistant(task.actorUserId(),task.postId(),parsed.subscribe(),assistantUserId));
+    case "GIVEAWAY" -> new Outcome("DONE",giveaways.createFromAssistant(task.actorUserId(),task.postId(),task.triggerCommentId(),parsed.giveaway()));
+    default -> new Outcome("CLARIFY","暂未识别意图，请说明找素材、蹲改进或抽奖。");
+   };
+  }catch(FeedFailure f){
+   if(f.status>=500)throw f;
+   return new Outcome(CLARIFY_CODES.contains(f.code)?"CLARIFY":"REJECTED",rejection(f.code));
+  }
  }
+
+ private static final Set<String> CLARIFY_CODES=Set.of("NOT_A_FEEDBACK_COMMENT");
+ private static final Map<String,String> REASONS=Map.ofEntries(
+  Map.entry("NOT_A_FEEDBACK_COMMENT","只能订阅本帖带素材版本的反馈评论，请在目标反馈下回复「@助手 蹲这条的修改结果」。"),
+  Map.entry("SUBSCRIBE_SELF_ONLY","只能为你自己订阅或取消订阅，不能替他人或批量操作。未执行。"),
+  Map.entry("UNSUPPORTED_SUBSCRIBE_ACTION","只支持订阅或取消订阅反馈的改进结果。未执行。"),
+  Map.entry("MISSING_COMMAND","指令不完整，未执行。"),
+  Map.entry("POST_FORBIDDEN","只有作者可以发起抽奖。活动未创建。"),
+  Map.entry("INVALID_GIVEAWAY","抽奖指令不完整。活动未创建。"),
+  Map.entry("INVALID_RULE_TREE","参与条件无法识别。活动未创建。"),
+  Map.entry("INVALID_RULE_OP","参与条件的组合方式无法识别。活动未创建。"),
+  Map.entry("UNKNOWN_RULE_FIELD","参与条件包含暂不支持的限定。活动未创建。"),
+  Map.entry("DUPLICATE_RULE_CONDITION","参与条件重复。活动未创建。"),
+  Map.entry("INVALID_AT_LEAST_K","「至少满足 N 项」与列出的条件数不符。活动未创建。"),
+  Map.entry("UNKNOWN_ELIGIBILITY_TOOL","包含暂不支持的参与条件。活动未创建。"),
+  Map.entry("ELIGIBILITY_TOOL_DISABLED","包含未开放的参与条件。活动未创建。"),
+  Map.entry("REWARD_VERSION_UNAVAILABLE","奖品必须是本帖已就绪的素材版本。活动未创建。"),
+  Map.entry("COMMERCIAL_LICENSE_NOT_ALLOWED","本素材不允许商用，不能以商用授权作为奖品。活动未创建。"),
+  Map.entry("INVALID_LICENSE","奖品许可只能是下载或商用。活动未创建。"),
+  Map.entry("INVALID_DEADLINE","截止时间必须晚于当前时间。活动未创建。"),
+  Map.entry("INVALID_WINDOW","参与开始时间必须早于截止时间。活动未创建。"),
+  Map.entry("INVALID_WINNER_COUNT","中奖人数须在 1–100 之间。活动未创建。"),
+  Map.entry("POST_NOT_VISIBLE","目标不存在或不可见。未执行。"),
+  Map.entry("POST_NOT_FOUND","目标不存在或不可见。未执行。"),
+  Map.entry("FEEDBACK_NOT_FOUND","目标反馈不存在。未执行。"));
+ private static String rejection(String code){return REASONS.getOrDefault(code,"指令未通过校验（"+code+"），未执行。");}
+
+ /** A11: facts the parser cannot look up itself. Values are read from the database, not from the comment text. */
+ private Map<String,Object> parserContext(long postId,Long parentCommentId){
+  Map<String,Object> ctx=new LinkedHashMap<>();
+  String kind=null;
+  if(parentCommentId!=null){
+   var parent=comments.commentById(parentCommentId);
+   if(parent!=null)kind=parent.userId()==assistantUserId?"assistant":parent.materialVersionId()!=null?"feedback":"ordinary";
+  }
+  ctx.put("parentKind",kind);
+  ctx.put("parentIsFeedback","feedback".equals(kind));
+  ctx.put("nowMs",System.currentTimeMillis());
+  ctx.put("timezone",TIMEZONE);
+  var profile=materials.profile(postId);
+  ctx.put("postLicenseCommercial",profile!=null && profile.licenseCommercial());
+  ctx.put("enabledTools",List.copyOf(giveaways.enabledTools()));
+  return ctx;
+ }
+ static final String TIMEZONE="Asia/Shanghai";
 
  private String renderSearch(long viewer,AssistantParser.SearchCommand cmd)throws Exception{
   if(cmd==null)return "缺少搜索条件。";

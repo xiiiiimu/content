@@ -23,6 +23,7 @@ public final class GiveawayService {
   this.db=db;this.comments=comments;this.posts=posts;this.materials=materials;this.notifications=notifications;
   this.users=users;this.eligibility=eligibility;this.visibility=visibility;this.tx=tx;this.json=json;
  }
+ public Set<String> enabledTools(){return eligibility.enabledTypes();}
  public void setSaleBridgeProvider(java.util.function.Supplier<SaleService> sales){this.sales=sales;}
 
  public FavoriteResult favorite(long user,long post){
@@ -44,14 +45,23 @@ public final class GiveawayService {
   var post=posts.post(postId);if(post==null)throw new FeedFailure(404,"POST_NOT_FOUND");
   if(post.authorId()!=authorId)throw new FeedFailure(403,"POST_FORBIDDEN");
   if(cmd==null)throw new FeedFailure(400,"INVALID_GIVEAWAY");
-  JsonNode tree=json.readTree(cmd.ruleTreeJson());
+  JsonNode tree;
+  try{tree=cmd.ruleTreeJson()==null?null:json.readTree(cmd.ruleTreeJson());}
+  catch(com.fasterxml.jackson.core.JsonProcessingException e){throw new FeedFailure(400,"INVALID_RULE_TREE");}
+  if(tree==null || !tree.isObject())throw new FeedFailure(400,"INVALID_RULE_TREE");
   eligibility.validateTreeOrThrow(tree);
   Long reward=resolveRewardVersion(postId,cmd.rewardVersionHint());
   if(reward==null)throw new FeedFailure(409,"REWARD_VERSION_UNAVAILABLE");
   if(cmd.deadlineMs()==null || cmd.deadlineMs()<=System.currentTimeMillis())throw new FeedFailure(400,"INVALID_DEADLINE");
+  if(cmd.windowStartMs()!=null && cmd.windowStartMs()>=cmd.deadlineMs())throw new FeedFailure(400,"INVALID_WINDOW");
   if(cmd.winnerCount()<=0 || cmd.winnerCount()>100)throw new FeedFailure(400,"INVALID_WINNER_COUNT");
   String license=cmd.rewardLicense()==null?"DOWNLOAD":cmd.rewardLicense();
   if(!Set.of("DOWNLOAD","COMMERCIAL").contains(license))throw new FeedFailure(400,"INVALID_LICENSE");
+  // Hardening A11: the material's own licence bounds what a giveaway may grant (read from material_posts, not the parser).
+  if("COMMERCIAL".equals(license)){
+   var profile=materials.profile(postId);
+   if(profile==null || !profile.licenseCommercial())throw new FeedFailure(409,"COMMERCIAL_LICENSE_NOT_ALLOWED");
+  }
   var existing=db.bySource(sourceCommentId);
   if(existing!=null)return existing.summaryText()!=null?existing.summaryText():("活动 #"+existing.id()+" 已存在，状态 "+existing.state());
 
@@ -173,8 +183,11 @@ public final class GiveawayService {
  private Long resolveRewardVersion(long postId,String hint){
   var profile=materials.profile(postId);if(profile==null)return null;
   if(hint==null || "DEFAULT".equalsIgnoreCase(hint) || "最新版".equals(hint))return profile.defaultVersionId();
-  try{long id=Long.parseLong(hint);var v=materials.version(id);return v!=null && v.postId()==postId && "READY".equals(v.state())?id:null;}
-  catch(Exception e){return profile.defaultVersionId();}
+  // A11: a hint must be a READY version of this post; anything else is refused instead of silently defaulted.
+  long id;
+  try{id=Long.parseLong(hint.trim());}catch(NumberFormatException e){return null;}
+  var v=materials.version(id);
+  return v!=null && v.postId()==postId && "READY".equals(v.state())?id:null;
  }
  private String buildSummary(AssistantParser.GiveawayCommand cmd,long rewardVersionId){
   return (cmd.summary()==null?"抽奖活动":cmd.summary())+"；奖励版本 #"+rewardVersionId+"；资格在截止后封池时核验；每账号一次。";

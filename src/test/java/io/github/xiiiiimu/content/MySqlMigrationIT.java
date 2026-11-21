@@ -20,7 +20,7 @@ class MySqlMigrationIT {
         Flyway flyway = Flyway.configure()
                 .dataSource(MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword())
                 .load();
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(29);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(30);
         assertThat(flyway.migrate().migrationsExecuted).isZero();
         flyway.validate();
         try(var c=DriverManager.getConnection(MYSQL.getJdbcUrl(),MYSQL.getUsername(),MYSQL.getPassword());
@@ -57,6 +57,10 @@ class MySqlMigrationIT {
             var r=s.executeQuery("SELECT GROUP_CONCAT(column_name ORDER BY seq_in_index) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name='post_reports' AND index_name='uq_report_post_reporter' AND non_unique=0")){
             r.next();assertThat(r.getString(1)).as("V29: one report per (post, reporter)").isEqualTo("post_id,reporter_user_id");
         }catch(Exception e){throw new AssertionError(e);}
+        try(var c=DriverManager.getConnection(MYSQL.getJdbcUrl(),MYSQL.getUsername(),MYSQL.getPassword());var s=c.createStatement();
+            var r=s.executeQuery("SELECT check_clause FROM information_schema.check_constraints WHERE constraint_schema=DATABASE() AND constraint_name='chk_assistant_state'")){
+            r.next();assertThat(r.getString(1)).as("V30: assistant tasks may end REJECTED").contains("REJECTED").contains("CLARIFY");
+        }catch(Exception e){throw new AssertionError(e);}
     }
 
     @Test
@@ -74,7 +78,7 @@ class MySqlMigrationIT {
             statement.executeUpdate("INSERT INTO posts(id,author_id,status,body,version) VALUES (1,1,'DRAFT','preserved',4)");
         }
         Flyway latest = Flyway.configure().dataSource(url, "root", MYSQL.getPassword()).load();
-        assertThat(latest.migrate().migrationsExecuted).isEqualTo(28);
+        assertThat(latest.migrate().migrationsExecuted).isEqualTo(29);
         assertThat(latest.migrate().migrationsExecuted).isZero();
         latest.validate();
         try (var connection = DriverManager.getConnection(url, "root", MYSQL.getPassword());
@@ -101,7 +105,7 @@ class MySqlMigrationIT {
             try(var r=s.executeQuery("SELECT payload FROM outbox_events WHERE id=42")){r.next();payload=r.getString(1);}
         }
         var latest=Flyway.configure().dataSource(url,"root",MYSQL.getPassword()).load();
-        assertThat(latest.migrate().migrationsExecuted).isEqualTo(27);latest.validate();
+        assertThat(latest.migrate().migrationsExecuted).isEqualTo(28);latest.validate();
         assertThat(latest.migrate().migrationsExecuted).isZero();
         try(var c=DriverManager.getConnection(url,"root",MYSQL.getPassword());var s=c.createStatement();var r=s.executeQuery("SELECT payload,status,attempt,lease_token FROM outbox_events WHERE id=42")) {
             assertThat(r.next()).isTrue();assertThat(r.getString("payload")).isEqualTo(payload);

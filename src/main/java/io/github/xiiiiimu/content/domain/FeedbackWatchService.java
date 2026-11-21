@@ -24,6 +24,27 @@ public final class FeedbackWatchService {
   return "已订阅反馈 #"+feedbackCommentId+" 的改进结果。可在原反馈下取消订阅。";
  }
 
+ /**
+  * Hardening A11: assistant subscribe/cancel. Java checks the target itself (a feedback comment, i.e. one with a material
+  * version, on this post, not written by the assistant); the parser only says what the user meant (action/target).
+  */
+ public String fromAssistant(long accountId,long postId,AssistantParser.SubscribeCommand cmd,long assistantUserId){
+  if(cmd==null)throw new FeedFailure(400,"MISSING_COMMAND");
+  String action=cmd.action()==null?"SUBSCRIBE":cmd.action();
+  String target=cmd.target()==null?"SELF":cmd.target();
+  if(!"SELF".equals(target))throw new FeedFailure(403,"SUBSCRIBE_SELF_ONLY");
+  if(!"SUBSCRIBE".equals(action) && !"CANCEL".equals(action))throw new FeedFailure(400,"UNSUPPORTED_SUBSCRIBE_ACTION");
+  var c=comments.commentById(cmd.feedbackCommentId());
+  if(c==null || c.postId()!=postId || c.materialVersionId()==null || c.userId()==assistantUserId)
+   throw new FeedFailure(422,"NOT_A_FEEDBACK_COMMENT");
+  if("CANCEL".equals(action)){
+   visibility.read(accountId,c.postId()).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+   boolean cancelled=db.cancelSubscription(accountId,c.id(),System.currentTimeMillis())==1;
+   return cancelled?"已取消订阅反馈 #"+c.id()+" 的改进结果。":"你没有订阅反馈 #"+c.id()+"，无需取消。";
+  }
+  return subscribe(accountId,c.id());
+ }
+
  public void cancel(long accountId,long feedbackCommentId){
   if(db.cancelSubscription(accountId,feedbackCommentId,System.currentTimeMillis())!=1)
    throw new FeedFailure(404,"SUBSCRIPTION_NOT_FOUND");
