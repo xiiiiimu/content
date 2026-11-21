@@ -238,4 +238,71 @@ public final class SaleEntryRedis {
    return result==1;
   }catch(com.fasterxml.jackson.core.JsonProcessingException e){throw new IllegalStateException(e);}
  }
+
+ // ---- Hardening C2 R-STREAM: retention of acknowledged Stream entries ----
+ /**
+  * Read-only: up to {@code n} Stream ids, oldest first, that every consumer group has been delivered and acknowledged and that
+  * are older than {@code olderThanMs}. Bound per group: ids up to its last-delivered-id and strictly before its oldest pending id
+  * (so no unacknowledged entry, and nothing XAUTOCLAIM could still take over, is returned). No group means nothing was consumed.
+  */
+ private static final String ACKED_BEFORE="""
+ if redis.call('TYPE',KEYS[1]).ok~='stream' then return {} end
+ local function parse(id) local ms,seq=string.match(id,'^(%d+)%-(%d+)$') return tonumber(ms),tonumber(seq) end
+ local function less(a,b) local am,as=parse(a) local bm,bs=parse(b) if am~=bm then return am<bm end return as<bs end
+ local groups=redis.call('XINFO','GROUPS',KEYS[1])
+ if #groups==0 then return {} end
+ local delivered=nil
+ local pending=nil
+ for _,g in ipairs(groups) do
+  local name,last
+  for i=1,#g,2 do if g[i]=='name' then name=g[i+1] elseif g[i]=='last-delivered-id' then last=g[i+1] end end
+  if delivered==nil or less(last,delivered) then delivered=last end
+  local p=redis.call('XPENDING',KEYS[1],name)
+  if tonumber(p[1])>0 and (pending==nil or less(p[2],pending)) then pending=p[2] end
+ end
+ local out={}
+ for _,e in ipairs(redis.call('XRANGE',KEYS[1],'-','('..ARGV[1]..'-0','COUNT',ARGV[2])) do
+  local id=e[1]
+  if less(delivered,id) or (pending and not less(id,pending)) then break end
+  out[#out+1]=id
+ end
+ return out
+ """;
+ /** ARGV[1]=k, ARGV[2..k+1]=Stream ids to delete, the rest = ids whose t: copy must stay. Returns {entries deleted, t: fields deleted}. */
+ private static final String DROP_ACKED="""
+ local n=tonumber(ARGV[1])
+ local keep={}
+ for i=n+2,#ARGV do keep[ARGV[i]]=true end
+ local ids={}
+ local fields={}
+ for i=2,n+1 do ids[#ids+1]=ARGV[i]; if not keep[ARGV[i]] then fields[#fields+1]='t:'..ARGV[i] end end
+ local d=0
+ local t=0
+ if #ids>0 then d=redis.call('XDEL',KEYS[1],unpack(ids)) end
+ if #fields>0 then t=redis.call('HDEL',KEYS[2],unpack(fields)) end
+ return {d,t}
+ """;
+ public List<String> acknowledgedBefore(long olderThanMs,int n){
+  if(olderThanMs<0 || n<1)throw new IllegalArgumentException("Invalid Stream retention bounds");
+  List<String> ids=commands().eval(ACKED_BEFORE,ScriptOutputType.MULTI,new String[]{STREAM},Long.toString(olderThanMs),Integer.toString(n));
+  return ids==null?List.of():ids;
+ }
+ /** Deletes acknowledged entries returned by {@link #acknowledgedBefore} and their trusted copies, except copies in {@code keepTrusted}. */
+ public long[] dropAcknowledged(List<String> ids,Collection<String> keepTrusted){
+  if(ids.isEmpty())return new long[2];
+  List<String> args=new ArrayList<>();args.add(Integer.toString(ids.size()));args.addAll(ids);args.addAll(keepTrusted);
+  List<Object> r=commands().eval(DROP_ACKED,ScriptOutputType.MULTI,new String[]{STREAM,STATE},args.toArray(String[]::new));
+  return new long[]{((Number)r.get(0)).longValue(),((Number)r.get(1)).longValue()};
+ }
+ /** Generations of recovery staging hashes that currently exist ({@code stage:<generation>}). */
+ public List<Long> stageGenerations(){
+  List<Long> out=new ArrayList<>();ScanCursor cursor=ScanCursor.INITIAL;
+  do{
+   var page=commands().scan(cursor,ScanArgs.Builder.matches(BASE+"stage:*").limit(100));
+   for(String key:page.getKeys()){String g=key.substring((BASE+"stage:").length());if(g.matches("[0-9]{1,18}"))out.add(Long.parseLong(g));}
+   cursor=page;
+  }while(!cursor.isFinished());
+  return out;
+ }
+ public long dropStage(long generation){return commands().unlink(BASE+"stage:"+generation);}
 }
