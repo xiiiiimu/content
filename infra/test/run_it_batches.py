@@ -121,6 +121,12 @@ def main():
             cmd = [m, '-B', '-ntp', '-Pintegration', 'verify', '-Dtest=ContentApplicationTest', '-Dit.test=' + filt,
                    '-Dsurefire.failIfNoSpecifiedTests=false']
         cmd.append('-DargLine=' + ARGLINE)
+        # A batch that runs no IT (b00-unit) does not rewrite failsafe-summary.xml, so `verify` would re-read a stale
+        # result from an earlier run. Move it into the evidence directory (kept, not deleted) before every batch.
+        stale = ROOT / 'target/failsafe-reports/failsafe-summary.xml'
+        if stale.exists():
+            stale.replace(out / ('stale-failsafe-summary-before-' + name + '.xml'))
+            rec['staleFailsafeSummaryMoved'] = True
         rec['command'] = cmd[1:]; rec['startMs'] = int(time.time() * 1000)
         save()
         with (out / (name + '.log')).open('w', encoding='utf8') as log:
