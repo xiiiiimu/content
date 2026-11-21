@@ -37,6 +37,9 @@ class SearchCommand(BaseModel):
 
 class SubscribeCommand(BaseModel):
     feedbackCommentId: int
+    # Parser-only semantics (A11): CANCEL for negation/cancel, OTHERS/ALL when the request is not for the actor alone.
+    action: Literal["SUBSCRIBE", "CANCEL"] = "SUBSCRIBE"
+    target: Literal["SELF", "OTHERS", "ALL"] = "SELF"
 
 
 class GiveawayCommand(BaseModel):
@@ -68,6 +71,40 @@ def _contains(text: str, *keys: str) -> bool:
     return any(k in text for k in keys)
 
 
+# A11: conditions the platform cannot evaluate or grant. Each hit is reported in unsupportedTools (label, patterns);
+# Java refuses the whole command when the list is non-empty, so nothing is silently dropped.
+UNSUPPORTED_GIVEAWAY: list[tuple[str, str]] = [
+    ("转发", r"转发"),
+    ("分享", r"分享"),
+    ("评论字数", r"字数|\d+\s*字"),
+    ("关注时长", r"关注满|关注超过|老粉|粉龄|关注时长"),
+    ("@好友", r"@\S*好友|艾特|圈\S*好友"),
+    ("打赏", r"打赏"),
+    ("等级", r"等级|级以上"),
+    ("弹幕", r"弹幕"),
+    ("下载记录", r"下载过|下载记录"),
+    ("未关注（否定条件）", r"没关注|未关注|不关注|没有关注"),
+    ("转售授权", r"转售|转卖|二次销售"),
+    ("其他帖子的奖品", r"另一个帖子|其他帖子|别的帖子|另一个作品"),
+    ("作者本人参与", r"作者(本人)?也参与|我也参与|作者本人参与|我自己也参与"),
+    ("同一人多次参与", r"多次(评论|参与|抽)|增加中奖率|多评多中"),
+]
+CANCEL_WORDS = ("取消", "不用蹲", "不想蹲", "别蹲", "不要蹲", "别通知", "不要通知", "不用通知", "退订")
+ALL_WORDS = ("所有", "全部", "大家", "每个人", "每一个")
+
+
+def _unsupported_giveaway(text: str) -> list[str]:
+    return [label for label, pat in UNSUPPORTED_GIVEAWAY if re.search(pat, text)]
+
+
+def _subscribe_target(text: str) -> str:
+    if _contains(text, *ALL_WORDS):
+        return "ALL"
+    if re.search(r"帮\s*@|帮(他|她|别人|朋友)|替\s*@|替(他|她|别人)|给\s*@", text):
+        return "OTHERS"
+    return "SELF"
+
+
 @app.get("/healthz")
 def healthz() -> dict[str, str]:
     return {"status": "ok"}
@@ -87,11 +124,28 @@ def parse(req: ParseRequest, x_content_internal_token: str | None = Header(defau
                 intent="SUBSCRIBE",
                 clarify=Clarify(intent="SUBSCRIBE", question="请在目标反馈评论下回复「@助手 蹲这条的修改结果」。"),
             )
-        return ParseResult(intent="SUBSCRIBE", subscribe=SubscribeCommand(feedbackCommentId=req.parentCommentId))
+        kind = req.context.get("parentKind")
+        if kind is not None and kind != "feedback":
+            return ParseResult(
+                intent="SUBSCRIBE",
+                clarify=Clarify(intent="SUBSCRIBE", question="只能订阅带素材版本的反馈评论，请在目标反馈下回复「@助手 蹲这条的修改结果」。"),
+            )
+        action = "CANCEL" if _contains(text, *CANCEL_WORDS) else "SUBSCRIBE"
+        return ParseResult(
+            intent="SUBSCRIBE",
+            subscribe=SubscribeCommand(feedbackCommentId=req.parentCommentId, action=action, target=_subscribe_target(text)),
+        )
 
     if _contains(text, "抽", "开奖", "抽取", "抽奖"):
         if not req.actorIsAuthor:
             return ParseResult(intent="GIVEAWAY", clarify=Clarify(intent="GIVEAWAY", question="只有作者可以发起抽奖。"))
+        unsupported = _unsupported_giveaway(text)
+        if unsupported:
+            return ParseResult(
+                intent="GIVEAWAY",
+                clarify=Clarify(intent="GIVEAWAY", question="暂不支持条件：" + "、".join(unsupported) + "。请去掉这些条件后重新发起。"),
+                unsupportedTools=unsupported,
+            )
         like = _contains(text, "点赞")
         comment = _contains(text, "评论")
         favorite = _contains(text, "收藏")
@@ -106,10 +160,16 @@ def parse(req: ParseRequest, x_content_internal_token: str | None = Header(defau
         k = 0
         if _contains(text, "任一", "或者", "或"):
             mode = "ANY"
-        m = re.search(r"至少\s*(\d+)|任选\s*(\d+)", text)
+        m = re.search(r"至少(?:满足)?\s*(\d+)|任选\s*(\d+)", text)
         if m:
             mode = "AT_LEAST"
             k = int(m.group(1) or m.group(2))
+            n = sum([like, comment, favorite, follow, purchase])
+            if k <= 0 or k > n:
+                return ParseResult(
+                    intent="GIVEAWAY",
+                    clarify=Clarify(intent="GIVEAWAY", question=f"「至少满足{k}项」但只列出了 {n} 项条件，请确认。"),
+                )
         if "选两" in text and mode != "AT_LEAST" and "指定" not in text:
             return ParseResult(
                 intent="GIVEAWAY",
