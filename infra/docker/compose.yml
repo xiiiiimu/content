@@ -22,7 +22,10 @@ services:
   redis:
     image: redis:7.4
     restart: "no"
-    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    # Hardening C3 stopgap: an explicit cap so a full Redis rejects writes (OOM error; the sale entry answers 503
+    # SALE_CACHE_UNAVAILABLE) instead of the VM running out of memory and killing the container. 1gb of the 4.8 GiB
+    # Docker Desktop VM, shared with MySQL, RocketMQ and MinIO; AOF rewrite forks need headroom on top. Not the fix (see C3).
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "1gb", "--maxmemory-policy", "noeviction"]
     ports:
       - "127.0.0.1:${CONTENT_REDIS_PORT:-26379}:6379"
     volumes:
