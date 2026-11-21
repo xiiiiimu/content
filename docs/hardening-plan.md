@@ -187,6 +187,7 @@
   - `context` 新增 `parentKind`/`parentIsFeedback`、`nowMs`、`timezone`、`postLicenseCommercial`、`enabledTools`。
   - 端到端非法执行：r3 全量 10 → **0**，r1 冒烟 171 条 18 → **0**。gold 为 EXECUTE 的执行数与基线相同（没有误拦）。
   - 报告：`docs/perf-evidence/assistant/a11-validation-20261121.md`。
+  - 收尾：`eval/run_eval.py` 改为发送与 Java 相同的 `context`（取代复跑时用的包装脚本，结果逐字节相同）；V30 合并为一条 `ALTER TABLE`（DROP CHECK 与 ADD CONSTRAINT 在同一语句中）。改写历史后重跑：pytest 27 项通过；单元测试与 8 个 A11 相关 IT 类分批运行，162 用例 0 失败 0 错误 1 跳过（`target/hardening-a/a11-final-c6e8d03-121951`）。
 
 ### A12 反馈 resolve 缺 `versionId` 返回 400（A1 认证盘点发现）
 - **问题**：`POST /api/materials/{post}/feedback/{comment}/resolve` 直接 `((Number)body.get("versionId")).longValue()`，缺字段 NPE、非数字 ClassCastException，均为 500；并且先解析请求体、后检查身份。

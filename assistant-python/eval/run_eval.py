@@ -6,7 +6,7 @@ Usage (from assistant-python/):
   .venv/Scripts/python.exe eval/run_eval.py --split all --emit-e2e
 
 The parser is called through the real FastAPI endpoint (TestClient), with the same request
-shape Java sends today (context={}). time.time is frozen to the dataset's REF_NOW so that
+shape Java sends (since A11: context = parentKind/parentIsFeedback, nowMs, timezone, postLicenseCommercial, enabledTools). time.time is frozen to the dataset's REF_NOW so that
 relative deadlines ("N秒后") are deterministic; parser logic is not modified.
 
 Outputs go to ../target/assistant-eval/<timestamp>-<split>/ (private, not committed):
@@ -52,7 +52,26 @@ def build_request(i: int, row: dict) -> dict:
         "parentCommentId": PARENT_ID if ctx["parent"] else None,
         "body": row["text"],
         "actorIsAuthor": ctx["actorIsAuthor"],
-        "context": {},  # mirrors AssistantService.tick(): Map.of()
+        "context": java_context(ctx),
+    }
+
+
+# Mirrors AssistantService.parserContext() (hardening A11). Same tools as GiveawayService.enabledTools() in the E2E
+# harness (SaleMapper present -> PURCHASE enabled).
+ENABLED_TOOLS = ["LIKE", "COMMENT", "FAVORITE", "FOLLOW", "PURCHASE"]
+
+
+def java_context(ctx: dict) -> dict:
+    kind = ctx["parent"]["kind"] if ctx["parent"] else None
+    lic = ctx.get("postLicenseCommercial")
+    return {
+        "parentKind": kind,
+        "parentIsFeedback": kind == "feedback",
+        "nowMs": ctx["nowMs"],
+        "timezone": ctx["timezone"],
+        # non-giveaway rows carry null in the dataset; AssistantEvalE2EIT runs them on the commercial fixture post
+        "postLicenseCommercial": lic if isinstance(lic, bool) else True,
+        "enabledTools": ENABLED_TOOLS,
     }
 
 

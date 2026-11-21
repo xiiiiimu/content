@@ -19,8 +19,8 @@
 ## 1. 运行方式
 - 解析器：`assistant-python/app/main.py`（A11 版）。
 - 请求的 `context` 与 A11 后的 Java 一致：`parentKind`/`parentIsFeedback`、`nowMs`、`timezone`、`postLicenseCommercial`、`enabledTools`。
-  - `eval/run_eval.py` 属于评测工作，没有改动，至今仍发 `context={}`。
-  - 本次复跑用 `target/hardening-a/a11-e2e-tools/run_eval_java_ctx.py` 包装它，只替换请求里的 `context`。
+  - 首次复跑时 `eval/run_eval.py` 还在另一个会话名下，仍发 `context={}`，因此用一个包装脚本（`target/hardening-a/a11-e2e-tools/run_eval_java_ctx.py`）只替换请求里的 `context`。
+  - 收尾时这段逻辑已直接写进 `eval/run_eval.py`（`java_context()`），包装脚本已删除。用修改后的脚本重跑 dev/test/all/smoke-r1（`target/assistant-eval/a11-runeval-20261121T041927Z/`）：predictions、errors、metrics、e2e-cases 与包装脚本的结果逐字节相同，端到端的输入没有变化，本文数字不变。
 - 端到端：`AssistantEvalE2EIT`，按录制的解析结果回放，走真实的 Java 链路（含 A11 校验）。汇总用 `eval/e2e_summary.py`。
 - 补充集 `smoke-r1`：用新解析器重新解析 r1 冒烟的 171 条原文（epoch 时间写法，旧标注）。r3 数据集里的抽奖全部因自然语言时间停在补问，抽奖命令到不了 Java；只有冒烟集能检验 Java 在抽奖路径上的拦截。冒烟集的标注是旧版，只用来统计非法执行，不用来算准确率。
 
