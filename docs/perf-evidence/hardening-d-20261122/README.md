@@ -2,7 +2,7 @@
 
 > 日期：2026-11-21 → 11-22 · 分支 `feat/v1.1-material-commerce` · 起点 `d90097e`
 > 原始日志、批次状态、RED 证据都在本地 `target/hardening-d/`（不提交）。本文只记录结论和数字。
-> **CI 状态：尚未推送，没有 CI 结果。** 推送后补记 run 号和每个 job 的耗时。
+> **CI 状态：通过。** run `44941020312`（提交 `5f88f18`），5 个 job 第一次推送全部成功，墙钟约 9 分钟。详见“CI 实际结果”。
 
 ## 提交
 
@@ -83,6 +83,21 @@
 - **关于 35 分钟**：分批合计 39.7 min 包含 28 次 Maven 启动、编译和每批重复的 `ContentApplicationTest`，比单次调用偏高；CI 实际是一个 job 一次调用。按这个偏保守的口径，拆分后每个分片约 19–20 min，加上 runner 上的拉镜像和依赖下载，仍低于 35 min。**每个 job 在 CI 上的真实耗时：缺证据，等推送后的 CI 运行。**
 - 分批运行时，完整 IT 在 D1 的 Java 改动之后、`ci.yml` 拆分之前完成；之后只改了 `ci.yml`，没有 Java 改动。
 
+### CI 实际结果（run `44941020312`，提交 `5f88f18`）
+
+| job | 结果 | 耗时 | 超时 | 测试数（来自 artifact / 日志） |
+|---|---|---|---|---|
+| `frontend` | 成功 | 26 s | 15 min | vitest 21 passed（typecheck 通过） |
+| `assistant-python` | 成功 | 16 s | 10 min | pytest 151 passed |
+| `maven (a-l)` | 成功 | 7 min 44 s | 35 min | 单元 62（3 跳过）；IT 26 类 305 运行、0 失败、91 跳过 |
+| `maven (m-z)` | 成功 | 8 min 52 s | 35 min | IT 27 类 154 运行、0 失败、2 跳过 |
+| `maven-real-mq` | 成功 | 3 min 07 s | 35 min | IT 2 类 95 运行、0 失败、0 跳过 |
+
+- 每个 job 都远低于上限。本地分批口径（19–20 min）比 CI 单次调用高一倍多，与前面的判断一致。
+- a-l 的 91 个跳过就是两个真实 MQ 类（39 + 52），它们在 `maven-real-mq` 里 95 个全部运行；m-z 的 2 个跳过是 `MediaMinioIT`、`PerfHarnessIT`。
+- FFmpeg 相关在 runner 上运行：`MediaFfmpegIT` 4/4、`FfmpegTranscoderTimeoutIT` 2/2、`FfmpegTranscoderExecTest` 1 运行 1 跳过（Windows 用例）。`PostTopicIT` 5/5（含新的读接口话题用例）。
+- 原始 artifact 和日志：`target/hardening-d/ci-44941020312/`（不提交）。
+
 ### CI 中仍然跳过的测试
 
 | 测试 | 跳过数 | 原因 |
@@ -91,6 +106,7 @@
 | `PerfHarnessIT` | 1 | 需要 `-Dcontent.perf.enabled=true`；性能实验，不进 CI |
 | `AssistantEvalE2EIT` | 类级跳过（报告为 0 运行） | 评测工具，需要 `-Dassistant.eval.cases`/`-Dassistant.eval.out`，不是回归测试；仍会启动 Spring 上下文（约 20 s） |
 | `FfmpegTranscoderExecTest.waitForDestroysHungWindowsProcess` | 1 | `@EnabledOnOs(WINDOWS)`，Linux runner 上跳过；对应的 Unix 用例在 CI 运行 |
+| `WindowsListenBacklogTest` 两个用例 | 2 | `@EnabledOnOs(WINDOWS)`，验证 Windows 下 Tomcat 监听 backlog，Linux runner 上跳过。初稿漏列，按 CI 报告补上 |
 | `CommerceRealMqIT`、`CommerceDispatchBatchRealMqIT`（在两个 maven 分片中） | 39 + 52 | 没有 `CONTENT_REAL_MQ_IT`，属预期；它们在 `maven-real-mq` job 里全部运行（启用时为 41 + 54 个用例） |
 
 - 计划里原先写 `FfmpegTranscoderExecTest` “跳过原因待核实”：实际是按操作系统跳过，不依赖 docker 或 ffmpeg 镜像。
@@ -112,7 +128,6 @@
 
 ## 遗留问题
 
-1. 推送后的 CI 结果，以及每个 job 的实际耗时（缺证据）。
-2. D2：容器尚未创建时就超时的理论窗口（见上）。
-3. D3：只连续运行 10 次，置信度有限。
-4. 读接口返回话题后，没有做浏览器端手工验证编辑页。
+1. D2：容器尚未创建时就超时的理论窗口（见上）。
+2. D3：只连续运行 10 次，置信度有限。
+3. 读接口返回话题后，没有做浏览器端手工验证编辑页。

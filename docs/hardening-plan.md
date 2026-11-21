@@ -40,7 +40,7 @@
 | B6 | 关注潮（R6）与推模式扩散（R7）实测 | P1 | 未开始 |
 | C1 | 只增不减的表和 Redis 结构盘点 | P2 | 未开始 |
 | C2 | 保留策略与清理任务【需决定】 | P2 | 未开始 |
-| D1 | CI 跳过项评估与启用（已决定） | P3 | 进行中（已实现并本地验证，待推送后 CI） |
+| D1 | CI 跳过项评估与启用（已决定） | P3 | 完成（CI run 44941020312 通过） |
 | D2 | FFmpeg 超时后的容器清理测试 | P3 | 完成 |
 | D3 | `offlineDuringProcessingFailsLeaseWithoutCompleting` 偶发失败 | P3 | 完成（连续 10 次，置信度有限） |
 | D4 | 前端话题输入框 + 前端测试 | P3 | 完成 |
@@ -295,7 +295,7 @@
 - **待评估**：真实 MQ 测试设置环境变量后能否在 GitHub Actions 上用 Testcontainers 的 RocketMQ 运行，以及新增的耗时；在 runner 上安装 FFmpeg 或拉取镜像；是否需要拆成多个 job，或者调整 20 分钟的超时。
 - **验收**：按收益和 CI 耗时给出建议，**确认后再改 workflow**；改后的 CI 运行通过，并列出仍然跳过的项和原因。
 - **决定（2026-11-21）**：拆成并行 job，每个超时 ≤35 min，超了再拆、不调大；真实 MQ 用 Testcontainers 并设 `CONTENT_REAL_MQ_IT=true`；FFmpeg 测试尽量在 CI 运行；MinIO 照旧跳过；PerfHarnessIT 不进 CI；`setup-java` 升 v5。
-- **结果（`2ec9483`，待 CI）**：job 为 `assistant-python`、`maven (a-l)`、`maven (m-z)`（按 IT 类名首字母拆分）、`maven-real-mq`。真实 MQ 套件改用 Testcontainers（`CommerceMqFixture`，broker 端口 30924），本地同一 JVM 95/95 通过、231 s。FFmpeg 经 Docker 镜像运行，不需要在 runner 上装宿主机 ffmpeg（此前已在 CI 运行）。本地完整分批 547 运行 / 0 失败 / 94 跳过，Maven 时间合计 39.7 min，两个分片约 19.0 / 19.9 min（分批口径偏高）；CI 实际耗时缺证据。actionlint 0 错误。仍跳过：MediaMinioIT、PerfHarnessIT、AssistantEvalE2EIT（评测工具）、FfmpegTranscoderExecTest 的 Windows 用例。报告：`docs/perf-evidence/hardening-d-20261122/README.md`。
+- **结果（`2ec9483`、`5d93a28`；CI run `44941020312` 通过）**：job 为 `frontend`（15 min）、`assistant-python`、`maven (a-l)`、`maven (m-z)`（按 IT 类名首字母拆分）、`maven-real-mq`。CI 实际耗时 26 s / 16 s / 7m44s / 8m52s / 3m07s，均远低于上限；真实 MQ 95/95 实际运行。真实 MQ 套件改用 Testcontainers（`CommerceMqFixture`，broker 端口 30924），本地同一 JVM 95/95 通过、231 s。FFmpeg 经 Docker 镜像运行，不需要在 runner 上装宿主机 ffmpeg（此前已在 CI 运行）。本地完整分批 547 运行 / 0 失败 / 94 跳过，Maven 时间合计 39.7 min，两个分片约 19.0 / 19.9 min（分批口径偏高）。actionlint 0 错误。仍跳过：MediaMinioIT、PerfHarnessIT、AssistantEvalE2EIT（评测工具）、FfmpegTranscoderExecTest 和 WindowsListenBacklogTest 的 Windows 用例。报告：`docs/perf-evidence/hardening-d-20261122/README.md`。
 
 ### D2 FFmpeg 超时后的容器清理
 - **问题**：`FfmpegTranscoder` 用 `docker run --rm` 执行（`FfmpegTranscoder.java:72`）。超时后只杀掉本地 docker CLI 进程，容器可能还在运行（CLAUDE.md 列为“已知边界：未验证”）。
@@ -377,3 +377,4 @@
 | 2026-11-21 | E | E1 完成：@助手 接入大模型解析器（多供应商，默认 DeepSeek，`llm_with_fallback`），`droppedRequirements` 注入防护；测试集意图 98.8%（规则版 82.1%），执行判定 97.6%（60.7%），E2E 非法执行 0；两组注入集 26 条非法执行 0；Java 解析超时改为 30 s（`c6f37dd`…`572b779`） |
 | 2026-11-22 | D | D2（`90452ce`）、D4（`5e4bad4`）、D5（`3fa364e`）、D3（`ba2cc30`，连续 10 次 0 失败）完成；D1（`2ec9483`）CI 拆为 4 个并行 job、真实 MQ 改用 Testcontainers、`setup-java` v5，本地验证通过，待推送后 CI；分批脚本修复旧 summary 误判并去掉过时的 AssistantEvalE2EIT 排除（`5d25a83`、`2ec9483`）；本地完整分批 IT 547 运行 0 失败 94 跳过。报告 `docs/perf-evidence/hardening-d-20261122/` |
 | 2026-11-22 | D | 推送前补充：`GET /api/posts/{id}` 返回话题、编辑页预填（`0cf18d7`）；CI 新增 `frontend` job（`5d93a28`，pnpm frozen install + typecheck + vitest，15 min）；`CLAUDE.md` 更新（`d64729b`）。D1 仍待推送后 CI |
+| 2026-11-22 | D | CI run `44941020312`（`5f88f18`）5 个 job 首次推送全部通过：frontend 26 s、assistant-python 16 s、maven (a-l) 7m44s、maven (m-z) 8m52s、maven-real-mq 3m07s（95/95）。D1 完成，第 D 轮全部完成 |
