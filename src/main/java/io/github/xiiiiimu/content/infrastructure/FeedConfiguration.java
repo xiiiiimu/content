@@ -134,9 +134,10 @@ public class FeedConfiguration {
   return g;
  }
  @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
- AssistantParser assistantParser(@Value("${content.assistant.python-url:}")String url,@Value("${content.assistant.internal-token:}")String token,ObjectMapper json){
+ AssistantParser assistantParser(@Value("${content.assistant.python-url:}")String url,@Value("${content.assistant.internal-token:}")String token,
+   @Value("${content.assistant.parse-timeout:30s}")java.time.Duration parseTimeout,ObjectMapper json){
   if(url==null || url.isBlank())return new StubAssistantParser();
-  return new HttpAssistantParser(url,token,json);
+  return new HttpAssistantParser(url,token,json,parseTimeout);
  }
  @Bean @ConditionalOnProperty(name="content.media.enabled",havingValue="true")
  AssistantService assistantService(AssistantMapper assistant,InteractionMapper comments,FeedMapper posts,UserMapper users,MaterialMapper materials,MaterialService materialService,VisibilityService visibility,TransactionTemplate tx,RelationshipService events,AssistantParser parser,FeedbackWatchService feedback,GiveawayService giveaways,ObjectMapper json){

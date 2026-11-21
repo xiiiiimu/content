@@ -34,3 +34,5 @@ content:
   assistant:
     python-url: ${CONTENT_ASSISTANT_PYTHON_URL:}
     internal-token: ${CONTENT_ASSISTANT_INTERNAL_TOKEN:}
+    # must exceed the Python parser's worst case (LLM timeout x 2 attempts + backoff, about 21 s by default)
+    parse-timeout: ${CONTENT_ASSISTANT_PARSE_TIMEOUT:30s}
