@@ -64,6 +64,21 @@ class PostTopicIT {
     .content("{\"body\":\"long\",\"topic\":\""+"x".repeat(129)+"\"}")).andExpect(status().isBadRequest());
  }
 
+ /** Hardening D: the topic is public (the topic page already lists it), so every reader who can see the post gets it. */
+ @Test void postDetailReturnsTheTopicToEveryReaderWhoCanSeeThePost()throws Exception{
+  follows.change(2001,1001,true);
+  published(120401,"music");
+  published(120402,null);
+  http.perform(get("/api/posts/120401").header("Authorization",bearer(1001)))
+   .andExpect(status().isOk()).andExpect(jsonPath("$.topic").value("music"));
+  http.perform(get("/api/posts/120401").header("Authorization",bearer(2001)))
+   .andExpect(status().isOk()).andExpect(jsonPath("$.topic").value("music"));
+  http.perform(get("/api/posts/120402").header("Authorization",bearer(2001)))
+   .andExpect(status().isOk()).andExpect(jsonPath("$.topic").doesNotExist());
+  http.perform(get("/api/posts/120401").header("Authorization",bearer(2999)))
+   .andExpect(status().isNotFound());
+ }
+
  @Test void interactionsOnAPostWithoutTopicWriteNoTopicStatistics(){
   follows.change(2001,1001,true);follows.change(2002,1001,true);
   published(120101,null);

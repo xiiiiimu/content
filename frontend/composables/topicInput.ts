@@ -31,3 +31,15 @@ export function editPayload(body: string, expectedVersion: number, topic: string
   if (!c.ok) throw new Error(c.code)
   return c.value == null ? { body, expectedVersion } : { body, expectedVersion, topic: c.value }
 }
+
+/**
+ * PATCH body for an edit form pre-filled with the post's current topic (GET /api/posts/{id} returns it).
+ * Unchanged keeps the stored topic (no "topic"), a different value replaces it, a blank input clears it (null).
+ * Throws on an invalid topic.
+ */
+export function editPayloadFromLoaded(body: string, expectedVersion: number, loaded: string | null, input: string): { body: string, expectedVersion: number, topic?: string | null } {
+  const c = checkTopic(input)
+  if (!c.ok) throw new Error(c.code)
+  if (c.value === (loaded ?? null)) return { body, expectedVersion }
+  return { body, expectedVersion, topic: c.value }
+}

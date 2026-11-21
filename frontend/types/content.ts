@@ -14,6 +14,8 @@ export interface ContentPost {
   body: string
   version: number
   status: string
+  /** Public post metadata; null when the post has no topic. */
+  topic: string | null
 }
 
 /** POST/PATCH /api/posts response (PostAuthoringService.Draft). */
