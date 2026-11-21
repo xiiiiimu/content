@@ -23,10 +23,18 @@ public class AssistantController {
  }
  @PostMapping("/materials/{post}/feedback/{comment}/resolve")
  public Map<String,Object> resolve(@PathVariable long post,@PathVariable long comment,@RequestBody Map<String,Object> body,Principal p){
-  long version=((Number)body.get("versionId")).longValue();
-  Long offset=body.get("offsetMs")==null?null:((Number)body.get("offsetMs")).longValue();
-  feedback.linkResolution(user(p),post,comment,version,offset);
+  long viewer=user(p);
+  // Hardening A12: a missing or non-integer versionId/offsetMs is a 400, not a NullPointerException/ClassCastException 500.
+  Long version=integer(body.get("versionId"));if(version==null)throw new FeedFailure(400,"INVALID_REQUEST");
+  Object rawOffset=body.get("offsetMs");Long offset=integer(rawOffset);
+  if(rawOffset!=null && offset==null)throw new FeedFailure(400,"INVALID_REQUEST");
+  feedback.linkResolution(viewer,post,comment,version,offset);
   return Map.of("ok",true);
+ }
+ private static Long integer(Object v){
+  if(v instanceof Integer || v instanceof Long || v instanceof Short || v instanceof Byte)return ((Number)v).longValue();
+  if(v instanceof java.math.BigInteger b && b.bitLength()<64)return b.longValue();
+  return null;
  }
  @PostMapping("/posts/{post}/favorite") public GiveawayService.FavoriteResult favorite(@PathVariable long post,Principal p){return giveaways.favorite(user(p),post);}
  @DeleteMapping("/posts/{post}/favorite") public GiveawayService.FavoriteResult unfavorite(@PathVariable long post,Principal p){return giveaways.unfavorite(user(p),post);}
