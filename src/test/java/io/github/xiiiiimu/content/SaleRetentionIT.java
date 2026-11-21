@@ -53,7 +53,7 @@ class SaleRetentionIT {
   db.update("INSERT INTO material_sale_dispatch(reservation_id,state,sent_at_ms,available_at_ms) VALUES(?,?,?,?)",id,state,sentDaysAgo==null?null:now()-sentDaysAgo*DAY,availableAt);
  }
  void receipt(String id,long daysAgo){db.update("INSERT INTO material_sale_consume_receipts(reservation_id,decision,created_at_ms) VALUES(?,'SUCCEEDED',?)",id,now()-daysAgo*DAY);}
- SaleRetention sale(int batch){return new SaleRetention(retention,tx,new RetentionBounds(SaleRetention.DEFAULT_RETENTION_MS,batch,1000));}
+ SaleRetention sale(int batch){return new SaleRetention(retention,tx,new RetentionBounds(SaleRetention.DEFAULT_RETENTION_MS,batch,1000),72);}
 
  @Test void saleRetentionDeletesSentDispatchAndReceiptsOfTerminalRequestsTogether(){
   String done=request("SUCCEEDED");dispatch(done,"SENT",8L,0);receipt(done,8);

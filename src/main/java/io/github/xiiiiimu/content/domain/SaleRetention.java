@@ -14,7 +14,8 @@ import java.util.List;
  *
  * <p>Safety: settlement is idempotent on the request state ({@code SaleService} returns once the request is not PROCESSING),
  * the receipt is a second guard. If an old Stream entry were processed again the bridge would re-enqueue the request
- * ({@code SaleBridgeBatch} enqueues known requests): one extra MQ message that the consumer ignores.
+ * ({@code SaleBridgeBatch} enqueues known requests): one extra MQ message that the consumer ignores. Receipts are kept at least
+ * as long as the broker can redeliver ({@link RetentionBounds#requireCoversBroker}).
  *
  * <p>Locks: candidates come from a plain read of {@code ix_sale_dispatch_pending_due} ({@code available_at_ms} is never later
  * than the send). Each batch is one READ COMMITTED transaction that re-checks with {@code FOR UPDATE OF} the dispatch and
@@ -25,7 +26,8 @@ public final class SaleRetention {
  public static final long DEFAULT_RETENTION_MS=7*RetentionBounds.DAY_MS;
  public record Result(long dispatch,long receipts) {}
  private final RetentionMapper db;private final TransactionTemplate tx;private final RetentionBounds bounds;
- public SaleRetention(RetentionMapper db,TransactionTemplate tx,RetentionBounds bounds){
+ public SaleRetention(RetentionMapper db,TransactionTemplate tx,RetentionBounds bounds,long brokerReservedHours){
+  RetentionBounds.requireCoversBroker("Sale",bounds.retentionMs(),brokerReservedHours);
   this.db=db;this.tx=tx;this.bounds=bounds;
  }
  public Result purge(){

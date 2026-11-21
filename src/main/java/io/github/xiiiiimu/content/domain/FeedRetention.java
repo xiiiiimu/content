@@ -15,7 +15,7 @@ import java.util.List;
  * kept) could at worst add a detect-only {@code orphanTasks} report, never a repair.
  *
  * <p><b>What stays.</b> Anything not SENT (NEW/RUNNING/DEAD); SENT rows with an unknown send time (C-6); receipts younger
- * than the retention (the broker can still redeliver); SENT without receipt
+ * than the retention (the broker can still redeliver: see {@link RetentionBounds#requireCoversBroker}); SENT without receipt
  * and task-producing receipts without a task (reconciliation gaps); events whose task is DEAD, RUNNING, NEW or DONE too
  * recently; events with a replay audit row (FK) or a recorded conflict (manual handling).
  *
@@ -30,7 +30,8 @@ public final class FeedRetention {
  public record Result(long events,long receipts,long tasks) {}
  private static final LocalDateTime START=LocalDateTime.of(1970,1,1,0,0);
  private final RetentionMapper db;private final TransactionTemplate tx;private final RetentionBounds bounds;
- public FeedRetention(RetentionMapper db,TransactionTemplate tx,RetentionBounds bounds){
+ public FeedRetention(RetentionMapper db,TransactionTemplate tx,RetentionBounds bounds,long brokerReservedHours){
+  RetentionBounds.requireCoversBroker("Feed",bounds.retentionMs(),brokerReservedHours);
   this.db=db;this.tx=tx;this.bounds=bounds;
  }
  public Result purge(){

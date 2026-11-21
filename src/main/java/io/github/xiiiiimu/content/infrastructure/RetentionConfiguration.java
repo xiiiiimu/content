@@ -10,7 +10,8 @@ import java.util.function.Supplier;
 
 /**
  * Hardening C2 retention jobs. Every job has its own switch, batch size, batches per run, interval and (where time based)
- * retention under {@code content.retention.<job>.*}.
+ * retention under {@code content.retention.<job>.*}. The retention objects are always created, so an unsafe retention (for
+ * example receipts shorter than the broker can redeliver, C-14) stops startup even when the job itself is switched off.
  * Each job runs on its own daemon thread with a first run one interval after startup; a failed run is logged and retried.
  */
 @Configuration(proxyBeanMethods=false) @ConditionalOnProperty(name="content.feed.enabled",havingValue="true")
@@ -19,8 +20,9 @@ public class RetentionConfiguration {
 
  @Bean FeedRetention feedRetention(RetentionMapper db,TransactionTemplate tx,
    @Value("${content.retention.feed.retention-millis:"+FeedRetention.DEFAULT_RETENTION_MS+"}")long retention,
-   @Value("${content.retention.feed.batch:"+DEFAULT_BATCH+"}")int batch,@Value("${content.retention.feed.max-batches:"+DEFAULT_MAX_BATCHES+"}")int maxBatches){
-  return new FeedRetention(db,tx,new RetentionBounds(retention,batch,maxBatches));
+   @Value("${content.retention.feed.batch:"+DEFAULT_BATCH+"}")int batch,@Value("${content.retention.feed.max-batches:"+DEFAULT_MAX_BATCHES+"}")int maxBatches,
+   @Value("${content.retention.broker-reserved-hours:72}")long brokerHours){
+  return new FeedRetention(db,tx,new RetentionBounds(retention,batch,maxBatches),brokerHours);
  }
  @Bean(destroyMethod="close") @ConditionalOnProperty(name="content.retention.feed.enabled",havingValue="true",matchIfMissing=true)
  RetentionJob feedRetentionJob(FeedRetention retention,@Value("${content.retention.feed.interval-millis:"+DEFAULT_INTERVAL+"}")long interval){
@@ -51,8 +53,9 @@ public class RetentionConfiguration {
  static class Sale {
   @Bean SaleRetention saleRetention(RetentionMapper db,TransactionTemplate tx,
     @Value("${content.retention.sale.retention-millis:"+SaleRetention.DEFAULT_RETENTION_MS+"}")long retention,
-    @Value("${content.retention.sale.batch:"+DEFAULT_BATCH+"}")int batch,@Value("${content.retention.sale.max-batches:"+DEFAULT_MAX_BATCHES+"}")int maxBatches){
-   return new SaleRetention(db,tx,new RetentionBounds(retention,batch,maxBatches));
+    @Value("${content.retention.sale.batch:"+DEFAULT_BATCH+"}")int batch,@Value("${content.retention.sale.max-batches:"+DEFAULT_MAX_BATCHES+"}")int maxBatches,
+    @Value("${content.retention.broker-reserved-hours:72}")long brokerHours){
+   return new SaleRetention(db,tx,new RetentionBounds(retention,batch,maxBatches),brokerHours);
   }
   @Bean(destroyMethod="close") @ConditionalOnProperty(name="content.retention.sale.enabled",havingValue="true",matchIfMissing=true)
   RetentionJob saleRetentionJob(SaleRetention retention,@Value("${content.retention.sale.interval-millis:"+DEFAULT_INTERVAL+"}")long interval){

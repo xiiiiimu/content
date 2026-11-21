@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.*;
 
 /**
  * Hardening C2: R-FEED (outbox -> inbox -> DONE task per event), R-FOLLOW (stale follow epochs), the DONE completion time
- * (C-5) and the B1 "processed watermark" bound on the topic ledger purge (C-13).
+ * (C-5), the broker-coverage rule (C-14) and the B1 "processed watermark" bound on the topic ledger purge (C-13).
  */
 @SpringBootTest @Testcontainers
 @org.springframework.test.annotation.DirtiesContext(classMode=org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
@@ -57,7 +57,7 @@ class FeedRetentionIT {
   db.update("INSERT INTO feed_delivery_tasks(event_id,author_id,delivery_epoch,state,kind,completed_at,last_attempt_at) VALUES(?,1,0,?,'PUBLISH',"
    +(completedDaysAgo==null?"NULL":"TIMESTAMPADD(DAY,-"+completedDaysAgo+",CURRENT_TIMESTAMP(6))")+",TIMESTAMPADD(DAY,-?,CURRENT_TIMESTAMP(6)))",event,state,lastAttemptDaysAgo);
  }
- FeedRetention feed(int batch){return new FeedRetention(retention,tx,new RetentionBounds(FeedRetention.DEFAULT_RETENTION_MS,batch,1000));}
+ FeedRetention feed(int batch){return new FeedRetention(retention,tx,new RetentionBounds(FeedRetention.DEFAULT_RETENTION_MS,batch,1000),72);}
  long count(String sql,Object... args){return db.queryForObject(sql,Long.class,args);}
  long orphanTasks(){return count("SELECT COUNT(*) FROM feed_delivery_tasks t WHERE t.state<>'RUNNING' AND NOT EXISTS(SELECT 1 FROM consumer_inbox i WHERE i.event_id=t.event_id)");}
  long taskGaps(){return count("SELECT COUNT(*) FROM consumer_inbox i WHERE i.decision IN('PUSH_TASK','HISTORY_TASK') AND NOT EXISTS(SELECT 1 FROM feed_delivery_tasks t WHERE t.event_id=i.event_id)");}
@@ -102,10 +102,17 @@ class FeedRetentionIT {
 
  @Test void feedRetentionStopsAfterMaxBatchesPerRun(){
   for(int i=0;i<5;i++){long e=event("SENT",8,8);inbox(e,8,"PULL_NO_FANOUT");}
-  var bounded=new FeedRetention(retention,tx,new RetentionBounds(FeedRetention.DEFAULT_RETENTION_MS,2,1));
+  var bounded=new FeedRetention(retention,tx,new RetentionBounds(FeedRetention.DEFAULT_RETENTION_MS,2,1),72);
   assertThat(bounded.purge().events()).as("one batch of two per run").isEqualTo(2);
   assertThat(bounded.purge().events()).isEqualTo(2);
   assertThat(bounded.purge().events()).isEqualTo(1);
+ }
+
+ @Test void receiptRetentionMustCoverBrokerMessageRetentionPlusMargin(){
+  assertThatThrownBy(()->new FeedRetention(retention,tx,new RetentionBounds(3*DAY,500,10),72)).isInstanceOf(IllegalArgumentException.class);
+  assertThatThrownBy(()->new SaleRetention(retention,tx,new RetentionBounds(3*DAY,500,10),72)).isInstanceOf(IllegalArgumentException.class);
+  assertThatCode(()->new FeedRetention(retention,tx,new RetentionBounds(4*DAY,500,10),72)).doesNotThrowAnyException();
+  assertThatThrownBy(()->new FeedRetention(retention,tx,new RetentionBounds(FeedRetention.DEFAULT_RETENTION_MS,500,10),200)).isInstanceOf(IllegalArgumentException.class);
  }
 
  @Test void deliveryTaskRecordsCompletionTimeWhenItBecomesDone(){
