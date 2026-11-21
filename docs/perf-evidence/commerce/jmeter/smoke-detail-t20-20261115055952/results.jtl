@@ -1,0 +1,21 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1794693632375,270,GET-campaign-detail,200,,commerce-threads 1-4,text,true,,384,381,20,20,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,254,0,142
+1794693632375,270,GET-campaign-detail,200,,commerce-threads 1-12,text,true,,384,381,20,20,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,254,0,171
+1794693632375,551,GET-campaign-detail,200,,commerce-threads 1-15,text,true,,384,381,18,18,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,551,0,183
+1794693632376,614,GET-campaign-detail,200,,commerce-threads 1-19,text,true,,384,381,17,17,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,613,0,137
+1794693632375,615,GET-campaign-detail,200,,commerce-threads 1-16,text,true,,384,381,17,17,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,613,0,138
+1794693632375,616,GET-campaign-detail,200,,commerce-threads 1-11,text,true,,384,381,17,17,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,613,0,200
+1794693632376,650,GET-campaign-detail,200,,commerce-threads 1-18,text,true,,384,381,15,15,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,650,0,141
+1794693632375,651,GET-campaign-detail,200,,commerce-threads 1-17,text,true,,384,381,15,15,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,651,0,144
+1794693632375,651,GET-campaign-detail,200,,commerce-threads 1-1,text,true,,384,381,15,15,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,651,0,220
+1794693632375,671,GET-campaign-detail,200,,commerce-threads 1-2,text,true,,384,381,14,14,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,670,0,220
+1794693632376,670,GET-campaign-detail,200,,commerce-threads 1-6,text,true,,384,381,14,14,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,669,0,143
+1794693632376,670,GET-campaign-detail,200,,commerce-threads 1-8,text,true,,384,381,14,14,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,670,0,151
+1794693632375,686,GET-campaign-detail,200,,commerce-threads 1-9,text,true,,384,381,11,11,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,678,0,163
+1794693632375,693,GET-campaign-detail,200,,commerce-threads 1-5,text,true,,384,381,11,11,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,693,0,138
+1794693632375,693,GET-campaign-detail,200,,commerce-threads 1-3,text,true,,384,381,11,11,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,693,0,143
+1794693632375,699,GET-campaign-detail,200,,commerce-threads 1-13,text,true,,384,381,11,11,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,699,0,163
+1794693632375,711,GET-campaign-detail,200,,commerce-threads 1-10,text,true,,384,381,11,11,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,711,0,232
+1794693632375,713,GET-campaign-detail,200,,commerce-threads 1-20,text,true,,384,381,11,11,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,713,0,219
+1794693632375,713,GET-campaign-detail,200,,commerce-threads 1-7,text,true,,384,381,11,11,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,713,0,138
+1794693632375,715,GET-campaign-detail,200,,commerce-threads 1-14,text,true,,384,381,11,11,http://127.0.0.1:28080/api/materials/25/sale-campaigns/current,715,0,230

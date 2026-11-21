@@ -1,0 +1,17 @@
+{
+  "javaRuntime": "17.0.17",
+  "jmeterJava": "17.0.17",
+  "jarSha256": "c69dc7a865c533f5daf9e5f902e0e6c0d836ec82ff6d214c96a3d209e6b7dbbe",
+  "tomcat": {
+    "maxThreads": 5000,
+    "minSpare": 200,
+    "acceptCount": 5000,
+    "maxConnections": 20000
+  },
+  "hikariMax": 120,
+  "saleConsumeThreads": 20,
+  "timeoutMs": 30000,
+  "barrierTimeoutMs": 120000,
+  "jmeterHeap": "Xms256m Xmx1g MaxMetaspaceSize256m",
+  "changedAdmissionLimits": false
+}

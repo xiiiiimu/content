@@ -1,0 +1,97 @@
+{
+  "fullVerify": {
+    "status": "FAILED: one real MQ condition timeout; all remaining tests passed",
+    "log": "target\\bridge-batch-20261119-022551\\RELEASE-verify.log",
+    "integration": [
+      {
+        "name": "io.github.xiiiiimu.content.CommerceIngressRevisionIT",
+        "tests": "36",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "279.878"
+      },
+      {
+        "name": "io.github.xiiiiimu.content.CommerceRealMqIT",
+        "tests": "2",
+        "failures": "0",
+        "errors": "1",
+        "skipped": "0",
+        "time": "189.845"
+      },
+      {
+        "name": "io.github.xiiiiimu.content.MaterialCommercePurchaseIT",
+        "tests": "9",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "159.013"
+      },
+      {
+        "name": "io.github.xiiiiimu.content.MaterialCommerceRefundBlacklistIT",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "71.104"
+      },
+      {
+        "name": "io.github.xiiiiimu.content.MaterialFlowIT",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "81.147"
+      },
+      {
+        "name": "io.github.xiiiiimu.content.MySqlMigrationIT",
+        "tests": "3",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "4486.661"
+      }
+    ]
+  },
+  "mqTargetedRecheck": {
+    "log": "target\\bridge-batch-20261119-022551\\RELEASE-MQ-targeted.log",
+    "results": [
+      {
+        "name": "io.github.xiiiiimu.content.CommerceRealMqIT",
+        "tests": "2",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "224.349"
+      }
+    ]
+  },
+  "instrumentationPackage": {
+    "log": "target\\bridge-batch-20261119-022551\\RELEASE-instrumentation-package.log",
+    "status": "BUILD SUCCESS; SaleLatencyTest passed"
+  },
+  "originalUnits": {
+    "run": 52,
+    "passed": 51,
+    "skipped": 1,
+    "skipReason": "Optional FFmpeg executable test"
+  },
+  "python": {
+    "run": 33,
+    "passed": 33,
+    "log": "target\\bridge-batch-20261119-022551\\tool-tests-final.log"
+  },
+  "red": {
+    "firstBatchTests": 2,
+    "failures": 2,
+    "additionalIsolationTests": 3,
+    "failuresAdditional": 3,
+    "compilable": true,
+    "realMySqlRedis": true,
+    "logs": [
+      "target\\bridge-batch-20261119-022551\\RED.log",
+      "target\\bridge-batch-20261119-022551\\quarantine-RED.log"
+    ]
+  },
+  "git": "No staging, commits, push or merge"
+}

@@ -1,0 +1,951 @@
+{
+ "head": "1535a09",
+ "batches": [
+  {
+   "batch": "b03-AuthRegisterRace",
+   "itClasses": "AuthRegisterRaceIT,CommentIdempotencyRaceIT",
+   "freeMiBStart": 4415,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=AuthRegisterRaceIT,CommentIdempotencyRaceIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795216233425,
+   "mvnRc": 0,
+   "endMs": 1795216305129,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "AuthRegisterRaceIT": {
+     "run": 2,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "CommentIdempotencyRaceIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 4111,
+   "result": "PASS"
+  },
+  {
+   "batch": "b04-CommentTopicEventId",
+   "itClasses": "CommentTopicEventIdIT,CommerceCampaignLockIT",
+   "freeMiBStart": 4118,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=CommentTopicEventIdIT,CommerceCampaignLockIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795216321890,
+   "mvnRc": 0,
+   "endMs": 1795216434485,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "CommentTopicEventIdIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "CommerceCampaignLockIT": {
+     "run": 14,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 3936,
+   "result": "PASS"
+  },
+  {
+   "batch": "b05-CommerceDispatchBatch",
+   "itClasses": "CommerceDispatchBatchIT,CommerceDispatchBatchRealMqIT",
+   "freeMiBStart": 3948,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=CommerceDispatchBatchIT,CommerceDispatchBatchRealMqIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795216451102,
+   "mvnRc": 0,
+   "endMs": 1795216580420,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "CommerceDispatchBatchIT": {
+     "run": 52,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "CommerceDispatchBatchRealMqIT": {
+     "run": 52,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 52
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 3874,
+   "result": "PASS"
+  },
+  {
+   "batch": "b06-CommerceIngressRevision",
+   "itClasses": "CommerceIngressRevisionIT,CommerceRealMqIT",
+   "freeMiBStart": 3873,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=CommerceIngressRevisionIT,CommerceRealMqIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795216596783,
+   "mvnRc": 0,
+   "endMs": 1795216710659,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "CommerceIngressRevisionIT": {
+     "run": 39,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "CommerceRealMqIT": {
+     "run": 39,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 39
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 3977,
+   "result": "PASS"
+  },
+  {
+   "batch": "b07-CommunityFlow",
+   "itClasses": "CommunityFlowIT,DebugEndpointsDefaultIT",
+   "freeMiBStart": 3978,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=CommunityFlowIT,DebugEndpointsDefaultIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795216727046,
+   "mvnRc": 0,
+   "endMs": 1795216816536,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "CommunityFlowIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "DebugEndpointsDefaultIT": {
+     "run": 9,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 10,
+   "freeMiBEnd": 3800,
+   "result": "PASS"
+  },
+  {
+   "batch": "b08-DebugEndpointsEnabled",
+   "itClasses": "DebugEndpointsEnabledIT,DeliveryExhaustedClaimIT",
+   "freeMiBStart": 3801,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=DebugEndpointsEnabledIT,DeliveryExhaustedClaimIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795216828007,
+   "mvnRc": 0,
+   "endMs": 1795216925548,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "DebugEndpointsEnabledIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "DeliveryExhaustedClaimIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 4107,
+   "result": "PASS"
+  },
+  {
+   "batch": "b09-DeliveryWorker",
+   "itClasses": "DeliveryWorkerIT,DistributionIT",
+   "freeMiBStart": 4113,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=DeliveryWorkerIT,DistributionIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795216941902,
+   "mvnRc": 0,
+   "endMs": 1795217128338,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "DeliveryWorkerIT": {
+     "run": 14,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "DistributionIT": {
+     "run": 9,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 3944,
+   "result": "PASS"
+  },
+  {
+   "batch": "b10-FeedMerge",
+   "itClasses": "FeedMergeIT,InteractionsAndTrendingIT",
+   "freeMiBStart": 3946,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=FeedMergeIT,InteractionsAndTrendingIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795217144745,
+   "mvnRc": 0,
+   "endMs": 1795217234802,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "FeedMergeIT": {
+     "run": 9,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "InteractionsAndTrendingIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 4773,
+   "result": "PASS"
+  },
+  {
+   "batch": "b11-LikeTopicFlip",
+   "itClasses": "LikeTopicFlipIT,MaterialCommercePurchaseIT",
+   "freeMiBStart": 4766,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=LikeTopicFlipIT,MaterialCommercePurchaseIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795217251246,
+   "mvnRc": 0,
+   "endMs": 1795217370166,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "LikeTopicFlipIT": {
+     "run": 4,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "MaterialCommercePurchaseIT": {
+     "run": 9,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 5494,
+   "result": "PASS"
+  },
+  {
+   "batch": "b12-MaterialCommerceRefundBlacklist",
+   "itClasses": "MaterialCommerceRefundBlacklistIT,MaterialFlowIT",
+   "freeMiBStart": 5485,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=MaterialCommerceRefundBlacklistIT,MaterialFlowIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795217386592,
+   "mvnRc": 0,
+   "endMs": 1795217489157,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "MaterialCommerceRefundBlacklistIT": {
+     "run": 2,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "MaterialFlowIT": {
+     "run": 3,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 5210,
+   "result": "PASS"
+  },
+  {
+   "batch": "b13-MediaFfmpeg",
+   "itClasses": "MediaFfmpegIT,MediaMinioIT",
+   "freeMiBStart": 5210,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=MediaFfmpegIT,MediaMinioIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795217505554,
+   "mvnRc": 0,
+   "endMs": 1795217577629,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "MediaFfmpegIT": {
+     "run": 3,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "MediaMinioIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 1
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 5513,
+   "result": "PASS"
+  },
+  {
+   "batch": "b14-MediaPipeline",
+   "itClasses": "MediaPipelineIT,MediaSecretStartupIT",
+   "freeMiBStart": 5511,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=MediaPipelineIT,MediaSecretStartupIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795217594020,
+   "mvnRc": 0,
+   "endMs": 1795217691813,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "MediaPipelineIT": {
+     "run": 2,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "MediaSecretStartupIT": {
+     "run": 4,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 5455,
+   "result": "PASS"
+  },
+  {
+   "batch": "b15-MySqlMigration",
+   "itClasses": "MySqlMigrationIT,OutboxRelayIT",
+   "freeMiBStart": 5462,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=MySqlMigrationIT,OutboxRelayIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795217708220,
+   "mvnRc": 0,
+   "endMs": 1795217952866,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "MySqlMigrationIT": {
+     "run": 3,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "OutboxRelayIT": {
+     "run": 22,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 5585,
+   "result": "PASS"
+  },
+  {
+   "batch": "b16-PerfHarness",
+   "itClasses": "PerfHarnessIT,PostTopicIT",
+   "freeMiBStart": 5581,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=PerfHarnessIT,PostTopicIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795217969268,
+   "mvnRc": 0,
+   "endMs": 1795218022474,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "PerfHarnessIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 1
+    },
+    "PostTopicIT": {
+     "run": 4,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 5648,
+   "result": "PASS"
+  },
+  {
+   "batch": "b17-ProductionFeed",
+   "itClasses": "ProductionFeedIT,PublishPostIT",
+   "freeMiBStart": 5652,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=ProductionFeedIT,PublishPostIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795218038862,
+   "mvnRc": 0,
+   "endMs": 1795218138924,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "ProductionFeedIT": {
+     "run": 10,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "PublishPostIT": {
+     "run": 23,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 10,
+   "freeMiBEnd": 5641,
+   "result": "PASS"
+  },
+  {
+   "batch": "b18-RateLimit",
+   "itClasses": "RateLimitIT,RateLimitRedisDownIT",
+   "freeMiBStart": 5650,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=RateLimitIT,RateLimitRedisDownIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795218150341,
+   "mvnRc": 0,
+   "endMs": 1795218233737,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "RateLimitIT": {
+     "run": 7,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "RateLimitRedisDownIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 5663,
+   "result": "PASS"
+  },
+  {
+   "batch": "b19-RecoveryAndModes",
+   "itClasses": "RecoveryAndModesIT,RedisFeedCandidateStoreIT",
+   "freeMiBStart": 5662,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=RecoveryAndModesIT,RedisFeedCandidateStoreIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795218250067,
+   "mvnRc": 0,
+   "endMs": 1795218334411,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "RecoveryAndModesIT": {
+     "run": 12,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "RedisFeedCandidateStoreIT": {
+     "run": 19,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 5755,
+   "result": "PASS"
+  },
+  {
+   "batch": "b20-ReliabilityMatrix",
+   "itClasses": "ReliabilityMatrixIT,ReportDedupIT",
+   "freeMiBStart": 5747,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=ReliabilityMatrixIT,ReportDedupIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795218350716,
+   "mvnRc": 0,
+   "endMs": 1795218432441,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "ReliabilityMatrixIT": {
+     "run": 2,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "ReportDedupIT": {
+     "run": 3,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 5746,
+   "result": "PASS"
+  },
+  {
+   "batch": "b21-ReportDedupMigration",
+   "itClasses": "ReportDedupMigrationIT,RiskEmitDedupIT",
+   "freeMiBStart": 5751,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=ReportDedupMigrationIT,RiskEmitDedupIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795218448784,
+   "mvnRc": 0,
+   "endMs": 1795218528371,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "ReportDedupMigrationIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "RiskEmitDedupIT": {
+     "run": 3,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 5699,
+   "result": "PASS"
+  },
+  {
+   "batch": "b22-TrendGuard",
+   "itClasses": "TrendGuardIT,TrendGuardRiskIT",
+   "freeMiBStart": 5702,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=TrendGuardIT,TrendGuardRiskIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795218544707,
+   "mvnRc": 0,
+   "endMs": 1795218627993,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "TrendGuardIT": {
+     "run": 3,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "TrendGuardRiskIT": {
+     "run": 6,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 5668,
+   "result": "PASS"
+  },
+  {
+   "batch": "b23-TrendingRetention",
+   "itClasses": "TrendingRetentionIT,UnlockBcryptPoolIT",
+   "freeMiBStart": 5675,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=TrendingRetentionIT,UnlockBcryptPoolIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795218644394,
+   "mvnRc": 0,
+   "endMs": 1795218800285,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "TrendingRetentionIT": {
+     "run": 3,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "UnlockBcryptPoolIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 5453,
+   "result": "PASS"
+  },
+  {
+   "batch": "b24-UnlockRateLimit",
+   "itClasses": "UnlockRateLimitIT,VisibilityAndOfflineIT",
+   "freeMiBStart": 5442,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=UnlockRateLimitIT,VisibilityAndOfflineIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795218816773,
+   "mvnRc": 0,
+   "endMs": 1795218914211,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "UnlockRateLimitIT": {
+     "run": 3,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "VisibilityAndOfflineIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 5432,
+   "result": "PASS"
+  }
+ ]
+}

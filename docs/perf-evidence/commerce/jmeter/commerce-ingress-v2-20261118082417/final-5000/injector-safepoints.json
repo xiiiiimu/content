@@ -1,0 +1,209 @@
+{
+  "available": true,
+  "httpStartMs": 1794977900254,
+  "httpEndMs": 1794977996400,
+  "allJvmLifetime": {
+    "Cleanup": {
+      "count": 137,
+      "sumReachingMs": 40654.5783,
+      "maxReachingMs": 4970.1584,
+      "sumAtSafepointMs": 2451.5182000000004,
+      "maxTotalMs": 5547.8735
+    },
+    "G1CollectForAllocation": {
+      "count": 65,
+      "sumReachingMs": 7422.8319999999985,
+      "maxReachingMs": 1231.5373,
+      "sumAtSafepointMs": 11190.3574,
+      "maxTotalMs": 1485.1421
+    },
+    "CollectForMetadataAllocation": {
+      "count": 364,
+      "sumReachingMs": 4992.382399999997,
+      "maxReachingMs": 990.2311,
+      "sumAtSafepointMs": 1102.2996000000012,
+      "maxTotalMs": 1281.959
+    },
+    "G1PauseRemark": {
+      "count": 8,
+      "sumReachingMs": 349.6559,
+      "maxReachingMs": 235.8178,
+      "sumAtSafepointMs": 494.9305,
+      "maxTotalMs": 394.3678
+    },
+    "G1PauseCleanup": {
+      "count": 8,
+      "sumReachingMs": 655.9723,
+      "maxReachingMs": 348.2867,
+      "sumAtSafepointMs": 59.408199999999994,
+      "maxTotalMs": 351.2219
+    },
+    "G1CollectFull": {
+      "count": 1,
+      "sumReachingMs": 0.0148,
+      "maxReachingMs": 0.0148,
+      "sumAtSafepointMs": 239.3147,
+      "maxTotalMs": 239.376
+    },
+    "ICBufferFull": {
+      "count": 2,
+      "sumReachingMs": 0.7356,
+      "maxReachingMs": 0.3741,
+      "sumAtSafepointMs": 0.3188,
+      "maxTotalMs": 0.7052
+    }
+  },
+  "overlappingHttpWindow": {
+    "Cleanup": {
+      "count": 50,
+      "sumReachingMs": 14104.081300000002,
+      "maxReachingMs": 1699.0214,
+      "sumAtSafepointMs": 893.3832000000001,
+      "maxTotalMs": 1700.0291
+    },
+    "G1CollectForAllocation": {
+      "count": 15,
+      "sumReachingMs": 2402.2653999999998,
+      "maxReachingMs": 878.2733,
+      "sumAtSafepointMs": 3340.9575,
+      "maxTotalMs": 1243.2228
+    },
+    "G1PauseRemark": {
+      "count": 1,
+      "sumReachingMs": 235.8178,
+      "maxReachingMs": 235.8178,
+      "sumAtSafepointMs": 152.8082,
+      "maxTotalMs": 394.3678
+    },
+    "G1PauseCleanup": {
+      "count": 1,
+      "sumReachingMs": 181.0952,
+      "maxReachingMs": 181.0952,
+      "sumAtSafepointMs": 21.2182,
+      "maxTotalMs": 202.4926
+    }
+  },
+  "longest": [
+    {
+      "operation": "Cleanup",
+      "startMs": 1794977920961.971,
+      "endMs": 1794977922662.0,
+      "reachingMs": 1699.0214,
+      "atSafepointMs": 0.8867,
+      "totalMs": 1700.0291
+    },
+    {
+      "operation": "G1CollectForAllocation",
+      "startMs": 1794977976342.777,
+      "endMs": 1794977977586.0,
+      "reachingMs": 878.2733,
+      "atSafepointMs": 360.0531,
+      "totalMs": 1243.2228
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794977969420.6934,
+      "endMs": 1794977970541.0,
+      "reachingMs": 1101.6711,
+      "atSafepointMs": 17.7429,
+      "totalMs": 1120.3066
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794977942790.7827,
+      "endMs": 1794977943799.0,
+      "reachingMs": 998.6848,
+      "atSafepointMs": 2.2319,
+      "totalMs": 1008.2174
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794977967435.073,
+      "endMs": 1794977968401.0,
+      "reachingMs": 913.6726,
+      "atSafepointMs": 52.2256,
+      "totalMs": 965.9271
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794977979123.7136,
+      "endMs": 1794977980009.0,
+      "reachingMs": 666.8307,
+      "atSafepointMs": 218.4239,
+      "totalMs": 885.2863
+    },
+    {
+      "operation": "G1CollectForAllocation",
+      "startMs": 1794977924318.646,
+      "endMs": 1794977925094.0,
+      "reachingMs": 617.5651,
+      "atSafepointMs": 157.4371,
+      "totalMs": 775.3541
+    },
+    {
+      "operation": "G1CollectForAllocation",
+      "startMs": 1794977991741.177,
+      "endMs": 1794977992456.0,
+      "reachingMs": 377.6774,
+      "atSafepointMs": 337.128,
+      "totalMs": 714.8229
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794977948000.344,
+      "endMs": 1794977948700.0,
+      "reachingMs": 699.3324,
+      "atSafepointMs": 0.2982,
+      "totalMs": 699.656
+    },
+    {
+      "operation": "G1CollectForAllocation",
+      "startMs": 1794977980543.1184,
+      "endMs": 1794977981237.0,
+      "reachingMs": 210.2647,
+      "atSafepointMs": 434.513,
+      "totalMs": 693.8815
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794977938169.5574,
+      "endMs": 1794977938795.0,
+      "reachingMs": 611.5415,
+      "atSafepointMs": 13.7713,
+      "totalMs": 625.4426
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794977971556.4502,
+      "endMs": 1794977972151.0,
+      "reachingMs": 590.9575,
+      "atSafepointMs": 3.5348,
+      "totalMs": 594.5499
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794977912787.6602,
+      "endMs": 1794977913381.0,
+      "reachingMs": 591.0697,
+      "atSafepointMs": 2.1761,
+      "totalMs": 593.3399
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794977934931.2878,
+      "endMs": 1794977935511.0,
+      "reachingMs": 575.6311,
+      "atSafepointMs": 4.0022,
+      "totalMs": 579.7122
+    },
+    {
+      "operation": "Cleanup",
+      "startMs": 1794977962970.4563,
+      "endMs": 1794977963518.0,
+      "reachingMs": 545.1333,
+      "atSafepointMs": 1.9688,
+      "totalMs": 547.5438
+    }
+  ],
+  "caveat": "Reaching safepoint is synchronization delay, not all threads stopped. AtSafepoint is distinct from GC pause. Do not add them to overlapping JFR wait durations."
+}

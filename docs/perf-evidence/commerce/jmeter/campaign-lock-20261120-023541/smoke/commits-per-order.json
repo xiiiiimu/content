@@ -1,0 +1,25 @@
+{
+  "source": "docs\\perf-evidence\\commerce\\jmeter\\campaign-lock-20261120-023541\\smoke",
+  "orders": 20,
+  "paidOrdersFormal": 16,
+  "commits": {
+    "bridge": 17,
+    "cacheSync": 65,
+    "dispatchClaim": 537,
+    "dispatchConfirm": 20,
+    "settle": 20
+  },
+  "rollbacks": {},
+  "cacheSyncFromBridge": 25,
+  "commitsPerOrder": {
+    "bridge": 0.85,
+    "cacheSync": 3.25,
+    "dispatchClaim": 26.85,
+    "dispatchConfirm": 1.0,
+    "settle": 1.0
+  },
+  "commitsPerOrderTotal": 32.95,
+  "commitSpanSeconds": 67.949,
+  "commitsPerSecondOverSpan": 9.7,
+  "note": "orders = committed settle transactions containing insertOrder (formal + warm-up orders in the recording)"
+}

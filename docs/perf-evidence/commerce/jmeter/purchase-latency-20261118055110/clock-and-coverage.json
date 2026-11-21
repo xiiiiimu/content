@@ -1,0 +1,30 @@
+{
+  "diagnostic": {
+    "matchedAccessLogs": 5000,
+    "responseStatusMatches": 5000,
+    "minClientEndAfterAccessEndMs": -5,
+    "maxClientEndAfterAccessEndMs": 60890,
+    "maxFilterEndToAccessEndMs": 60.18374453125
+  },
+  "probe": {
+    "matchedAccessLogs": 5000,
+    "responseStatusMatches": 5000,
+    "minClientEndAfterAccessEndMs": 1167,
+    "maxClientEndAfterAccessEndMs": 26995,
+    "maxFilterEndToAccessEndMs": 19.116448828125016
+  },
+  "fixed": {
+    "matchedAccessLogs": 5000,
+    "responseStatusMatches": 5000,
+    "minClientEndAfterAccessEndMs": -6,
+    "maxClientEndAfterAccessEndMs": 40999,
+    "maxFilterEndToAccessEndMs": 15.03858281250001
+  },
+  "ic-off": {
+    "matchedAccessLogs": 5000,
+    "responseStatusMatches": 5000,
+    "minClientEndAfterAccessEndMs": -15,
+    "maxClientEndAfterAccessEndMs": 25487,
+    "maxFilterEndToAccessEndMs": 15.361816015624981
+  }
+}

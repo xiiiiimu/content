@@ -1,0 +1,182 @@
+{
+ "head": "1535a09",
+ "batches": [
+  {
+   "batch": "b00-unit",
+   "itClasses": null,
+   "freeMiBStart": 3529,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dit.test=NoSuchIT",
+    "-Dfailsafe.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795206926793,
+   "mvnRc": 0,
+   "endMs": 1795206966351,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "FfmpegTranscoderExecTest": {
+     "run": 2,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 1
+    },
+    "FeedMemberCodecTest": {
+     "run": 16,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "FeedMergerTest": {
+     "run": 19,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "FeedTokensTest": {
+     "run": 3,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "RelayPolicyTest": {
+     "run": 8,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "SaleDispatchDefaultsTest": {
+     "run": 4,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "SaleLatencyTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "SaleProducerWarmupTest": {
+     "run": 3,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "WindowsListenBacklogTest": {
+     "run": 2,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 0,
+   "freeMiBEnd": 3424,
+   "result": "PASS"
+  },
+  {
+   "batch": "b01-AnonymousAccess",
+   "itClasses": "AnonymousAccessIT,AssistantFlowIT",
+   "freeMiBStart": 3476,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=AnonymousAccessIT,AssistantFlowIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795206967837,
+   "mvnRc": 0,
+   "endMs": 1795207079313,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "AnonymousAccessIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "AssistantFlowIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 3256,
+   "result": "PASS"
+  },
+  {
+   "batch": "b02-AssistantTaskAccess",
+   "itClasses": "AssistantTaskAccessIT,AuthBcryptPoolIT",
+   "freeMiBStart": 3248,
+   "memWaitS": 0,
+   "command": [
+    "-B",
+    "-ntp",
+    "-Pintegration",
+    "verify",
+    "-Dtest=ContentApplicationTest",
+    "-Dit.test=AssistantTaskAccessIT,AuthBcryptPoolIT",
+    "-Dsurefire.failIfNoSpecifiedTests=false",
+    "-DargLine=--add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xmx1g"
+   ],
+   "startMs": 1795207096123,
+   "mvnRc": 0,
+   "endMs": 1795207202767,
+   "classes": {
+    "ContentApplicationTest": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "AssistantTaskAccessIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    },
+    "AuthBcryptPoolIT": {
+     "run": 1,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0
+    }
+   },
+   "containersLeft": [],
+   "containerWaitS": 15,
+   "freeMiBEnd": 2334,
+   "result": "PASS"
+  },
+  {
+   "batch": "b03-AuthRegisterRace",
+   "itClasses": "AuthRegisterRaceIT,CommentIdempotencyRaceIT",
+   "freeMiBStart": 2721,
+   "memWaitS": 600,
+   "result": "STOP_LOW_MEMORY"
+  }
+ ]
+}

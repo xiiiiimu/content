@@ -1,0 +1,23 @@
+{
+  "status": "PARTIAL",
+  "applicationCorrectness": {
+    "A": true,
+    "B": true
+  },
+  "A_target400Reached": false,
+  "B_actualWindowStartQps": 56.666666666666664,
+  "B_windowTps": null,
+  "B_confirmedWindowCommitTpsLowerBound": 5.85,
+  "B_fullTps": null,
+  "B_missingPerOrderCommitTimes": 2334,
+  "reasons": [
+    "A actual HTTP arrival below target400/s",
+    "B post-run observation interrupted by Windows argv overflow; fixed and real3400 reconciliation passed, missing timings retained"
+  ],
+  "noNewLoadAfterB": true,
+  "indexUnchanged": true,
+  "payment": "SIMULATED",
+  "refund": "SIMULATED",
+  "ffmpegContainerCleanup": "UNVERIFIED",
+  "report": "docs\\perf-evidence\\commerce\\v23-performance-20261119.md"
+}

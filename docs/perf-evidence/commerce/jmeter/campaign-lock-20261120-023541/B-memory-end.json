@@ -1,0 +1,16 @@
+{
+  "label": "B-end",
+  "memoryBefore": {
+    "atLocal": "2026-11-20T02:54:49.891406+08:00",
+    "freeMiB": 4109,
+    "totalMiB": 16083
+  },
+  "minFreeMiB": 3072,
+  "memoryAfter": {
+    "atLocal": "2026-11-20T02:54:51.181753+08:00",
+    "freeMiB": 4092,
+    "totalMiB": 16083
+  },
+  "failures": [],
+  "pass": true
+}

@@ -1,0 +1,33 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\baseline200-retest-sign-t200-20261115082355\\results.jtl",
+  "samples": 1200,
+  "spanSec": 11.133,
+  "requestQps": 107.79,
+  "acceptQps": 107.34,
+  "businessRejects": 0,
+  "systemErrors": 5,
+  "connectFail": 0,
+  "timeouts": 0,
+  "ok": 1195,
+  "p50Ms": 1498,
+  "p95Ms": 4022,
+  "p99Ms": 5126,
+  "byLabel": [
+    {
+      "p95": 4022,
+      "qps": 107.79,
+      "n": 1200,
+      "label": "POST-original-sign"
+    }
+  ],
+  "byClass": [
+    {
+      "cls": "OK",
+      "count": 1195
+    },
+    {
+      "cls": "SYSTEM",
+      "count": 5
+    }
+  ]
+}

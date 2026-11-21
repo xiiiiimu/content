@@ -1,0 +1,11 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1794712027739,413,POST-original-sign,200,,commerce-threads 1-6,text,true,,353,409,10,10,http://127.0.0.1:28080/api/materials/62/original/sign,411,0,166
+1794712027738,415,POST-original-sign,200,,commerce-threads 1-3,text,true,,353,409,10,10,http://127.0.0.1:28080/api/materials/62/original/sign,411,0,166
+1794712027743,410,POST-original-sign,200,,commerce-threads 1-7,text,true,,353,409,10,10,http://127.0.0.1:28080/api/materials/62/original/sign,406,0,160
+1794712027738,422,POST-original-sign,200,,commerce-threads 1-9,text,true,,353,409,10,10,http://127.0.0.1:28080/api/materials/62/original/sign,419,0,182
+1794712027742,411,POST-original-sign,200,,commerce-threads 1-4,text,true,,353,409,10,10,http://127.0.0.1:28080/api/materials/62/original/sign,407,0,164
+1794712027738,425,POST-original-sign,200,,commerce-threads 1-2,text,true,,353,409,10,10,http://127.0.0.1:28080/api/materials/62/original/sign,424,0,165
+1794712027741,423,POST-original-sign,200,,commerce-threads 1-10,text,true,,353,409,10,10,http://127.0.0.1:28080/api/materials/62/original/sign,422,0,162
+1794712027738,451,POST-original-sign,200,,commerce-threads 1-8,text,true,,353,409,3,3,http://127.0.0.1:28080/api/materials/62/original/sign,451,0,165
+1794712027738,451,POST-original-sign,200,,commerce-threads 1-1,text,true,,353,409,3,3,http://127.0.0.1:28080/api/materials/62/original/sign,450,0,167
+1794712027741,475,POST-original-sign,200,,commerce-threads 1-5,text,true,,353,409,1,1,http://127.0.0.1:28080/api/materials/62/original/sign,466,0,177

@@ -1,0 +1,5 @@
+{
+  "applicationLog": "target\\v23-perf-20261118-234151\\backend-final.raw.log",
+  "sha256": "e390668b158ae2d16d534ceeb494d77bcd0cf584856ec815b2525bd44b1995d0",
+  "note": "Raw service log stays private. JMeter logs and whitelisted timing events are in each public run folder."
+}

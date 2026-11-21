@@ -1,0 +1,56 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\purchase-5k-stock-t5000-purchase-t5000-20261116025653\\results.jtl",
+  "samples": 5000,
+  "spanSec": 32.764,
+  "requestQps": 152.61,
+  "acceptQps": 17.43,
+  "businessRejects": 12,
+  "systemErrors": 4417,
+  "connectFail": 3606,
+  "timeouts": 322,
+  "http503": 11,
+  "ok": 571,
+  "p50Ms": 1796,
+  "p95Ms": 30012,
+  "p99Ms": 39375,
+  "byLabel": [
+    {
+      "activeWindowSec": 32.764,
+      "n": 5000,
+      "activeQps": 152.61,
+      "p95": 30012,
+      "p99": 39375,
+      "windowSec": 32.764,
+      "label": "POST-purchase",
+      "qps": 152.61,
+      "p50": 1796
+    }
+  ],
+  "byClass": [
+    {
+      "cls": "BIZ:",
+      "count": 12
+    },
+    {
+      "cls": "CONNECT_FAIL",
+      "count": 3606
+    },
+    {
+      "cls": "HTTP_503",
+      "count": 11
+    },
+    {
+      "cls": "OK",
+      "count": 571
+    },
+    {
+      "cls": "SYSTEM",
+      "count": 478
+    },
+    {
+      "cls": "TIMEOUT",
+      "count": 322
+    }
+  ],
+  "qpsNote": "byLabel.qps = n / whole-run spanSec; byLabel.activeQps = n / label start-ts span (optional)"
+}

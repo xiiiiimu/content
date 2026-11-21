@@ -1,0 +1,28 @@
+{
+ "id": "46a54235-9fdf-4c28-a7d9-5a5574805446",
+ "object": "chat.completion",
+ "created": 1795271122,
+ "model": "deepseek-flash",
+ "choices": [
+  {
+   "index": 0,
+   "message": {
+    "role": "assistant",
+    "content": "{\"intent\": \"SEARCH\", \"decision\": \"EXECUTE\", \"reasons\": [], \"unsupportedConditions\": [], \"droppedRequirements\": [], \"search\": {\"keywords\": [\"雨夜\", \"街景\"], \"tag\": null, \"aspectRatio\": \"PORTRAIT\", \"licenseDownload\": null, \"licenseCommercial\": true}, \"subscribe\": null, \"giveaway\": null}"
+   },
+   "logprobs": null,
+   "finish_reason": "stop"
+  }
+ ],
+ "usage": {
+  "prompt_tokens": 17514,
+  "completion_tokens": 84,
+  "total_tokens": 17598,
+  "prompt_tokens_details": {
+   "cached_tokens": 17280
+  },
+  "prompt_cache_hit_tokens": 17280,
+  "prompt_cache_miss_tokens": 234
+ },
+ "system_fingerprint": "bc19ba97cbe016479903222bb1578db6"
+}

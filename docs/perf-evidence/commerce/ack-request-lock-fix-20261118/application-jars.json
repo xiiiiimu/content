@@ -1,0 +1,17 @@
+{
+  "original-v19": {
+    "path": "target\\content-0.1.0-SNAPSHOT.jar",
+    "sha256": "179c67e9de96841b04e8a76dc618c7df1554b6d77a0ea94e08d72562af6065d5",
+    "bytes": 102632949
+  },
+  "failed-run-v22": {
+    "path": "target\\commerce-revision-20261118082417\\content-v22-benchmark.jar",
+    "sha256": "fa7d8ac2d055a1545d178f8de856b6ac656652e4131e3e1db1aee4da1100c9d4",
+    "bytes": 102684884
+  },
+  "verified-v23": {
+    "path": "E:\\content\\target\\commerce-revision-20261118082417\\runtime\\content-v23-376b7ae3cf20.jar",
+    "sha256": "376b7ae3cf209dec1f36993c81d27685ab6de3014a687fdeee642d521c54efa5",
+    "bytes": 102686026
+  }
+}

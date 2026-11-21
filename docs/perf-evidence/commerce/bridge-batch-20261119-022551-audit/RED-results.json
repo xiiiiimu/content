@@ -1,0 +1,20 @@
+{
+  "tests": 2,
+  "failures": 2,
+  "errors": 0,
+  "skipped": 0,
+  "compiled": true,
+  "realMysqlRedis": true,
+  "testDatabase": "disposable Testcontainers mysql:8.4, random port; not business database",
+  "cases": [
+    {
+      "name": "bridgeBatchCommitBeforeAckCrashKeepsTheWholeBatchDurable",
+      "failure": "[both requests commit atomically before any stream acknowledgement] \nexpected: 2\n but was: 1"
+    },
+    {
+      "name": "bridgeBatchCommitsTwoReadyMessagesInOneTransaction",
+      "failure": "[a ready two-message batch uses one real JDBC commit, not per-message commits] \nexpected: 1L\n but was: 2L"
+    }
+  ],
+  "rawLog": "target\\bridge-batch-20261119-022551\\RED.log"
+}

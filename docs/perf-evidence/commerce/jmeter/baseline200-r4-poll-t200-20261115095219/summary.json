@@ -1,0 +1,30 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\baseline200-r4-poll-t200-20261115095219\\results.jtl",
+  "samples": 2590,
+  "spanSec": 9.157,
+  "requestQps": 282.84,
+  "acceptQps": 282.84,
+  "businessRejects": 0,
+  "systemErrors": 0,
+  "connectFail": 0,
+  "timeouts": 0,
+  "http503": 0,
+  "ok": 2590,
+  "p50Ms": 450,
+  "p95Ms": 1231,
+  "p99Ms": 1696,
+  "byLabel": [
+    {
+      "label": "GET-purchase-result",
+      "p95": 1231,
+      "n": 2590,
+      "qps": 282.84
+    }
+  ],
+  "byClass": [
+    {
+      "cls": "OK",
+      "count": 2590
+    }
+  ]
+}

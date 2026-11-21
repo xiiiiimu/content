@@ -1,0 +1,27 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\band5k-order-order-t200-20261115061114\\results.jtl",
+  "samples": 200,
+  "spanSec": 0.524,
+  "requestQps": 381.68,
+  "acceptQps": 381.68,
+  "businessRejects": 0,
+  "systemErrors": 0,
+  "ok": 200,
+  "p50Ms": 1290,
+  "p95Ms": 1966,
+  "p99Ms": 2196,
+  "byLabel": [
+    {
+      "n": 200,
+      "qps": 381.68,
+      "p95": 1966,
+      "label": "GET-order-me"
+    }
+  ],
+  "byClass": [
+    {
+      "count": 200,
+      "cls": "OK"
+    }
+  ]
+}

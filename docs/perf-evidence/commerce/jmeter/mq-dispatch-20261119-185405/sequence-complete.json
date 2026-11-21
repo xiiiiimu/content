@@ -1,0 +1,13 @@
+{
+  "atMs": 1795087330456,
+  "tiers": [
+    "B",
+    "C"
+  ],
+  "backendPids": {
+    "B": 35780,
+    "C": 49824
+  },
+  "sameJar": "E:\\content\\target\\mq-dispatch-20261119-083643\\runtime\\content-v25-90d1a3eb48f9.jar",
+  "sha256": "90d1a3eb48f94bea59750d7a3b115c3a39e591a784f84298280a350e7d70aa4e"
+}

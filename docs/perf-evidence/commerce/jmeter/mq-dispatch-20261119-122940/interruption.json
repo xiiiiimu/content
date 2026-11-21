@@ -1,0 +1,108 @@
+{
+ "writtenAtMs": 1795085605480,
+ "summary": "Sequence driver process tree terminated externally (Claude Code background-shell memory-pressure reap) during tier B JMeter start; no sequence-failure.json was written because the driver itself was killed.",
+ "completedTiers": {
+  "smoke": "VERIFIED",
+  "A": "VERIFIED (correctness + reconciliation passed; kept, not rerun)"
+ },
+ "interruptedTier": "B",
+ "notStartedTiers": [
+  "C"
+ ],
+ "timeline": {
+  "bGateStart": "B-gate-start.json (passed, freeMiB 3979)",
+  "bBrokerLagFirstOk": {
+   "epochMs": 1795064282379,
+   "local": "2026-11-19T12:58:02+08:00"
+  },
+  "bJmeterStarted": {
+   "epochMs": 1795064300839,
+   "local": "2026-11-19T12:58:20+08:00",
+   "source": "B/console.log"
+  },
+  "lastObservation": {
+   "epochMs": 1795064326082,
+   "local": "2026-11-19T12:58:46+08:00",
+   "availablePhysicalMiB": 3682,
+   "memoryLoadPercent": 77
+  },
+  "lastBrokerLagSample": {
+   "epochMs": 1795064327692,
+   "local": "2026-11-19T12:58:47+08:00"
+  },
+  "lastFileUpdate": {
+   "epochMs": 1795064327714,
+   "local": "2026-11-19T12:58:47+08:00"
+  },
+  "allLogsStoppedTogether": true
+ },
+ "tierBEvidenceState": {
+  "resultsJtlLines": 0,
+  "observations": 39,
+  "brokerLagLines": 12,
+  "brokerLagOk": 10,
+  "missing": [
+   "summary.json",
+   "window.json",
+   "server-events.tsv",
+   "reconciliation.json",
+   "measurement-verification.json",
+   "B-memory-end.json",
+   "sequence-failure.json"
+  ],
+  "usableForComparison": false
+ },
+ "residualCheck": {
+  "checkedAtLocal": "2026-11-19 ~18:50+08:00 (before the 18:52 JFR dump; exact second not recorded)",
+  "processes": {
+   "backend28080": {
+    "pid": 1800,
+    "jar": "content-v25-90d1a3eb48f9.jar",
+    "config": "B (batch,20,1)"
+   },
+   "jmeter": null,
+   "pythonDriver": null,
+   "lagSampler": null,
+   "maven": null
+  },
+  "testcontainers": [],
+  "backendHandling": "Logs copied and still-running JFR recording v231795064283055 dumped to target/mq-dispatch-20261119-083643/perf-private-20261119-122940/backend-B/snapshot-before-stop/ (private), recording stopped, then PID 1800 stopped (verified jar in command line) at epochMs 1795085586814."
+ },
+ "tierBCampaignState": {
+  "formalCampaign": {
+   "id": 123,
+   "postId": 136,
+   "purchaseRequests": 0,
+   "dispatchRows": 0,
+   "orders": 0,
+   "soldCount": 0,
+   "redisStock": 4000,
+   "stockCap": 4000,
+   "note": "Untouched: no reservation, PROCESSING or MQ pending left by the interrupted run."
+  },
+  "warmCampaign": {
+   "id": 124,
+   "postId": 137,
+   "purchaseRequests": {
+    "SUCCEEDED": 64
+   },
+   "dispatch": {
+    "SENT": 64
+   },
+   "consumeReceipts": 64,
+   "ordersPAID": 64,
+   "entitlementsACTIVE": 64,
+   "soldCount": 64,
+   "redisStock": 0,
+   "note": "Warm-up completed and reconciles 64/64."
+  },
+  "global": {
+   "PROCESSING": 0,
+   "dispatchNotSent": 0,
+   "ordersHELD": 0,
+   "streamPending": 0,
+   "streamLag": 0
+  }
+ },
+ "followUp": "B and C rerun after the resource gate on the same JAR (sha256 90d1a3eb48f94bea59750d7a3b115c3a39e591a784f84298280a350e7d70aa4e) with new campaigns/clientKeys in a new directory (--profiles B C --skip-smoke). Campaigns 123/124 are not reused."
+}

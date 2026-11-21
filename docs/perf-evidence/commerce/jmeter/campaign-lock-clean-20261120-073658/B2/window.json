@@ -1,0 +1,9 @@
+{
+  "startEpochMs": 1795132112962,
+  "endEpochMs": 1795132172962,
+  "targetRate": 60,
+  "workers": 64,
+  "sameJvm": true,
+  "sameHttpSamplerAndThreads": true,
+  "deadlinePolicy": "No catch-up; serialized minimum-spaced permits"
+}

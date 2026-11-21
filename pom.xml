@@ -81,6 +81,13 @@
   </build>
   <profiles>
     <profile>
+      <id>windows-local-transport-tests</id>
+      <activation><os><family>Windows</family></os></activation>
+      <properties>
+        <argLine>--add-opens=java.base/sun.nio.ch=ALL-UNNAMED</argLine>
+      </properties>
+    </profile>
+    <profile>
       <id>integration</id>
       <build>
         <plugins>

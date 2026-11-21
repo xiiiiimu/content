@@ -1,0 +1,38 @@
+{
+  "formalWindow": {
+    "endEpochMs": 1794957853652,
+    "warmupExcluded": true,
+    "seedAndPreflightExcluded": true,
+    "startEpochMs": 1794957685868,
+    "wallSec": 172.009
+  },
+  "jmeter": {
+    "firstSampleTs": 1794957798239.0,
+    "emitSpanMs": 28737,
+    "samples": 5000,
+    "multiIterCheck": {
+      "ok": true,
+      "expectedMinSamples": 5000
+    },
+    "rampSec": 1,
+    "configuredThreads": 5000,
+    "lastSampleTs": 1794957826976.0,
+    "peakActiveThreads": 5000.0,
+    "note": "peakActiveThreads is measured from JTL allThreads; configuredThreads is never rewritten downward by this runner",
+    "durationSec": 3600,
+    "purchaseStartsPerSecond": 0,
+    "loops": 1
+  },
+  "startBarrier": {
+    "readyCount": 5000,
+    "configuredGroupSize": 5000,
+    "releaseEpochMs": 1794957777255,
+    "timedOut": false,
+    "firstArrivedSeen": 2169,
+    "jmeterPid": 48084,
+    "groovyIndy": "true",
+    "javaVersion": "17.0.17",
+    "maxHeapBytes": 3221225472,
+    "availableProcessors": 16
+  }
+}

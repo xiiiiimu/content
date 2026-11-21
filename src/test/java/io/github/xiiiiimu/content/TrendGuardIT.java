@@ -44,7 +44,7 @@ class TrendGuardIT {
 
  @Test void topicContentListFiltersInvisiblePostsAndRequiresAuth()throws Exception{
   follows.change(2001,1001,true);
-  db.update("INSERT INTO posts(id,author_id,status,body) VALUES(100201,1001,'DRAFT','visible'),(100202,1001,'DRAFT','offline-soon')");
+  db.update("INSERT INTO posts(id,author_id,status,body,topic) VALUES(100201,1001,'DRAFT','visible','sports'),(100202,1001,'DRAFT','offline-soon','sports')");
   publish.publish(1001,100201,UUID.randomUUID().toString(),0);
   publish.publish(1001,100202,UUID.randomUUID().toString(),0);
   interactions.like(2001,100201,"sports");
@@ -65,7 +65,7 @@ class TrendGuardIT {
 
  @Test void poisonedRedisRankingCannotAuthorizeTopicContent()throws Exception{
   follows.change(2001,1001,true);
-  db.update("INSERT INTO posts(id,author_id,status,body) VALUES(100301,1001,'DRAFT','ok')");
+  db.update("INSERT INTO posts(id,author_id,status,body,topic) VALUES(100301,1001,'DRAFT','ok','music')");
   publish.publish(1001,100301,UUID.randomUUID().toString(),0);
   interactions.like(2001,100301,"music");
   // Poison Redis projection with a phantom topic and a score; must not mint content or bypass MySQL.
@@ -79,7 +79,7 @@ class TrendGuardIT {
 
  @Test void mysqlBucketsRemainAuthoritativeWhenRedisProjectionMissing(){
   follows.change(2001,1001,true);
-  db.update("INSERT INTO posts(id,author_id,status,body) VALUES(100401,1001,'DRAFT','bucket')");
+  db.update("INSERT INTO posts(id,author_id,status,body,topic) VALUES(100401,1001,'DRAFT','bucket','tech')");
   publish.publish(1001,100401,UUID.randomUUID().toString(),0);
   interactions.like(2001,100401,"tech");
   assertThat(trending.rebuild(3_600_000L)).isGreaterThanOrEqualTo(1);

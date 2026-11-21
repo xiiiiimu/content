@@ -1,0 +1,7720 @@
+{
+ "profile": "B2:batch,20,2",
+ "batchMode": true,
+ "claimEvidence": "SaleDispatchBatch events",
+ "jfrDataLoss": 0,
+ "claimSizeDistribution": {
+  "0": 367,
+  "1": 4,
+  "2": 31,
+  "4": 899
+ },
+ "claimsWithRows": 934,
+ "emptyClaims": 367,
+ "outcomes": {
+  "sent": 3662,
+  "failed": 0,
+  "budgetSkipped": 0,
+  "confirmMissed": 0,
+  "retryMissed": 0,
+  "outcomeNotPersisted": 0
+ },
+ "leaseUseMs": {
+  "count": 934,
+  "p50": 115,
+  "p95": 206,
+  "p99": 285,
+  "max": 468
+ },
+ "leaseViolations": {
+  "budgetSkipped": 0,
+  "confirmMissed": 0,
+  "retryMissed": 0,
+  "outcomeNotPersisted": 0,
+  "leaseUseOver25000Ms": 0
+ },
+ "window": {
+  "sqlTotal": 4523,
+  "sqlByStatement": {
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.unknownHoldCurrent": 413,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.claimAll": 411,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.due": 413,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.expired": 413,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard": 413,
+   "dispatch-confirm sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.holding": 410,
+   "dispatch-confirm sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.sentAll": 410,
+   "dispatch-send sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request": 1640
+  },
+  "commitsByKind": {
+   "dispatch-claim": 413,
+   "dispatch-confirm": 410
+  },
+  "commitsTotal": 823,
+  "rollbacksByKind": {},
+  "phaseMs": {
+   "dispatch-claim dispatch.claim": {
+    "count": 413,
+    "p50": 58,
+    "p95": 120,
+    "p99": 165,
+    "max": 247
+   },
+   "dispatch-claim jdbc.commit": {
+    "count": 413,
+    "p50": 34,
+    "p95": 53,
+    "p99": 91,
+    "max": 139
+   },
+   "dispatch-confirm dispatch.confirm": {
+    "count": 410,
+    "p50": 55,
+    "p95": 117,
+    "p99": 220,
+    "max": 363
+   },
+   "dispatch-confirm jdbc.commit": {
+    "count": 410,
+    "p50": 38,
+    "p95": 56,
+    "p99": 80,
+    "max": 134
+   },
+   "dispatch-send mq.send": {
+    "count": 1640,
+    "p50": 5,
+    "p95": 11,
+    "p99": 16,
+    "max": 36
+   }
+  }
+ },
+ "full": {
+  "sqlTotal": 11668,
+  "sqlByStatement": {
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.unknownHoldCurrent": 1301,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.claimAll": 934,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.due": 1301,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.expired": 1301,
+   "dispatch-claim sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard": 1301,
+   "dispatch-confirm sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.holding": 934,
+   "dispatch-confirm sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.sentAll": 934,
+   "dispatch-send sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request": 3662
+  },
+  "commitsByKind": {
+   "dispatch-claim": 1301,
+   "dispatch-confirm": 934
+  },
+  "commitsTotal": 2235,
+  "rollbacksByKind": {},
+  "phaseMs": {
+   "dispatch-claim dispatch.claim": {
+    "count": 1301,
+    "p50": 47,
+    "p95": 89,
+    "p99": 146,
+    "max": 247
+   },
+   "dispatch-claim jdbc.commit": {
+    "count": 1301,
+    "p50": 29,
+    "p95": 48,
+    "p99": 69,
+    "max": 139
+   },
+   "dispatch-confirm dispatch.confirm": {
+    "count": 934,
+    "p50": 52,
+    "p95": 103,
+    "p99": 178,
+    "max": 363
+   },
+   "dispatch-confirm jdbc.commit": {
+    "count": 934,
+    "p50": 37,
+    "p95": 54,
+    "p99": 80,
+    "max": 134
+   },
+   "dispatch-send mq.send": {
+    "count": 3662,
+    "p50": 5,
+    "p95": 10,
+    "p99": 16,
+    "max": 39
+   }
+  }
+ },
+ "settle": {
+  "transactionsMs": {
+   "count": 3662,
+   "p50": 660,
+   "p95": 796,
+   "p99": 867,
+   "max": 927
+  },
+  "commitMs": {
+   "count": 10986,
+   "p50": 34,
+   "p95": 52,
+   "p99": 79,
+   "max": 235
+  },
+  "committedInWindow": 1555
+ },
+ "lockWaits": {
+  "samplesWithWaits": 58,
+  "samples": 78,
+  "observedWaitsByTable": {
+   "material_sale_campaigns": 4913,
+   "material_sale_cache_jobs": 6
+  },
+  "peakPerSampleByTable": {
+   "material_sale_campaigns": 120,
+   "material_sale_cache_jobs": 1
+  },
+  "note": "Discrete samples; repeated observations of one wait are counted again. Absence is not proof of no waits."
+ },
+ "backlog": {
+  "peaks": {
+   "streamLag": {
+    "value": 257,
+    "atMs": 1795132131835
+   },
+   "mqPending": {
+    "value": 1926,
+    "atMs": 1795132173649
+   },
+   "processing": {
+    "value": 2018,
+    "atMs": 1795132173649
+   },
+   "brokerBacklog": {
+    "value": 375,
+    "atMs": 1795132233447
+   }
+  },
+  "edges": {
+   "windowStart": {
+    "streamLag": {
+     "value": 35,
+     "offsetMs": 352
+    },
+    "mqPending": {
+     "value": 13,
+     "offsetMs": 352
+    },
+    "processing": {
+     "value": 15,
+     "offsetMs": 352
+    },
+    "brokerBacklog": {
+     "value": 6,
+     "offsetMs": 448
+    }
+   },
+   "windowEnd": {
+    "streamLag": {
+     "value": 0,
+     "offsetMs": 687
+    },
+    "mqPending": {
+     "value": 1926,
+     "offsetMs": 687
+    },
+    "processing": {
+     "value": 2018,
+     "offsetMs": 687
+    },
+    "brokerBacklog": {
+     "value": 90,
+     "offsetMs": 468
+    }
+   }
+  },
+  "lagSamples": 31,
+  "lagSamplesOk": 31,
+  "lagIntervalMs": 5000,
+  "firstObservedDrainAfterWindowMs": 68910,
+  "brokerBacklogScope": "Whole consumer group on the topic (all campaigns); only this workload runs during the tier."
+ },
+ "series": [
+  {
+   "atMs": 1795132084471,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4844
+  },
+  {
+   "atMs": 1795132086597,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4730
+  },
+  {
+   "atMs": 1795132088665,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4636
+  },
+  {
+   "atMs": 1795132090797,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4719
+  },
+  {
+   "atMs": 1795132092823,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4646
+  },
+  {
+   "atMs": 1795132094859,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4673
+  },
+  {
+   "atMs": 1795132096885,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4617
+  },
+  {
+   "atMs": 1795132098903,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4492
+  },
+  {
+   "atMs": 1795132100964,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4401
+  },
+  {
+   "atMs": 1795132102989,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4344
+  },
+  {
+   "atMs": 1795132105002,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4340
+  },
+  {
+   "atMs": 1795132107131,
+   "streamLag": 24,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4291
+  },
+  {
+   "atMs": 1795132109233,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4263
+  },
+  {
+   "atMs": 1795132111236,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 0,
+   "freeMiB": 4256
+  },
+  {
+   "atMs": 1795132113314,
+   "streamLag": 35,
+   "streamPending": 0,
+   "mqPending": 13,
+   "sending": 4,
+   "processing": 15,
+   "receipts": 8,
+   "freeMiB": 4251
+  },
+  {
+   "atMs": 1795132115350,
+   "streamLag": 70,
+   "streamPending": 0,
+   "mqPending": 53,
+   "sending": 4,
+   "processing": 57,
+   "receipts": 46,
+   "freeMiB": 4240
+  },
+  {
+   "atMs": 1795132117370,
+   "streamLag": 103,
+   "streamPending": 0,
+   "mqPending": 109,
+   "sending": 4,
+   "processing": 113,
+   "receipts": 89,
+   "freeMiB": 4215
+  },
+  {
+   "atMs": 1795132119365,
+   "streamLag": 128,
+   "streamPending": 0,
+   "mqPending": 149,
+   "sending": 0,
+   "processing": 154,
+   "receipts": 128,
+   "freeMiB": 4279
+  },
+  {
+   "atMs": 1795132121395,
+   "streamLag": 145,
+   "streamPending": 0,
+   "mqPending": 201,
+   "sending": 0,
+   "processing": 207,
+   "receipts": 176,
+   "freeMiB": 4251
+  },
+  {
+   "atMs": 1795132123512,
+   "streamLag": 179,
+   "streamPending": 0,
+   "mqPending": 249,
+   "sending": 0,
+   "processing": 256,
+   "receipts": 226,
+   "freeMiB": 4218
+  },
+  {
+   "atMs": 1795132125593,
+   "streamLag": 202,
+   "streamPending": 0,
+   "mqPending": 301,
+   "sending": 0,
+   "processing": 307,
+   "receipts": 276,
+   "freeMiB": 4240
+  },
+  {
+   "atMs": 1795132127728,
+   "streamLag": 232,
+   "streamPending": 0,
+   "mqPending": 353,
+   "sending": 4,
+   "processing": 356,
+   "receipts": 328,
+   "freeMiB": 4179
+  },
+  {
+   "atMs": 1795132129806,
+   "streamLag": 254,
+   "streamPending": 0,
+   "mqPending": 409,
+   "sending": 4,
+   "processing": 411,
+   "receipts": 372,
+   "freeMiB": 4263
+  },
+  {
+   "atMs": 1795132131835,
+   "streamLag": 257,
+   "streamPending": 0,
+   "mqPending": 473,
+   "sending": 4,
+   "processing": 477,
+   "receipts": 427,
+   "freeMiB": 4256
+  },
+  {
+   "atMs": 1795132133869,
+   "streamLag": 253,
+   "streamPending": 0,
+   "mqPending": 541,
+   "sending": 4,
+   "processing": 545,
+   "receipts": 478,
+   "freeMiB": 4245
+  },
+  {
+   "atMs": 1795132135986,
+   "streamLag": 234,
+   "streamPending": 20,
+   "mqPending": 621,
+   "sending": 4,
+   "processing": 605,
+   "receipts": 537,
+   "freeMiB": 4310
+  },
+  {
+   "atMs": 1795132138067,
+   "streamLag": 229,
+   "streamPending": 20,
+   "mqPending": 697,
+   "sending": 4,
+   "processing": 682,
+   "receipts": 601,
+   "freeMiB": 4277
+  },
+  {
+   "atMs": 1795132140172,
+   "streamLag": 226,
+   "streamPending": 20,
+   "mqPending": 741,
+   "sending": 4,
+   "processing": 753,
+   "receipts": 650,
+   "freeMiB": 4330
+  },
+  {
+   "atMs": 1795132142295,
+   "streamLag": 235,
+   "streamPending": 0,
+   "mqPending": 817,
+   "sending": 0,
+   "processing": 835,
+   "receipts": 707,
+   "freeMiB": 4274
+  },
+  {
+   "atMs": 1795132144380,
+   "streamLag": 239,
+   "streamPending": 0,
+   "mqPending": 877,
+   "sending": 0,
+   "processing": 900,
+   "receipts": 764,
+   "freeMiB": 4304
+  },
+  {
+   "atMs": 1795132146504,
+   "streamLag": 245,
+   "streamPending": 0,
+   "mqPending": 941,
+   "sending": 0,
+   "processing": 965,
+   "receipts": 817,
+   "freeMiB": 4284
+  },
+  {
+   "atMs": 1795132148642,
+   "streamLag": 212,
+   "streamPending": 0,
+   "mqPending": 1033,
+   "sending": 0,
+   "processing": 1063,
+   "receipts": 880,
+   "freeMiB": 4299
+  },
+  {
+   "atMs": 1795132150639,
+   "streamLag": 189,
+   "streamPending": 0,
+   "mqPending": 1121,
+   "sending": 4,
+   "processing": 1148,
+   "receipts": 935,
+   "freeMiB": 4291
+  },
+  {
+   "atMs": 1795132152700,
+   "streamLag": 195,
+   "streamPending": 0,
+   "mqPending": 1177,
+   "sending": 0,
+   "processing": 1206,
+   "receipts": 996,
+   "freeMiB": 4278
+  },
+  {
+   "atMs": 1795132154816,
+   "streamLag": 187,
+   "streamPending": 0,
+   "mqPending": 1253,
+   "sending": 4,
+   "processing": 1283,
+   "receipts": 1060,
+   "freeMiB": 4278
+  },
+  {
+   "atMs": 1795132156880,
+   "streamLag": 164,
+   "streamPending": 20,
+   "mqPending": 1329,
+   "sending": 4,
+   "processing": 1366,
+   "receipts": 1118,
+   "freeMiB": 4269
+  },
+  {
+   "atMs": 1795132158976,
+   "streamLag": 151,
+   "streamPending": 0,
+   "mqPending": 1393,
+   "sending": 4,
+   "processing": 1439,
+   "receipts": 1184,
+   "freeMiB": 4308
+  },
+  {
+   "atMs": 1795132160979,
+   "streamLag": 111,
+   "streamPending": 0,
+   "mqPending": 1485,
+   "sending": 0,
+   "processing": 1544,
+   "receipts": 1238,
+   "freeMiB": 4280
+  },
+  {
+   "atMs": 1795132163113,
+   "streamLag": 125,
+   "streamPending": 20,
+   "mqPending": 1557,
+   "sending": 4,
+   "processing": 1588,
+   "receipts": 1294,
+   "freeMiB": 4260
+  },
+  {
+   "atMs": 1795132165218,
+   "streamLag": 86,
+   "streamPending": 20,
+   "mqPending": 1641,
+   "sending": 4,
+   "processing": 1696,
+   "receipts": 1347,
+   "freeMiB": 4237
+  },
+  {
+   "atMs": 1795132167348,
+   "streamLag": 72,
+   "streamPending": 20,
+   "mqPending": 1709,
+   "sending": 0,
+   "processing": 1775,
+   "receipts": 1407,
+   "freeMiB": 4254
+  },
+  {
+   "atMs": 1795132169440,
+   "streamLag": 59,
+   "streamPending": 20,
+   "mqPending": 1805,
+   "sending": 4,
+   "processing": 1873,
+   "receipts": 1469,
+   "freeMiB": 4276
+  },
+  {
+   "atMs": 1795132171529,
+   "streamLag": 23,
+   "streamPending": 20,
+   "mqPending": 1897,
+   "sending": 4,
+   "processing": 1955,
+   "receipts": 1528,
+   "freeMiB": 4284
+  },
+  {
+   "atMs": 1795132173649,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1926,
+   "sending": 4,
+   "processing": 2018,
+   "receipts": 1583,
+   "freeMiB": 4259
+  },
+  {
+   "atMs": 1795132175731,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1854,
+   "sending": 4,
+   "processing": 1953,
+   "receipts": 1647,
+   "freeMiB": 4508
+  },
+  {
+   "atMs": 1795132177840,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1782,
+   "sending": 0,
+   "processing": 1892,
+   "receipts": 1709,
+   "freeMiB": 4516
+  },
+  {
+   "atMs": 1795132179846,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1718,
+   "sending": 0,
+   "processing": 1833,
+   "receipts": 1767,
+   "freeMiB": 4536
+  },
+  {
+   "atMs": 1795132181887,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1642,
+   "sending": 4,
+   "processing": 1768,
+   "receipts": 1834,
+   "freeMiB": 4512
+  },
+  {
+   "atMs": 1795132183972,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1574,
+   "sending": 0,
+   "processing": 1706,
+   "receipts": 1893,
+   "freeMiB": 4513
+  },
+  {
+   "atMs": 1795132186033,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1506,
+   "sending": 4,
+   "processing": 1646,
+   "receipts": 1954,
+   "freeMiB": 4500
+  },
+  {
+   "atMs": 1795132188133,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1430,
+   "sending": 4,
+   "processing": 1585,
+   "receipts": 2014,
+   "freeMiB": 4506
+  },
+  {
+   "atMs": 1795132190200,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1358,
+   "sending": 4,
+   "processing": 1526,
+   "receipts": 2074,
+   "freeMiB": 4506
+  },
+  {
+   "atMs": 1795132192225,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1286,
+   "sending": 4,
+   "processing": 1464,
+   "receipts": 2137,
+   "freeMiB": 4482
+  },
+  {
+   "atMs": 1795132194250,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1226,
+   "sending": 0,
+   "processing": 1412,
+   "receipts": 2188,
+   "freeMiB": 4490
+  },
+  {
+   "atMs": 1795132196312,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1154,
+   "sending": 4,
+   "processing": 1353,
+   "receipts": 2247,
+   "freeMiB": 4519
+  },
+  {
+   "atMs": 1795132198400,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1074,
+   "sending": 0,
+   "processing": 1293,
+   "receipts": 2308,
+   "freeMiB": 4511
+  },
+  {
+   "atMs": 1795132200395,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 1002,
+   "sending": 4,
+   "processing": 1232,
+   "receipts": 2369,
+   "freeMiB": 4506
+  },
+  {
+   "atMs": 1795132202497,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 926,
+   "sending": 0,
+   "processing": 1172,
+   "receipts": 2429,
+   "freeMiB": 4481
+  },
+  {
+   "atMs": 1795132204497,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 854,
+   "sending": 0,
+   "processing": 1113,
+   "receipts": 2488,
+   "freeMiB": 4479
+  },
+  {
+   "atMs": 1795132206502,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 794,
+   "sending": 4,
+   "processing": 1057,
+   "receipts": 2544,
+   "freeMiB": 4506
+  },
+  {
+   "atMs": 1795132208635,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 718,
+   "sending": 4,
+   "processing": 990,
+   "receipts": 2611,
+   "freeMiB": 4509
+  },
+  {
+   "atMs": 1795132210636,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 654,
+   "sending": 0,
+   "processing": 933,
+   "receipts": 2667,
+   "freeMiB": 4497
+  },
+  {
+   "atMs": 1795132212712,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 590,
+   "sending": 4,
+   "processing": 876,
+   "receipts": 2724,
+   "freeMiB": 4476
+  },
+  {
+   "atMs": 1795132214844,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 514,
+   "sending": 0,
+   "processing": 816,
+   "receipts": 2785,
+   "freeMiB": 4473
+  },
+  {
+   "atMs": 1795132216975,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 442,
+   "sending": 4,
+   "processing": 751,
+   "receipts": 2849,
+   "freeMiB": 4508
+  },
+  {
+   "atMs": 1795132219066,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 362,
+   "sending": 0,
+   "processing": 687,
+   "receipts": 2913,
+   "freeMiB": 4490
+  },
+  {
+   "atMs": 1795132221113,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 290,
+   "sending": 4,
+   "processing": 626,
+   "receipts": 2974,
+   "freeMiB": 4512
+  },
+  {
+   "atMs": 1795132223199,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 222,
+   "sending": 0,
+   "processing": 568,
+   "receipts": 3032,
+   "freeMiB": 4466
+  },
+  {
+   "atMs": 1795132225261,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 158,
+   "sending": 4,
+   "processing": 508,
+   "receipts": 3093,
+   "freeMiB": 4496
+  },
+  {
+   "atMs": 1795132227374,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 86,
+   "sending": 0,
+   "processing": 446,
+   "receipts": 3154,
+   "freeMiB": 4488
+  },
+  {
+   "atMs": 1795132229457,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 6,
+   "sending": 0,
+   "processing": 379,
+   "receipts": 3222,
+   "freeMiB": 4493
+  },
+  {
+   "atMs": 1795132231554,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 311,
+   "receipts": 3291,
+   "freeMiB": 4488
+  },
+  {
+   "atMs": 1795132233649,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 245,
+   "receipts": 3355,
+   "freeMiB": 4472
+  },
+  {
+   "atMs": 1795132235752,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 177,
+   "receipts": 3423,
+   "freeMiB": 4487
+  },
+  {
+   "atMs": 1795132237819,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 111,
+   "receipts": 3490,
+   "freeMiB": 4496
+  },
+  {
+   "atMs": 1795132239870,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 48,
+   "receipts": 3553,
+   "freeMiB": 4482
+  },
+  {
+   "atMs": 1795132241872,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 3598,
+   "freeMiB": 4476
+  },
+  {
+   "atMs": 1795132243990,
+   "streamLag": 0,
+   "streamPending": 0,
+   "mqPending": 0,
+   "sending": 0,
+   "processing": 0,
+   "receipts": 3598,
+   "freeMiB": 4448
+  }
+ ],
+ "brokerLagSeries": [
+  {
+   "atMs": 1795132093405,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795132098406,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795132103407,
+   "brokerBacklog": 0,
+   "pulledNotCommitted": 0
+  },
+  {
+   "atMs": 1795132108408,
+   "brokerBacklog": 8,
+   "pulledNotCommitted": 8
+  },
+  {
+   "atMs": 1795132113410,
+   "brokerBacklog": 6,
+   "pulledNotCommitted": 6
+  },
+  {
+   "atMs": 1795132118412,
+   "brokerBacklog": 11,
+   "pulledNotCommitted": 11
+  },
+  {
+   "atMs": 1795132123413,
+   "brokerBacklog": 13,
+   "pulledNotCommitted": 13
+  },
+  {
+   "atMs": 1795132128415,
+   "brokerBacklog": 10,
+   "pulledNotCommitted": 10
+  },
+  {
+   "atMs": 1795132133416,
+   "brokerBacklog": 11,
+   "pulledNotCommitted": 11
+  },
+  {
+   "atMs": 1795132138417,
+   "brokerBacklog": 15,
+   "pulledNotCommitted": 15
+  },
+  {
+   "atMs": 1795132143419,
+   "brokerBacklog": 25,
+   "pulledNotCommitted": 25
+  },
+  {
+   "atMs": 1795132148420,
+   "brokerBacklog": 32,
+   "pulledNotCommitted": 32
+  },
+  {
+   "atMs": 1795132153421,
+   "brokerBacklog": 35,
+   "pulledNotCommitted": 35
+  },
+  {
+   "atMs": 1795132158423,
+   "brokerBacklog": 49,
+   "pulledNotCommitted": 49
+  },
+  {
+   "atMs": 1795132163426,
+   "brokerBacklog": 63,
+   "pulledNotCommitted": 63
+  },
+  {
+   "atMs": 1795132168429,
+   "brokerBacklog": 71,
+   "pulledNotCommitted": 71
+  },
+  {
+   "atMs": 1795132173430,
+   "brokerBacklog": 90,
+   "pulledNotCommitted": 90
+  },
+  {
+   "atMs": 1795132178432,
+   "brokerBacklog": 113,
+   "pulledNotCommitted": 113
+  },
+  {
+   "atMs": 1795132183432,
+   "brokerBacklog": 132,
+   "pulledNotCommitted": 132
+  },
+  {
+   "atMs": 1795132188434,
+   "brokerBacklog": 161,
+   "pulledNotCommitted": 161
+  },
+  {
+   "atMs": 1795132193436,
+   "brokerBacklog": 183,
+   "pulledNotCommitted": 183
+  },
+  {
+   "atMs": 1795132198438,
+   "brokerBacklog": 223,
+   "pulledNotCommitted": 223
+  },
+  {
+   "atMs": 1795132203440,
+   "brokerBacklog": 255,
+   "pulledNotCommitted": 255
+  },
+  {
+   "atMs": 1795132208442,
+   "brokerBacklog": 278,
+   "pulledNotCommitted": 278
+  },
+  {
+   "atMs": 1795132213443,
+   "brokerBacklog": 294,
+   "pulledNotCommitted": 294
+  },
+  {
+   "atMs": 1795132218443,
+   "brokerBacklog": 324,
+   "pulledNotCommitted": 324
+  },
+  {
+   "atMs": 1795132223444,
+   "brokerBacklog": 350,
+   "pulledNotCommitted": 350
+  },
+  {
+   "atMs": 1795132228446,
+   "brokerBacklog": 368,
+   "pulledNotCommitted": 368
+  },
+  {
+   "atMs": 1795132233447,
+   "brokerBacklog": 375,
+   "pulledNotCommitted": 375
+  },
+  {
+   "atMs": 1795132238449,
+   "brokerBacklog": 257,
+   "pulledNotCommitted": 257
+  },
+  {
+   "atMs": 1795132243451,
+   "brokerBacklog": 99,
+   "pulledNotCommitted": 99
+  }
+ ],
+ "batches": [
+  {
+   "atMs": 1795132107509,
+   "requested": 1,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 176
+  },
+  {
+   "atMs": 1795132107816,
+   "requested": 1,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 239
+  },
+  {
+   "atMs": 1795132108093,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 258
+  },
+  {
+   "atMs": 1795132107473,
+   "requested": 1,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 255
+  },
+  {
+   "atMs": 1795132107759,
+   "requested": 1,
+   "idleSenders": 1,
+   "claimed": 1,
+   "leaseUseMs": 283
+  },
+  {
+   "atMs": 1795132107996,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 235
+  },
+  {
+   "atMs": 1795132109074,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 264
+  },
+  {
+   "atMs": 1795132108979,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 241
+  },
+  {
+   "atMs": 1795132108234,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 237
+  },
+  {
+   "atMs": 1795132108408,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 173
+  },
+  {
+   "atMs": 1795132108561,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 153
+  },
+  {
+   "atMs": 1795132108714,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 151
+  },
+  {
+   "atMs": 1795132108322,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 205
+  },
+  {
+   "atMs": 1795132108459,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 135
+  },
+  {
+   "atMs": 1795132108647,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 158
+  },
+  {
+   "atMs": 1795132108809,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 137
+  },
+  {
+   "atMs": 1795132109208,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 133
+  },
+  {
+   "atMs": 1795132109410,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 186
+  },
+  {
+   "atMs": 1795132109615,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 188
+  },
+  {
+   "atMs": 1795132109796,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 180
+  },
+  {
+   "atMs": 1795132110001,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 169
+  },
+  {
+   "atMs": 1795132109143,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 163
+  },
+  {
+   "atMs": 1795132109350,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 206
+  },
+  {
+   "atMs": 1795132109528,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 176
+  },
+  {
+   "atMs": 1795132109688,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 158
+  },
+  {
+   "atMs": 1795132109844,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 154
+  },
+  {
+   "atMs": 1795132110107,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 199
+  },
+  {
+   "atMs": 1795132110147,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 145
+  },
+  {
+   "atMs": 1795132110451,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 272
+  },
+  {
+   "atMs": 1795132110615,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 162
+  },
+  {
+   "atMs": 1795132110691,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 147
+  },
+  {
+   "atMs": 1795132110278,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 170
+  },
+  {
+   "atMs": 1795132110544,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 264
+  },
+  {
+   "atMs": 1795132110770,
+   "requested": 2,
+   "idleSenders": 1,
+   "claimed": 2,
+   "leaseUseMs": 154
+  },
+  {
+   "atMs": 1795132113765,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 203
+  },
+  {
+   "atMs": 1795132113561,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 407
+  },
+  {
+   "atMs": 1795132114053,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 282
+  },
+  {
+   "atMs": 1795132114659,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 168
+  },
+  {
+   "atMs": 1795132115028,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 196
+  },
+  {
+   "atMs": 1795132114489,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 164
+  },
+  {
+   "atMs": 1795132114831,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 168
+  },
+  {
+   "atMs": 1795132114324,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 270
+  },
+  {
+   "atMs": 1795132115658,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 169
+  },
+  {
+   "atMs": 1795132115857,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 197
+  },
+  {
+   "atMs": 1795132116098,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 240
+  },
+  {
+   "atMs": 1795132115202,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 173
+  },
+  {
+   "atMs": 1795132115434,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 229
+  },
+  {
+   "atMs": 1795132116614,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 139
+  },
+  {
+   "atMs": 1795132117040,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 130
+  },
+  {
+   "atMs": 1795132117169,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 128
+  },
+  {
+   "atMs": 1795132116331,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 230
+  },
+  {
+   "atMs": 1795132116474,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 142
+  },
+  {
+   "atMs": 1795132116765,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 151
+  },
+  {
+   "atMs": 1795132116909,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 142
+  },
+  {
+   "atMs": 1795132118044,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 173
+  },
+  {
+   "atMs": 1795132117870,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 180
+  },
+  {
+   "atMs": 1795132117689,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 468
+  },
+  {
+   "atMs": 1795132118496,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 248
+  },
+  {
+   "atMs": 1795132119112,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 129
+  },
+  {
+   "atMs": 1795132118247,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 202
+  },
+  {
+   "atMs": 1795132118664,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 167
+  },
+  {
+   "atMs": 1795132118820,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 155
+  },
+  {
+   "atMs": 1795132118982,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 161
+  },
+  {
+   "atMs": 1795132120007,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 164
+  },
+  {
+   "atMs": 1795132120132,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 124
+  },
+  {
+   "atMs": 1795132119260,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 147
+  },
+  {
+   "atMs": 1795132119842,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 169
+  },
+  {
+   "atMs": 1795132119539,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 227
+  },
+  {
+   "atMs": 1795132119671,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 131
+  },
+  {
+   "atMs": 1795132121143,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 132
+  },
+  {
+   "atMs": 1795132120836,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132120960,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 123
+  },
+  {
+   "atMs": 1795132120287,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 154
+  },
+  {
+   "atMs": 1795132120591,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 302
+  },
+  {
+   "atMs": 1795132120721,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 129
+  },
+  {
+   "atMs": 1795132121475,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 176
+  },
+  {
+   "atMs": 1795132121633,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 157
+  },
+  {
+   "atMs": 1795132121819,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 185
+  },
+  {
+   "atMs": 1795132121297,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 152
+  },
+  {
+   "atMs": 1795132121971,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 151
+  },
+  {
+   "atMs": 1795132122176,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 203
+  },
+  {
+   "atMs": 1795132122766,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 138
+  },
+  {
+   "atMs": 1795132122995,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 177
+  },
+  {
+   "atMs": 1795132123138,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 142
+  },
+  {
+   "atMs": 1795132122626,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 204
+  },
+  {
+   "atMs": 1795132122422,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 245
+  },
+  {
+   "atMs": 1795132123956,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 179
+  },
+  {
+   "atMs": 1795132124101,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 144
+  },
+  {
+   "atMs": 1795132123434,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 161
+  },
+  {
+   "atMs": 1795132123575,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 140
+  },
+  {
+   "atMs": 1795132123775,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 199
+  },
+  {
+   "atMs": 1795132123272,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 133
+  },
+  {
+   "atMs": 1795132124415,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 154
+  },
+  {
+   "atMs": 1795132124609,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 143
+  },
+  {
+   "atMs": 1795132124893,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 162
+  },
+  {
+   "atMs": 1795132125177,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 133
+  },
+  {
+   "atMs": 1795132124259,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 157
+  },
+  {
+   "atMs": 1795132124731,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 120
+  },
+  {
+   "atMs": 1795132125043,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 148
+  },
+  {
+   "atMs": 1795132125743,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 155
+  },
+  {
+   "atMs": 1795132125898,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 154
+  },
+  {
+   "atMs": 1795132125587,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 230
+  },
+  {
+   "atMs": 1795132126039,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 140
+  },
+  {
+   "atMs": 1795132125355,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 177
+  },
+  {
+   "atMs": 1795132126866,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 142
+  },
+  {
+   "atMs": 1795132127044,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 178
+  },
+  {
+   "atMs": 1795132127178,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 133
+  },
+  {
+   "atMs": 1795132126249,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 159
+  },
+  {
+   "atMs": 1795132126419,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 169
+  },
+  {
+   "atMs": 1795132126572,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 152
+  },
+  {
+   "atMs": 1795132126723,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 149
+  },
+  {
+   "atMs": 1795132127346,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 167
+  },
+  {
+   "atMs": 1795132127685,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 150
+  },
+  {
+   "atMs": 1795132127952,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 215
+  },
+  {
+   "atMs": 1795132127534,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 187
+  },
+  {
+   "atMs": 1795132128133,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 181
+  },
+  {
+   "atMs": 1795132128738,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 137
+  },
+  {
+   "atMs": 1795132129010,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 129
+  },
+  {
+   "atMs": 1795132128600,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 138
+  },
+  {
+   "atMs": 1795132128879,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 140
+  },
+  {
+   "atMs": 1795132129192,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 181
+  },
+  {
+   "atMs": 1795132128461,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 327
+  },
+  {
+   "atMs": 1795132129934,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 188
+  },
+  {
+   "atMs": 1795132130139,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 204
+  },
+  {
+   "atMs": 1795132129501,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 152
+  },
+  {
+   "atMs": 1795132129348,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 155
+  },
+  {
+   "atMs": 1795132129744,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 191
+  },
+  {
+   "atMs": 1795132130373,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 232
+  },
+  {
+   "atMs": 1795132130524,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 151
+  },
+  {
+   "atMs": 1795132130961,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 133
+  },
+  {
+   "atMs": 1795132131181,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132130688,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 163
+  },
+  {
+   "atMs": 1795132130826,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 135
+  },
+  {
+   "atMs": 1795132131079,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 118
+  },
+  {
+   "atMs": 1795132131360,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 128
+  },
+  {
+   "atMs": 1795132131458,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132131554,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 95
+  },
+  {
+   "atMs": 1795132131776,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 113
+  },
+  {
+   "atMs": 1795132131889,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 112
+  },
+  {
+   "atMs": 1795132131662,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 107
+  },
+  {
+   "atMs": 1795132132124,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 233
+  },
+  {
+   "atMs": 1795132132635,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 162
+  },
+  {
+   "atMs": 1795132132758,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132133049,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132133146,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132132944,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 135
+  },
+  {
+   "atMs": 1795132132472,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 347
+  },
+  {
+   "atMs": 1795132133629,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 88
+  },
+  {
+   "atMs": 1795132133886,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 107
+  },
+  {
+   "atMs": 1795132134085,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 198
+  },
+  {
+   "atMs": 1795132133539,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 113
+  },
+  {
+   "atMs": 1795132133270,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132133425,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 154
+  },
+  {
+   "atMs": 1795132133779,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 150
+  },
+  {
+   "atMs": 1795132135157,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 116
+  },
+  {
+   "atMs": 1795132134567,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 157
+  },
+  {
+   "atMs": 1795132134409,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 272
+  },
+  {
+   "atMs": 1795132134707,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 139
+  },
+  {
+   "atMs": 1795132134822,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132134935,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  },
+  {
+   "atMs": 1795132135040,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132136160,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 149
+  },
+  {
+   "atMs": 1795132135280,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132135816,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 92
+  },
+  {
+   "atMs": 1795132136009,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 107
+  },
+  {
+   "atMs": 1795132135451,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 169
+  },
+  {
+   "atMs": 1795132135575,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 124
+  },
+  {
+   "atMs": 1795132135723,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132135901,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 84
+  },
+  {
+   "atMs": 1795132136527,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 155
+  },
+  {
+   "atMs": 1795132137060,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 124
+  },
+  {
+   "atMs": 1795132137196,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 135
+  },
+  {
+   "atMs": 1795132136372,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 210
+  },
+  {
+   "atMs": 1795132136659,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 131
+  },
+  {
+   "atMs": 1795132136765,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132136884,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 118
+  },
+  {
+   "atMs": 1795132137453,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132137701,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 119
+  },
+  {
+   "atMs": 1795132137826,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 124
+  },
+  {
+   "atMs": 1795132137916,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 88
+  },
+  {
+   "atMs": 1795132137581,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 126
+  },
+  {
+   "atMs": 1795132138043,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 126
+  },
+  {
+   "atMs": 1795132138230,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 186
+  },
+  {
+   "atMs": 1795132137352,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 154
+  },
+  {
+   "atMs": 1795132138746,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 138
+  },
+  {
+   "atMs": 1795132139179,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 159
+  },
+  {
+   "atMs": 1795132139020,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 132
+  },
+  {
+   "atMs": 1795132138607,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 326
+  },
+  {
+   "atMs": 1795132138886,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 139
+  },
+  {
+   "atMs": 1795132139841,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132140007,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 115
+  },
+  {
+   "atMs": 1795132140198,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132139329,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 149
+  },
+  {
+   "atMs": 1795132140103,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 95
+  },
+  {
+   "atMs": 1795132139474,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 143
+  },
+  {
+   "atMs": 1795132139608,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 133
+  },
+  {
+   "atMs": 1795132139736,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 127
+  },
+  {
+   "atMs": 1795132140818,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132141028,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132141127,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132140317,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132140926,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 106
+  },
+  {
+   "atMs": 1795132140598,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 280
+  },
+  {
+   "atMs": 1795132140723,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 124
+  },
+  {
+   "atMs": 1795132142149,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 131
+  },
+  {
+   "atMs": 1795132141791,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132141888,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132142017,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 128
+  },
+  {
+   "atMs": 1795132141288,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 110
+  },
+  {
+   "atMs": 1795132141595,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 188
+  },
+  {
+   "atMs": 1795132141695,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 99
+  },
+  {
+   "atMs": 1795132141406,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132143055,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132143166,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 109
+  },
+  {
+   "atMs": 1795132142288,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 138
+  },
+  {
+   "atMs": 1795132142852,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 115
+  },
+  {
+   "atMs": 1795132142546,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 256
+  },
+  {
+   "atMs": 1795132142736,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 138
+  },
+  {
+   "atMs": 1795132142957,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 103
+  },
+  {
+   "atMs": 1795132143608,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 131
+  },
+  {
+   "atMs": 1795132143703,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 93
+  },
+  {
+   "atMs": 1795132143869,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132144122,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 131
+  },
+  {
+   "atMs": 1795132143288,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 121
+  },
+  {
+   "atMs": 1795132143402,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 113
+  },
+  {
+   "atMs": 1795132143476,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 74
+  },
+  {
+   "atMs": 1795132143990,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 120
+  },
+  {
+   "atMs": 1795132145046,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 126
+  },
+  {
+   "atMs": 1795132145188,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 141
+  },
+  {
+   "atMs": 1795132144292,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 169
+  },
+  {
+   "atMs": 1795132144623,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 329
+  },
+  {
+   "atMs": 1795132144768,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 145
+  },
+  {
+   "atMs": 1795132144919,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 150
+  },
+  {
+   "atMs": 1795132146033,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 144
+  },
+  {
+   "atMs": 1795132145345,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 156
+  },
+  {
+   "atMs": 1795132145759,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 166
+  },
+  {
+   "atMs": 1795132145889,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 128
+  },
+  {
+   "atMs": 1795132146165,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 131
+  },
+  {
+   "atMs": 1795132146270,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132145591,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 194
+  },
+  {
+   "atMs": 1795132146581,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 207
+  },
+  {
+   "atMs": 1795132146704,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132147149,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132146841,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 137
+  },
+  {
+   "atMs": 1795132147031,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 138
+  },
+  {
+   "atMs": 1795132147261,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  },
+  {
+   "atMs": 1795132146372,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 101
+  },
+  {
+   "atMs": 1795132147614,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 92
+  },
+  {
+   "atMs": 1795132147933,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 106
+  },
+  {
+   "atMs": 1795132148205,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132147712,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132147826,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 113
+  },
+  {
+   "atMs": 1795132148039,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132147386,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 123
+  },
+  {
+   "atMs": 1795132147521,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 134
+  },
+  {
+   "atMs": 1795132148641,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 90
+  },
+  {
+   "atMs": 1795132148758,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132148874,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132148992,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132149112,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 119
+  },
+  {
+   "atMs": 1795132149217,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132148395,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 189
+  },
+  {
+   "atMs": 1795132148549,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 153
+  },
+  {
+   "atMs": 1795132149931,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  },
+  {
+   "atMs": 1795132150277,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 126
+  },
+  {
+   "atMs": 1795132149818,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 101
+  },
+  {
+   "atMs": 1795132150036,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132150150,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132149476,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 258
+  },
+  {
+   "atMs": 1795132149646,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 118
+  },
+  {
+   "atMs": 1795132149717,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 70
+  },
+  {
+   "atMs": 1795132151183,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  },
+  {
+   "atMs": 1795132150565,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 287
+  },
+  {
+   "atMs": 1795132150762,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 124
+  },
+  {
+   "atMs": 1795132150637,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 70
+  },
+  {
+   "atMs": 1795132150951,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 136
+  },
+  {
+   "atMs": 1795132151071,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 119
+  },
+  {
+   "atMs": 1795132151725,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 92
+  },
+  {
+   "atMs": 1795132151816,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 90
+  },
+  {
+   "atMs": 1795132151911,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132152167,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 125
+  },
+  {
+   "atMs": 1795132151469,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 285
+  },
+  {
+   "atMs": 1795132151632,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 162
+  },
+  {
+   "atMs": 1795132152041,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 129
+  },
+  {
+   "atMs": 1795132152534,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132152633,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 98
+  },
+  {
+   "atMs": 1795132152996,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 137
+  },
+  {
+   "atMs": 1795132153129,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 131
+  },
+  {
+   "atMs": 1795132153268,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 138
+  },
+  {
+   "atMs": 1795132152415,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 197
+  },
+  {
+   "atMs": 1795132152738,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132152858,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 119
+  },
+  {
+   "atMs": 1795132153423,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 155
+  },
+  {
+   "atMs": 1795132153967,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132154074,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132154177,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132153752,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132153861,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 108
+  },
+  {
+   "atMs": 1795132153599,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 176
+  },
+  {
+   "atMs": 1795132154682,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132154778,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132155111,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 124
+  },
+  {
+   "atMs": 1795132155251,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 139
+  },
+  {
+   "atMs": 1795132154985,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 155
+  },
+  {
+   "atMs": 1795132154359,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 181
+  },
+  {
+   "atMs": 1795132154477,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132154584,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 107
+  },
+  {
+   "atMs": 1795132155960,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 92
+  },
+  {
+   "atMs": 1795132156062,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 101
+  },
+  {
+   "atMs": 1795132155867,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 98
+  },
+  {
+   "atMs": 1795132156212,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132155457,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 206
+  },
+  {
+   "atMs": 1795132155581,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132155659,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 77
+  },
+  {
+   "atMs": 1795132155768,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 108
+  },
+  {
+   "atMs": 1795132156964,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132157085,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 121
+  },
+  {
+   "atMs": 1795132157198,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  },
+  {
+   "atMs": 1795132156345,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 133
+  },
+  {
+   "atMs": 1795132156751,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132156847,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132156550,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 204
+  },
+  {
+   "atMs": 1795132156655,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132157888,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 92
+  },
+  {
+   "atMs": 1795132157983,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132158291,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 113
+  },
+  {
+   "atMs": 1795132158177,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132157318,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 119
+  },
+  {
+   "atMs": 1795132157608,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 78
+  },
+  {
+   "atMs": 1795132157795,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132157529,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 159
+  },
+  {
+   "atMs": 1795132157700,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 90
+  },
+  {
+   "atMs": 1795132158076,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 91
+  },
+  {
+   "atMs": 1795132158839,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 84
+  },
+  {
+   "atMs": 1795132158926,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 86
+  },
+  {
+   "atMs": 1795132159042,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 115
+  },
+  {
+   "atMs": 1795132159169,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 127
+  },
+  {
+   "atMs": 1795132158679,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 80
+  },
+  {
+   "atMs": 1795132158755,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 75
+  },
+  {
+   "atMs": 1795132158449,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 157
+  },
+  {
+   "atMs": 1795132158598,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132159789,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 77
+  },
+  {
+   "atMs": 1795132160066,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132159572,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 224
+  },
+  {
+   "atMs": 1795132159877,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 86
+  },
+  {
+   "atMs": 1795132159971,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 93
+  },
+  {
+   "atMs": 1795132160171,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132159347,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 176
+  },
+  {
+   "atMs": 1795132159661,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 88
+  },
+  {
+   "atMs": 1795132160862,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 91
+  },
+  {
+   "atMs": 1795132160957,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132161214,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132160459,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 148
+  },
+  {
+   "atMs": 1795132160631,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 86
+  },
+  {
+   "atMs": 1795132161091,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 133
+  },
+  {
+   "atMs": 1795132160310,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 138
+  },
+  {
+   "atMs": 1795132160544,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 83
+  },
+  {
+   "atMs": 1795132160720,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 89
+  },
+  {
+   "atMs": 1795132161837,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132162058,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132161952,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132161385,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 169
+  },
+  {
+   "atMs": 1795132161585,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 198
+  },
+  {
+   "atMs": 1795132161719,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 132
+  },
+  {
+   "atMs": 1795132162346,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 235
+  },
+  {
+   "atMs": 1795132162625,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 277
+  },
+  {
+   "atMs": 1795132163169,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 130
+  },
+  {
+   "atMs": 1795132162774,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 148
+  },
+  {
+   "atMs": 1795132162914,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 138
+  },
+  {
+   "atMs": 1795132163038,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 123
+  },
+  {
+   "atMs": 1795132163603,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 433
+  },
+  {
+   "atMs": 1795132164096,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 101
+  },
+  {
+   "atMs": 1795132164221,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 124
+  },
+  {
+   "atMs": 1795132163723,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 118
+  },
+  {
+   "atMs": 1795132163826,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132163943,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 116
+  },
+  {
+   "atMs": 1795132164815,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 121
+  },
+  {
+   "atMs": 1795132165153,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 115
+  },
+  {
+   "atMs": 1795132164693,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132164939,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 123
+  },
+  {
+   "atMs": 1795132165037,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132165280,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 126
+  },
+  {
+   "atMs": 1795132164381,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 158
+  },
+  {
+   "atMs": 1795132164579,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 197
+  },
+  {
+   "atMs": 1795132165817,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 125
+  },
+  {
+   "atMs": 1795132165928,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 110
+  },
+  {
+   "atMs": 1795132166024,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 95
+  },
+  {
+   "atMs": 1795132166132,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 107
+  },
+  {
+   "atMs": 1795132166251,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 118
+  },
+  {
+   "atMs": 1795132165691,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 115
+  },
+  {
+   "atMs": 1795132165575,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 243
+  },
+  {
+   "atMs": 1795132167189,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 83
+  },
+  {
+   "atMs": 1795132167018,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 118
+  },
+  {
+   "atMs": 1795132167105,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 86
+  },
+  {
+   "atMs": 1795132166632,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 101
+  },
+  {
+   "atMs": 1795132166400,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 148
+  },
+  {
+   "atMs": 1795132166530,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 129
+  },
+  {
+   "atMs": 1795132166798,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132166899,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132167763,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 106
+  },
+  {
+   "atMs": 1795132168035,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 112
+  },
+  {
+   "atMs": 1795132168140,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 103
+  },
+  {
+   "atMs": 1795132167872,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 107
+  },
+  {
+   "atMs": 1795132168266,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 126
+  },
+  {
+   "atMs": 1795132167365,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 174
+  },
+  {
+   "atMs": 1795132167493,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 128
+  },
+  {
+   "atMs": 1795132167656,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 161
+  },
+  {
+   "atMs": 1795132168573,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 120
+  },
+  {
+   "atMs": 1795132168660,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 86
+  },
+  {
+   "atMs": 1795132169059,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  },
+  {
+   "atMs": 1795132168837,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132168947,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 108
+  },
+  {
+   "atMs": 1795132169204,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 93
+  },
+  {
+   "atMs": 1795132168452,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 185
+  },
+  {
+   "atMs": 1795132168731,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 70
+  },
+  {
+   "atMs": 1795132169816,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132169935,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 118
+  },
+  {
+   "atMs": 1795132170046,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 109
+  },
+  {
+   "atMs": 1795132170292,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 147
+  },
+  {
+   "atMs": 1795132170143,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132169711,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 134
+  },
+  {
+   "atMs": 1795132169348,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 143
+  },
+  {
+   "atMs": 1795132169576,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 227
+  },
+  {
+   "atMs": 1795132170464,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 172
+  },
+  {
+   "atMs": 1795132170701,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132170893,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 93
+  },
+  {
+   "atMs": 1795132170990,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132171083,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 91
+  },
+  {
+   "atMs": 1795132171163,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 79
+  },
+  {
+   "atMs": 1795132171265,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 101
+  },
+  {
+   "atMs": 1795132170604,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 89
+  },
+  {
+   "atMs": 1795132170800,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132171564,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 213
+  },
+  {
+   "atMs": 1795132171729,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 113
+  },
+  {
+   "atMs": 1795132171858,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 129
+  },
+  {
+   "atMs": 1795132171980,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 121
+  },
+  {
+   "atMs": 1795132172105,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 123
+  },
+  {
+   "atMs": 1795132172262,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 156
+  },
+  {
+   "atMs": 1795132171350,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 84
+  },
+  {
+   "atMs": 1795132172788,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132173293,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 101
+  },
+  {
+   "atMs": 1795132172563,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 121
+  },
+  {
+   "atMs": 1795132172886,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132173077,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 138
+  },
+  {
+   "atMs": 1795132173191,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132172440,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 177
+  },
+  {
+   "atMs": 1795132172691,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 126
+  },
+  {
+   "atMs": 1795132173993,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132174102,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 107
+  },
+  {
+   "atMs": 1795132173647,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 145
+  },
+  {
+   "atMs": 1795132174278,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 125
+  },
+  {
+   "atMs": 1795132173396,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 101
+  },
+  {
+   "atMs": 1795132173500,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 103
+  },
+  {
+   "atMs": 1795132173770,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132173896,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 125
+  },
+  {
+   "atMs": 1795132174675,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132174795,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 119
+  },
+  {
+   "atMs": 1795132174915,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 119
+  },
+  {
+   "atMs": 1795132175020,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132175126,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 106
+  },
+  {
+   "atMs": 1795132175211,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 82
+  },
+  {
+   "atMs": 1795132174377,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132174481,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132174571,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 89
+  },
+  {
+   "atMs": 1795132176117,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 101
+  },
+  {
+   "atMs": 1795132176228,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  },
+  {
+   "atMs": 1795132175637,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132175878,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 149
+  },
+  {
+   "atMs": 1795132175407,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 144
+  },
+  {
+   "atMs": 1795132175540,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 132
+  },
+  {
+   "atMs": 1795132175729,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 91
+  },
+  {
+   "atMs": 1795132176014,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 134
+  },
+  {
+   "atMs": 1795132177252,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 126
+  },
+  {
+   "atMs": 1795132177002,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 103
+  },
+  {
+   "atMs": 1795132177124,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 121
+  },
+  {
+   "atMs": 1795132176432,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 80
+  },
+  {
+   "atMs": 1795132176587,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132176351,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 121
+  },
+  {
+   "atMs": 1795132176661,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 73
+  },
+  {
+   "atMs": 1795132176781,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 118
+  },
+  {
+   "atMs": 1795132176898,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 115
+  },
+  {
+   "atMs": 1795132178193,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 120
+  },
+  {
+   "atMs": 1795132178328,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 134
+  },
+  {
+   "atMs": 1795132177542,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132177830,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 120
+  },
+  {
+   "atMs": 1795132177419,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 166
+  },
+  {
+   "atMs": 1795132177659,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 116
+  },
+  {
+   "atMs": 1795132177934,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 103
+  },
+  {
+   "atMs": 1795132178072,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 137
+  },
+  {
+   "atMs": 1795132179158,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132179253,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132178457,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 129
+  },
+  {
+   "atMs": 1795132178576,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132178821,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 136
+  },
+  {
+   "atMs": 1795132178916,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132178685,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 108
+  },
+  {
+   "atMs": 1795132179060,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 93
+  },
+  {
+   "atMs": 1795132179744,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 91
+  },
+  {
+   "atMs": 1795132180076,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 135
+  },
+  {
+   "atMs": 1795132180222,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132179408,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 154
+  },
+  {
+   "atMs": 1795132179552,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 143
+  },
+  {
+   "atMs": 1795132179651,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 99
+  },
+  {
+   "atMs": 1795132179833,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 89
+  },
+  {
+   "atMs": 1795132179939,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132180426,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 203
+  },
+  {
+   "atMs": 1795132180536,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 109
+  },
+  {
+   "atMs": 1795132180893,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 81
+  },
+  {
+   "atMs": 1795132181320,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  },
+  {
+   "atMs": 1795132180985,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 91
+  },
+  {
+   "atMs": 1795132181058,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 72
+  },
+  {
+   "atMs": 1795132181157,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 98
+  },
+  {
+   "atMs": 1795132180629,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 93
+  },
+  {
+   "atMs": 1795132180710,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 80
+  },
+  {
+   "atMs": 1795132180811,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 99
+  },
+  {
+   "atMs": 1795132181619,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 95
+  },
+  {
+   "atMs": 1795132182079,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 160
+  },
+  {
+   "atMs": 1795132181822,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 109
+  },
+  {
+   "atMs": 1795132181918,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 95
+  },
+  {
+   "atMs": 1795132182237,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 157
+  },
+  {
+   "atMs": 1795132181407,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 85
+  },
+  {
+   "atMs": 1795132181523,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 116
+  },
+  {
+   "atMs": 1795132181713,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 92
+  },
+  {
+   "atMs": 1795132182890,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 125
+  },
+  {
+   "atMs": 1795132182977,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 86
+  },
+  {
+   "atMs": 1795132183150,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 77
+  },
+  {
+   "atMs": 1795132183073,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132183250,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 98
+  },
+  {
+   "atMs": 1795132182431,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 192
+  },
+  {
+   "atMs": 1795132182642,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 159
+  },
+  {
+   "atMs": 1795132182764,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132183690,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 91
+  },
+  {
+   "atMs": 1795132183900,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 101
+  },
+  {
+   "atMs": 1795132183984,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 83
+  },
+  {
+   "atMs": 1795132184238,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 133
+  },
+  {
+   "atMs": 1795132184104,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 118
+  },
+  {
+   "atMs": 1795132183449,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 85
+  },
+  {
+   "atMs": 1795132183547,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 98
+  },
+  {
+   "atMs": 1795132183362,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 112
+  },
+  {
+   "atMs": 1795132183798,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 107
+  },
+  {
+   "atMs": 1795132184716,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 112
+  },
+  {
+   "atMs": 1795132185043,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 90
+  },
+  {
+   "atMs": 1795132185248,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 101
+  },
+  {
+   "atMs": 1795132185145,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132184507,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132184412,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 173
+  },
+  {
+   "atMs": 1795132184602,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132184867,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132184952,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 84
+  },
+  {
+   "atMs": 1795132186176,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132185950,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 107
+  },
+  {
+   "atMs": 1795132186058,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 107
+  },
+  {
+   "atMs": 1795132185367,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 118
+  },
+  {
+   "atMs": 1795132185474,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 106
+  },
+  {
+   "atMs": 1795132185570,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 95
+  },
+  {
+   "atMs": 1795132185674,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 103
+  },
+  {
+   "atMs": 1795132185791,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 116
+  },
+  {
+   "atMs": 1795132186986,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132187132,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132187230,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132187335,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 103
+  },
+  {
+   "atMs": 1795132186373,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 196
+  },
+  {
+   "atMs": 1795132186479,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132186680,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 106
+  },
+  {
+   "atMs": 1795132186807,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 125
+  },
+  {
+   "atMs": 1795132186573,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132186891,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 83
+  },
+  {
+   "atMs": 1795132188169,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132188291,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 120
+  },
+  {
+   "atMs": 1795132187828,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132188021,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132187439,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 103
+  },
+  {
+   "atMs": 1795132187517,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 78
+  },
+  {
+   "atMs": 1795132187618,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132187730,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  },
+  {
+   "atMs": 1795132187920,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 91
+  },
+  {
+   "atMs": 1795132189297,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 112
+  },
+  {
+   "atMs": 1795132188861,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132189027,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 82
+  },
+  {
+   "atMs": 1795132189133,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 106
+  },
+  {
+   "atMs": 1795132188466,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 174
+  },
+  {
+   "atMs": 1795132188575,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 108
+  },
+  {
+   "atMs": 1795132188654,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 78
+  },
+  {
+   "atMs": 1795132188755,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 101
+  },
+  {
+   "atMs": 1795132188944,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 81
+  },
+  {
+   "atMs": 1795132189609,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 95
+  },
+  {
+   "atMs": 1795132189723,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 113
+  },
+  {
+   "atMs": 1795132189850,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 126
+  },
+  {
+   "atMs": 1795132189954,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132190043,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 88
+  },
+  {
+   "atMs": 1795132190138,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132190254,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 115
+  },
+  {
+   "atMs": 1795132189404,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132189514,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 109
+  },
+  {
+   "atMs": 1795132191258,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 88
+  },
+  {
+   "atMs": 1795132190667,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132190976,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 77
+  },
+  {
+   "atMs": 1795132191170,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132190462,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 156
+  },
+  {
+   "atMs": 1795132190569,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 107
+  },
+  {
+   "atMs": 1795132190795,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 127
+  },
+  {
+   "atMs": 1795132190898,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132191069,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 92
+  },
+  {
+   "atMs": 1795132191518,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 109
+  },
+  {
+   "atMs": 1795132191748,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 119
+  },
+  {
+   "atMs": 1795132191871,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132192002,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 130
+  },
+  {
+   "atMs": 1795132192137,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 133
+  },
+  {
+   "atMs": 1795132191358,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 99
+  },
+  {
+   "atMs": 1795132191628,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 110
+  },
+  {
+   "atMs": 1795132192716,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 168
+  },
+  {
+   "atMs": 1795132192882,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 165
+  },
+  {
+   "atMs": 1795132193177,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 110
+  },
+  {
+   "atMs": 1795132193290,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 112
+  },
+  {
+   "atMs": 1795132192350,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 213
+  },
+  {
+   "atMs": 1795132192547,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 196
+  },
+  {
+   "atMs": 1795132193066,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 132
+  },
+  {
+   "atMs": 1795132193779,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 127
+  },
+  {
+   "atMs": 1795132193900,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 119
+  },
+  {
+   "atMs": 1795132193988,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 88
+  },
+  {
+   "atMs": 1795132194215,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 83
+  },
+  {
+   "atMs": 1795132194337,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 120
+  },
+  {
+   "atMs": 1795132193413,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132193651,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 113
+  },
+  {
+   "atMs": 1795132193538,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 123
+  },
+  {
+   "atMs": 1795132194081,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 92
+  },
+  {
+   "atMs": 1795132194972,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132195155,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 86
+  },
+  {
+   "atMs": 1795132194747,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 127
+  },
+  {
+   "atMs": 1795132194867,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 118
+  },
+  {
+   "atMs": 1795132195068,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 95
+  },
+  {
+   "atMs": 1795132195262,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132194479,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 141
+  },
+  {
+   "atMs": 1795132194620,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 139
+  },
+  {
+   "atMs": 1795132195723,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132196116,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 83
+  },
+  {
+   "atMs": 1795132196206,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 89
+  },
+  {
+   "atMs": 1795132196321,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132195414,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132195499,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 84
+  },
+  {
+   "atMs": 1795132195605,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132195832,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 108
+  },
+  {
+   "atMs": 1795132195925,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 92
+  },
+  {
+   "atMs": 1795132196031,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132197070,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 90
+  },
+  {
+   "atMs": 1795132197171,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 99
+  },
+  {
+   "atMs": 1795132197270,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 99
+  },
+  {
+   "atMs": 1795132196626,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 109
+  },
+  {
+   "atMs": 1795132196752,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 125
+  },
+  {
+   "atMs": 1795132196516,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 142
+  },
+  {
+   "atMs": 1795132196857,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132196979,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132197833,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 98
+  },
+  {
+   "atMs": 1795132198045,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  },
+  {
+   "atMs": 1795132198128,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 82
+  },
+  {
+   "atMs": 1795132198213,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 83
+  },
+  {
+   "atMs": 1795132198307,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132197507,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 123
+  },
+  {
+   "atMs": 1795132197933,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 99
+  },
+  {
+   "atMs": 1795132197383,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 112
+  },
+  {
+   "atMs": 1795132197636,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 78
+  },
+  {
+   "atMs": 1795132197733,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132199144,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 82
+  },
+  {
+   "atMs": 1795132199348,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 121
+  },
+  {
+   "atMs": 1795132198411,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132198531,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 119
+  },
+  {
+   "atMs": 1795132198698,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132198828,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 129
+  },
+  {
+   "atMs": 1795132198937,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 109
+  },
+  {
+   "atMs": 1795132199061,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 123
+  },
+  {
+   "atMs": 1795132199226,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 81
+  },
+  {
+   "atMs": 1795132199802,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 106
+  },
+  {
+   "atMs": 1795132200008,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132200118,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 109
+  },
+  {
+   "atMs": 1795132200297,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132199446,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132199552,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132199645,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 92
+  },
+  {
+   "atMs": 1795132199907,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 103
+  },
+  {
+   "atMs": 1795132200199,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 79
+  },
+  {
+   "atMs": 1795132200366,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 68
+  },
+  {
+   "atMs": 1795132200485,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132200750,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 127
+  },
+  {
+   "atMs": 1795132200909,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 107
+  },
+  {
+   "atMs": 1795132201293,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132200621,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 136
+  },
+  {
+   "atMs": 1795132201004,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132201087,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 82
+  },
+  {
+   "atMs": 1795132201190,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132201682,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 89
+  },
+  {
+   "atMs": 1795132201784,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132202090,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 121
+  },
+  {
+   "atMs": 1795132202197,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 106
+  },
+  {
+   "atMs": 1795132202323,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 125
+  },
+  {
+   "atMs": 1795132201526,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 91
+  },
+  {
+   "atMs": 1795132201967,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 132
+  },
+  {
+   "atMs": 1795132201434,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 140
+  },
+  {
+   "atMs": 1795132201592,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 65
+  },
+  {
+   "atMs": 1795132202699,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 119
+  },
+  {
+   "atMs": 1795132202816,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 116
+  },
+  {
+   "atMs": 1795132203034,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132202457,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 133
+  },
+  {
+   "atMs": 1795132202580,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132202931,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132203169,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 83
+  },
+  {
+   "atMs": 1795132203285,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 115
+  },
+  {
+   "atMs": 1795132203698,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 77
+  },
+  {
+   "atMs": 1795132203812,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 113
+  },
+  {
+   "atMs": 1795132203912,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 99
+  },
+  {
+   "atMs": 1795132204029,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132204276,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132203621,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 84
+  },
+  {
+   "atMs": 1795132204120,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 90
+  },
+  {
+   "atMs": 1795132203391,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132203536,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 144
+  },
+  {
+   "atMs": 1795132204580,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 112
+  },
+  {
+   "atMs": 1795132204981,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 134
+  },
+  {
+   "atMs": 1795132204706,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 124
+  },
+  {
+   "atMs": 1795132204845,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 138
+  },
+  {
+   "atMs": 1795132205082,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132205184,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 101
+  },
+  {
+   "atMs": 1795132205297,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 112
+  },
+  {
+   "atMs": 1795132204359,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 82
+  },
+  {
+   "atMs": 1795132204467,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 106
+  },
+  {
+   "atMs": 1795132206106,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132206344,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 134
+  },
+  {
+   "atMs": 1795132205683,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 124
+  },
+  {
+   "atMs": 1795132205883,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 90
+  },
+  {
+   "atMs": 1795132206009,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 125
+  },
+  {
+   "atMs": 1795132206210,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132205558,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 209
+  },
+  {
+   "atMs": 1795132205792,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 108
+  },
+  {
+   "atMs": 1795132207313,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 106
+  },
+  {
+   "atMs": 1795132206590,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 129
+  },
+  {
+   "atMs": 1795132206767,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 126
+  },
+  {
+   "atMs": 1795132206915,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 147
+  },
+  {
+   "atMs": 1795132207127,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132207205,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 77
+  },
+  {
+   "atMs": 1795132206460,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132207021,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132207522,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132207723,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  },
+  {
+   "atMs": 1795132208074,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 99
+  },
+  {
+   "atMs": 1795132208155,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 80
+  },
+  {
+   "atMs": 1795132208243,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 86
+  },
+  {
+   "atMs": 1795132207425,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 110
+  },
+  {
+   "atMs": 1795132207612,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 88
+  },
+  {
+   "atMs": 1795132207873,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 99
+  },
+  {
+   "atMs": 1795132207974,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132208362,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 119
+  },
+  {
+   "atMs": 1795132208608,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 101
+  },
+  {
+   "atMs": 1795132209145,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 118
+  },
+  {
+   "atMs": 1795132209264,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 118
+  },
+  {
+   "atMs": 1795132208506,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 142
+  },
+  {
+   "atMs": 1795132208737,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 128
+  },
+  {
+   "atMs": 1795132208863,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 126
+  },
+  {
+   "atMs": 1795132209026,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  },
+  {
+   "atMs": 1795132209392,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 127
+  },
+  {
+   "atMs": 1795132209651,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 132
+  },
+  {
+   "atMs": 1795132209798,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 146
+  },
+  {
+   "atMs": 1795132210172,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 128
+  },
+  {
+   "atMs": 1795132209922,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132210044,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 121
+  },
+  {
+   "atMs": 1795132209518,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 126
+  },
+  {
+   "atMs": 1795132210612,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 103
+  },
+  {
+   "atMs": 1795132210939,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 173
+  },
+  {
+   "atMs": 1795132211183,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 120
+  },
+  {
+   "atMs": 1795132211281,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132211062,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132210396,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 172
+  },
+  {
+   "atMs": 1795132210508,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  },
+  {
+   "atMs": 1795132210765,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 153
+  },
+  {
+   "atMs": 1795132211630,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 109
+  },
+  {
+   "atMs": 1795132211714,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 83
+  },
+  {
+   "atMs": 1795132211808,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 93
+  },
+  {
+   "atMs": 1795132212221,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132212328,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132212106,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 131
+  },
+  {
+   "atMs": 1795132211387,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132211469,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 82
+  },
+  {
+   "atMs": 1795132211974,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 165
+  },
+  {
+   "atMs": 1795132212560,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 99
+  },
+  {
+   "atMs": 1795132212675,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132212856,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 128
+  },
+  {
+   "atMs": 1795132212978,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 121
+  },
+  {
+   "atMs": 1795132213215,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132213306,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 89
+  },
+  {
+   "atMs": 1795132212460,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 132
+  },
+  {
+   "atMs": 1795132213100,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 121
+  },
+  {
+   "atMs": 1795132213506,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 95
+  },
+  {
+   "atMs": 1795132213601,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132213831,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 129
+  },
+  {
+   "atMs": 1795132214061,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 91
+  },
+  {
+   "atMs": 1795132214340,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 180
+  },
+  {
+   "atMs": 1795132213410,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 103
+  },
+  {
+   "atMs": 1795132213701,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132213968,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 85
+  },
+  {
+   "atMs": 1795132214159,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132214847,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 113
+  },
+  {
+   "atMs": 1795132215140,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 129
+  },
+  {
+   "atMs": 1795132215280,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 139
+  },
+  {
+   "atMs": 1795132214433,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 92
+  },
+  {
+   "atMs": 1795132214525,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 91
+  },
+  {
+   "atMs": 1795132214632,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 106
+  },
+  {
+   "atMs": 1795132214733,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132214959,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  },
+  {
+   "atMs": 1795132215929,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 80
+  },
+  {
+   "atMs": 1795132216038,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 108
+  },
+  {
+   "atMs": 1795132216329,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 154
+  },
+  {
+   "atMs": 1795132215744,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 113
+  },
+  {
+   "atMs": 1795132215424,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 143
+  },
+  {
+   "atMs": 1795132215541,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132215630,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 88
+  },
+  {
+   "atMs": 1795132215848,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 103
+  },
+  {
+   "atMs": 1795132216123,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 85
+  },
+  {
+   "atMs": 1795132217033,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132217170,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 136
+  },
+  {
+   "atMs": 1795132217302,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 130
+  },
+  {
+   "atMs": 1795132216451,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 120
+  },
+  {
+   "atMs": 1795132216743,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 110
+  },
+  {
+   "atMs": 1795132216549,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 98
+  },
+  {
+   "atMs": 1795132216632,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 82
+  },
+  {
+   "atMs": 1795132216840,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132216935,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132217969,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 98
+  },
+  {
+   "atMs": 1795132218146,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 93
+  },
+  {
+   "atMs": 1795132218348,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 121
+  },
+  {
+   "atMs": 1795132218225,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 78
+  },
+  {
+   "atMs": 1795132217517,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 164
+  },
+  {
+   "atMs": 1795132217793,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 113
+  },
+  {
+   "atMs": 1795132217870,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 76
+  },
+  {
+   "atMs": 1795132217598,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 80
+  },
+  {
+   "atMs": 1795132217679,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 79
+  },
+  {
+   "atMs": 1795132218052,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 81
+  },
+  {
+   "atMs": 1795132219176,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 113
+  },
+  {
+   "atMs": 1795132219335,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 158
+  },
+  {
+   "atMs": 1795132219062,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 73
+  },
+  {
+   "atMs": 1795132218648,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 81
+  },
+  {
+   "atMs": 1795132218491,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 91
+  },
+  {
+   "atMs": 1795132218567,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 74
+  },
+  {
+   "atMs": 1795132218779,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 130
+  },
+  {
+   "atMs": 1795132218878,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 98
+  },
+  {
+   "atMs": 1795132218987,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 108
+  },
+  {
+   "atMs": 1795132220144,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 100
+  },
+  {
+   "atMs": 1795132220269,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 124
+  },
+  {
+   "atMs": 1795132220044,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 95
+  },
+  {
+   "atMs": 1795132219478,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 142
+  },
+  {
+   "atMs": 1795132219632,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132219742,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 109
+  },
+  {
+   "atMs": 1795132219850,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 108
+  },
+  {
+   "atMs": 1795132219947,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 95
+  },
+  {
+   "atMs": 1795132220927,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 91
+  },
+  {
+   "atMs": 1795132221019,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 91
+  },
+  {
+   "atMs": 1795132221208,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  },
+  {
+   "atMs": 1795132220388,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132220474,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 85
+  },
+  {
+   "atMs": 1795132220565,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 90
+  },
+  {
+   "atMs": 1795132220835,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132220731,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 116
+  },
+  {
+   "atMs": 1795132221096,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 77
+  },
+  {
+   "atMs": 1795132221890,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132222243,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 124
+  },
+  {
+   "atMs": 1795132221736,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 121
+  },
+  {
+   "atMs": 1795132221999,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 108
+  },
+  {
+   "atMs": 1795132222118,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132221382,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 172
+  },
+  {
+   "atMs": 1795132221527,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 144
+  },
+  {
+   "atMs": 1795132221614,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 86
+  },
+  {
+   "atMs": 1795132222830,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132222933,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132223074,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 89
+  },
+  {
+   "atMs": 1795132223173,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 98
+  },
+  {
+   "atMs": 1795132223297,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132222371,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 127
+  },
+  {
+   "atMs": 1795132222493,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 122
+  },
+  {
+   "atMs": 1795132222610,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 116
+  },
+  {
+   "atMs": 1795132222727,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 115
+  },
+  {
+   "atMs": 1795132223794,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 131
+  },
+  {
+   "atMs": 1795132223882,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 87
+  },
+  {
+   "atMs": 1795132223990,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 107
+  },
+  {
+   "atMs": 1795132224103,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 112
+  },
+  {
+   "atMs": 1795132224271,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 117
+  },
+  {
+   "atMs": 1795132223439,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 141
+  },
+  {
+   "atMs": 1795132223662,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 93
+  },
+  {
+   "atMs": 1795132223568,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 128
+  },
+  {
+   "atMs": 1795132224802,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 145
+  },
+  {
+   "atMs": 1795132224920,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 116
+  },
+  {
+   "atMs": 1795132225167,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 125
+  },
+  {
+   "atMs": 1795132225041,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 120
+  },
+  {
+   "atMs": 1795132225354,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 185
+  },
+  {
+   "atMs": 1795132224656,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 128
+  },
+  {
+   "atMs": 1795132224405,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 133
+  },
+  {
+   "atMs": 1795132224527,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 121
+  },
+  {
+   "atMs": 1795132226322,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132225493,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 139
+  },
+  {
+   "atMs": 1795132225978,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 152
+  },
+  {
+   "atMs": 1795132225687,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 142
+  },
+  {
+   "atMs": 1795132225824,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 137
+  },
+  {
+   "atMs": 1795132226092,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132226217,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 124
+  },
+  {
+   "atMs": 1795132227121,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 72
+  },
+  {
+   "atMs": 1795132227310,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132226585,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 96
+  },
+  {
+   "atMs": 1795132226673,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 87
+  },
+  {
+   "atMs": 1795132227049,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 99
+  },
+  {
+   "atMs": 1795132226488,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 165
+  },
+  {
+   "atMs": 1795132226805,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 131
+  },
+  {
+   "atMs": 1795132226949,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 92
+  },
+  {
+   "atMs": 1795132227204,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 82
+  },
+  {
+   "atMs": 1795132227998,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 109
+  },
+  {
+   "atMs": 1795132228300,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 137
+  },
+  {
+   "atMs": 1795132227405,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132227508,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 102
+  },
+  {
+   "atMs": 1795132227838,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 108
+  },
+  {
+   "atMs": 1795132227623,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 115
+  },
+  {
+   "atMs": 1795132227728,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 104
+  },
+  {
+   "atMs": 1795132228089,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 90
+  },
+  {
+   "atMs": 1795132228162,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 73
+  },
+  {
+   "atMs": 1795132229032,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 91
+  },
+  {
+   "atMs": 1795132229118,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 85
+  },
+  {
+   "atMs": 1795132229309,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 108
+  },
+  {
+   "atMs": 1795132228425,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 124
+  },
+  {
+   "atMs": 1795132228604,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 79
+  },
+  {
+   "atMs": 1795132228688,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 84
+  },
+  {
+   "atMs": 1795132228795,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 105
+  },
+  {
+   "atMs": 1795132228523,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 98
+  },
+  {
+   "atMs": 1795132228889,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 94
+  },
+  {
+   "atMs": 1795132229200,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 80
+  },
+  {
+   "atMs": 1795132229724,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 114
+  },
+  {
+   "atMs": 1795132229843,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 118
+  },
+  {
+   "atMs": 1795132229954,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 2,
+   "leaseUseMs": 110
+  },
+  {
+   "atMs": 1795132229407,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 97
+  },
+  {
+   "atMs": 1795132229497,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 89
+  },
+  {
+   "atMs": 1795132229609,
+   "requested": 4,
+   "idleSenders": 2,
+   "claimed": 4,
+   "leaseUseMs": 111
+  }
+ ]
+}

@@ -1,7 +1,7 @@
 package io.github.xiiiiimu.content.domain;
 
 import io.github.xiiiiimu.content.infrastructure.UserMapper;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /** V1.1 register/login; issues FeedTokens.Identity compatible Bearer (role always READER). */
@@ -9,26 +9,40 @@ public final class AuthService {
  public record Session(long userId,String username,String token,long expiresAtMs) {}
  public record PublicUser(long userId,String username,String status) {}
  private final UserMapper users;private final TransactionTemplate tx;private final FeedTokens identity;
- private final BCryptPasswordEncoder passwords=new BCryptPasswordEncoder();
+ private final PasswordHasher passwords;
+ /** BCrypt cost 10 (same as real hashes) of a random value that was discarded; never matches a real password. */
+ static final String DUMMY_HASH="$2a$10$MrJ2M4dkc4DKr1ZbR9dmyepYW2AO2jR6Jzh.F2Tw72Pzq9GA3k3lm";
  private final long ttlMs;
- public AuthService(UserMapper users,TransactionTemplate tx,FeedTokens identity,long ttlMs){
-  this.users=users;this.tx=tx;this.identity=identity;this.ttlMs=Math.min(Math.max(ttlMs,60_000),3_600_000);
+ public AuthService(UserMapper users,TransactionTemplate tx,FeedTokens identity,long ttlMs,PasswordHasher passwords){
+  this.users=users;this.tx=tx;this.identity=identity;this.ttlMs=Math.min(Math.max(ttlMs,60_000),3_600_000);this.passwords=passwords;
  }
+ /**
+  * A taken name is refused before hashing. The hash is computed outside the transaction (on the bounded BCrypt pool, A4),
+  * so no connection is held while it runs. A concurrent registration of the same name (the key is case-insensitive) hits
+  * uq_users_username and is answered like any taken name: 409 USERNAME_TAKEN (A6), never a server error.
+  */
  public Session register(String username,String password){
   validateCreds(username,password);
-  return tx.execute(status->{
-   if(users.byUsername(username)!=null)throw new FeedFailure(409,"USERNAME_TAKEN");
-   long now=System.currentTimeMillis();
-   if(users.insert(username,passwords.encode(password),now)!=1)throw new IllegalStateException("user insert");
-   long id=users.lastId();
-   users.ensureAuthor(id);
-   return session(id,username);
-  });
+  if(users.byUsername(username)!=null)throw new FeedFailure(409,"USERNAME_TAKEN");
+  String hash=passwords.encode(password);
+  try{
+   return tx.execute(status->{
+    if(users.byUsername(username)!=null)throw new FeedFailure(409,"USERNAME_TAKEN");
+    long now=System.currentTimeMillis();
+    if(users.insert(username,hash,now)!=1)throw new IllegalStateException("user insert");
+    long id=users.lastId();
+    users.ensureAuthor(id);
+    return session(id,username);
+   });
+  }catch(DuplicateKeyException e){throw new FeedFailure(409,"USERNAME_TAKEN");}
  }
  public Session login(String username,String password){
   validateCreds(username,password);
   var u=users.byUsername(username);
-  if(u==null || !passwords.matches(password,u.passwordHash()))throw new FeedFailure(401,"INVALID_CREDENTIALS");
+  // Hardening A13: an unknown username still pays one BCrypt check (fixed dummy hash, same cost, same pool), so the
+  // response time does not tell whether the account exists.
+  boolean ok=passwords.matches(password,u==null?DUMMY_HASH:u.passwordHash());
+  if(u==null || !ok)throw new FeedFailure(401,"INVALID_CREDENTIALS");
   if(!"ACTIVE".equals(u.status()))throw new FeedFailure(403,"USER_DISABLED");
   users.ensureAuthor(u.id());
   return session(u.id(),u.username());

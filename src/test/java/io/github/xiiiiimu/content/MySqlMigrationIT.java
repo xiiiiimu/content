@@ -20,7 +20,7 @@ class MySqlMigrationIT {
         Flyway flyway = Flyway.configure()
                 .dataSource(MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword())
                 .load();
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(16);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(30);
         assertThat(flyway.migrate().migrationsExecuted).isZero();
         flyway.validate();
         try(var c=DriverManager.getConnection(MYSQL.getJdbcUrl(),MYSQL.getUsername(),MYSQL.getPassword());
@@ -28,6 +28,38 @@ class MySqlMigrationIT {
             var r=s.executeQuery("SHOW INDEX FROM feed_delivery_tasks WHERE Key_name IN ('ix_delivery_retry_attempt','ix_delivery_lease_attempt')")){
             int n=0;while(r.next())n++;
             assertThat(n).as("V9 attempt-aware claim indexes").isGreaterThanOrEqualTo(2);
+        }catch(Exception e){throw new AssertionError(e);}
+        try(var c=DriverManager.getConnection(MYSQL.getJdbcUrl(),MYSQL.getUsername(),MYSQL.getPassword());
+            var s=c.createStatement();
+            var r=s.executeQuery("SELECT index_name,GROUP_CONCAT(column_name ORDER BY seq_in_index) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name='material_sale_dispatch' AND index_name IN ('ix_sale_dispatch_pending_due','ix_sale_dispatch_sending_expired','ix_sale_dispatch_due') GROUP BY index_name ORDER BY index_name")){
+            var found=new java.util.ArrayList<String>();while(r.next())found.add(r.getString(1)+"="+r.getString(2));
+            assertThat(found).as("V25 split dispatch claim indexes keep V20's serial index").containsExactly(
+             "ix_sale_dispatch_due=state,available_at_ms,lease_until_ms",
+             "ix_sale_dispatch_pending_due=state,available_at_ms,reservation_id",
+             "ix_sale_dispatch_sending_expired=state,lease_until_ms,reservation_id");
+        }catch(Exception e){throw new AssertionError(e);}
+        try(var c=DriverManager.getConnection(MYSQL.getJdbcUrl(),MYSQL.getUsername(),MYSQL.getPassword());var s=c.createStatement()){
+            var fks=new java.util.ArrayList<String>();
+            try(var r=s.executeQuery("SELECT constraint_name FROM information_schema.referential_constraints WHERE constraint_schema=DATABASE() AND referenced_table_name='material_sale_campaigns' ORDER BY constraint_name")){while(r.next())fks.add(r.getString(1));}
+            assertThat(fks).as("V26: purchase requests and orders no longer take an FK share lock on the hot campaign row")
+             .doesNotContain("fk_purchase_campaign","fk_order_campaign").contains("fk_sale_elig_campaign");
+            var idx=new java.util.ArrayList<String>();
+            try(var r=s.executeQuery("SELECT CONCAT(table_name,'.',index_name,'=',GROUP_CONCAT(column_name ORDER BY seq_in_index)) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name IN ('material_purchase_requests','material_orders') AND index_name IN ('ix_purchase_campaign_state','fk_order_campaign') GROUP BY table_name,index_name ORDER BY 1")){while(r.next())idx.add(r.getString(1));}
+            assertThat(idx).as("V26 keeps the campaign_id indexes").containsExactly("material_orders.fk_order_campaign=campaign_id","material_purchase_requests.ix_purchase_campaign_state=campaign_id,state");
+        }catch(Exception e){throw new AssertionError(e);}
+        try(var c=DriverManager.getConnection(MYSQL.getJdbcUrl(),MYSQL.getUsername(),MYSQL.getPassword());var s=c.createStatement();
+            var r=s.executeQuery("SELECT CONCAT(table_name,'.',index_name,'=',GROUP_CONCAT(column_name ORDER BY seq_in_index)) FROM information_schema.statistics WHERE table_schema=DATABASE() AND index_name IN ('ix_bucket_start','ix_ledger_time') GROUP BY table_name,index_name ORDER BY 1")){
+            var idx=new java.util.ArrayList<String>();while(r.next())idx.add(r.getString(1));
+            assertThat(idx).as("V27: time-leading indexes for the trending window read and the retention purge")
+             .containsExactly("topic_event_ledger.ix_ledger_time=occurred_at_ms","topic_minute_buckets.ix_bucket_start=bucket_start_ms");
+        }catch(Exception e){throw new AssertionError(e);}
+        try(var c=DriverManager.getConnection(MYSQL.getJdbcUrl(),MYSQL.getUsername(),MYSQL.getPassword());var s=c.createStatement();
+            var r=s.executeQuery("SELECT GROUP_CONCAT(column_name ORDER BY seq_in_index) FROM information_schema.statistics WHERE table_schema=DATABASE() AND table_name='post_reports' AND index_name='uq_report_post_reporter' AND non_unique=0")){
+            r.next();assertThat(r.getString(1)).as("V29: one report per (post, reporter)").isEqualTo("post_id,reporter_user_id");
+        }catch(Exception e){throw new AssertionError(e);}
+        try(var c=DriverManager.getConnection(MYSQL.getJdbcUrl(),MYSQL.getUsername(),MYSQL.getPassword());var s=c.createStatement();
+            var r=s.executeQuery("SELECT check_clause FROM information_schema.check_constraints WHERE constraint_schema=DATABASE() AND constraint_name='chk_assistant_state'")){
+            r.next();assertThat(r.getString(1)).as("V30: assistant tasks may end REJECTED").contains("REJECTED").contains("CLARIFY");
         }catch(Exception e){throw new AssertionError(e);}
     }
 
@@ -46,7 +78,7 @@ class MySqlMigrationIT {
             statement.executeUpdate("INSERT INTO posts(id,author_id,status,body,version) VALUES (1,1,'DRAFT','preserved',4)");
         }
         Flyway latest = Flyway.configure().dataSource(url, "root", MYSQL.getPassword()).load();
-        assertThat(latest.migrate().migrationsExecuted).isEqualTo(15);
+        assertThat(latest.migrate().migrationsExecuted).isEqualTo(29);
         assertThat(latest.migrate().migrationsExecuted).isZero();
         latest.validate();
         try (var connection = DriverManager.getConnection(url, "root", MYSQL.getPassword());
@@ -73,7 +105,7 @@ class MySqlMigrationIT {
             try(var r=s.executeQuery("SELECT payload FROM outbox_events WHERE id=42")){r.next();payload=r.getString(1);}
         }
         var latest=Flyway.configure().dataSource(url,"root",MYSQL.getPassword()).load();
-        assertThat(latest.migrate().migrationsExecuted).isEqualTo(14);latest.validate();
+        assertThat(latest.migrate().migrationsExecuted).isEqualTo(28);latest.validate();
         assertThat(latest.migrate().migrationsExecuted).isZero();
         try(var c=DriverManager.getConnection(url,"root",MYSQL.getPassword());var s=c.createStatement();var r=s.executeQuery("SELECT payload,status,attempt,lease_token FROM outbox_events WHERE id=42")) {
             assertThat(r.next()).isTrue();assertThat(r.getString("payload")).isEqualTo(payload);

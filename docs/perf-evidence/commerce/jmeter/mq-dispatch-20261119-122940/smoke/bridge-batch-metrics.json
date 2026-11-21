@@ -1,0 +1,193 @@
+{
+  "configuredBatchSize": 20,
+  "identityCommitCoverageComplete": true,
+  "newRequestIdsObserved": 16,
+  "expectedNewRequests": 16,
+  "committedFormalBatches": 16,
+  "actualReadSizeDistribution": {
+    "1": 16
+  },
+  "actualNormalSizeDistribution": {
+    "1": 16
+  },
+  "normalBatchSqlCount": 112,
+  "normalBatchSqlStatements": {
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard": 16,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.campaigns": 16,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.requests": 16,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.ensureFences": 16,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.fences": 16,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.insertRequests": 16,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.enqueue": 16
+  },
+  "normalBatchSqlPerBatch": {
+    "count": 16,
+    "p50": 7,
+    "p95": 7,
+    "p99": 7,
+    "max": 7
+  },
+  "normalBatchExplicitJdbcCommits": 16,
+  "normalBatchSuccessfulTransactions": 16,
+  "normalBatchJdbcRollbacks": 0,
+  "normalBatchTransactionMs": {
+    "count": 16,
+    "p50": 74,
+    "p95": 309,
+    "p99": 309,
+    "max": 309
+  },
+  "normalBatchSqlPerPersistedRequest": 7.0,
+  "windowBridgePersistedRequests": 15,
+  "windowBridgePersistRate": 1.9946808510638299,
+  "fullBridgePersistRate": 2.109982856389292,
+  "windowAllBridgeSqlCount": 331,
+  "windowAllBridgeSqlStatements": {
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.unresolved": 39,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard": 37,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.campaigns": 15,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.requests": 15,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.ensureFences": 15,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.fences": 15,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.insertRequests": 15,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.enqueue": 15,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.jobs": 39,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.runtime": 77,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job": 22,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.orderByUserPost": 9,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.winner": 9,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied": 9
+  },
+  "windowAllBridgeExplicitJdbcCommits": 37,
+  "allBridgeSqlScope": "Includes prepare/scans including empty scans and quarantine; statement start in window. Batch commits use return in window. No per-request autocommit SELECT transaction counts inferred.",
+  "batchDetails": [
+    {
+      "traceId": "diag-0cfedfd3e3fa4a359574d457fe71114e",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062833335,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-70a0a1995fff4cec9c6c75efb5fa50aa",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062834406,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-4050d5313fdd40c9a9dd6a494a097305",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062833696,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-8aff134886724107b60922d293f5f61f",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062834730,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-c13c2b16600f41c68a51b343bcdbb0d4",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062835306,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-a8479db41b50450e9944495fb24e6838",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062836152,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-cd22b15ae01c48b39744412e6f63d930",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062836574,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-a1fe02e7ac60428188306be024acab8e",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062835701,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-e220e3d179334a6d85b794c7734b70b4",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062837602,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-83e78a8cc5b14aefa25761c2c57fa166",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062837010,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-4cec2b19ebda44bb9aca564f5986949b",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062838149,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-09d57141ab35470a87879ba9bad7a545",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062838615,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-ff18a7b88fa04bfbb65a374f4dfec786",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062839089,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-061a9857fa264087bacfb2e01be66673",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062839734,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-4dd8bb2f3f6c4181be2db857abe4f955",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062840081,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-c4d328d2608342759dca2744d1f8b587",
+      "readCount": 1,
+      "normalCount": 1,
+      "insertCount": 1,
+      "commitReturnedAtMs": 1795062840553,
+      "sqlCount": 7
+    }
+  ]
+}

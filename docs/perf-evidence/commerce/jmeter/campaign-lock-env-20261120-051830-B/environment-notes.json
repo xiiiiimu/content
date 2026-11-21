@@ -1,0 +1,15 @@
+{
+ "recordedAtMs": 1795123110551,
+ "userStated": "restarted, WSL memory cap 5GB, Ubuntu distro stopped, AC power, best performance",
+ "observed": {
+  "wslconfig": "C:/Users/<user>/.wslconfig absent; settings are in .wslconfig.txt (memory=5GB) which WSL does not read",
+  "dockerMemTotalBytes": 8170364928,
+  "vmmemWSLMiB": 4869,
+  "ubuntuDistro": "Stopped",
+  "power": "AC (Win32_Battery.BatteryStatus=2, 76%), plan High performance 8c5e7fda-...",
+  "lastBootUpTime": "2026-11-16 16:10:23 (Kernel-Boot event 27 at 2026-11-20 04:47:32: fast-startup boot)",
+  "freeMiB": 3370,
+  "cpu": "i7-1260P, 16 logical, MaxClockSpeed 2100"
+ },
+ "previousRunsPowerState": "unknown (not recorded); user reports laptop may have been on battery"
+}

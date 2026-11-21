@@ -49,7 +49,7 @@ class TrendGuardRiskIT {
 
  @Test void productionInteractionPathEmitsRiskEventQueryableReadonly()throws Exception{
   follows.change(2001,1001,true);follows.change(2002,1001,true);follows.change(2003,1001,true);
-  db.update("INSERT INTO posts(id,author_id,status,body) VALUES(100501,1001,'DRAFT','tg')");
+  db.update("INSERT INTO posts(id,author_id,status,body,topic) VALUES(100501,1001,'DRAFT','tg','sports')");
   publish.publish(1001,100501,UUID.randomUUID().toString(),0);
 
   assertThat(db.queryForObject("SELECT COUNT(*) FROM trend_risk_events",Integer.class)).isZero();
@@ -87,7 +87,7 @@ class TrendGuardRiskIT {
   String prefix="a".repeat(40);
   String topicA=prefix+"TOPIC_A_UNIQUE_TAIL";String topicB=prefix+"TOPIC_B_UNIQUE_TAIL";
   assertThat(topicA.length()).isLessThanOrEqualTo(128);
-  db.update("INSERT INTO posts(id,author_id,status,body) VALUES(100601,1001,'DRAFT','a'),(100602,1001,'DRAFT','b')");
+  db.update("INSERT INTO posts(id,author_id,status,body,topic) VALUES(100601,1001,'DRAFT','a',?),(100602,1001,'DRAFT','b',?)",topicA,topicB);
   publish.publish(1001,100601,UUID.randomUUID().toString(),0);publish.publish(1001,100602,UUID.randomUUID().toString(),0);
   interactions.like(2101,100601,topicA);interactions.like(2102,100601,topicA);
   interactions.like(2103,100602,topicB);interactions.like(2104,100602,topicB);
@@ -112,7 +112,7 @@ class TrendGuardRiskIT {
 
  @Test void concurrentThresholdEmitProducesOneEventWithoutFurtherInteraction()throws Exception{
   follows.change(2201,1001,true);follows.change(2202,1001,true);
-  db.update("INSERT INTO posts(id,author_id,status,body) VALUES(100701,1001,'DRAFT','c')");
+  db.update("INSERT INTO posts(id,author_id,status,body,topic) VALUES(100701,1001,'DRAFT','c','race')");
   publish.publish(1001,100701,UUID.randomUUID().toString(),0);
   CountDownLatch ready=new CountDownLatch(2),go=new CountDownLatch(1);
   ExecutorService pool=Executors.newFixedThreadPool(2);
@@ -127,7 +127,7 @@ class TrendGuardRiskIT {
 
  @Test void rolledBackInteractionDoesNotLeaveRiskEvent(){
   follows.change(2301,1001,true);follows.change(2302,1001,true);
-  db.update("INSERT INTO posts(id,author_id,status,body) VALUES(100801,1001,'DRAFT','rb')");
+  db.update("INSERT INTO posts(id,author_id,status,body,topic) VALUES(100801,1001,'DRAFT','rb','rollback')");
   publish.publish(1001,100801,UUID.randomUUID().toString(),0);
   interactions.like(2301,100801,"rollback");
   assertThat(db.queryForObject("SELECT COUNT(*) FROM trend_risk_events WHERE topic='rollback'",Integer.class)).isZero();
@@ -143,7 +143,7 @@ class TrendGuardRiskIT {
 
  @Test void risksEndpointRejectsReaderAndInvalidTokenButAllowsOps()throws Exception{
   follows.change(2401,1001,true);follows.change(2402,1001,true);
-  db.update("INSERT INTO posts(id,author_id,status,body) VALUES(100901,1001,'DRAFT','auth')");
+  db.update("INSERT INTO posts(id,author_id,status,body,topic) VALUES(100901,1001,'DRAFT','auth','authz')");
   publish.publish(1001,100901,UUID.randomUUID().toString(),0);
   interactions.like(2401,100901,"authz");interactions.like(2402,100901,"authz");
   String ops=bearer(2401,"TRENDGUARD_OPS");String reader=bearer(2401,"READER");

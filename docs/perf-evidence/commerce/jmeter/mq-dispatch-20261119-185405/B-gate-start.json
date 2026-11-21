@@ -1,0 +1,44 @@
+{
+  "label": "B-start",
+  "memoryBefore": {
+    "atLocal": "2026-11-19T18:54:07.221504+08:00",
+    "freeMiB": 4957,
+    "totalMiB": 16083
+  },
+  "minFreeMiB": 3072,
+  "runningTestcontainers": [],
+  "dockerHealth": {
+    "content-namesrv-1": "healthy 0",
+    "content-broker-1": "healthy 0"
+  },
+  "brokerProbes": [
+    {
+      "probe": 1,
+      "ok": true,
+      "rc": 0,
+      "elapsedMs": 5312,
+      "at": "2026-11-19T18:54:13.231492+08:00"
+    },
+    {
+      "probe": 2,
+      "ok": true,
+      "rc": 0,
+      "elapsedMs": 4672,
+      "at": "2026-11-19T18:54:22.917330+08:00"
+    },
+    {
+      "probe": 3,
+      "ok": true,
+      "rc": 0,
+      "elapsedMs": 4953,
+      "at": "2026-11-19T18:54:32.865158+08:00"
+    }
+  ],
+  "memoryAfter": {
+    "atLocal": "2026-11-19T18:54:33.608775+08:00",
+    "freeMiB": 4932,
+    "totalMiB": 16083
+  },
+  "failures": [],
+  "pass": true
+}

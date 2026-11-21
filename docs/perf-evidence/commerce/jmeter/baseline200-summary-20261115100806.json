@@ -1,0 +1,203 @@
+{
+  "giveaway": {
+    "runId": "20261115100715",
+    "postId": 58,
+    "campaignId": 45,
+    "giveawayAutoRefund": {
+      "note": "giveaway API path unavailable or failed: 响应状态代码未指示成功: 404 ()。; use MaterialCommerceRefundBlacklistIT + mq-demo as correctness evidence",
+      "tps": 0.0,
+      "notificationsInWindow": 0,
+      "wallSec": 0.916,
+      "measurement": "COUNT SUCCEEDED GIVEAWAY_AUTO refunds resolved in window (MySQL)",
+      "uniqueSucceededRows": 0
+    },
+    "boundaries": {
+      "payment": "simulated",
+      "refund": "simulated",
+      "ffmpegContainerCleanup": "unverified"
+    }
+  },
+  "tps": {
+    "runId": "20261115100548",
+    "campaignId": 44,
+    "windowSec": 20,
+    "settle": {
+      "wallSec": 20.744,
+      "uniquePaidOrdersInWindow": 100,
+      "tps": 4.82,
+      "drainSec": 0.689,
+      "measurement": "COUNT DISTINCT PAID orders with paid_at_ms in window"
+    },
+    "buyerRefund": {
+      "wallSec": 18.418,
+      "succeededRows": 20,
+      "attempted": 20,
+      "tps": 1.09,
+      "measurement": "COUNT SUCCEEDED BUYER_REQUESTED refunds resolved in window"
+    },
+    "giveawayAutoRefund": {
+      "tps": null,
+      "note": "see run-tps-giveaway-auto.ps1 / mq-demo evidence"
+    },
+    "reconcile": {
+      "active_purchase_ents": 80,
+      "paid_orders": 80,
+      "sold_count": 80
+    },
+    "peakBacklog": 0,
+    "boundaries": {
+      "refund": "simulated",
+      "payment": "simulated",
+      "ffmpegContainerCleanup": "unverified"
+    }
+  },
+  "durationSec": 20,
+  "threads": 200,
+  "hikariMaxPool": 80,
+  "mysqlMaxConnections": 500,
+  "band": "baseline200-r4",
+  "scenarios": [
+    {
+      "scenario": "detail",
+      "dir": "baseline200-r4-detail-t200-20261115094647",
+      "samples": 798,
+      "qps": 99.33,
+      "p50": 1413,
+      "p95": 6081,
+      "p99": 9041,
+      "ok": 798,
+      "biz": 0,
+      "sys": 0,
+      "cf": 0,
+      "to": 0,
+      "h503": 0,
+      "multi": true,
+      "peakA": 200.0,
+      "peakHttp": 200.0,
+      "peakSettle": 0.0
+    },
+    {
+      "scenario": "purchase",
+      "dir": "baseline200-r4-purchase-t200-20261115095047",
+      "samples": 427,
+      "qps": 55.18,
+      "p50": 3007,
+      "p95": 10556,
+      "p99": 11562,
+      "ok": 427,
+      "biz": 0,
+      "sys": 0,
+      "cf": 0,
+      "to": 0,
+      "h503": 0,
+      "multi": true,
+      "peakA": 200.0,
+      "peakHttp": 200.0,
+      "peakSettle": 20.0
+    },
+    {
+      "scenario": "poll",
+      "dir": "baseline200-r4-poll-t200-20261115095219",
+      "samples": 2590,
+      "qps": 282.84,
+      "p50": 450,
+      "p95": 1231,
+      "p99": 1696,
+      "ok": 2590,
+      "biz": 0,
+      "sys": 0,
+      "cf": 0,
+      "to": 0,
+      "h503": 0,
+      "multi": true,
+      "peakA": 200.0,
+      "peakHttp": 200.0,
+      "peakSettle": 0.0
+    },
+    {
+      "scenario": "order",
+      "dir": "baseline200-r4-order-t200-20261115095356",
+      "samples": 1743,
+      "qps": 180.06,
+      "p50": 758,
+      "p95": 2702,
+      "p99": 5021,
+      "ok": 1743,
+      "biz": 0,
+      "sys": 0,
+      "cf": 0,
+      "to": 0,
+      "h503": 0,
+      "multi": true,
+      "peakA": 200.0,
+      "peakHttp": 200.0,
+      "peakSettle": 0.0
+    },
+    {
+      "scenario": "sign",
+      "dir": "baseline200-r4-sign-t200-20261115095528",
+      "samples": 1075,
+      "qps": 107.91,
+      "p50": 1300,
+      "p95": 7019,
+      "p99": 10903,
+      "ok": 1072,
+      "biz": 0,
+      "sys": 3,
+      "cf": 0,
+      "to": 0,
+      "h503": 3,
+      "multi": true,
+      "peakA": 200.0,
+      "peakHttp": 200.0,
+      "peakSettle": 0.0
+    },
+    {
+      "scenario": "flash",
+      "dir": "baseline200-r4-flash-flash-t200-20261115095903",
+      "samples": 200,
+      "qps": 372.44,
+      "p50": 6762,
+      "p95": 8383,
+      "p99": 8606,
+      "ok": 80,
+      "biz": 120,
+      "sys": 0,
+      "cf": 0,
+      "to": 0,
+      "h503": 0,
+      "multi": true,
+      "peakA": 200.0,
+      "peakHttp": 200.0,
+      "peakSettle": 20.0
+    },
+    {
+      "scenario": "mixed",
+      "dir": "baseline200-r4-mixed-t200-20261115100312",
+      "samples": 1651,
+      "qps": 57.22,
+      "p50": 1080,
+      "p95": 12656,
+      "p99": 17787,
+      "ok": 1612,
+      "biz": 0,
+      "sys": 39,
+      "cf": 0,
+      "to": 7,
+      "h503": 15,
+      "multi": true,
+      "peakA": 200.0,
+      "peakHttp": 200.0,
+      "peakSettle": 20.0
+    }
+  ],
+  "bands5k10k": "pending — no remote injectors; see infra/jmeter/distributed/README.md",
+  "timeoutMs": 20000,
+  "rampSec": 15,
+  "flashReconcile": "flash_reconcile=80\t80\t80",
+  "boundaries": {
+    "refund": "simulated",
+    "payment": "simulated",
+    "ffmpegContainerCleanup": "unverified"
+  }
+}

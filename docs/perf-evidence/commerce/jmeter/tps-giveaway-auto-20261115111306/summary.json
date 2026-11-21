@@ -1,0 +1,38 @@
+{
+  "runId": "20261115111306",
+  "postId": 66,
+  "campaignId": 53,
+  "giveawayId": 4,
+  "route": "POST /api/sale-debug/giveaway-auto-refund (fault-hooks); replaces 404 /api/materials/{post}/giveaways",
+  "smoke": {
+    "refunds": 1,
+    "notifications": 1,
+    "giveawayEntitlementsActive": 1,
+    "giveawayId": 3,
+    "ok": true
+  },
+  "giveawayAutoRefund": {
+    "measurement": "COUNT SUCCEEDED GIVEAWAY_AUTO refunds with resolved_at_ms in wall [tWall0,tWall1]; steady uses min..max resolved_at span",
+    "t0Ms": 1794712447622,
+    "t1Ms": 1794712454470,
+    "windowExactSec": 6.848,
+    "commitSpanSec": 3.218,
+    "minResolvedAtMs": 1794712450951,
+    "maxResolvedAtMs": 1794712454169,
+    "commitsInWindow": 18,
+    "steadyTps": 5.59,
+    "fullTpsIncludingWait": 2.63,
+    "sampleSize": 18,
+    "sampleInsufficient": false,
+    "notificationsInWindow": 18,
+    "giveawayEntitlementsActive": 19,
+    "purchaseEntitlementsRemaining": 1,
+    "ordersRefundedGiveawayAuto": 19,
+    "note": "Winners keep GIVEAWAY entitlement; PURCHASE entitlement revoked on auto-refund (IT contract). Wall includes deadline sleep inside debug controller."
+  },
+  "boundaries": {
+    "payment": "simulated",
+    "refund": "simulated",
+    "ffmpegContainerCleanup": "unverified"
+  }
+}

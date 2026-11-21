@@ -29,8 +29,10 @@ content:
     s3-endpoint: ${CONTENT_S3_ENDPOINT:}
     bucket: ${CONTENT_S3_BUCKET:content-media}
     access-key: ${CONTENT_S3_ACCESS_KEY:content}
-    secret-key: ${CONTENT_S3_SECRET_KEY:content-secret-key-32-bytes-minimum}
+    secret-key: ${CONTENT_S3_SECRET_KEY:}
     ffmpeg-image: ${CONTENT_FFMPEG_IMAGE:}
   assistant:
     python-url: ${CONTENT_ASSISTANT_PYTHON_URL:}
     internal-token: ${CONTENT_ASSISTANT_INTERNAL_TOKEN:}
+    # must exceed the Python parser's worst case (LLM timeout x 2 attempts + backoff, about 21 s by default)
+    parse-timeout: ${CONTENT_ASSISTANT_PARSE_TIMEOUT:30s}

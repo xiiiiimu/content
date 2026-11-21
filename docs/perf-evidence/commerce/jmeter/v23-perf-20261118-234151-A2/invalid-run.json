@@ -1,0 +1,12 @@
+{
+  "runId": "v23-perf-20261118-234151-A2",
+  "validPerformanceRun": false,
+  "formalSamples": 0,
+  "failureReasons": [
+    "No formal window. 1057417ms host-wide observation gap; post-gap warmup 401. Root cause sleep vs scheduling vs clock change not proven."
+  ],
+  "allSampleCounts": {
+    "WARMUP-purchase:401": 154,
+    "prepare (ignored):500": 105
+  }
+}

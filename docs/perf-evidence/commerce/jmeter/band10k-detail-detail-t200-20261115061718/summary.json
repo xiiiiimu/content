@@ -1,0 +1,27 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\band10k-detail-detail-t200-20261115061718\\results.jtl",
+  "samples": 200,
+  "spanSec": 0.223,
+  "requestQps": 896.86,
+  "acceptQps": 0.0,
+  "businessRejects": 200,
+  "systemErrors": 0,
+  "ok": 0,
+  "p50Ms": 1285,
+  "p95Ms": 1480,
+  "p99Ms": 1619,
+  "byLabel": [
+    {
+      "label": "GET-campaign-detail",
+      "qps": 896.86,
+      "n": 200,
+      "p95": 1480
+    }
+  ],
+  "byClass": [
+    {
+      "count": 200,
+      "cls": "BIZ:"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1794693881699,270,MIX-detail,200,,commerce-threads 1-7,text,true,,355,376,10,10,http://127.0.0.1:28080/api/materials/26/sale-campaigns/current,267,0,204
+1794693881693,281,MIX-detail,200,,commerce-threads 1-4,text,true,,355,376,10,10,http://127.0.0.1:28080/api/materials/26/sale-campaigns/current,273,0,212
+1794693881693,281,MIX-detail,200,,commerce-threads 1-9,text,true,,355,376,10,10,http://127.0.0.1:28080/api/materials/26/sale-campaigns/current,273,0,212
+1794693881689,285,MIX-detail,200,,commerce-threads 1-2,text,true,,355,376,10,10,http://127.0.0.1:28080/api/materials/26/sale-campaigns/current,277,0,216
+1794693881689,285,MIX-detail,200,,commerce-threads 1-6,text,true,,355,376,10,10,http://127.0.0.1:28080/api/materials/26/sale-campaigns/current,277,0,216
+1794693881689,286,MIX-detail,200,,commerce-threads 1-1,text,true,,355,376,10,10,http://127.0.0.1:28080/api/materials/26/sale-campaigns/current,277,0,216
+1794693881692,279,MIX-detail,200,,commerce-threads 1-5,text,true,,355,376,10,10,http://127.0.0.1:28080/api/materials/26/sale-campaigns/current,274,0,213
+1794693881692,277,MIX-detail,200,,commerce-threads 1-8,text,true,,355,376,10,10,http://127.0.0.1:28080/api/materials/26/sale-campaigns/current,274,0,213
+1794693881699,270,MIX-detail,200,,commerce-threads 1-10,text,true,,355,376,10,10,http://127.0.0.1:28080/api/materials/26/sale-campaigns/current,267,0,205
+1794693881690,286,MIX-detail,200,,commerce-threads 1-3,text,true,,355,376,10,10,http://127.0.0.1:28080/api/materials/26/sale-campaigns/current,276,0,216
+1794693881984,132,MIX-purchase,409,,commerce-threads 1-8,text,false,,163,416,10,10,http://127.0.0.1:28080/api/sale-campaigns/13/purchase,131,0,37
+1794693881986,201,MIX-purchase,409,,commerce-threads 1-9,text,false,,163,416,10,10,http://127.0.0.1:28080/api/sale-campaigns/13/purchase,200,0,36
+1794693881987,260,MIX-purchase,409,,commerce-threads 1-10,text,false,,163,417,10,10,http://127.0.0.1:28080/api/sale-campaigns/13/purchase,258,0,35
+1794693881987,262,MIX-purchase,409,,commerce-threads 1-5,text,false,,163,416,10,10,http://127.0.0.1:28080/api/sale-campaigns/13/purchase,261,0,45
+1794693881986,263,MIX-purchase,409,,commerce-threads 1-3,text,false,,163,416,10,10,http://127.0.0.1:28080/api/sale-campaigns/13/purchase,259,0,36
+1794693881986,273,MIX-purchase,200,,commerce-threads 1-6,text,true,,277,416,10,10,http://127.0.0.1:28080/api/sale-campaigns/13/purchase,273,0,35
+1794693881985,277,MIX-purchase,200,,commerce-threads 1-4,text,true,,277,416,10,10,http://127.0.0.1:28080/api/sale-campaigns/13/purchase,276,0,35
+1794693881988,275,MIX-purchase,200,,commerce-threads 1-1,text,true,,277,416,10,10,http://127.0.0.1:28080/api/sale-campaigns/13/purchase,273,0,43
+1794693881985,277,MIX-purchase,200,,commerce-threads 1-2,text,true,,277,416,10,10,http://127.0.0.1:28080/api/sale-campaigns/13/purchase,276,0,40
+1794693881984,282,MIX-purchase,200,,commerce-threads 1-7,text,true,,277,416,10,10,http://127.0.0.1:28080/api/sale-campaigns/13/purchase,281,0,38
+1794693882711,83,MIX-poll,200,,commerce-threads 1-4,text,true,,277,391,5,5,http://127.0.0.1:28080/api/purchase-requests/9206cfe933f34cb5ad3033348b8a89e8,83,0,9
+1794693882710,182,MIX-poll,200,,commerce-threads 1-6,text,true,,277,391,5,5,http://127.0.0.1:28080/api/purchase-requests/bc74a4b405b14b66a7d622f3a881dfd6,181,0,151
+1794693882715,88,MIX-poll,200,,commerce-threads 1-7,text,true,,277,391,5,5,http://127.0.0.1:28080/api/purchase-requests/00067a82737d45a1a54eb321b0d289f5,87,0,5
+1794693882710,182,MIX-poll,200,,commerce-threads 1-2,text,true,,277,391,5,5,http://127.0.0.1:28080/api/purchase-requests/dddeb31d21e54663a00003f52581498f,182,0,6
+1794693882715,174,MIX-poll,200,,commerce-threads 1-1,text,true,,277,391,5,5,http://127.0.0.1:28080/api/purchase-requests/9fc2a627f3894f89b3d2edfd1d2c63a8,173,0,4

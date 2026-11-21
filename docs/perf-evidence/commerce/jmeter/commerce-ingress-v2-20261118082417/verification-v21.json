@@ -1,0 +1,552 @@
+{
+  "unit": {
+    "tests": 52,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "suites": [
+      {
+        "name": "io.github.xiiiiimu.content.ContentApplicationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.ContentApplicationTest.xml",
+        "cases": [
+          {
+            "name": "loadsApplicationWiringWithoutMiddleware",
+            "status": "PASSED"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.domain.FfmpegTranscoderExecTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.domain.FfmpegTranscoderExecTest.xml",
+        "cases": [
+          {
+            "name": "waitForDestroysHungUnixProcess",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "waitForDestroysHungWindowsProcess",
+            "status": "PASSED"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.FeedMemberCodecTest",
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.FeedMemberCodecTest.xml",
+        "cases": [
+          {
+            "name": "rejectsNullMember",
+            "status": "PASSED"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[1]",
+            "status": "PASSED"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[2]",
+            "status": "PASSED"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[3]",
+            "status": "PASSED"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[4]",
+            "status": "PASSED"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[5]",
+            "status": "PASSED"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[6]",
+            "status": "PASSED"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[7]",
+            "status": "PASSED"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[8]",
+            "status": "PASSED"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[9]",
+            "status": "PASSED"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[10]",
+            "status": "PASSED"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[11]",
+            "status": "PASSED"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[12]",
+            "status": "PASSED"
+          },
+          {
+            "name": "canonicalAsciiEncodingAndLongLimits",
+            "status": "PASSED"
+          },
+          {
+            "name": "invalidNumericInputsAreRejected",
+            "status": "PASSED"
+          },
+          {
+            "name": "localeDoesNotChangeWireDigits",
+            "status": "PASSED"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.FeedMergerTest",
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.FeedMergerTest.xml",
+        "cases": [
+          {
+            "name": "authorityTimeoutAndRejectedExecutorCannotReturnPartialSuccess",
+            "status": "PASSED"
+          },
+          {
+            "name": "authorityFailureDiscardsRequestAndCannotCommitUnprocessedPositions",
+            "status": "PASSED"
+          },
+          {
+            "name": "invalidBatchesAndConflictingCanonicalIdentityAreErrors",
+            "status": "PASSED"
+          },
+          {
+            "name": "prefetchSurvivesRequestReconstructionAndEqualHeadsAreConsumedTogether",
+            "status": "PASSED"
+          },
+          {
+            "name": "lateCandidatesRespectConsumedBoundaryAndSnapshot",
+            "status": "PASSED"
+          },
+          {
+            "name": "absentAndFollowEpochRejectedCandidatesAreFilteredWithoutLosingFollowingItems",
+            "status": "PASSED"
+          },
+          {
+            "name": "checksAndReadsAreBoundedAndPositionsOnlyAdvanceOnConsumption",
+            "status": "PASSED"
+          },
+          {
+            "name": "sourceTimeoutIsAnErrorAndRetryUsesOriginalContinuation",
+            "status": "PASSED"
+          },
+          {
+            "name": "unknownHeadBlocksConsumptionUntilAllSourcesConfirm",
+            "status": "PASSED"
+          },
+          {
+            "name": "duplicateHeadsWithinAndAcrossSourcesConsumeOneCheckAndScan",
+            "status": "PASSED"
+          },
+          {
+            "name": "randomizedFixedSourcesMatchIndependentNumericOrderAcrossRequests",
+            "status": "PASSED"
+          },
+          {
+            "name": "allFilteredAndExactBudgetCanStillConfirmExhaustion",
+            "status": "PASSED"
+          },
+          {
+            "name": "initialAndRefillExceptionsNeverBecomeExhaustionOrPartialSuccess",
+            "status": "PASSED"
+          },
+          {
+            "name": "continuousEmptyUnknownPagesAdvanceConsumedBoundaryWithoutMovingGlobalBoundary",
+            "status": "PASSED"
+          },
+          {
+            "name": "insufficientReadBudgetBeforeUnknownHeadCannotConsumeSmallerKnownItem",
+            "status": "PASSED"
+          },
+          {
+            "name": "statesAreCandidateKnowledgeNotPromisesOfVisibleItems",
+            "status": "PASSED"
+          },
+          {
+            "name": "rejectsInvalidConfigurationBeforeReading",
+            "status": "PASSED"
+          },
+          {
+            "name": "extremeTuplesAndInputSharedBoundariesAreRespected",
+            "status": "PASSED"
+          },
+          {
+            "name": "invalidContinuationAndAdditionalBudgetBoundsAreRejectedBeforeSourceCalls",
+            "status": "PASSED"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.FeedTokensTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.FeedTokensTest.xml",
+        "cases": [
+          {
+            "name": "roundTripAndPurposeSeparation",
+            "status": "PASSED"
+          },
+          {
+            "name": "invalidEncodingAndOversizeCannotPassMac",
+            "status": "PASSED"
+          },
+          {
+            "name": "weakKeyIsRejected",
+            "status": "PASSED"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.RelayPolicyTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.RelayPolicyTest.xml",
+        "cases": [
+          {
+            "name": "exponentialBackoffCapsWithoutOverflow",
+            "status": "PASSED"
+          },
+          {
+            "name": "onlyExactSendOkAcknowledges(String)[1]",
+            "status": "PASSED"
+          },
+          {
+            "name": "onlyExactSendOkAcknowledges(String)[2]",
+            "status": "PASSED"
+          },
+          {
+            "name": "onlyExactSendOkAcknowledges(String)[3]",
+            "status": "PASSED"
+          },
+          {
+            "name": "onlyExactSendOkAcknowledges(String)[4]",
+            "status": "PASSED"
+          },
+          {
+            "name": "onlyExactSendOkAcknowledges(String)[5]",
+            "status": "PASSED"
+          },
+          {
+            "name": "onlyExactSendOkAcknowledges(String)[6]",
+            "status": "PASSED"
+          },
+          {
+            "name": "leaseMustExceedSendTimeout",
+            "status": "PASSED"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.SaleLatencyTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.SaleLatencyTest.xml",
+        "cases": [
+          {
+            "name": "recordsPhasesAndClearsRequestContext",
+            "status": "PASSED"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.WindowsListenBacklogTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.WindowsListenBacklogTest.xml",
+        "cases": [
+          {
+            "name": "holdsThousandConnectionsBeforeAcceptWithoutRefusal",
+            "status": "PASSED"
+          },
+          {
+            "name": "customTomcatConnectorServesRealHttp",
+            "status": "PASSED"
+          }
+        ]
+      }
+    ]
+  },
+  "integrationLatestPerClass": {
+    "tests": 35,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": [
+      {
+        "name": "io.github.xiiiiimu.content.CommerceIngressRevisionIT",
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\failsafe-reports\\TEST-io.github.xiiiiimu.content.CommerceIngressRevisionIT.xml",
+        "cases": [
+          {
+            "name": "activePurchaseDownloadsAfterUnfollowEvenWhenShareModeIsAuthorOnly",
+            "status": "PASSED"
+          },
+          {
+            "name": "rollbackBeforeBridgeCommitLeavesPendingAndReplayPersistsExactlyOnce",
+            "status": "PASSED"
+          },
+          {
+            "name": "redisLossPausesAndRestoresCommittedReservationWithoutInventingLostRequest",
+            "status": "PASSED"
+          },
+          {
+            "name": "winningKeepsPaidOrderAndRequiresIdempotentUserRequestedRefund",
+            "status": "PASSED"
+          },
+          {
+            "name": "commitBeforeStreamAckAndAbandonedConsumerAreRecoverable",
+            "status": "PASSED"
+          },
+          {
+            "name": "reservationIsOnlyInRedisUntilRealStreamIsDrained",
+            "status": "PASSED"
+          },
+          {
+            "name": "loggedInNonFollowerWithRestrictedPreviewCanBuyWithoutEntrySql",
+            "status": "PASSED"
+          },
+          {
+            "name": "failedRecoveryLeaseCanBeTakenOverAndOldGenerationCannotInstall",
+            "status": "PASSED"
+          },
+          {
+            "name": "failedSettlementRollsBackEveryRowAndCrossCampaignReplayDoesNotReserveAgain",
+            "status": "PASSED"
+          },
+          {
+            "name": "wrongStreamTypeDoesNotDecrementStockAndOfflinePreventsFinalOrder",
+            "status": "PASSED"
+          },
+          {
+            "name": "staleDispatchTokenCannotCompleteOrRetryAfterTakeover",
+            "status": "PASSED"
+          },
+          {
+            "name": "purchaseSettlementAndRealDrawSerializeOnTheSameAccountMaterial",
+            "status": "PASSED"
+          },
+          {
+            "name": "opaqueClientKeysHaveIdenticalExactIdentityInRedisAndMySql",
+            "status": "PASSED"
+          },
+          {
+            "name": "controlRetryFinalBlacklistCheckAndRepeatedReleaseAreConsistent",
+            "status": "PASSED"
+          },
+          {
+            "name": "aofRestartPreservesUnbridgedStreamAndReservationIdentity",
+            "status": "PASSED"
+          },
+          {
+            "name": "ordinaryApprovedRefundRemovesPurchaseEligibilityAndCannotBecomeWinningRefund",
+            "status": "PASSED"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.CommerceRealMqIT",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\failsafe-reports\\TEST-io.github.xiiiiimu.content.CommerceRealMqIT.xml",
+        "cases": [
+          {
+            "name": "realBrokerAckThenLostSenderConfirmationAndConsumerAckReplayOneOrder",
+            "status": "PASSED"
+          },
+          {
+            "name": "unavailableRealProducerLeavesDurableRetryThenRealBrokerCompletes",
+            "status": "PASSED"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.MaterialCommercePurchaseIT",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\failsafe-reports\\TEST-io.github.xiiiiimu.content.MaterialCommercePurchaseIT.xml",
+        "cases": [
+          {
+            "name": "blacklistAfterReserveRejectsAndReleasesStock",
+            "status": "PASSED"
+          },
+          {
+            "name": "unfinishedGiveawayCanCoexistWithSale",
+            "status": "PASSED"
+          },
+          {
+            "name": "diagnosticConnectionKeepsRealCommitAndRollback",
+            "status": "PASSED"
+          },
+          {
+            "name": "newCampaignSettlesAgainstTheVersionPinnedBeforeDefaultChanges",
+            "status": "PASSED"
+          },
+          {
+            "name": "concurrentStockAndOneOrderPerAccount(int)[1]",
+            "status": "PASSED"
+          },
+          {
+            "name": "concurrentStockAndOneOrderPerAccount(int)[2]",
+            "status": "PASSED"
+          },
+          {
+            "name": "recoverSettleIdempotentAndBlacklistRejectReleasesStock",
+            "status": "PASSED"
+          },
+          {
+            "name": "rejectsOutsideSaleWindowAndCloseWinsAgainstPendingSettlement",
+            "status": "PASSED"
+          },
+          {
+            "name": "giveawayOwnerCannotBuyWhileOtherUsersCan",
+            "status": "PASSED"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.MaterialCommerceRefundBlacklistIT",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\failsafe-reports\\TEST-io.github.xiiiiimu.content.MaterialCommerceRefundBlacklistIT.xml",
+        "cases": [
+          {
+            "name": "requestedGiveawayRefundKeepsEntitlementAndPurchaseEligibility",
+            "status": "PASSED"
+          },
+          {
+            "name": "buyerForcedRefundExcludesPurchaseAndCrossMaterialBlacklist",
+            "status": "PASSED"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.MaterialFlowIT",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\failsafe-reports\\TEST-io.github.xiiiiimu.content.MaterialFlowIT.xml",
+        "cases": [
+          {
+            "name": "laterReadyOfOlderRevisionDoesNotRegressDefaultVersion",
+            "status": "PASSED"
+          },
+          {
+            "name": "materialDiscoverPreviewTimestampCommentNewVersionAcceptOfflinePassword",
+            "status": "PASSED"
+          },
+          {
+            "name": "expiredLeaseTakeoverKeepsOldWorkerFromPublishingObjectRefs",
+            "status": "PASSED"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.MySqlMigrationIT",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\failsafe-reports\\TEST-io.github.xiiiiimu.content.MySqlMigrationIT.xml",
+        "cases": [
+          {
+            "name": "upgradesExistingV1WithoutLosingDrafts",
+            "status": "PASSED"
+          },
+          {
+            "name": "upgradesV2WithAnUnsentPublicationWithoutChangingItsIdentity",
+            "status": "PASSED"
+          },
+          {
+            "name": "migratesEmptySchemaAndCanRunAgain",
+            "status": "PASSED"
+          }
+        ]
+      }
+    ]
+  },
+  "red": [
+    {
+      "source": "target\\commerce-revision-20261118082417\\red-it.log",
+      "tests": 3,
+      "failures": 1,
+      "errors": 2,
+      "skipped": 0,
+      "sha256": "76e9ad07857f630d5716cd95dc46d3098fa9ad8112a71981bb42b8423cd1993d"
+    },
+    {
+      "source": "target\\commerce-revision-20261118082417\\refund-red.log",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "sha256": "f890083c3da49580eb33749f3ce83eaef4e4d49723bc8396bcb64b2f4d1d9d73"
+    }
+  ],
+  "executions": [
+    {
+      "log": "target\\commerce-revision-20261118082417\\green-verify2.log",
+      "buildSuccess": true
+    },
+    {
+      "log": "target\\commerce-revision-20261118082417\\green-verify3.log",
+      "buildSuccess": false
+    },
+    {
+      "log": "target\\commerce-revision-20261118082417\\green-verify4.log",
+      "buildSuccess": true
+    }
+  ],
+  "frontend": {
+    "testsPassed": 8,
+    "typecheck": "PASS",
+    "productionBuild": "PASS",
+    "logs": [
+      "target\\commerce-revision-20261118082417\\frontend-test2.log",
+      "target\\commerce-revision-20261118082417\\frontend-typecheck2.log",
+      "target\\commerce-revision-20261118082417\\frontend-build.log"
+    ]
+  },
+  "python": {
+    "testsPassed": 17,
+    "log": "target\\commerce-revision-20261118082417\\python-regression-final2.log"
+  }
+}

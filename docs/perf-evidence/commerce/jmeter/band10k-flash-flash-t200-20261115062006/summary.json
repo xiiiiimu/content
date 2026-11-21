@@ -1,0 +1,27 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\band10k-flash-flash-t200-20261115062006\\results.jtl",
+  "samples": 200,
+  "spanSec": 0.781,
+  "requestQps": 256.08,
+  "acceptQps": 0.0,
+  "businessRejects": 200,
+  "systemErrors": 0,
+  "ok": 0,
+  "p50Ms": 701,
+  "p95Ms": 1139,
+  "p99Ms": 1164,
+  "byLabel": [
+    {
+      "n": 200,
+      "qps": 256.08,
+      "p95": 1139,
+      "label": "POST-purchase"
+    }
+  ],
+  "byClass": [
+    {
+      "count": 200,
+      "cls": "BIZ:"
+    }
+  ]
+}

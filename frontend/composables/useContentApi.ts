@@ -175,6 +175,70 @@ export function useContentApi() {
       const q = versionId ? `?versionId=${versionId}` : ''
       return request<{ entitled: boolean; versionId?: number; license?: string }>(`/api/posts/${postId}/entitlement${q}`)
     },
+    forceOrderRefund(orderId: number) {
+      return request(`/api/orders/${orderId}/force-refund`, { method: 'POST', body: '{}' })
+    },
+    saleByToken(token: string) {
+      return request<{ id: number; postId: number; merchantId: number; priceCents: number; stockCap: number; soldCount: number; startMs: number; endMs: number; state: string; linkToken: string; remainingStock?: number }>(`/api/sale-links/${encodeURIComponent(token)}`)
+    },
+    requestGiveawayRefund(orderId: number) {
+      return request<{ refundRequestId: number }>(`/api/orders/${orderId}/giveaway-refund-requests`, { method: 'POST', body: '{}' })
+    },
+    saleCampaignCurrent(postId: number) {
+      return request<{
+        id: number
+        postId: number
+        merchantId: number
+        priceCents: number
+        stockCap: number
+        soldCount: number
+        startMs: number
+        endMs: number
+        state: string
+        linkToken: string
+        remainingStock?: number
+      } | null>(`/api/materials/${postId}/sale-campaigns/current`)
+    },
+    createSaleCampaign(postId: number, body: { priceCents: number; stockCap: number; startMs: number; endMs: number }) {
+      return request<{ id: number; linkToken: string; stockCap: number; priceCents: number }>(`/api/materials/${postId}/sale-campaigns`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      })
+    },
+    purchaseSale(campaignId: number, clientKey: string) {
+      return request<{ reservationId: string; state: string; rejectReason?: string; orderId?: number }>(
+        `/api/sale-campaigns/${campaignId}/purchase`,
+        { method: 'POST', body: JSON.stringify({ clientKey }) },
+      )
+    },
+    purchaseRequest(reservationId: string) {
+      return request<{ reservationId: string; state: string; rejectReason?: string; orderId?: number }>(
+        `/api/purchase-requests/${reservationId}`,
+      )
+    },
+    myMaterialOrder(postId: number) {
+      return request<{ id: number; state: string; priceCents: number; refundReason?: string; giveawayRefundEligible?: boolean } | null>(
+        `/api/materials/${postId}/orders/me`,
+      )
+    },
+    requestOrderRefund(orderId: number) {
+      return request<{ refundRequestId: number }>(`/api/orders/${orderId}/refund-requests`, { method: 'POST', body: '{}' })
+    },
+    approveRefund(refundId: number) {
+      return request<{ id: number; state: string }>(`/api/refund-requests/${refundId}/approve`, { method: 'POST', body: '{}' })
+    },
+    forceRefund(orderId: number) {
+      return request<{ id: number; state: string }>(`/api/orders/${orderId}/force-refund`, { method: 'POST', body: '{}' })
+    },
+    blacklistUser(targetUserId: number, reason?: string) {
+      return request<{ ok: boolean }>(`/api/merchants/me/blacklist/${targetUserId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ reason: reason || '' }),
+      })
+    },
+    unblacklistUser(targetUserId: number) {
+      return request<{ ok: boolean }>(`/api/merchants/me/blacklist/${targetUserId}`, { method: 'DELETE' })
+    },
     follow(authorId: number) {
       return request<FollowResult>(`/api/follows/${authorId}`, { method: 'PUT' })
     },

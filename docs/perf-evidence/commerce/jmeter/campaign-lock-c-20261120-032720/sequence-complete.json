@@ -1,0 +1,11 @@
+{
+  "atMs": 1795117223473,
+  "tiers": [
+    "C"
+  ],
+  "backendPids": {
+    "C": 3112
+  },
+  "sameJar": "E:\\content\\target\\campaign-lock-20261120-001706\\runtime\\content-v26-6924c4880b0d.jar",
+  "sha256": "6924c4880b0de067ad92fa6ec4c96fc8edc3623134437f6d6afb4e6ad01d2e5e"
+}

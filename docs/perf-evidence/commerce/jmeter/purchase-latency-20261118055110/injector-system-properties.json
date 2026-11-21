@@ -1,0 +1,5 @@
+{
+  "groovy.target.indy": "true",
+  "user.timezone": "Asia/Shanghai",
+  "java.version": "17.0.17"
+}

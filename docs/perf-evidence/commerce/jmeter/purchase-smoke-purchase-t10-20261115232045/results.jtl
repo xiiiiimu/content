@@ -1,0 +1,11 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1794756061288,356,POST-purchase,200,,commerce-threads 1-4,text,true,,309,418,10,10,http://127.0.0.1:28080/api/sale-campaigns/59/purchase,353,0,173
+1794756061288,381,POST-purchase,200,,commerce-threads 1-10,text,true,,309,418,10,10,http://127.0.0.1:28080/api/sale-campaigns/59/purchase,380,0,172
+1794756061288,381,POST-purchase,200,,commerce-threads 1-6,text,true,,309,418,10,10,http://127.0.0.1:28080/api/sale-campaigns/59/purchase,380,0,171
+1794756061288,381,POST-purchase,200,,commerce-threads 1-3,text,true,,309,418,10,10,http://127.0.0.1:28080/api/sale-campaigns/59/purchase,381,0,171
+1794756061288,382,POST-purchase,200,,commerce-threads 1-5,text,true,,309,418,10,10,http://127.0.0.1:28080/api/sale-campaigns/59/purchase,381,0,172
+1794756061288,385,POST-purchase,200,,commerce-threads 1-8,text,true,,309,418,10,10,http://127.0.0.1:28080/api/sale-campaigns/59/purchase,384,0,169
+1794756061288,385,POST-purchase,200,,commerce-threads 1-2,text,true,,309,418,10,10,http://127.0.0.1:28080/api/sale-campaigns/59/purchase,385,0,171
+1794756061288,388,POST-purchase,200,,commerce-threads 1-1,text,true,,309,418,10,10,http://127.0.0.1:28080/api/sale-campaigns/59/purchase,387,0,171
+1794756061288,388,POST-purchase,200,,commerce-threads 1-7,text,true,,309,418,10,10,http://127.0.0.1:28080/api/sale-campaigns/59/purchase,388,0,169
+1794756061288,398,POST-purchase,200,,commerce-threads 1-9,text,true,,309,418,10,10,http://127.0.0.1:28080/api/sale-campaigns/59/purchase,398,0,171

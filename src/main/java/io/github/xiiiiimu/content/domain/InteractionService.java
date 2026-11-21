@@ -7,7 +7,8 @@ import java.util.*;
 public final class InteractionService {
  public record LikeResult(boolean liked,long likeCount) {}
  public record DislikeResult(boolean disliked,long dislikeCount) {}
- public record ReportResult(long reportId,long reportCount) {}
+ /** {@code replay} = this reporter had already reported the post; reportId is that first report. */
+ public record ReportResult(long reportId,long reportCount,boolean replay) {}
  public record CommentResult(long commentId,long commentCount,boolean replay,Long parentId,Long materialVersionId,Long offsetMs,Long acceptedAtMs) {}
  public record CommentView(long commentId,long userId,Long parentId,Long materialVersionId,Long offsetMs,Long acceptedAtMs,String body,long createdAtMs) {}
  private final VisibilityService visibility;private final InteractionMapper db;private final TransactionTemplate tx;private final TrendingService trending;private final RelationshipService events;
@@ -20,28 +21,36 @@ public final class InteractionService {
  public InteractionService(VisibilityService visibility,InteractionMapper db,TransactionTemplate tx,TrendingService trending,RelationshipService events,MaterialService materials,java.util.function.Function<AssistantEnqueue,Long> assistantEnqueue){
   this.visibility=visibility;this.db=db;this.tx=tx;this.trending=trending;this.events=events;this.materials=materials;this.assistantEnqueue=assistantEnqueue;
  }
- public LikeResult like(long user,long post,String topic){
+ /**
+  * @param clientTopic ignored. Kept for API compatibility; topic statistics use the post's own topic attribute
+  *                    ({@code posts.topic}) and a post without a topic writes no topic statistics.
+  */
+ public LikeResult like(long user,long post,String clientTopic){
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
    db.undislike(post,user);
    boolean inserted=db.like(post,user,System.currentTimeMillis())==1;
    reconcile(post);
-   if(inserted)trending.record("like:"+post+":"+user,topic==null?"general":topic,post,1,"LIKE");
+   String topic=inserted?db.postTopic(post):null;
+   if(topic!=null)trending.recordLike(post,user,topic);
    return new LikeResult(true,db.stats(post).likes());
   });
  }
- public LikeResult unlike(long user,long post,String topic){
+ /** @param clientTopic ignored, see {@link #like}. */
+ public LikeResult unlike(long user,long post,String clientTopic){
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
    boolean removed=db.unlike(post,user)==1;reconcile(post);
-   if(removed)trending.record("unlike:"+post+":"+user+":"+System.currentTimeMillis(),topic==null?"general":topic,post,-1,"UNLIKE");
+   // Only a real true→false flip revokes the like's own topic contribution (no separate -1 event).
+   if(removed)trending.revokeLike(post,user);
    return new LikeResult(false,db.stats(post).likes());
   });
  }
  public DislikeResult dislike(long user,long post){
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
-   db.unlike(post,user);
+   // Disliking removes an existing like: that is a true→false like flip as well.
+   if(db.unlike(post,user)==1)trending.revokeLike(post,user);
    db.dislike(post,user,System.currentTimeMillis());
    reconcile(post);
    return new DislikeResult(true,db.stats(post).dislikes());
@@ -58,17 +67,34 @@ public final class InteractionService {
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   if(reason==null || reason.isBlank() || reason.length()>64)throw new FeedFailure(400,"INVALID_REQUEST");
   if(detail!=null && detail.length()>1000)throw new FeedFailure(400,"INVALID_REQUEST");
+  // Hardening A3: one report per (post, reporter). A concurrent repeat waits on the unique key until the first commits
+  // (READ COMMITTED), then inserts nothing and reads the committed first row; counts are recomputed only on a new row.
   return tx.execute(status->{
-   db.report(post,user,reason,detail==null?"":detail,contextJson,System.currentTimeMillis());
-   reconcile(post);
-   return new ReportResult(0,db.stats(post).reports());
+   boolean inserted=db.report(post,user,reason,detail==null?"":detail,contextJson,System.currentTimeMillis())==1;
+   long count=inserted?reconcile(post).reports():currentReports(post);
+   Long id=db.reportId(post,user);
+   if(id==null)throw new IllegalStateException("report row missing after insert for post "+post);
+   return new ReportResult(id,count,!inserted);
   });
  }
  public CommentResult comment(long user,long post,String body,String key,String topic){return comment(user,post,body,key,topic,null,null,null);}
  public CommentResult comment(long user,long post,String body,String key,String topic,Long parentId){return comment(user,post,body,key,topic,parentId,null,null);}
- public CommentResult comment(long user,long post,String body,String key,String topic,Long parentId,Long materialVersionId,Long offsetMs){
+ /** @param clientTopic ignored, see {@link #like}. */
+ public CommentResult comment(long user,long post,String body,String key,String clientTopic,Long parentId,Long materialVersionId,Long offsetMs){
   if(body==null || body.isBlank() || body.length()>4000 || key==null || key.isBlank() || key.length()>128)throw new FeedFailure(400,"INVALID_REQUEST");
   var view=visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+  try{
+   return createComment(user,post,body,key,parentId,materialVersionId,offsetMs,view);
+  }catch(org.springframework.dao.DuplicateKeyException conflict){
+   // Hardening A5 (same as PublishService): a concurrent request with this key committed first and our insert hit
+   // uq_comment_idem. The template rolled back every write of this attempt; read the winner in a new transaction,
+   // never inside the failed one.
+   var replay=tx.execute(status->{var winner=db.existingComment(user,key);return winner==null?null:toResult(winner,true);});
+   if(replay==null)throw conflict;
+   return replay;
+  }
+ }
+ private CommentResult createComment(long user,long post,String body,String key,Long parentId,Long materialVersionId,Long offsetMs,VisibilityService.View view){
   return tx.execute(status->{
    var existing=db.existingComment(user,key);
    if(existing!=null)return toResult(existing,true);
@@ -91,7 +117,10 @@ public final class InteractionService {
    }
    if(db.comment(post,user,parentId,version,offset,body,key,System.currentTimeMillis())!=1)throw new IllegalStateException("comment insert failed");
    var created=db.existingComment(user,key);reconcile(post);
-   trending.record("comment:"+key,topic==null?"general":topic,post,1,"COMMENT");
+   String topic=db.postTopic(post);
+   // Hardening A10: one ledger row per created comment. The idempotency key is only unique per user, so it cannot be
+   // the event id; a replay returns before this point and records nothing.
+   if(topic!=null)trending.record("comment:"+created.id(),topic,post,1,"COMMENT");
    Map<String,Object> fields=new LinkedHashMap<>();
    fields.put("postId",post);fields.put("commentId",created.id());fields.put("actorUserId",user);
    fields.put("postAuthorId",view.authorId());fields.put("occurredAtMs",created.createdAtMs());
@@ -124,6 +153,7 @@ public final class InteractionService {
    .map(c->new CommentView(c.id(),c.userId(),c.parentId(),c.materialVersionId(),c.offsetMs(),c.acceptedAtMs(),c.body(),c.createdAtMs()))
    .toList();
  }
+ private long currentReports(long post){var s=db.stats(post);return s==null?db.reportCount(post):s.reports();}
  public InteractionMapper.Stats reconcile(long post){
   long likes=db.likeCount(post),comments=db.commentCount(post),dislikes=db.dislikeCount(post),reports=db.reportCount(post);
   db.upsertStats(post,likes,dislikes,comments,reports);return db.stats(post);

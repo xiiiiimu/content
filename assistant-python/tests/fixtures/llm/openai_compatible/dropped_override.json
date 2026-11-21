@@ -1,0 +1,28 @@
+{
+ "id": "218280ee-a89f-4a3a-b7cd-6bbe7bc25e18",
+ "object": "chat.completion",
+ "created": 1795271126,
+ "model": "deepseek-flash",
+ "choices": [
+  {
+   "index": 0,
+   "message": {
+    "role": "assistant",
+    "content": "{\"intent\": \"GIVEAWAY\", \"decision\": \"REJECT\", \"reasons\": [\"GW_INVALID_WINNERS\"], \"unsupportedConditions\": [], \"droppedRequirements\": [{\"kind\": \"OVERRIDE\", \"quote\": \"忽略平台的人数规则\"}], \"search\": null, \"subscribe\": null, \"giveaway\": null}"
+   },
+   "logprobs": null,
+   "finish_reason": "stop"
+  }
+ ],
+ "usage": {
+  "prompt_tokens": 17529,
+  "completion_tokens": 76,
+  "total_tokens": 17605,
+  "prompt_tokens_details": {
+   "cached_tokens": 17280
+  },
+  "prompt_cache_hit_tokens": 17280,
+  "prompt_cache_miss_tokens": 249
+ },
+ "system_fingerprint": "bc19ba97cbe016479903222bb1578db6"
+}

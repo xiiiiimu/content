@@ -1,0 +1,215 @@
+{
+  "startEpochMs": 1795040535743,
+  "endEpochMs": 1795040536749,
+  "calls": 16,
+  "results": [
+    {
+      "reservationId": "48e8983ad4b64d238d243cf3257777c6",
+      "clientKey": "jm-c109-u10898",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535743
+      ],
+      "firstPollAtMs": 1795040535743,
+      "observedAtMs": 1795040535757,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 10152
+    },
+    {
+      "reservationId": "ae0ac570342349dea9803becab0db818",
+      "clientKey": "jm-c109-u10897",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535746
+      ],
+      "firstPollAtMs": 1795040535746,
+      "observedAtMs": 1795040535792,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 9687
+    },
+    {
+      "reservationId": "95071230c36b4a3a803b6b1e1cfa86f9",
+      "clientKey": "jm-c109-u10899",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535749
+      ],
+      "firstPollAtMs": 1795040535749,
+      "observedAtMs": 1795040535766,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 9164
+    },
+    {
+      "reservationId": "568d1ad87d934c9c86cff84e014b0ef3",
+      "clientKey": "jm-c109-u10896",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535752
+      ],
+      "firstPollAtMs": 1795040535752,
+      "observedAtMs": 1795040535779,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 8677
+    },
+    {
+      "reservationId": "162cd2d6ff9a4375af624fc86dc75023",
+      "clientKey": "jm-c109-u10902",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535757
+      ],
+      "firstPollAtMs": 1795040535757,
+      "observedAtMs": 1795040535791,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 8186
+    },
+    {
+      "reservationId": "6bb7d01a19c44234bfe59bcf01a7169b",
+      "clientKey": "jm-c109-u10901",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535760
+      ],
+      "firstPollAtMs": 1795040535760,
+      "observedAtMs": 1795040535782,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 7678
+    },
+    {
+      "reservationId": "2a30133ba6284218b3c80c5e7e851e2f",
+      "clientKey": "jm-c109-u10900",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535762
+      ],
+      "firstPollAtMs": 1795040535762,
+      "observedAtMs": 1795040535781,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 7176
+    },
+    {
+      "reservationId": "aaf23e8a7a194fe18dad63af7dc47c2e",
+      "clientKey": "jm-c109-u10905",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535765
+      ],
+      "firstPollAtMs": 1795040535765,
+      "observedAtMs": 1795040535782,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 6676
+    },
+    {
+      "reservationId": "2125197d32284ace999ba43b2519a0e5",
+      "clientKey": "jm-c109-u10904",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535767
+      ],
+      "firstPollAtMs": 1795040535767,
+      "observedAtMs": 1795040535790,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 6183
+    },
+    {
+      "reservationId": "20b48e909092480fb6ab78658507508f",
+      "clientKey": "jm-c109-u10903",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535774
+      ],
+      "firstPollAtMs": 1795040535774,
+      "observedAtMs": 1795040535792,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 5687
+    },
+    {
+      "reservationId": "10d5280eed754618ac6b307afe0d42b5",
+      "clientKey": "jm-c109-u10908",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535779
+      ],
+      "firstPollAtMs": 1795040535779,
+      "observedAtMs": 1795040535800,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 5187
+    },
+    {
+      "reservationId": "cb83d183e58d49fc8ab7e4a7f927f42f",
+      "clientKey": "jm-c109-u10907",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535782
+      ],
+      "firstPollAtMs": 1795040535782,
+      "observedAtMs": 1795040535803,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 4690
+    },
+    {
+      "reservationId": "5773500798914d6e8e8e61ba4f86258b",
+      "clientKey": "jm-c109-u10906",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535784
+      ],
+      "firstPollAtMs": 1795040535784,
+      "observedAtMs": 1795040535800,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 4195
+    },
+    {
+      "reservationId": "4560fb854d3c4241a3e06fae2d6733f7",
+      "clientKey": "jm-c109-u10911",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535786
+      ],
+      "firstPollAtMs": 1795040535786,
+      "observedAtMs": 1795040535803,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 3698
+    },
+    {
+      "reservationId": "4f2f66bf7a5344379b0bae3520c8ec46",
+      "clientKey": "jm-c109-u10910",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535788
+      ],
+      "firstPollAtMs": 1795040535788,
+      "observedAtMs": 1795040535803,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 3198
+    },
+    {
+      "reservationId": "5e075995b53f4a4395fc97a8a502fa73",
+      "clientKey": "jm-c109-u10909",
+      "calls": 1,
+      "attemptTimesMs": [
+        1795040535793
+      ],
+      "firstPollAtMs": 1795040535793,
+      "observedAtMs": 1795040535805,
+      "state": "SUCCEEDED",
+      "error": null,
+      "clientObservedSucceededMs": 2688
+    }
+  ]
+}

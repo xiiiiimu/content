@@ -1,0 +1,10 @@
+{
+  "atMs": 1795116394506,
+  "error": "RuntimeError",
+  "detail": "Resource gate failed (C-start): content-broker-1-not-healthy; thresholds not lowered",
+  "backendPids": {
+    "B": 11880,
+    "B2": 19680
+  },
+  "nextProfileStarted": false
+}

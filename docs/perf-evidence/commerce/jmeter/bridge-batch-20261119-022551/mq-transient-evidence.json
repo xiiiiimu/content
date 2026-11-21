@@ -1,0 +1,9 @@
+{
+  "scope": "Failed full verify MQ test process 31104; only timeout/startup evidence, not proof of consumer business failure",
+  "clientLogLines": [
+    "2026-11-19 04:49:01.770 WARN  [31104] [main] [RocketmqRemoting#?:?] - invokeSync: wait response timeout exception, the channel[addr=127.0.0.1:29876, id=4d04281f]",
+    "2026-11-19 04:49:01.818 WARN  [31104] [main] [o.a.r.c.i.c.DefaultMQPushConsumerImpl#?:?] - Start the consumer sale-revision-f02e6fb380c247a6b4e10c4dadabfb51 fail.",
+    "2026-11-19 04:49:36.363 WARN  [31104] [main] [RocketmqRemoting#?:?] - invokeSync: wait response timeout exception, the channel[addr=127.0.0.1:29876, id=d7f96364]"
+  ],
+  "targetedRecheck": "2 tests passed unchanged timeout/application code"
+}

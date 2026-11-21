@@ -1,0 +1,6 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1794701454321,76,GET-campaign-detail,200,,commerce-threads 1-1,text,true,,386,381,5,5,http://127.0.0.1:28080/api/materials/44/sale-campaigns/current,75,0,43
+1794701454321,76,GET-campaign-detail,200,,commerce-threads 1-5,text,true,,386,381,5,5,http://127.0.0.1:28080/api/materials/44/sale-campaigns/current,75,0,43
+1794701454321,76,GET-campaign-detail,200,,commerce-threads 1-3,text,true,,386,381,5,5,http://127.0.0.1:28080/api/materials/44/sale-campaigns/current,75,0,43
+1794701454321,76,GET-campaign-detail,200,,commerce-threads 1-4,text,true,,386,381,5,5,http://127.0.0.1:28080/api/materials/44/sale-campaigns/current,75,0,43
+1794701454321,76,GET-campaign-detail,200,,commerce-threads 1-2,text,true,,386,381,5,5,http://127.0.0.1:28080/api/materials/44/sale-campaigns/current,75,0,43

@@ -1,0 +1,8 @@
+{
+  "paced": false,
+  "injectorLogicalCpuMask": 65520,
+  "injectorPriority": "BelowNormal",
+  "backendLogicalCpuMask": 15,
+  "jmeterStack": "512k",
+  "backendPriority": "AboveNormal"
+}

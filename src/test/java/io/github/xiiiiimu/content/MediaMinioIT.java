@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class MediaMinioIT {
  static final String MINIO_IMAGE="content-minio:RELEASE.2025-04-22T22-12-26Z";
  static final String ACCESS="contentadmin";
- static final String SECRET="content-secret-key-32-bytes-minimum";
+ static final String SECRET="media-test-secret-key-not-for-production-01";
  static final String FFMPEG="linuxserver/ffmpeg:version-7.1-cli";
  @Container static final MySQLContainer<?> MYSQL=new MySQLContainer<>("mysql:8.4");
  @Container static final GenericContainer<?> REDIS=new GenericContainer<>("redis:7.4").withExposedPorts(6379).withCommand("redis-server","--maxmemory-policy","noeviction");

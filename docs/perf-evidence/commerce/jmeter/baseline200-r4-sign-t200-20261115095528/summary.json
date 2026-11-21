@@ -1,0 +1,34 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\baseline200-r4-sign-t200-20261115095528\\results.jtl",
+  "samples": 1075,
+  "spanSec": 9.962,
+  "requestQps": 107.91,
+  "acceptQps": 107.61,
+  "businessRejects": 0,
+  "systemErrors": 3,
+  "connectFail": 0,
+  "timeouts": 0,
+  "http503": 3,
+  "ok": 1072,
+  "p50Ms": 1300,
+  "p95Ms": 7019,
+  "p99Ms": 10903,
+  "byLabel": [
+    {
+      "n": 1075,
+      "label": "POST-original-sign",
+      "qps": 107.91,
+      "p95": 7019
+    }
+  ],
+  "byClass": [
+    {
+      "cls": "HTTP_503",
+      "count": 3
+    },
+    {
+      "cls": "OK",
+      "count": 1072
+    }
+  ]
+}

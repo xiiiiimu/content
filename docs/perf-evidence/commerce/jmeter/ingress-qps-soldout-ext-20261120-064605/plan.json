@@ -1,0 +1,54 @@
+{
+ "path": "soldout",
+ "levels": [
+  3500,
+  4000,
+  5000
+ ],
+ "seconds": 30,
+ "rest": 15,
+ "warmup": [
+  100,
+  15
+ ],
+ "expectedRtMs": 200,
+ "vuCap": 4000,
+ "vus": {
+  "3500": 2100,
+  "4000": 2400,
+  "5000": 3000
+ },
+ "buyers": 1000,
+ "k6Affinity": "0xfc00",
+ "k6Cpus": [
+  10,
+  11,
+  12,
+  13,
+  14,
+  15
+ ],
+ "backendAffinity": "0x3ff",
+ "backendCpus": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9
+ ],
+ "dockerVm": "not pinned",
+ "k6": "tools\\k6-v0.55.0\\k6-v0.55.0-windows-amd64\\k6.exe",
+ "tool": "k6 v0.55.0 constant-arrival-rate",
+ "stock": 4,
+ "backendPid": 34532,
+ "backendAffinityObserved": 1023,
+ "campaignId": 146,
+ "postId": 159,
+ "loginSec": 29.4,
+ "soldOutAtMs": 1795128473188
+}

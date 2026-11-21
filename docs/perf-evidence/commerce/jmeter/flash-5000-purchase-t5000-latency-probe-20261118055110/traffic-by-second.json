@@ -1,0 +1,22 @@
+[
+  {
+    "epochSecond": 1794955180,
+    "requestStarts": 782
+  },
+  {
+    "epochSecond": 1794955181,
+    "requestStarts": 1605
+  },
+  {
+    "epochSecond": 1794955182,
+    "requestStarts": 1289
+  },
+  {
+    "epochSecond": 1794955183,
+    "requestStarts": 1324
+  },
+  {
+    "epochSecond": 1794955217,
+    "httpResponses": 5000
+  }
+]

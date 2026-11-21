@@ -1,0 +1,54 @@
+{
+  "startEpochMs": 1795018099342,
+  "database": {
+    "campaign": [
+      [
+        "0",
+        "0",
+        "0",
+        "0"
+      ]
+    ],
+    "cacheJobs": [
+      [
+        "0"
+      ]
+    ],
+    "receipts": [
+      [
+        "0"
+      ]
+    ],
+    "dispatch": [
+      [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ]
+    ],
+    "lockWaitsByTable": [],
+    "campaignForUpdateDigest": [
+      [
+        "1",
+        "236",
+        "19325039010000"
+      ]
+    ],
+    "appAccountTransactions": [
+      [
+        "406338",
+        "874954846079000"
+      ]
+    ]
+  },
+  "redis": {
+    "globalStreamLag": 0,
+    "campaignStock": 100,
+    "globalStreamLength": 350,
+    "globalStreamPending": 0,
+    "ready": "1"
+  },
+  "endEpochMs": 1795018101632
+}

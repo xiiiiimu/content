@@ -1,0 +1,25 @@
+{
+  "source": "docs\\perf-evidence\\commerce\\jmeter\\campaign-lock-tiers-20261120-025631\\B2",
+  "orders": 2913,
+  "paidOrdersFormal": 2849,
+  "commits": {
+    "bridge": 148,
+    "cacheSync": 7799,
+    "dispatchClaim": 991,
+    "dispatchConfirm": 748,
+    "settle": 2913
+  },
+  "rollbacks": {},
+  "cacheSyncFromBridge": 1973,
+  "commitsPerOrder": {
+    "bridge": 0.051,
+    "cacheSync": 2.677,
+    "dispatchClaim": 0.34,
+    "dispatchConfirm": 0.257,
+    "settle": 1.0
+  },
+  "commitsPerOrderTotal": 4.325,
+  "commitSpanSeconds": 338.873,
+  "commitsPerSecondOverSpan": 37.2,
+  "note": "orders = committed settle transactions containing insertOrder (formal + warm-up orders in the recording)"
+}

@@ -1,0 +1,25 @@
+{
+  "source": "docs\\perf-evidence\\commerce\\jmeter\\campaign-lock-clean-20261120-073658\\B",
+  "orders": 3661,
+  "paidOrdersFormal": 3597,
+  "commits": {
+    "bridge": 262,
+    "cacheSync": 10416,
+    "dispatchClaim": 2028,
+    "dispatchConfirm": 1833,
+    "settle": 3661
+  },
+  "rollbacks": {},
+  "cacheSyncFromBridge": 3094,
+  "commitsPerOrder": {
+    "bridge": 0.072,
+    "cacheSync": 2.845,
+    "dispatchClaim": 0.554,
+    "dispatchConfirm": 0.501,
+    "settle": 1.0
+  },
+  "commitsPerOrderTotal": 4.971,
+  "commitSpanSeconds": 206.164,
+  "commitsPerSecondOverSpan": 88.3,
+  "note": "orders = committed settle transactions containing insertOrder (formal + warm-up orders in the recording)"
+}

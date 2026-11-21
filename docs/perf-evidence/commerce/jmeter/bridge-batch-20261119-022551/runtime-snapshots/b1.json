@@ -1,0 +1,59 @@
+{
+  "beforeRestart": {
+    "atMs": 1795040555611,
+    "database": [
+      [
+        "0"
+      ],
+      [
+        "0"
+      ],
+      [
+        "0"
+      ],
+      [
+        "0"
+      ]
+    ],
+    "redis": {
+      "globalStreamLag": 0,
+      "globalStreamLength": 4062,
+      "globalStreamPending": 0,
+      "ready": "1"
+    },
+    "unresolvedQuarantine": 0
+  },
+  "pid": 35068,
+  "java": "C:\\Users\\西木\\.jdks\\ms-17.0.17\\bin\\java.exe",
+  "jarMatches": true,
+  "batchSize": "1",
+  "options": {
+    "server.tomcat.threads.max": "100",
+    "server.tomcat.mbeanregistry.enabled": "true",
+    "content.sale.topic": "content-sale",
+    "spring.profiles.active": "pipeline",
+    "content.sale.namesrv": "127.0.0.1:29876",
+    "server.address": "127.0.0.1",
+    "content.sale.producer-enabled": "true",
+    "spring.datasource.hikari.register-mbeans": "true",
+    "content.sale.manual-settle": "true",
+    "server.tomcat.accesslog.pattern": "%{begin:msec}t,%{end:msec}t,%D,%s,%U,%{X-Diag-Id}i,%I",
+    "content.sale.consume-threads": "20",
+    "server.tomcat.accesslog.enabled": "true",
+    "content.sale.scan-enabled": "true",
+    "content.sale.bridge-batch-size": "1",
+    "content.sale.fault-hooks": "true",
+    "server.tomcat.accesslog.buffered": "true",
+    "content.sale.scan-delay-millis": "50",
+    "server.tomcat.max-connections": "20000",
+    "content.sale.latency-enabled": "true",
+    "server.tomcat.accept-count": "5000",
+    "content.sale.consumer-enabled": "true",
+    "content.sale.sync-settle": "false",
+    "content.sale.settle-delay-ms": "0",
+    "server.tomcat.accesslog.directory": "E:\\content\\target\\bridge-batch-20261119-022551\\perf-private\\backend-b1/access",
+    "server.tomcat.threads.min-spare": "100"
+  },
+  "listener": 35068,
+  "jarSha256": "c1c7cd41f07c565582d89fad3e4445e3cd0822c5e6fbf6a3260df07cd9ee83d8"
+}

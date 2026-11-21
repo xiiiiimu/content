@@ -1,0 +1,137 @@
+{
+  "config": {
+    "runId": "v23-perf-20261118-234151-A1",
+    "campaignId": 104,
+    "postId": 117,
+    "warmCampaignId": 103,
+    "count": 2000,
+    "stock": 100,
+    "rate": 400,
+    "workers": 128,
+    "windowSec": 0,
+    "timeoutMs": 30000,
+    "loopsPerBuyer": 1,
+    "sameJvmWarmup": true,
+    "heap": "128m/384m",
+    "clientJfr": false,
+    "clientThreadDump": false,
+    "sourceRevision": "V23",
+    "jarSha256": "376b7ae3cf209dec1f36993c81d27685ab6de3014a687fdeee642d521c54efa5",
+    "warmupSettlementPoll": "Each worker, 1 second interval, 60 second bound, outside formal; same HTTP POST sampler/thread",
+    "finalResultPolling": "After formal HTTP only; concurrency16, 1s retry per request, global120s deadline; observation latency includes delayed polling start",
+    "observerIntervalSec": 2,
+    "serverJfr": "Only custom sale events + GC pause + DataLoss, no stacks/environment/JVM properties",
+    "hostMemoryBefore": {
+      "observedAtMs": 1795017503490,
+      "memoryLoadPercent": 84,
+      "totalPhysicalBytes": 16864305152,
+      "availablePhysicalBytes": 2622349312,
+      "commitLimitBytes": 28727582720,
+      "availableCommitBytes": 1712422912
+    }
+  },
+  "window": {
+    "startEpochMs": 1795017587435,
+    "endEpochMs": 1795017612869,
+    "targetRate": 400,
+    "workers": 128,
+    "sameJvm": true,
+    "sameHttpSamplerAndThreads": true,
+    "deadlinePolicy": "No catch-up; serialized minimum-spaced permits"
+  },
+  "windowSeconds": 25.434,
+  "samples": 2000,
+  "warmSamples": 128,
+  "requestStartSpanMs": 25406,
+  "requestArrivalRate": 78.68220105486893,
+  "windowStarts": 2000,
+  "windowStartQps": 78.63489816780687,
+  "outsideFixedWindowStarts": 0,
+  "normalBusinessCompletionQps": 78.63489816780687,
+  "groups": {
+    "accepted": {
+      "count": 100,
+      "windowCompleted": 100,
+      "elapsed": {
+        "count": 100,
+        "p50": 59,
+        "p95": 292,
+        "p99": 311,
+        "max": 316
+      },
+      "Latency": {
+        "count": 100,
+        "p50": 56,
+        "p95": 292,
+        "p99": 311,
+        "max": 315
+      },
+      "Connect": {
+        "count": 100,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "completionQps": 3.9317449083903435
+    },
+    "soldOut": {
+      "count": 1900,
+      "windowCompleted": 1900,
+      "elapsed": {
+        "count": 1900,
+        "p50": 41,
+        "p95": 244,
+        "p99": 401,
+        "max": 571
+      },
+      "Latency": {
+        "count": 1900,
+        "p50": 40,
+        "p95": 231,
+        "p99": 372,
+        "max": 456
+      },
+      "Connect": {
+        "count": 1900,
+        "p50": 0,
+        "p95": 4,
+        "p99": 10,
+        "max": 129
+      },
+      "completionQps": 74.70315325941652
+    }
+  },
+  "httpStatuses": {
+    "200": 100,
+    "409": 1900
+  },
+  "systemErrors": [],
+  "paidOrders": 100,
+  "remainingStock": 0,
+  "activeEntitlements": 100,
+  "processingLeft": 0,
+  "drainConfirmedAfterLastHttpSec": 27.619,
+  "drainObservationNote": "Confirmation upper bound includes post-load polling and reconciliation, not exact queue empty instant; use observations for tighter bracket.",
+  "windowCommittedTps": 1.6120154124400408,
+  "fullCommittedTps": 2.056470685010385,
+  "clientObservedSucceededMs": {
+    "count": 100,
+    "p50": 30311,
+    "p95": 46804,
+    "p99": 48771,
+    "max": 48908
+  },
+  "checks": {
+    "sampleCount": true,
+    "uniqueBuyers": true,
+    "noSystemErrors": true,
+    "noReconciliationMismatch": true,
+    "ledgerInvariant": true,
+    "drained": true,
+    "redisInventory": true,
+    "replays": true
+  },
+  "correctnessPass": true,
+  "reconciliationMismatches": []
+}

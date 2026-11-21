@@ -1,0 +1,148 @@
+{
+  "config": {
+    "runId": "v23-perf-20261118-234151-B",
+    "campaignId": 106,
+    "postId": 119,
+    "warmCampaignId": 105,
+    "count": 3600,
+    "stock": 4000,
+    "rate": 60,
+    "workers": 64,
+    "windowSec": 60,
+    "timeoutMs": 30000,
+    "loopsPerBuyer": 1,
+    "sameJvmWarmup": true,
+    "heap": "128m/384m",
+    "clientJfr": false,
+    "clientThreadDump": false,
+    "temporarySystemSleepPrevention": true,
+    "hostInterruptionInvalidatesRunMs": 30000,
+    "sourceRevision": "V23",
+    "jarSha256": "376b7ae3cf209dec1f36993c81d27685ab6de3014a687fdeee642d521c54efa5",
+    "warmupSettlementPoll": "Each worker, 1 second interval, 60 second bound, outside formal; same HTTP POST sampler/thread",
+    "finalResultPolling": "After formal HTTP only; fair round-robin, concurrency16, max100 calls/batch, >=1s between batches, global120s deadline. Per-request interval grows with outstanding set. No per-request starvation; actual attempt timestamps archived.",
+    "drainObservationLimitSec": 1200,
+    "observerIntervalSec": 2,
+    "pacer": "One serialized coordinator; Windows park leaves 16ms headroom then spins; at400/s may use one CPU core, captured in host load, never subtracted",
+    "serverJfr": "Only custom sale events + GC pause + DataLoss, no stacks/environment/JVM properties",
+    "hostMemoryBefore": {
+      "observedAtMs": 1795020074268,
+      "memoryLoadPercent": 85,
+      "totalPhysicalBytes": 16864305152,
+      "availablePhysicalBytes": 2422349824,
+      "commitLimitBytes": 29807333376,
+      "availableCommitBytes": 2646310912
+    }
+  },
+  "window": {
+    "startEpochMs": 1795020117681,
+    "endEpochMs": 1795020177681,
+    "targetRate": 60,
+    "workers": 64,
+    "sameJvm": true,
+    "sameHttpSamplerAndThreads": true,
+    "deadlinePolicy": "No catch-up; serialized minimum-spaced permits"
+  },
+  "windowSeconds": 60,
+  "samples": 3400,
+  "warmSamples": 64,
+  "requestStartSpanMs": 59987,
+  "requestArrivalRate": 56.66227682664577,
+  "windowStarts": 3400,
+  "windowStartQps": 56.666666666666664,
+  "outsideFixedWindowStarts": 0,
+  "normalBusinessCompletionQps": 56.65,
+  "groups": {
+    "accepted": {
+      "count": 3400,
+      "windowCompleted": 3399,
+      "completionQps": 56.65,
+      "elapsed": {
+        "count": 3400,
+        "p50": 11,
+        "p95": 50,
+        "p99": 87,
+        "max": 154
+      },
+      "Latency": {
+        "count": 3400,
+        "p50": 11,
+        "p95": 48,
+        "p99": 85,
+        "max": 154
+      },
+      "Connect": {
+        "count": 3400,
+        "p50": 0,
+        "p95": 0,
+        "p99": 14,
+        "max": 55
+      }
+    },
+    "soldOut": {
+      "count": 0,
+      "windowCompleted": 0,
+      "completionQps": 0.0,
+      "elapsed": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "max": null
+      },
+      "Latency": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "max": null
+      },
+      "Connect": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "max": null
+      }
+    }
+  },
+  "httpStatuses": {
+    "200": 3400
+  },
+  "systemErrors": [],
+  "paidOrders": 3400,
+  "remainingStock": 600,
+  "activeEntitlements": 3400,
+  "processingLeft": 0,
+  "drainConfirmedAfterLastHttpSec": null,
+  "windowCommittedTps": null,
+  "fullCommittedTps": null,
+  "confirmedWindowCommitOrders": 351,
+  "confirmedWindowCommitTpsLowerBound": 5.85,
+  "clientObservedSucceededMs": {
+    "count": 910,
+    "p50": 93489,
+    "p95": 149322,
+    "p99": 149584,
+    "max": 149664
+  },
+  "clientObservedCoverage": 0.2676470588235294,
+  "fullClientObservedSucceededP95Ms": null,
+  "checks": {
+    "sampleCount": true,
+    "uniqueBuyers": true,
+    "noSystemErrors": true,
+    "noReconciliationMismatch": true,
+    "ledgerInvariant": true,
+    "drained": true,
+    "redisInventory": true,
+    "replays": true
+  },
+  "correctnessPass": true,
+  "measurementComplete": false,
+  "reconciliationMismatches": [],
+  "measurementFailureReasons": [
+    "Post-run Windows command-line overflow interrupted observation; commit timing gap retained."
+  ],
+  "postprocessingRecoveredWithoutNewLoad": true
+}

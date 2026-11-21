@@ -1,0 +1,37 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\baseline200-retest-purchase-t200-20261115081923\\results.jtl",
+  "samples": 1317,
+  "spanSec": 13.341,
+  "requestQps": 98.72,
+  "acceptQps": 97.52,
+  "businessRejects": 0,
+  "systemErrors": 16,
+  "connectFail": 0,
+  "timeouts": 9,
+  "ok": 1301,
+  "p50Ms": 1173,
+  "p95Ms": 5914,
+  "p99Ms": 10031,
+  "byLabel": [
+    {
+      "p95": 5914,
+      "qps": 98.72,
+      "n": 1317,
+      "label": "POST-purchase"
+    }
+  ],
+  "byClass": [
+    {
+      "cls": "OK",
+      "count": 1301
+    },
+    {
+      "cls": "SYSTEM",
+      "count": 7
+    },
+    {
+      "cls": "TIMEOUT",
+      "count": 9
+    }
+  ]
+}
