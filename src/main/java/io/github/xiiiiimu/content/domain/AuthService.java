@@ -10,6 +10,8 @@ public final class AuthService {
  public record PublicUser(long userId,String username,String status) {}
  private final UserMapper users;private final TransactionTemplate tx;private final FeedTokens identity;
  private final PasswordHasher passwords;
+ /** BCrypt cost 10 (same as real hashes) of a random value that was discarded; never matches a real password. */
+ static final String DUMMY_HASH="$2a$10$MrJ2M4dkc4DKr1ZbR9dmyepYW2AO2jR6Jzh.F2Tw72Pzq9GA3k3lm";
  private final long ttlMs;
  public AuthService(UserMapper users,TransactionTemplate tx,FeedTokens identity,long ttlMs,PasswordHasher passwords){
   this.users=users;this.tx=tx;this.identity=identity;this.ttlMs=Math.min(Math.max(ttlMs,60_000),3_600_000);this.passwords=passwords;
@@ -37,7 +39,10 @@ public final class AuthService {
  public Session login(String username,String password){
   validateCreds(username,password);
   var u=users.byUsername(username);
-  if(u==null || !passwords.matches(password,u.passwordHash()))throw new FeedFailure(401,"INVALID_CREDENTIALS");
+  // Hardening A13: an unknown username still pays one BCrypt check (fixed dummy hash, same cost, same pool), so the
+  // response time does not tell whether the account exists.
+  boolean ok=passwords.matches(password,u==null?DUMMY_HASH:u.passwordHash());
+  if(u==null || !ok)throw new FeedFailure(401,"INVALID_CREDENTIALS");
   if(!"ACTIVE".equals(u.status()))throw new FeedFailure(403,"USER_DISABLED");
   users.ensureAuthor(u.id());
   return session(u.id(),u.username());

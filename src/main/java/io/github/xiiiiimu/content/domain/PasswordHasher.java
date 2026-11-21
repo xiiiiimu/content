@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class PasswordHasher implements AutoCloseable {
  private final BCryptPasswordEncoder encoder=new BCryptPasswordEncoder();
  private final ThreadPoolExecutor pool;private final long waitMillis;
+ private final java.util.concurrent.atomic.AtomicLong checks=new java.util.concurrent.atomic.AtomicLong();
 
  public PasswordHasher(int threads,int queue,long waitMillis){
   if(threads<1 || threads>64)throw new IllegalArgumentException("content.auth.bcrypt-threads must be in [1,64]");
@@ -33,7 +34,9 @@ public final class PasswordHasher implements AutoCloseable {
  static int defaultThreads(int logicalCores){return Math.max(2,logicalCores/2);}
 
  public String encode(String raw){return run(()->encoder.encode(raw));}
- public boolean matches(String raw,String hash){return Boolean.TRUE.equals(run(()->encoder.matches(raw,hash)));}
+ public boolean matches(String raw,String hash){return Boolean.TRUE.equals(run(()->{checks.incrementAndGet();return encoder.matches(raw,hash);}));}
+ /** Password checks run so far (counted on the pool thread, so a count means the check really went through the pool). */
+ public long checks(){return checks.get();}
 
  private <T> T run(Callable<T> work){
   Future<T> f;
