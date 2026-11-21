@@ -1,0 +1,28 @@
+{
+ "id": "b63702f1-5bd2-488b-b284-6a09e8d51db3",
+ "object": "chat.completion",
+ "created": 1795271125,
+ "model": "deepseek-flash",
+ "choices": [
+  {
+   "index": 0,
+   "message": {
+    "role": "assistant",
+    "content": "{\"intent\": \"GIVEAWAY\", \"decision\": \"CLARIFY\", \"reasons\": [\"GW_AMBIGUOUS_RULE\"], \"unsupportedConditions\": [], \"droppedRequirements\": [{\"kind\": \"CONFLICT\", \"quote\": \"抽2人送下载资格，1月22日晚上8点截止，嗯还是抽3人吧\"}], \"search\": null, \"subscribe\": null, \"giveaway\": null}"
+   },
+   "logprobs": null,
+   "finish_reason": "stop"
+  }
+ ],
+ "usage": {
+  "prompt_tokens": 17527,
+  "completion_tokens": 96,
+  "total_tokens": 17623,
+  "prompt_tokens_details": {
+   "cached_tokens": 17280
+  },
+  "prompt_cache_hit_tokens": 17280,
+  "prompt_cache_miss_tokens": 247
+ },
+ "system_fingerprint": "bc19ba97cbe016479903222bb1578db6"
+}
