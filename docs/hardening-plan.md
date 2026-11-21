@@ -19,16 +19,16 @@
 | 项 | 标题 | 优先级 | 状态 |
 |---|---|---|---|
 | 0 | 上一轮收尾（提交、扫描、推送、CI） | — | 完成 |
-| A1 | 调试接口仅在显式测试配置下注册 | P0 | 已修复，待全量 IT |
-| A2 | 互动/登录/注册限流（已决定） | P0 | 已修复，待全量 IT 与压测复核 |
-| A3 | 举报去重（已决定） | P0 | 已修复，待全量 IT |
-| A4 | 登录 BCrypt 有界线程池 | P0 | 已修复，待全量 IT 与登录压测 |
-| A5 | 评论幂等竞态 | P0 | 已修复，待全量 IT |
-| A6 | 注册并发重名返回 409 | P0 | 已修复，待全量 IT |
-| A7 | 媒体下载签名密钥去掉公开默认值 | P0 | 已修复，待全量 IT |
-| A8 | `GET /api/assistant/tasks/{id}` 需登录且仅发起人可看 | P0 | 已修复，待全量 IT |
-| A9 | 分享密码解锁限流 | P0 | 已修复，待全量 IT |
-| A10 | 相同幂等键下评论话题统计丢失（已决定） | P1 | 已修复，待全量 IT |
+| A1 | 调试接口仅在显式测试配置下注册 | P0 | 完成 |
+| A2 | 互动/登录/注册限流（已决定） | P0 | 完成 |
+| A3 | 举报去重（已决定） | P0 | 完成 |
+| A4 | 登录 BCrypt 有界线程池 | P0 | 完成（遗留：池大小默认值【需决定】） |
+| A5 | 评论幂等竞态 | P0 | 完成 |
+| A6 | 注册并发重名返回 409 | P0 | 完成 |
+| A7 | 媒体下载签名密钥去掉公开默认值 | P0 | 完成 |
+| A8 | `GET /api/assistant/tasks/{id}` 需登录且仅发起人可看 | P0 | 完成 |
+| A9 | 分享密码解锁限流 | P0 | 完成 |
+| A10 | 相同幂等键下评论话题统计丢失（已决定） | P1 | 完成 |
 | A11 | 助手指令的 Java 端校验缺口 | P0 | 未开始（等助手评测基线） |
 | B1 | 同一话题分钟计数热点【需决定】 | P1 | 未开始 |
 | B2 | 计数改为增量更新 + 离线对账（R3） | P1 | 未开始 |
@@ -72,6 +72,8 @@
   1. 新 IT 在 media 启用、fault-hooks 和 manual-settle 都不设置时，对上述每个端点断言返回 404（RED：当前预期返回 200）。
   2. 显式打开时，端点仍然可用，现有压测和正确性脚本（`run-java-commerce.ps1` 传 `--content.sale.fault-hooks=true`）不受影响。
   3. `SaleFaultHooks` 在关闭时不能被外部触发。
+- **结果**（`0480365`）：钩子移到类级条件的 `SaleFaultHookController`、`SaleManualSettleController`。RED：默认配置下 4 个钩子返回 200、`/settle` 返回 401（已注册），`holdArmed` 为 true；GREEN：`DebugEndpointsDefaultIT`（全部钩子与赠品钩子 404）、`DebugEndpointsEnabledIT`（显式打开时可用）通过。
+- **认证盘点结果**（`caff87e`，`AnonymousAccessIT` 匿名调用全部路由，表格写入 `target/anonymous-access/routes.tsv`）：不需要登录即可访问的只有注册、登录（A2 限流）和带 HMAC 签名的 `GET /api/media/objects`；发现 `GET /api/assistant/tasks/{id}` 匿名可读（→ A8，已修复，KNOWN_FINDINGS 已清空）；签名密钥有公开默认值（→ A7）；分享密码解锁无限流（→ A9）。Actuator 只暴露 health 和索引，env/metrics/beans/configprops/heapdump 均 404。另记两条未立项的小问题：素材反馈 resolve 缺 `versionId` 时 NPE → 500；不存在的用户名登录跳过 BCrypt（响应时间可区分用户是否存在）。
 
 ### A2 限流（已决定 2026-11-21）
 - **问题**：点赞/取消/踩、评论、举报、登录、注册都没有限流（R4/R5）；全仓只有 `SaleDispatcher` 有并发闸门。
@@ -94,26 +96,35 @@
   - 与抢购隔离：不覆盖抢购入口，也不改 `SaleHttpInFlightFilter`。
   - **压测冲突**：修改 `infra/perf/interactions` 的压测脚本，把请求分散到足够多的用户，使每个用户的速率低于阈值；**不为压测单独调高阈值**。报告中说明这一改动，并确认不影响第 1 轮的结论。
 - **验收**：每类接口的 IT 都能证明阈值内放行、超限返回 429 加 Retry-After、窗口过后恢复、Redis 不可用时的行为符合设计；抢购入口的 IT 不受影响；互动 a/b/c 场景在约定配置下的结果与第 1 轮一致（误差范围在报告中写明）。
+- **结果**（`ffc3fa0`、脚本 `4f5cc94`）：`RateLimitIT`（7 项）、`RateLimitRedisDownIT`（Redis 端口不通时按本地桶放行 5 个、拒绝 2 个，记 fallback 指标和 WARN）通过。压测复核见 `docs/perf-evidence/hardening-a-20261121/README.md` §2：新脚本下所有档 4xx = 0，第 1 轮结论不变（(a) 200 rps 无错误；(b)(c) 仍卡在约 55–64 rps，属 B1）；限流单次判定耗时缺证据。默认配置下单 IP 登录每 30 s 成功 29 次，符合 20/分钟 + 突发 20。
 
 ### A3 举报去重（已决定 2026-11-21）
 - **问题**：`post_reports` 没有唯一约束（`V14__material_posts.sql`），同一用户可以无限次举报，每次还要做 4 次 COUNT（R4）。
 - **决定**：唯一约束 `(post_id, reporter_user_id)`，同一用户对同一帖子只能举报一次；重复请求返回首次的 `reportId` 和计数。迁移时现有重复数据保留最早一条（迁移前先统计数量）。`reportId` 返回真实 id。
 - **待核实**：开发库里现有重复举报的数量（迁移前统计）；`reportId` 目前固定返回 0（`InteractionService.report`），需要返回真实 id。
 - **验收**：RED 证明重复举报会新增记录；GREEN 后重复请求不新增，返回同一个 `reportId` 和计数；两个线程同时举报只产生 1 条记录，且都不返回 5xx；迁移在已有重复数据的库上也能成功执行（有测试）。
+- **结果**（`9a5b366`，V29）：
+  - 迁移前统计：开发库 `content`（当时在 V26）重复举报 0 行、0 组（`target/hardening-a/A3-premigration-dup-count-010700.txt`）。
+  - RED：8 线程并发举报产生 8 行；重复举报产生 2 行。GREEN：`ReportDedupIT`（3 项：重复返回同一 `reportId` 和计数且 `replay=true`、并发只 1 行且无 5xx、`reportId` 为真实 id）通过。
+  - `ReportDedupMigrationIT`：在 V28 库中插入重复数据后迁移到 V29，每组保留最早一条（同时间按 id），`report_count` 按实际行数重算，唯一索引存在。`MySqlMigrationIT` 增加 V29 断言。
 
 ### A4 登录 BCrypt 有界线程池
 - **问题**：BCrypt 在请求线程上同步计算，每次约 61.7 ms CPU（风险清单 R5），没有上限。
 - **方案方向**：固定大小的线程池加有界队列，满了直接返回 429（带 Retry-After），与 A2 的登录限流叠加。池大小和队列长度可配置，默认值在设计里说明。注册时的 BCrypt 编码同样处理。
 - **验收**：IT 或单元测试证明并发超过池加队列容量时返回 429 而不是排队到超时；正常登录不变；并发压测（与风险清单 D 节同方法）记录改前改后的 CPU、p99、429 比例。
+- **结果**（`b44959c`）：`PasswordHasher`（默认线程 = 核数/2，队列 = 4×线程，等待上限 5 s 后 503 `AUTH_BUSY`），注册的编码移到事务外；`AuthBcryptPoolIT`（1 线程、队列 1、16 并发：部分 429 + Retry-After: 1，其余 200）通过。登录压测见 `docs/perf-evidence/hardening-a-20261121/README.md` §3：隔离运行（仅调高 login-ip）在 200 rps 下改前丢弃 2079 次迭代、p99 5.0 s、CPU 峰值 88.5%，改后无丢弃无 5xx、p99 1.5 s、CPU 峰值 55.8%，成功约 64/s，其余 429。
+- **遗留【需决定】**：16 逻辑核下默认 8 线程，成功吞吐上限约 64–75/s；改前 100 rps 时全部成功，改后 100 rps 有 24% 被 429。是否调整 `content.auth.bcrypt-threads` 默认值（例如按核数减 1），或保持保守默认、部署时按机器配置，请决定。
 
 ### A5 评论幂等竞态
 - **问题**：`InteractionService.comment` 先 `existingComment` 再 `INSERT`（`:73,92`）。同一个幂等键并发到达时，后到的请求撞唯一键 `uq_comment_idem`，`DuplicateKeyException` 没有被捕获，返回 500（R10）。
 - **方案**：参照 `PublishService.publish`：捕获唯一键冲突，**在新事务里**重读首条记录，返回 `replay=true` 的首次结果；不在已经失败的事务里读取。
 - **验收**：RED 用屏障让两个线程同时提交同一个键，其中一个当前返回 5xx；GREEN 后两者都返回同一个 `commentId`，并且只有 1 条评论、1 个 outbox 事件、1 次话题计数。
+- **结果**（`982e742`）：RED 实际为 503 `FEED_UNAVAILABLE`，不是计划中写的 500（`FeedErrors` 把 `DataAccessException` 映射为 503）；GREEN `CommentIdempotencyRaceIT`（8 线程同键：1 条评论、1 个 CommentCreated outbox 事件、话题净值 1、`comment_count` 1）通过。
 
 ### A6 注册并发重名返回 409
 - **问题**：`AuthService.register` 在事务里先查后插，并发重名撞 `uq_users_username` 时返回 500。
 - **验收**：RED 用屏障并发注册同一用户名，当前有 1 个返回 5xx；GREEN 后一个 200、一个 409 `USERNAME_TAKEN`，不出现 500，只有 1 条用户记录。
+- **结果**（`f0881d4`）：RED 实际为 503 `FEED_UNAVAILABLE`；GREEN `AuthRegisterRaceIT`（同名 8 并发、大小写变体并发：恰好一个 200，其余 409 `USERNAME_TAKEN`，1 条用户记录）通过。
 
 ### A7 媒体下载签名密钥去掉公开默认值
 - **问题**：`/api/media/objects` 只靠 HMAC 签名授权；`application.yml` 给 `content.media.secret-key` 配了公开默认值 `content-secret-key-32-bytes-minimum`。生产若没有设置 `CONTENT_S3_SECRET_KEY`，任何人都能伪造任意对象（包括付费原件）的下载链接。
@@ -287,3 +298,4 @@
 | 2026-11-21 | A | A1–A6 已修复（`0480365`…`982e742`）；全量 IT 因系统内存不足被中止，待重跑；新增 A7–A10（A1 扫描发现）；记录抢购压测脚本的造数方式决定（B5 前置） |
 | 2026-11-21 | A | A7（`89f9816`）、A8（`88668db`）、A9（`056a65a`、`3627911`）已修复；A10 已复现（`aa75ca7`），结论与方案待决定 |
 | 2026-11-21 | A | A10 采用方案 1 并修复（`b0d31e0`）；新增 A11（等助手评测基线）；前端评论幂等键并入 D4；完整 IT 改为分批运行（每批 1–2 个测试类，failsafe -Xmx1g，批前可用内存 ≥3GB，批后确认容器退出） |
+| 2026-11-21 | A | 第 A 轮收尾：分批完整 IT 全部通过（`1535a09`，488 用例 0 失败 0 错误 94 跳过，b03 起在重启后续跑）；互动 a/b/c 复测与登录前后压测完成，报告 `docs/perf-evidence/hardening-a-20261121/`；A1–A10 标为完成，A4 遗留池大小默认值待决定，A11 等助手评测基线 |
