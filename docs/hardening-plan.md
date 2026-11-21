@@ -29,7 +29,7 @@
 | A8 | `GET /api/assistant/tasks/{id}` 需登录且仅发起人可看 | P0 | 完成 |
 | A9 | 分享密码解锁限流 | P0 | 完成 |
 | A10 | 相同幂等键下评论话题统计丢失（已决定） | P1 | 完成 |
-| A11 | 助手指令的 Java 端校验缺口 | P0 | 未开始（等助手评测基线） |
+| A11 | 助手指令的 Java 端校验缺口 | P0 | 完成 |
 | A12 | 反馈 resolve 缺 `versionId` 返回 400 | P2 | 完成 |
 | A13 | 登录时用户不存在也执行 BCrypt | P1 | 完成 |
 | B1 | 同一话题分钟计数热点【需决定】 | P1 | 未开始 |
@@ -176,6 +176,17 @@
 - **要求**：Java 端对解析结果做完整校验，任何不支持或越权的条件都拒绝或补问，不得静默丢弃。
 - **验收**：等助手评测基线完成后，按评测中的 18 个非法执行样例逐一写 RED（合格 RED：编译通过、环境健康、因缺少校验而执行），再 GREEN；评测端到端汇总（`e2e_summary.py`）非法执行为 0。
 - **前置**：助手评测基线（另一会话的工作，`assistant-python/eval/`、`AssistantEvalE2EIT` 不属于本轮，未完成前不动）。
+- **决定**（2026-11-21）：
+  - 原则：Java 能核实的事项一律从数据库独立校验，包括目标评论是本帖反馈且不是助手写的、作者不参与、每人一个资格、商用在素材许可内、奖品是本帖 READY 版本、人数和时间合法。
+  - 显式字段只表达解析器才知道的语义：订阅 `action=SUBSCRIBE|CANCEL`、`target=SELF|OTHERS|ALL`，以及 `unsupportedTools`。
+  - 校验失败时回复一条原因，任务进入终态 `REJECTED`（新增 V30 放开 CHECK 约束）。目标不是反馈时为 `CLARIFY`。基础设施错误仍重试。
+  - CI 增加 pytest job。不改解析器的时间识别。
+- **结果**：
+  - Java：`AssistantCommandValidationIT` 42 项，RED 38 项失败，GREEN 全部通过。
+  - 解析器：识别到不支持的条件时填写 `unsupportedTools`，支持取消、替他人和批量的标记，使用 `parentKind`。pytest 由 RED 22 项失败变为 27 项全部通过。
+  - `context` 新增 `parentKind`/`parentIsFeedback`、`nowMs`、`timezone`、`postLicenseCommercial`、`enabledTools`。
+  - 端到端非法执行：r3 全量 10 → **0**，r1 冒烟 171 条 18 → **0**。gold 为 EXECUTE 的执行数与基线相同（没有误拦）。
+  - 报告：`docs/perf-evidence/assistant/a11-validation-20261121.md`。
 
 ### A12 反馈 resolve 缺 `versionId` 返回 400（A1 认证盘点发现）
 - **问题**：`POST /api/materials/{post}/feedback/{comment}/resolve` 直接 `((Number)body.get("versionId")).longValue()`，缺字段 NPE、非数字 ClassCastException，均为 500；并且先解析请求体、后检查身份。
@@ -314,3 +325,4 @@
 | 2026-11-21 | A | A10 采用方案 1 并修复（`b0d31e0`）；新增 A11（等助手评测基线）；前端评论幂等键并入 D4；完整 IT 改为分批运行（每批 1–2 个测试类，failsafe -Xmx1g，批前可用内存 ≥3GB，批后确认容器退出） |
 | 2026-11-21 | A | 第 A 轮收尾：分批完整 IT 全部通过（`1535a09`，488 用例 0 失败 0 错误 94 跳过，b03 起在重启后续跑）；互动 a/b/c 复测与登录前后压测完成，报告 `docs/perf-evidence/hardening-a-20261121/`；A1–A10 标为完成，A4 遗留池大小默认值待决定，A11 等助手评测基线 |
 | 2026-11-21 | A | A4 池大小默认值改为 max(2, 逻辑核数/2)（`0d171dc`）；新增并修复 A12（`db3789c`）、A13（`8301157`）；相关测试分批运行全部通过（单元测试 + 11 个 IT 类，94 用例 0 失败 0 错误 1 跳过，`target/hardening-a/it-batches-related-8301157-093435`）；删除 target/ 下三个旧 worktree（测试报告已归档到 `target/hardening-a/worktree-reports/`） |
+| 2026-11-21 | A | A11 完成：Java 端独立校验订阅和抽奖，校验失败进入 REJECTED 并回复原因（V30）；解析器上报不支持的条件，并标出取消、替他人、批量；`context` 补全；CI 加 pytest；端到端非法执行 r3 10→0、冒烟 18→0；LATEST_BASELINE 指向 r3 |
