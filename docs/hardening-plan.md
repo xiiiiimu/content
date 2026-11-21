@@ -40,11 +40,11 @@
 | B6 | 关注潮（R6）与推模式扩散（R7）实测 | P1 | 未开始 |
 | C1 | 只增不减的表和 Redis 结构盘点 | P2 | 未开始 |
 | C2 | 保留策略与清理任务【需决定】 | P2 | 未开始 |
-| D1 | CI 跳过项评估与启用【需决定】 | P3 | 未开始 |
-| D2 | FFmpeg 超时后的容器清理测试 | P3 | 未开始 |
-| D3 | `offlineDuringProcessingFailsLeaseWithoutCompleting` 偶发失败 | P3 | 未开始 |
-| D4 | 前端话题输入框 + 前端测试 | P3 | 未开始 |
-| D5 | 支付/退款为模拟实现的文档说明 | P3 | 未开始 |
+| D1 | CI 跳过项评估与启用（已决定） | P3 | 进行中（已实现并本地验证，待推送后 CI） |
+| D2 | FFmpeg 超时后的容器清理测试 | P3 | 完成 |
+| D3 | `offlineDuringProcessingFailsLeaseWithoutCompleting` 偶发失败 | P3 | 完成（连续 10 次，置信度有限） |
+| D4 | 前端话题输入框 + 前端测试 | P3 | 完成 |
+| D5 | 支付/退款为模拟实现的文档说明 | P3 | 完成 |
 | E1 | @助手 接入大模型解析器（多供应商、兜底、注入防护） | — | 完成 |
 
 ---
@@ -294,15 +294,19 @@
 
 - **待评估**：真实 MQ 测试设置环境变量后能否在 GitHub Actions 上用 Testcontainers 的 RocketMQ 运行，以及新增的耗时；在 runner 上安装 FFmpeg 或拉取镜像；是否需要拆成多个 job，或者调整 20 分钟的超时。
 - **验收**：按收益和 CI 耗时给出建议，**确认后再改 workflow**；改后的 CI 运行通过，并列出仍然跳过的项和原因。
+- **决定（2026-11-21）**：拆成并行 job，每个超时 ≤35 min，超了再拆、不调大；真实 MQ 用 Testcontainers 并设 `CONTENT_REAL_MQ_IT=true`；FFmpeg 测试尽量在 CI 运行；MinIO 照旧跳过；PerfHarnessIT 不进 CI；`setup-java` 升 v5。
+- **结果（`2ec9483`，待 CI）**：job 为 `assistant-python`、`maven (a-l)`、`maven (m-z)`（按 IT 类名首字母拆分）、`maven-real-mq`。真实 MQ 套件改用 Testcontainers（`CommerceMqFixture`，broker 端口 30924），本地同一 JVM 95/95 通过、231 s。FFmpeg 经 Docker 镜像运行，不需要在 runner 上装宿主机 ffmpeg（此前已在 CI 运行）。本地完整分批 547 运行 / 0 失败 / 94 跳过，Maven 时间合计 39.7 min，两个分片约 19.0 / 19.9 min（分批口径偏高）；CI 实际耗时缺证据。actionlint 0 错误。仍跳过：MediaMinioIT、PerfHarnessIT、AssistantEvalE2EIT（评测工具）、FfmpegTranscoderExecTest 的 Windows 用例。报告：`docs/perf-evidence/hardening-d-20261122/README.md`。
 
 ### D2 FFmpeg 超时后的容器清理
 - **问题**：`FfmpegTranscoder` 用 `docker run --rm` 执行（`FfmpegTranscoder.java:72`）。超时后只杀掉本地 docker CLI 进程，容器可能还在运行（CLAUDE.md 列为“已知边界：未验证”）。
 - **验收**：测试制造超时（例如用一个持续 sleep 的命令或很短的超时），断言超时后容器确实被停止并删除（`docker ps -a` 按名字或标签过滤后为空）；如果没有删除，就修复（例如给容器加 `--name`，超时后执行 `docker rm -f`），并按 RED/GREEN 记录。
+- **结果（`90452ce`）**：RED 确认超时后容器仍在运行；修复为唯一 `--name` + 标签，超时或中断时 `docker rm -f`。`FfmpegTranscoderTimeoutIT` 超时、中断两个用例通过（中断用例无单独 RED）。遗留：容器尚未创建时超时的理论窗口。报告：`docs/perf-evidence/hardening-d-20261122/README.md`。
 
 ### D3 `MediaFfmpegIT.offlineDuringProcessingFailsLeaseWithoutCompleting` 偶发失败
 - **位置**：`MediaFfmpegIT.java:105`
 - **待核实**：收集历史失败日志（CI artifact、本地），重复运行 N 次统计失败率，判断是测试时序问题（等待、屏障不足）还是真实竞态（下线与租约完成之间）。
-- **验收**：写明根因；修复对应的一方（测试或生产代码；如果是生产竞态，按 RED/GREEN）；修复后连续运行 ≥30 次无失败。
+- **验收**：写明根因；修复对应的一方（测试或生产代码；如果是生产竞态，按 RED/GREEN）；修复后连续运行 ≥30 次无失败。（2026-11-21 调整为连续 10 次，并在报告中说明置信度有限。）
+- **结果（`ba2cc30`）**：根因是测试夹具竞态：`MediaFfmpegIT` 没有关闭 1 s 后台媒体扫描，扫描线程可能抢在测试的 `tick()` 之前认领任务；生产代码的租约和版本检查正确。RED 守卫用例证明 3 s 内任务被后台处理为 DONE。修复：`content.media.scan-delay-millis=3600000`（与其他 media IT 一致），`MediaPipelineIT` 预防性同改。修复后连续 10 次 0 失败；10 次置信度有限。报告：`docs/perf-evidence/hardening-d-20261122/README.md`。
 
 ### D4 前端话题输入
 - **问题**：R1 之后话题由作者设置，但前端没有输入入口，话题页上线后为空。
@@ -311,10 +315,12 @@
   - 问题：`pages/posts/[id].vue` 用 `ui-${Date.now()}`、`assistant-${Date.now()}`，`pages/hot-topics/[topic]/[post].vue` 用 `web-${postId}-${Date.now()}`，每次点击生成新键，网络重试不会复用，后端幂等对用户重试不起作用。
   - 要求：打开评论框时生成一次键（随机 UUID），发送失败重试时复用，发送成功后才换新键；后端已有幂等，无需改动。
   - 验收：补一个前端测试（vitest），证明同一次评论的重试使用同一个键，成功后下一条评论使用新键。
+- **结果（`5e4bad4`）**：前端原本没有发帖和编辑页，新增 `/posts/new`、`/posts/edit/[id]`，话题校验与后端一致，编辑时留空保持、勾选清除发送 null（读接口不返回话题，无法预填）。三个评论框改用 `createCommentKey`。vitest RED 7 失败 → GREEN 17/17，原有测试无失败项；typecheck、build 通过。报告：`docs/perf-evidence/hardening-d-20261122/README.md`。
 
 ### D5 支付与退款仍为模拟实现
 - 不接入真实支付。在 README 和相关设计文档里如实说明：支付和退款是模拟实现，哪些状态流转是模拟的，接入真实支付前需要补哪些东西（回调验签、对账、幂等）。
 - **验收**：文档更新已提交；代码中没有任何地方暗示接入了真实支付。
+- **结果（`3fa364e`）**：README 与 `docs/v1.1-material-commerce.md`（“支付与退款边界”）列出模拟的状态流转和接入前要补的事项；前端价格和付款提示标明“模拟”；Java/Python 中没有支付渠道相关代码。报告：`docs/perf-evidence/hardening-d-20261122/README.md`。
 
 ---
 
@@ -369,3 +375,4 @@
 | 2026-11-21 | A | A4 池大小默认值改为 max(2, 逻辑核数/2)（`0d171dc`）；新增并修复 A12（`db3789c`）、A13（`8301157`）；相关测试分批运行全部通过（单元测试 + 11 个 IT 类，94 用例 0 失败 0 错误 1 跳过，`target/hardening-a/it-batches-related-8301157-093435`）；删除 target/ 下三个旧 worktree（测试报告已归档到 `target/hardening-a/worktree-reports/`） |
 | 2026-11-21 | A | A11 完成：Java 端独立校验订阅和抽奖，校验失败进入 REJECTED 并回复原因（V30）；解析器上报不支持的条件，并标出取消、替他人、批量；`context` 补全；CI 加 pytest；端到端非法执行 r3 10→0、冒烟 18→0；LATEST_BASELINE 指向 r3 |
 | 2026-11-21 | E | E1 完成：@助手 接入大模型解析器（多供应商，默认 DeepSeek，`llm_with_fallback`），`droppedRequirements` 注入防护；测试集意图 98.8%（规则版 82.1%），执行判定 97.6%（60.7%），E2E 非法执行 0；两组注入集 26 条非法执行 0；Java 解析超时改为 30 s（`c6f37dd`…`572b779`） |
+| 2026-11-22 | D | D2（`90452ce`）、D4（`5e4bad4`）、D5（`3fa364e`）、D3（`ba2cc30`，连续 10 次 0 失败）完成；D1（`2ec9483`）CI 拆为 4 个并行 job、真实 MQ 改用 Testcontainers、`setup-java` v5，本地验证通过，待推送后 CI；分批脚本修复旧 summary 误判并去掉过时的 AssistantEvalE2EIT 排除（`5d25a83`、`2ec9483`）；本地完整分批 IT 547 运行 0 失败 94 跳过。报告 `docs/perf-evidence/hardening-d-20261122/` |
