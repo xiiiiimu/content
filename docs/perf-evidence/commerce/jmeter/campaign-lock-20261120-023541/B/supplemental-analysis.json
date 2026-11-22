@@ -1,0 +1,557 @@
+{
+  "rollingOneSecondMaxStarts": 60,
+  "perSecond": [
+    {
+      "epochSecond": 1795114080,
+      "starts": 15,
+      "completed200": 2
+    },
+    {
+      "epochSecond": 1795114081,
+      "completed200": 62,
+      "starts": 52
+    },
+    {
+      "epochSecond": 1795114082,
+      "completed200": 47,
+      "starts": 48
+    },
+    {
+      "epochSecond": 1795114083,
+      "completed200": 46,
+      "starts": 49
+    },
+    {
+      "epochSecond": 1795114084,
+      "completed200": 47,
+      "starts": 48
+    },
+    {
+      "epochSecond": 1795114085,
+      "completed200": 52,
+      "starts": 50
+    },
+    {
+      "epochSecond": 1795114086,
+      "completed200": 39,
+      "starts": 53
+    },
+    {
+      "epochSecond": 1795114087,
+      "completed200": 66,
+      "starts": 49
+    },
+    {
+      "epochSecond": 1795114088,
+      "completed200": 49,
+      "starts": 48
+    },
+    {
+      "epochSecond": 1795114089,
+      "completed200": 51,
+      "starts": 52
+    },
+    {
+      "epochSecond": 1795114090,
+      "completed200": 57,
+      "starts": 57
+    },
+    {
+      "epochSecond": 1795114091,
+      "completed200": 56,
+      "starts": 57
+    },
+    {
+      "epochSecond": 1795114092,
+      "completed200": 53,
+      "starts": 50
+    },
+    {
+      "epochSecond": 1795114093,
+      "completed200": 45,
+      "starts": 53
+    },
+    {
+      "epochSecond": 1795114094,
+      "completed200": 40,
+      "starts": 39
+    },
+    {
+      "epochSecond": 1795114095,
+      "completed200": 54,
+      "starts": 48
+    },
+    {
+      "epochSecond": 1795114096,
+      "completed200": 52,
+      "starts": 52
+    },
+    {
+      "epochSecond": 1795114097,
+      "completed200": 57,
+      "starts": 57
+    },
+    {
+      "epochSecond": 1795114098,
+      "completed200": 55,
+      "starts": 54
+    },
+    {
+      "epochSecond": 1795114099,
+      "completed200": 52,
+      "starts": 52
+    },
+    {
+      "epochSecond": 1795114100,
+      "starts": 53,
+      "completed200": 50
+    },
+    {
+      "epochSecond": 1795114101,
+      "completed200": 43,
+      "starts": 46
+    },
+    {
+      "epochSecond": 1795114102,
+      "completed200": 59,
+      "starts": 54
+    },
+    {
+      "epochSecond": 1795114103,
+      "completed200": 57,
+      "starts": 56
+    },
+    {
+      "epochSecond": 1795114104,
+      "completed200": 52,
+      "starts": 59
+    },
+    {
+      "epochSecond": 1795114105,
+      "completed200": 56,
+      "starts": 49
+    },
+    {
+      "epochSecond": 1795114106,
+      "completed200": 57,
+      "starts": 56
+    },
+    {
+      "epochSecond": 1795114107,
+      "starts": 57,
+      "completed200": 55
+    },
+    {
+      "epochSecond": 1795114108,
+      "completed200": 58,
+      "starts": 59
+    },
+    {
+      "epochSecond": 1795114109,
+      "completed200": 47,
+      "starts": 48
+    },
+    {
+      "epochSecond": 1795114110,
+      "completed200": 56,
+      "starts": 54
+    },
+    {
+      "epochSecond": 1795114111,
+      "completed200": 31,
+      "starts": 38
+    },
+    {
+      "epochSecond": 1795114112,
+      "completed200": 53,
+      "starts": 49
+    },
+    {
+      "epochSecond": 1795114113,
+      "completed200": 50,
+      "starts": 47
+    },
+    {
+      "epochSecond": 1795114114,
+      "completed200": 55,
+      "starts": 54
+    },
+    {
+      "epochSecond": 1795114115,
+      "completed200": 56,
+      "starts": 57
+    },
+    {
+      "epochSecond": 1795114116,
+      "completed200": 56,
+      "starts": 58
+    },
+    {
+      "epochSecond": 1795114117,
+      "completed200": 53,
+      "starts": 53
+    },
+    {
+      "epochSecond": 1795114118,
+      "completed200": 55,
+      "starts": 52
+    },
+    {
+      "epochSecond": 1795114119,
+      "completed200": 54,
+      "starts": 55
+    },
+    {
+      "epochSecond": 1795114120,
+      "completed200": 53,
+      "starts": 52
+    },
+    {
+      "epochSecond": 1795114121,
+      "starts": 58,
+      "completed200": 56
+    },
+    {
+      "epochSecond": 1795114122,
+      "completed200": 59,
+      "starts": 57
+    },
+    {
+      "epochSecond": 1795114123,
+      "completed200": 60,
+      "starts": 60
+    },
+    {
+      "epochSecond": 1795114124,
+      "completed200": 37,
+      "starts": 40
+    },
+    {
+      "epochSecond": 1795114125,
+      "completed200": 57,
+      "starts": 56
+    },
+    {
+      "epochSecond": 1795114126,
+      "completed200": 45,
+      "starts": 49
+    },
+    {
+      "epochSecond": 1795114127,
+      "completed200": 55,
+      "starts": 50
+    },
+    {
+      "epochSecond": 1795114128,
+      "completed200": 48,
+      "starts": 48
+    },
+    {
+      "epochSecond": 1795114129,
+      "completed200": 47,
+      "starts": 50
+    },
+    {
+      "epochSecond": 1795114130,
+      "completed200": 50,
+      "starts": 48
+    },
+    {
+      "epochSecond": 1795114131,
+      "completed200": 53,
+      "starts": 53
+    },
+    {
+      "epochSecond": 1795114132,
+      "completed200": 56,
+      "starts": 55
+    },
+    {
+      "epochSecond": 1795114133,
+      "completed200": 58,
+      "starts": 57
+    },
+    {
+      "epochSecond": 1795114134,
+      "completed200": 51,
+      "starts": 54
+    },
+    {
+      "epochSecond": 1795114135,
+      "completed200": 62,
+      "starts": 59
+    },
+    {
+      "epochSecond": 1795114136,
+      "completed200": 57,
+      "starts": 58
+    },
+    {
+      "epochSecond": 1795114137,
+      "completed200": 51,
+      "starts": 53
+    },
+    {
+      "epochSecond": 1795114138,
+      "completed200": 51,
+      "starts": 51
+    },
+    {
+      "epochSecond": 1795114139,
+      "completed200": 60,
+      "starts": 57
+    },
+    {
+      "epochSecond": 1795114140,
+      "completed200": 37,
+      "starts": 36
+    }
+  ],
+  "httpSegmentsByCodeMs": {
+    "200": {
+      "samplerStartToAppEnterMs": {
+        "count": 3138,
+        "p50": 2,
+        "p95": 35,
+        "p99": 120,
+        "max": 387
+      },
+      "appEnterToAppExitMs": {
+        "count": 3138,
+        "p50": 22,
+        "p95": 167,
+        "p99": 308,
+        "max": 423
+      },
+      "appExitToHttpSamplerEndMs": {
+        "count": 3138,
+        "p50": 1,
+        "p95": 4,
+        "p99": 16,
+        "max": 127
+      }
+    }
+  },
+  "httpPhaseMs": {
+    "auth.verify": {
+      "count": 3138,
+      "p50": 0,
+      "p95": 2,
+      "p99": 7,
+      "max": 232
+    },
+    "redis.reserve.lua": {
+      "count": 3138,
+      "p50": 17,
+      "p95": 144,
+      "p99": 292,
+      "max": 411
+    },
+    "purchase.total": {
+      "count": 3138,
+      "p50": 17,
+      "p95": 146,
+      "p99": 293,
+      "max": 412
+    }
+  },
+  "observedHttpWindowMs": 60060,
+  "plannedWindowFirstSamplerOffsetMs": 11,
+  "dispatchPhasesMs": {},
+  "ackConfirmationSqlStatements": [],
+  "settlementRootStartToMainCommitReturnedMs": {
+    "count": 3138,
+    "p50": 188,
+    "p95": 547,
+    "p99": 787,
+    "max": 1726
+  },
+  "campaignLockReturnToMainCommitReturnMs": {
+    "count": 3138,
+    "p50": 36,
+    "p95": 111,
+    "p99": 259,
+    "max": 747
+  },
+  "lockDurationCaveat": "Return-to-commit is a lower bound on lock holding; measured from the first campaign-row locking statement (lockCampaign before V26, the final tryIncrementSold from V26), whose own duration includes query/RTT and possible lock wait.",
+  "resourcePeaks": {
+    "/actuator/metrics/sale.http.queue.depth": 4.0,
+    "/actuator/metrics/tomcat.threads.current": 100.0,
+    "/actuator/metrics/tomcat.threads.busy": 18.0,
+    "/actuator/metrics/tomcat.threads.config.max": 100.0,
+    "/actuator/metrics/tomcat.connections.current": 79.0,
+    "/actuator/metrics/tomcat.connections.config.max": 20000.0,
+    "/actuator/metrics/jvm.memory.used?tag=area:heap": 148933288.0,
+    "/actuator/metrics/jvm.memory.max?tag=area:heap": 4217372670.0,
+    "/actuator/metrics/process.cpu.usage": 0.20176906472999703,
+    "/actuator/metrics/jvm.threads.live": 257.0,
+    "/actuator/metrics/jvm.threads.states?tag=state:runnable": 27.0,
+    "/actuator/metrics/jvm.threads.states?tag=state:blocked": 25.0,
+    "/actuator/metrics/jvm.threads.states?tag=state:waiting": 181.0,
+    "/actuator/metrics/jvm.threads.states?tag=state:timed-waiting": 74.0,
+    "/actuator/metrics/hikaricp.connections.active": 9.0,
+    "/actuator/metrics/hikaricp.connections.pending": 0,
+    "/actuator/metrics/hikaricp.connections": 38.0,
+    "/actuator/metrics/hikaricp.connections.max": 120.0,
+    "/actuator/metrics/hikaricp.connections.min": 30.0,
+    "/actuator/metrics/hikaricp.connections.idle": 35.0
+  },
+  "unavailableMetricSampleCounts": {},
+  "sampledLockWaitTableObservations": {
+    "material_sale_campaigns": 36,
+    "material_sale_cache_jobs": 20
+  },
+  "processingPeak": 2479,
+  "streamLagPeakGlobal": 2077,
+  "streamPendingPeakGlobal": 20,
+  "dispatchPendingPeak": 2477,
+  "firstObservedFullyDrainedAfterLastHttp": {
+    "startMs": 1795114465597,
+    "endMs": 1795114465939
+  },
+  "drainAfterLastHttpSecUpperBound": 325.194,
+  "windowEdges": {
+    "start": {
+      "startEpochMs": 1795114080674,
+      "database": {
+        "campaign": [
+          [
+            "21",
+            "20",
+            "1",
+            "1"
+          ]
+        ],
+        "cacheJobs": [
+          [
+            "0"
+          ]
+        ],
+        "receipts": [
+          [
+            "1"
+          ]
+        ],
+        "dispatch": [
+          [
+            "21",
+            "18",
+            "2",
+            "1",
+            "1"
+          ]
+        ],
+        "lockWaitsByTable": [],
+        "campaignForUpdateDigest": [
+          [
+            "3",
+            "25155",
+            "11248316506274000"
+          ]
+        ],
+        "appAccountTransactions": [
+          [
+            "4945580",
+            "44930728388421000"
+          ]
+        ]
+      },
+      "redis": {
+        "globalStreamLag": 226,
+        "campaignStock": 3713,
+        "globalStreamLength": 25636,
+        "globalStreamPending": 0,
+        "ready": "1"
+      },
+      "endEpochMs": 1795114090596,
+      "redisKnownFormalBuyers": {
+        "staleGuards": 0,
+        "checkedUsers": 3600,
+        "invalid": 0,
+        "processing": 462,
+        "redisEpochMs": 1795114090293
+      },
+      "sampleStartOffsetFromBoundaryMs": 0,
+      "sampleEndOffsetFromBoundaryMs": 9922
+    },
+    "end": {
+      "startEpochMs": 1795114140734,
+      "database": {
+        "campaign": [
+          [
+            "1061",
+            "854",
+            "207",
+            "209"
+          ]
+        ],
+        "cacheJobs": [
+          [
+            "4"
+          ]
+        ],
+        "receipts": [
+          [
+            "207"
+          ]
+        ],
+        "dispatch": [
+          [
+            "1061",
+            "852",
+            "0",
+            "209",
+            "1"
+          ]
+        ],
+        "lockWaitsByTable": [],
+        "campaignForUpdateDigest": [
+          [
+            "3",
+            "25155",
+            "11248316506274000"
+          ]
+        ],
+        "appAccountTransactions": [
+          [
+            "4947486",
+            "45182015946648000"
+          ]
+        ]
+      },
+      "redis": {
+        "globalStreamLag": 2057,
+        "campaignStock": 862,
+        "globalStreamLength": 28487,
+        "globalStreamPending": 0,
+        "ready": "1"
+      },
+      "endEpochMs": 1795114143042,
+      "redisKnownFormalBuyers": {
+        "staleGuards": 0,
+        "checkedUsers": 3600,
+        "invalid": 0,
+        "processing": 2920,
+        "redisEpochMs": 1795114142842
+      },
+      "sampleStartOffsetFromBoundaryMs": 60,
+      "sampleEndOffsetFromBoundaryMs": 2368
+    }
+  },
+  "windowPaidAtRecordOrders": 204,
+  "clientPollCalls": 12000,
+  "clientPollSeconds": 120.369,
+  "clientPollAverageQps": 99.69344266380878,
+  "clientPollObservedSucceeded": 1080,
+  "clientPollAcceptedTotal": 3138,
+  "clientPollIntervalsMs": {
+    "count": 8862,
+    "p50": 27086,
+    "p95": 30034,
+    "p99": 30997,
+    "max": 31608
+  },
+  "clientReservationsWithPollError": 0,
+  "hostMinimumAvailableCommitBytes": 6016225280,
+  "maxObserverStartGapMs": 4347
+}

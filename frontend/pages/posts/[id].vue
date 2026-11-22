@@ -5,7 +5,7 @@ import { ContentApiError } from '~/types/content'
 const route = useRoute()
 const postId = computed(() => Number(route.params.id))
 const api = useContentApi()
-const { hydrate, token, expired } = useIdentity()
+const { hydrate, token, expired, readerId } = useIdentity()
 
 const post = ref<ContentPost | null>(null)
 const stats = ref<PostStats | null>(null)
@@ -16,6 +16,10 @@ const selectedVersionId = ref<number | null>(null)
 const offsetMs = ref(8000)
 const commentBody = ref('')
 const assistantBody = ref('@助手 ')
+// D4: one key per comment box, reused by retries and rotated only after a successful send.
+const commentKey = createCommentKey('ui')
+const assistantKey = createCommentKey('assistant')
+watch(postId, () => { commentKey.reset(); assistantKey.reset() })
 const feedbackCommentId = ref<number | null>(null)
 const subscribeMsg = ref('')
 const password = ref('')
@@ -25,6 +29,23 @@ const mediaError = ref('')
 const comments = ref<Array<{ commentId: number; userId: number; parentId?: number; body: string; createdAtMs: number }>>([])
 const notifications = ref<Array<{ id: number; kind: string; postId: number; commentId: number; refVersionId?: number }>>([])
 const entitlement = ref<{ entitled: boolean; versionId?: number; license?: string } | null>(null)
+const campaign = ref<{
+  id: number
+  priceCents: number
+  stockCap: number
+  soldCount: number
+  startMs: number
+  endMs: number
+  state: string
+  linkToken: string
+  remainingStock?: number
+} | null>(null)
+const myOrder = ref<{ id: number; state: string; priceCents: number; refundReason?: string; giveawayRefundEligible?: boolean } | null>(null)
+const refundMessage = ref('')
+const purchaseState = ref('')
+const salePrice = ref(990)
+const saleStock = ref(10)
+const blacklistTarget = ref<number | null>(null)
 const status = ref<'loading' | 'ok' | 'error' | 'auth'>('loading')
 const errorCode = ref('')
 const busy = ref(false)
@@ -66,6 +87,10 @@ async function load() {
     catch { notifications.value = [] }
     try { entitlement.value = await api.entitlement(postId.value) }
     catch { entitlement.value = null }
+    try { campaign.value = await api.saleCampaignCurrent(postId.value) }
+    catch { campaign.value = null }
+    try { myOrder.value = await api.myMaterialOrder(postId.value) }
+    catch { myOrder.value = null }
     status.value = 'ok'
   }
   catch (e) {
@@ -84,10 +109,11 @@ async function doCommentAtOffset() {
   if (!selectedVersionId.value || !commentBody.value || busy.value) return
   busy.value = true
   try {
-    await api.comment(postId.value, commentBody.value, `ui-${Date.now()}`, undefined, {
-      versionId: selectedVersionId.value,
+    const versionId = selectedVersionId.value
+    await commentKey.send(key => api.comment(postId.value, commentBody.value, key, undefined, {
+      versionId,
       offsetMs: offsetMs.value,
-    })
+    }))
     commentBody.value = ''
     stats.value = await api.stats(postId.value)
   }
@@ -172,9 +198,9 @@ async function doAssistantComment() {
   if (!assistantBody.value || busy.value) return
   busy.value = true
   try {
-    await api.comment(postId.value, assistantBody.value, `assistant-${Date.now()}`, undefined, {
+    await assistantKey.send(key => api.comment(postId.value, assistantBody.value, key, undefined, {
       parentId: feedbackCommentId.value ?? undefined,
-    })
+    }))
     assistantBody.value = '@助手 '
     stats.value = await api.stats(postId.value)
     comments.value = await api.comments(postId.value)
@@ -219,6 +245,80 @@ async function doFavorite() {
   finally { busy.value = false }
 }
 
+async function doCreateCampaign() {
+  if (busy.value) return
+  busy.value = true
+  errorCode.value = ''
+  try {
+    const now = Date.now()
+    campaign.value = await api.createSaleCampaign(postId.value, {
+      priceCents: salePrice.value,
+      stockCap: saleStock.value,
+      startMs: now - 1000,
+      endMs: now + 24 * 3600_000,
+    }) as typeof campaign.value
+  }
+  catch (e) { errorCode.value = e instanceof ContentApiError ? e.code : 'CAMPAIGN_FAILED' }
+  finally { busy.value = false }
+}
+
+async function doPurchase() {
+  if (!campaign.value || busy.value) return
+  busy.value = true
+  purchaseState.value = 'PROCESSING'
+  errorCode.value = ''
+  try {
+    const attempt = `sale-attempt:${readerId.value}:${campaign.value.id}`
+    const key = sessionStorage.getItem(attempt) || `web-${crypto.randomUUID()}`
+    sessionStorage.setItem(attempt, key)
+    let result = await api.purchaseSale(campaign.value.id, key)
+    const deadline = Date.now() + 30_000
+    while (result.state === 'PROCESSING' && Date.now() < deadline) {
+      await new Promise(r => setTimeout(r, 400))
+      result = await api.purchaseRequest(result.reservationId)
+    }
+    purchaseState.value = result.state + (result.rejectReason ? `:${result.rejectReason}` : '')
+    if (result.state === 'REJECTED') sessionStorage.removeItem(attempt)
+    myOrder.value = await api.myMaterialOrder(postId.value)
+    campaign.value = await api.saleCampaignCurrent(postId.value)
+    entitlement.value = await api.entitlement(postId.value)
+  }
+  catch (e) {
+    errorCode.value = e instanceof ContentApiError ? e.code : 'PURCHASE_FAILED'
+    purchaseState.value = e instanceof ContentApiError && e.status === 409 ? 'REJECTED' : 'UNKNOWN'
+  }
+  finally { busy.value = false }
+}
+
+async function doForceRefund() {
+  if (!myOrder.value || busy.value) return
+  busy.value = true
+  try {
+    myOrder.value = await api.forceOrderRefund(myOrder.value.id) as typeof myOrder.value
+    entitlement.value = await api.entitlement(postId.value)
+  }
+  catch (e) { errorCode.value = e instanceof ContentApiError ? e.code : 'REFUND_FAILED' }
+  finally { busy.value = false }
+}
+async function requestGiveawayRefund() {
+  if (!myOrder.value || busy.value) return
+  busy.value = true
+  try {
+    const result = await api.requestGiveawayRefund(myOrder.value.id)
+    refundMessage.value = `中奖退款申请 #${result.refundRequestId} 已提交，等待商家审批；中奖权益保留。`
+  }
+  catch (e) { errorCode.value = e instanceof ContentApiError ? e.code : 'REFUND_REQUEST_FAILED' }
+  finally { busy.value = false }
+}
+
+async function doBlacklist() {
+  if (!blacklistTarget.value || busy.value) return
+  busy.value = true
+  try { await api.blacklistUser(blacklistTarget.value, 'merchant block') }
+  catch (e) { errorCode.value = e instanceof ContentApiError ? e.code : 'BLACKLIST_FAILED' }
+  finally { busy.value = false }
+}
+
 onMounted(() => load())
 watch(postId, () => load())
 </script>
@@ -233,6 +333,7 @@ watch(postId, () => load())
     <StateBlock v-else-if="status === 'error'" kind="error" :message="`无法显示（${errorCode}）`" @retry="load" />
     <article v-else-if="post" class="px4 py4" data-testid="post-detail">
       <div class="text-sm text-secondary">作者 {{ post.authorId }} · {{ new Date(post.publishedAtMs).toLocaleString() }} · {{ post.status }}</div>
+      <NuxtLink v-if="readerId === post.authorId" :to="`/posts/edit/${post.postId}`" class="btn-text text-sm" data-testid="post-edit-link">编辑正文 / 话题</NuxtLink>
       <p class="mt4 whitespace-pre-wrap break-words text-lg leading-relaxed">{{ post.body || '（无正文）' }}</p>
       <div v-if="media" class="mt4">
         <img :src="media.url" alt="媒体" class="max-w-full rounded-lg border border-base">
@@ -270,6 +371,32 @@ watch(postId, () => load())
           <input v-model="password" type="password" class="input w-40" placeholder="原片密码">
           <button type="button" class="btn-ghost" :disabled="busy" @click="doUnlockDownload">解锁下载</button>
           <a v-if="downloadUrl" :href="downloadUrl" class="text-sm text-primary" target="_blank" rel="noopener">打开原片授权链接</a>
+        </div>
+
+        <div class="mt6 border-t border-base pt4" data-testid="sale-panel">
+          <h3 class="text-sm font-medium">限量抢购</h3>
+          <div v-if="campaign" class="mt2 text-sm text-secondary">
+            ¥{{ (campaign.priceCents / 100).toFixed(2) }}（模拟价格，不产生真实扣款） · 库存 {{ campaign.remainingStock ?? (campaign.stockCap - campaign.soldCount) }}/{{ campaign.stockCap }}
+            · {{ campaign.state }} · <NuxtLink :to="`/sales/${campaign.linkToken}`" class="text-primary">打开独立购买页</NuxtLink>
+            <button type="button" class="btn-primary ms2" :disabled="busy" @click="doPurchase">抢购</button>
+            <span v-if="purchaseState" class="ms2">{{ purchaseState }}</span>
+          </div>
+          <div v-else class="mt2 flex flex-wrap gap2 items-end">
+            <label class="text-sm">价格分<input v-model.number="salePrice" type="number" class="input w-24 ms1"></label>
+            <label class="text-sm">库存<input v-model.number="saleStock" type="number" class="input w-20 ms1"></label>
+            <button type="button" class="btn-ghost" :disabled="busy" @click="doCreateCampaign">创建活动</button>
+          </div>
+          <p v-if="myOrder" class="text-sm mt2">
+            我的订单 #{{ myOrder.id }} · {{ myOrder.state }}
+            <span v-if="myOrder.refundReason"> · {{ myOrder.refundReason }}</span>
+            <button v-if="myOrder.giveawayRefundEligible" type="button" class="btn-text ms2" :disabled="busy" @click="requestGiveawayRefund">申请中奖退款</button>
+            <button v-if="myOrder.state === 'PAID'" type="button" class="btn-text ms2" :disabled="busy" @click="doForceRefund">强制退款</button>
+          </p>
+          <p v-if="refundMessage" class="text-sm mt2">{{ refundMessage }}</p>
+          <div class="mt2 flex flex-wrap gap2 items-end">
+            <input v-model.number="blacklistTarget" type="number" class="input w-28" placeholder="拉黑用户ID">
+            <button type="button" class="btn-ghost" :disabled="busy || !blacklistTarget" @click="doBlacklist">拉黑</button>
+          </div>
         </div>
       </section>
 
@@ -317,7 +444,7 @@ watch(postId, () => load())
         </p>
         <ul v-if="notifications.length" class="mt3 space-y-2">
           <li v-for="n in notifications" :key="n.id" class="text-sm">
-            {{ n.kind }} · 帖 {{ n.postId }} · 评论 {{ n.commentId }}
+            {{ n.kind === 'GIVEAWAY_REFUND_AVAILABLE' ? '您已获得中奖权益，可申请中奖退款' : n.kind }} · 帖 {{ n.postId }} · 评论 {{ n.commentId }}
             <span v-if="n.refVersionId"> · 版本 {{ n.refVersionId }}</span>
           </li>
         </ul>

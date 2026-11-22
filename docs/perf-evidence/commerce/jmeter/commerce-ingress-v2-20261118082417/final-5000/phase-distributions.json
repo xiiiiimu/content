@@ -1,0 +1,3354 @@
+{
+  "samples": 5000,
+  "httpEvents": 4849,
+  "matched": 4849,
+  "settlementEvents": 100,
+  "dataLoss": [],
+  "settlementPhaseDistributions": {
+    "settlement.total": {
+      "count": 100,
+      "p50": 814.356,
+      "p95": 1621.15,
+      "p99": 1815.936,
+      "max": 1933.361
+    },
+    "jdbc.acquire": {
+      "count": 400,
+      "p50": 0.016,
+      "p95": 10.84,
+      "p99": 36.935,
+      "max": 64.843
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard": {
+      "count": 300,
+      "p50": 6.476,
+      "p95": 33.181,
+      "p99": 63.496,
+      "max": 144.504
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockRequest": {
+      "count": 100,
+      "p50": 7.766,
+      "p95": 150.844,
+      "p99": 344.303,
+      "max": 418.988
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.receipt": {
+      "count": 100,
+      "p50": 6.892,
+      "p95": 27.393,
+      "p99": 46.4,
+      "max": 245.147
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.touchLock": {
+      "count": 100,
+      "p50": 15.747,
+      "p95": 71.977,
+      "p99": 201.428,
+      "max": 249.995
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockDecision": {
+      "count": 100,
+      "p50": 7.174,
+      "p95": 33.011,
+      "p99": 36.774,
+      "max": 58.306
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.alreadyOwnsMaterial": {
+      "count": 100,
+      "p50": 8.307,
+      "p95": 46.202,
+      "p99": 142.719,
+      "max": 175.216
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockCampaign": {
+      "count": 100,
+      "p50": 7.849,
+      "p95": 96.02,
+      "p99": 215.402,
+      "max": 388.933
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.activeBlacklist": {
+      "count": 100,
+      "p50": 7.107,
+      "p95": 32.431,
+      "p99": 127.018,
+      "max": 170.847
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.FeedMapper.post": {
+      "count": 100,
+      "p50": 7.026,
+      "p95": 34.922,
+      "p99": 59.18,
+      "max": 89.791
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.tryIncrementSold": {
+      "count": 100,
+      "p50": 12.594,
+      "p95": 58.745,
+      "p99": 143.841,
+      "max": 269.38
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertOrder": {
+      "count": 100,
+      "p50": 15.384,
+      "p95": 63.792,
+      "p99": 273.486,
+      "max": 451.279
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertEntitlement": {
+      "count": 100,
+      "p50": 14.445,
+      "p95": 66.964,
+      "p99": 86.34,
+      "max": 150.418
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.finishRequest": {
+      "count": 100,
+      "p50": 13.161,
+      "p95": 36.516,
+      "p99": 44.662,
+      "max": 86.54
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertReceipt": {
+      "count": 100,
+      "p50": 12.781,
+      "p95": 67.521,
+      "p99": 98.578,
+      "max": 180.977
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty": {
+      "count": 200,
+      "p50": 13.192,
+      "p95": 54.694,
+      "p99": 136.046,
+      "max": 347.696
+    },
+    "jdbc.commit": {
+      "count": 300,
+      "p50": 42.362,
+      "p95": 255.781,
+      "p99": 361.829,
+      "max": 524.607
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request": {
+      "count": 100,
+      "p50": 7.685,
+      "p95": 34.329,
+      "p99": 123.528,
+      "max": 123.529
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job": {
+      "count": 200,
+      "p50": 8.594,
+      "p95": 81.739,
+      "p99": 197.698,
+      "max": 228.66
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.request": {
+      "count": 100,
+      "p50": 8.193,
+      "p95": 34.355,
+      "p99": 56.813,
+      "max": 128.1
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied": {
+      "count": 145,
+      "p50": 18.525,
+      "p95": 76.725,
+      "p99": 145.639,
+      "max": 147.231
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.orderByUserPost": {
+      "count": 45,
+      "p50": 9.917,
+      "p95": 40.072,
+      "p99": 71.873,
+      "max": 71.873
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.winner": {
+      "count": 45,
+      "p50": 7.511,
+      "p95": 36.934,
+      "p99": 85.512,
+      "max": 85.512
+    },
+    "campaign.lock.return.to.commit.return": {
+      "count": 100,
+      "p50": 637.568,
+      "p95": 1282.323,
+      "p99": 1367.4,
+      "max": 1376.038
+    }
+  },
+  "groups": {
+    "409": {
+      "auth.verify": {
+        "count": 4749,
+        "p50": 0.109,
+        "p95": 0.337,
+        "p99": 0.896,
+        "max": 73.269
+      },
+      "redis.reserve.lua": {
+        "count": 4749,
+        "p50": 11.912,
+        "p95": 132.626,
+        "p99": 368.156,
+        "max": 756.831
+      },
+      "purchase.total": {
+        "count": 4749,
+        "p50": 12.064,
+        "p95": 132.692,
+        "p99": 368.34,
+        "max": 757.293
+      },
+      "http.filter.total": {
+        "count": 4749,
+        "p50": 13.637,
+        "p95": 135.951,
+        "p99": 460.287,
+        "max": 1340.586
+      },
+      "sampler.to.filter": {
+        "count": 4749,
+        "p50": 63.534,
+        "p95": 59915.08,
+        "p99": 65005.973,
+        "max": 69272.956
+      },
+      "filter.end.to.sampler.end": {
+        "count": 4749,
+        "p50": 0.113,
+        "p95": 202.405,
+        "p99": 1690.869,
+        "max": 28419.062
+      },
+      "sql.total.per.request": {
+        "count": 4749,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "jdbc.acquire.total.per.request": {
+        "count": 4749,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "redis.total.per.request": {
+        "count": 4749,
+        "p50": 11.912,
+        "p95": 132.626,
+        "p99": 368.156,
+        "max": 756.831
+      },
+      "access.end.to.sampler.end": {
+        "count": 4749,
+        "p50": 1,
+        "p95": 203,
+        "p99": 1691,
+        "max": 28417
+      },
+      "filter.end.to.access.end": {
+        "count": 4749,
+        "p50": -0.603,
+        "p95": 0.0,
+        "p99": 0.178,
+        "max": 13.069
+      },
+      "sampler.to.accept": {
+        "count": 4749,
+        "p50": 32.487,
+        "p95": 59914.572,
+        "p99": 65002.333,
+        "max": 68793.542
+      },
+      "accept.to.filter": {
+        "count": 4749,
+        "p50": 1.859,
+        "p95": 275.684,
+        "p99": 31656.379,
+        "max": 31719.952
+      }
+    },
+    "200": {
+      "auth.verify": {
+        "count": 100,
+        "p50": 0.443,
+        "p95": 36.935,
+        "p99": 53.862,
+        "max": 85.491
+      },
+      "redis.reserve.lua": {
+        "count": 100,
+        "p50": 981.289,
+        "p95": 1110.527,
+        "p99": 1121.726,
+        "max": 1123.604
+      },
+      "purchase.total": {
+        "count": 100,
+        "p50": 981.611,
+        "p95": 1116.173,
+        "p99": 1121.875,
+        "max": 1123.755
+      },
+      "http.filter.total": {
+        "count": 100,
+        "p50": 1003.915,
+        "p95": 1151.304,
+        "p99": 1167.114,
+        "max": 1170.637
+      },
+      "sampler.to.filter": {
+        "count": 100,
+        "p50": 19.77,
+        "p95": 778.144,
+        "p99": 6986.954,
+        "max": 7531.132
+      },
+      "filter.end.to.sampler.end": {
+        "count": 100,
+        "p50": 28569.691,
+        "p95": 31004.113,
+        "p99": 31077.895,
+        "max": 31173.38
+      },
+      "sql.total.per.request": {
+        "count": 100,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "jdbc.acquire.total.per.request": {
+        "count": 100,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "max": 0
+      },
+      "redis.total.per.request": {
+        "count": 100,
+        "p50": 981.289,
+        "p95": 1110.527,
+        "p99": 1121.726,
+        "max": 1123.604
+      },
+      "access.end.to.sampler.end": {
+        "count": 100,
+        "p50": 28570,
+        "p95": 31004,
+        "p99": 31078,
+        "max": 31170
+      },
+      "filter.end.to.access.end": {
+        "count": 100,
+        "p50": -0.471,
+        "p95": 0.626,
+        "p99": 2.262,
+        "max": 3.38
+      },
+      "sampler.to.accept": {
+        "count": 100,
+        "p50": 12.476,
+        "p95": 776.62,
+        "p99": 6968.857,
+        "max": 7528.252
+      },
+      "accept.to.filter": {
+        "count": 100,
+        "p50": 4.764,
+        "p95": 21.768,
+        "p99": 60.676,
+        "max": 64.543
+      }
+    }
+  },
+  "gcDuringHttp": [
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977909506.752,
+      "durationMs": 16.6525
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977909506.752,
+      "durationMs": 16.6525
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977918440.205,
+      "durationMs": 12.6447
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977918440.205,
+      "durationMs": 12.6447
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977918693.0698,
+      "durationMs": 25.531100000000002
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977918752.409,
+      "durationMs": 0.3232
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977918453.1501,
+      "durationMs": 302.3818
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977924257.7651,
+      "durationMs": 10.2995
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977924257.7651,
+      "durationMs": 10.2995
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977929640.594,
+      "durationMs": 7.4059
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977929640.594,
+      "durationMs": 7.4059
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977929708.3909,
+      "durationMs": 31.220399999999998
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977929777.534,
+      "durationMs": 0.3185
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977929648.121,
+      "durationMs": 130.9448
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977933250.973,
+      "durationMs": 5.135
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977933250.973,
+      "durationMs": 5.135
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977933473.6372,
+      "durationMs": 8.4556
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977933473.6372,
+      "durationMs": 8.4556
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977935697.559,
+      "durationMs": 7.0133
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977935697.559,
+      "durationMs": 7.0133
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977935772.038,
+      "durationMs": 20.537
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977935844.013,
+      "durationMs": 0.2904
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977935704.72,
+      "durationMs": 140.7697
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977936527.657,
+      "durationMs": 8.0284
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977936527.657,
+      "durationMs": 8.0284
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977938108.307,
+      "durationMs": 9.5227
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977938108.307,
+      "durationMs": 9.5227
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977940740.885,
+      "durationMs": 5.7374
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977940740.885,
+      "durationMs": 5.7374
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977946913.633,
+      "durationMs": 5.7889
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977946913.633,
+      "durationMs": 5.7889
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977952514.3818,
+      "durationMs": 4.5117
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977952514.3818,
+      "durationMs": 4.5117
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977954022.151,
+      "durationMs": 7.669300000000001
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977954022.151,
+      "durationMs": 7.669300000000001
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977954325.747,
+      "durationMs": 7.4669
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977954325.747,
+      "durationMs": 7.4669
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977955692.2131,
+      "durationMs": 8.3537
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977955692.2131,
+      "durationMs": 8.3537
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977956353.333,
+      "durationMs": 8.1351
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977956353.333,
+      "durationMs": 8.1351
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977957056.468,
+      "durationMs": 6.5057
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977957056.468,
+      "durationMs": 6.5057
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977961303.4019,
+      "durationMs": 6.659400000000001
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977961303.4019,
+      "durationMs": 6.659400000000001
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977965271.045,
+      "durationMs": 5.5312
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977965271.045,
+      "durationMs": 5.5312
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977967307.549,
+      "durationMs": 8.7526
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977967307.549,
+      "durationMs": 8.7526
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977972266.0242,
+      "durationMs": 6.2352
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977972266.0242,
+      "durationMs": 6.2352
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977973712.992,
+      "durationMs": 7.4668
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977973712.992,
+      "durationMs": 7.4668
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977975482.467,
+      "durationMs": 6.3848
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977975482.467,
+      "durationMs": 6.3848
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977977732.081,
+      "durationMs": 6.6854000000000005
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977977732.081,
+      "durationMs": 6.6854000000000005
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977984003.728,
+      "durationMs": 4.7857
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977984003.728,
+      "durationMs": 4.7857
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977986511.7568,
+      "durationMs": 5.8509
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977986511.7568,
+      "durationMs": 5.8509
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977989575.258,
+      "durationMs": 5.0554
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977989575.258,
+      "durationMs": 5.0554
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977991689.892,
+      "durationMs": 6.9924
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977991689.892,
+      "durationMs": 6.9924
+    },
+    {
+      "type": "jdk.GarbageCollection",
+      "startMs": 1794977995065.1208,
+      "durationMs": 7.2465
+    },
+    {
+      "type": "jdk.GCPhasePause",
+      "startMs": 1794977995065.1208,
+      "durationMs": 7.2465
+    }
+  ],
+  "slowest10": [
+    {
+      "clientKey": "jm-c101-u15519",
+      "userId": "15519",
+      "status": "409",
+      "businessCode": "SOLD_OUT",
+      "reservationId": "",
+      "jmeterStartMs": 1794977901382,
+      "jmeterEndMs": 1794977970690,
+      "elapsed": 69308,
+      "Connect": 69271,
+      "Latency": 69308,
+      "server": {
+        "traceId": "jm-c101-u15519",
+        "kind": "http",
+        "clientKey": "jm-c101-u15519",
+        "reservationId": null,
+        "campaignId": 101,
+        "remotePort": 63633,
+        "status": 409,
+        "startMs": 1794977970654.956,
+        "durationMs": 19.8867
+      },
+      "acceptMs": 1794977970175.5422,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977970655.088,
+          "durationMs": 0.1155
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977970655.669,
+          "durationMs": 18.486099999999997
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977970655.6548,
+          "durationMs": 18.569
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977970654,
+        "endMs": 1794977970675,
+        "durationUs": 20267,
+        "status": "409",
+        "thread": "http-nio-127.0.0.1-28080-exec-28"
+      }
+    },
+    {
+      "clientKey": "jm-c101-u13957",
+      "userId": "13957",
+      "status": "409",
+      "businessCode": "SOLD_OUT",
+      "reservationId": "",
+      "jmeterStartMs": 1794977902008,
+      "jmeterEndMs": 1794977970953,
+      "elapsed": 68945,
+      "Connect": 66932,
+      "Latency": 68945,
+      "server": {
+        "traceId": "jm-c101-u13957",
+        "kind": "http",
+        "clientKey": "jm-c101-u13957",
+        "reservationId": null,
+        "campaignId": 101,
+        "remotePort": 63611,
+        "status": 409,
+        "startMs": 1794977968943.259,
+        "durationMs": 5.4392
+      },
+      "acceptMs": 1794977968937.218,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977968943.332,
+          "durationMs": 0.1076
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977968943.797,
+          "durationMs": 4.5533
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977968943.7612,
+          "durationMs": 4.6323
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977968942,
+        "endMs": 1794977968948,
+        "durationUs": 5635,
+        "status": "409",
+        "thread": "http-nio-127.0.0.1-28080-exec-85"
+      }
+    },
+    {
+      "clientKey": "jm-c101-u14090",
+      "userId": "14090",
+      "status": "409",
+      "businessCode": "SOLD_OUT",
+      "reservationId": "",
+      "jmeterStartMs": 1794977900254,
+      "jmeterEndMs": 1794977968571,
+      "elapsed": 68317,
+      "Connect": 68295,
+      "Latency": 68317,
+      "server": {
+        "traceId": "jm-c101-u14090",
+        "kind": "http",
+        "clientKey": "jm-c101-u14090",
+        "reservationId": null,
+        "campaignId": 101,
+        "remotePort": 63599,
+        "status": 409,
+        "startMs": 1794977968550.271,
+        "durationMs": 20.9902
+      },
+      "acceptMs": 1794977968549.187,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977968550.3499,
+          "durationMs": 0.1035
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977968550.8362,
+          "durationMs": 19.7804
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977968550.802,
+          "durationMs": 19.8945
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977968550,
+        "endMs": 1794977968571,
+        "durationUs": 21216,
+        "status": "409",
+        "thread": "http-nio-127.0.0.1-28080-exec-76"
+      }
+    },
+    {
+      "clientKey": "jm-c101-u12974",
+      "userId": "12974",
+      "status": "409",
+      "businessCode": "SOLD_OUT",
+      "reservationId": "",
+      "jmeterStartMs": 1794977903206,
+      "jmeterEndMs": 1794977970718,
+      "elapsed": 67512,
+      "Connect": 67495,
+      "Latency": 67512,
+      "server": {
+        "traceId": "jm-c101-u12974",
+        "kind": "http",
+        "clientKey": "jm-c101-u12974",
+        "reservationId": null,
+        "campaignId": 101,
+        "remotePort": 63574,
+        "status": 409,
+        "startMs": 1794977970702.442,
+        "durationMs": 15.3454
+      },
+      "acceptMs": 1794977968495.1401,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977970702.512,
+          "durationMs": 0.0809
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977970702.9368,
+          "durationMs": 13.7569
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977970702.907,
+          "durationMs": 13.8552
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977970701,
+        "endMs": 1794977970717,
+        "durationUs": 15678,
+        "status": "409",
+        "thread": "http-nio-127.0.0.1-28080-exec-12"
+      }
+    },
+    {
+      "clientKey": "jm-c101-u11158",
+      "userId": "11158",
+      "status": "409",
+      "businessCode": "SOLD_OUT",
+      "reservationId": "",
+      "jmeterStartMs": 1794977903911,
+      "jmeterEndMs": 1794977971003,
+      "elapsed": 67092,
+      "Connect": 67075,
+      "Latency": 67092,
+      "server": {
+        "traceId": "jm-c101-u11158",
+        "kind": "http",
+        "clientKey": "jm-c101-u11158",
+        "reservationId": null,
+        "campaignId": 101,
+        "remotePort": 50315,
+        "status": 409,
+        "startMs": 1794977970988.559,
+        "durationMs": 5.684200000000001
+      },
+      "acceptMs": 1794977970984.174,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977970988.611,
+          "durationMs": 0.156
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977970989.134,
+          "durationMs": 4.802
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977970989.054,
+          "durationMs": 4.9155
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977970988,
+        "endMs": 1794977970994,
+        "durationUs": 5925,
+        "status": "409",
+        "thread": "http-nio-127.0.0.1-28080-exec-2"
+      }
+    },
+    {
+      "clientKey": "jm-c101-u14322",
+      "userId": "14322",
+      "status": "409",
+      "businessCode": "SOLD_OUT",
+      "reservationId": "",
+      "jmeterStartMs": 1794977903964,
+      "jmeterEndMs": 1794977970952,
+      "elapsed": 66988,
+      "Connect": 65119,
+      "Latency": 66988,
+      "server": {
+        "traceId": "jm-c101-u14322",
+        "kind": "http",
+        "clientKey": "jm-c101-u14322",
+        "reservationId": null,
+        "campaignId": 101,
+        "remotePort": 63637,
+        "status": 409,
+        "startMs": 1794977969110.621,
+        "durationMs": 8.6461
+      },
+      "acceptMs": 1794977969079.867,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977969110.7122,
+          "durationMs": 0.0982
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977969111.1792,
+          "durationMs": 7.517399999999999
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977969111.1501,
+          "durationMs": 7.6377
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977969110,
+        "endMs": 1794977969119,
+        "durationUs": 8841,
+        "status": "409",
+        "thread": "http-nio-127.0.0.1-28080-exec-1"
+      }
+    },
+    {
+      "clientKey": "jm-c101-u11553",
+      "userId": "11553",
+      "status": "409",
+      "businessCode": "SOLD_OUT",
+      "reservationId": "",
+      "jmeterStartMs": 1794977904078,
+      "jmeterEndMs": 1794977970690,
+      "elapsed": 66612,
+      "Connect": 66575,
+      "Latency": 66612,
+      "server": {
+        "traceId": "jm-c101-u11553",
+        "kind": "http",
+        "clientKey": "jm-c101-u11553",
+        "reservationId": null,
+        "campaignId": 101,
+        "remotePort": 50314,
+        "status": 409,
+        "startMs": 1794977970655.125,
+        "durationMs": 19.5983
+      },
+      "acceptMs": 1794977970652.571,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977970655.202,
+          "durationMs": 0.0829
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977970655.669,
+          "durationMs": 18.204
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977970655.616,
+          "durationMs": 18.3339
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977970655,
+        "endMs": 1794977970674,
+        "durationUs": 19792,
+        "status": "409",
+        "thread": "http-nio-127.0.0.1-28080-exec-80"
+      }
+    },
+    {
+      "clientKey": "jm-c101-u11367",
+      "userId": "11367",
+      "status": "409",
+      "businessCode": "SOLD_OUT",
+      "reservationId": "",
+      "jmeterStartMs": 1794977901994,
+      "jmeterEndMs": 1794977968566,
+      "elapsed": 66572,
+      "Connect": 66550,
+      "Latency": 66572,
+      "server": {
+        "traceId": "jm-c101-u11367",
+        "kind": "http",
+        "clientKey": "jm-c101-u11367",
+        "reservationId": null,
+        "campaignId": 101,
+        "remotePort": 63598,
+        "status": 409,
+        "startMs": 1794977968545.1912,
+        "durationMs": 20.7456
+      },
+      "acceptMs": 1794977968544.6848,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977968545.229,
+          "durationMs": 0.0707
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977968545.583,
+          "durationMs": 19.965
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977968545.5588,
+          "durationMs": 20.014400000000002
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977968545,
+        "endMs": 1794977968566,
+        "durationUs": 20975,
+        "status": "409",
+        "thread": "http-nio-127.0.0.1-28080-exec-28"
+      }
+    },
+    {
+      "clientKey": "jm-c101-u15148",
+      "userId": "15148",
+      "status": "409",
+      "businessCode": "SOLD_OUT",
+      "reservationId": "",
+      "jmeterStartMs": 1794977901994,
+      "jmeterEndMs": 1794977968565,
+      "elapsed": 66571,
+      "Connect": 66539,
+      "Latency": 66571,
+      "server": {
+        "traceId": "jm-c101-u15148",
+        "kind": "http",
+        "clientKey": "jm-c101-u15148",
+        "reservationId": null,
+        "campaignId": 101,
+        "remotePort": 63591,
+        "status": 409,
+        "startMs": 1794977968534.205,
+        "durationMs": 31.0363
+      },
+      "acceptMs": 1794977968532.495,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977968534.2778,
+          "durationMs": 0.0708
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977968534.657,
+          "durationMs": 30.1284
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977968534.626,
+          "durationMs": 30.211100000000002
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977968534,
+        "endMs": 1794977968565,
+        "durationUs": 31321,
+        "status": "409",
+        "thread": "http-nio-127.0.0.1-28080-exec-7"
+      }
+    },
+    {
+      "clientKey": "jm-c101-u11568",
+      "userId": "11568",
+      "status": "409",
+      "businessCode": "SOLD_OUT",
+      "reservationId": "",
+      "jmeterStartMs": 1794977901994,
+      "jmeterEndMs": 1794977968525,
+      "elapsed": 66531,
+      "Connect": 66522,
+      "Latency": 66531,
+      "server": {
+        "traceId": "jm-c101-u11568",
+        "kind": "http",
+        "clientKey": "jm-c101-u11568",
+        "reservationId": null,
+        "campaignId": 101,
+        "remotePort": 63584,
+        "status": 409,
+        "startMs": 1794977968517.77,
+        "durationMs": 7.832199999999999
+      },
+      "acceptMs": 1794977968517.181,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977968517.814,
+          "durationMs": 0.10289999999999999
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977968518.2542,
+          "durationMs": 6.7357
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977968518.229,
+          "durationMs": 6.8613
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977968517,
+        "endMs": 1794977968525,
+        "durationUs": 8026,
+        "status": "409",
+        "thread": "http-nio-127.0.0.1-28080-exec-79"
+      }
+    }
+  ],
+  "acceptedSlowest10": [
+    {
+      "clientKey": "jm-c101-u14628",
+      "userId": "14628",
+      "status": "200",
+      "businessCode": "",
+      "reservationId": "8c14c1a464d549ab8b63c8eb210e9a48",
+      "jmeterStartMs": 1794977901385,
+      "jmeterEndMs": 1794977939499,
+      "elapsed": 38114,
+      "Connect": 6969,
+      "Latency": 38114,
+      "server": {
+        "traceId": "jm-c101-u14628",
+        "kind": "http",
+        "clientKey": "jm-c101-u14628",
+        "reservationId": "8c14c1a464d549ab8b63c8eb210e9a48",
+        "campaignId": 101,
+        "remotePort": 53225,
+        "status": 200,
+        "startMs": 1794977908371.9539,
+        "durationMs": 943.4225
+      },
+      "acceptMs": 1794977908353.857,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977908375.515,
+          "durationMs": 23.0059
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977908445.717,
+          "durationMs": 869.0459999999999
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977908445.643,
+          "durationMs": 869.1632000000001
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977908370,
+        "endMs": 1794977909315,
+        "durationUs": 945316,
+        "status": "200",
+        "thread": "http-nio-127.0.0.1-28080-exec-58"
+      },
+      "settlement": {
+        "traceId": "settle-8c14c1a464d549ab8b63c8eb210e9a48",
+        "kind": "settle",
+        "clientKey": "jm-c101-u14628",
+        "reservationId": "8c14c1a464d549ab8b63c8eb210e9a48",
+        "campaignId": 0,
+        "remotePort": 0,
+        "status": 0,
+        "startMs": 1794977967784.467,
+        "durationMs": 453.6392,
+        "phases": [
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977967784.496,
+            "durationMs": 6.1988
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977967819.425,
+            "durationMs": 4.7713
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockRequest",
+            "startMs": 1794977967824.2349,
+            "durationMs": 9.6775
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.receipt",
+            "startMs": 1794977967833.961,
+            "durationMs": 21.357
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.touchLock",
+            "startMs": 1794977967855.3691,
+            "durationMs": 9.9556
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockDecision",
+            "startMs": 1794977967865.3792,
+            "durationMs": 3.5571
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.alreadyOwnsMaterial",
+            "startMs": 1794977967868.987,
+            "durationMs": 4.024299999999999
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockCampaign",
+            "startMs": 1794977967873.056,
+            "durationMs": 4.6035
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.activeBlacklist",
+            "startMs": 1794977967877.707,
+            "durationMs": 4.2481
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.FeedMapper.post",
+            "startMs": 1794977967882.0,
+            "durationMs": 4.8929
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.tryIncrementSold",
+            "startMs": 1794977967886.954,
+            "durationMs": 7.8113
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertOrder",
+            "startMs": 1794977967894.816,
+            "durationMs": 11.5393
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertEntitlement",
+            "startMs": 1794977967906.39,
+            "durationMs": 6.9439
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.finishRequest",
+            "startMs": 1794977967913.382,
+            "durationMs": 7.7017
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertReceipt",
+            "startMs": 1794977967921.143,
+            "durationMs": 7.3245000000000005
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977967928.538,
+            "durationMs": 6.8232
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977967935.416,
+            "durationMs": 7.271299999999999
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977967942.751,
+            "durationMs": 14.950899999999999
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977967964.566,
+            "durationMs": 0.011399999999999999
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request",
+            "startMs": 1794977967964.483,
+            "durationMs": 5.0271
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977967969.592,
+            "durationMs": 0.0074
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977967980.4722,
+            "durationMs": 4.5969
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977967985.1128,
+            "durationMs": 2.9341
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.request",
+            "startMs": 1794977967988.088,
+            "durationMs": 3.9884999999999997
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied",
+            "startMs": 1794977967995.862,
+            "durationMs": 13.6365
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977968009.56,
+            "durationMs": 32.9002
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977968061.206,
+            "durationMs": 0.3681
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977968099.7368,
+            "durationMs": 6.8075
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977968106.584,
+            "durationMs": 81.7388
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977968188.3618,
+            "durationMs": 11.2227
+          }
+        ]
+      }
+    },
+    {
+      "clientKey": "jm-c101-u14544",
+      "userId": "14544",
+      "status": "200",
+      "businessCode": "",
+      "reservationId": "39a04741e6da4959a4cbd220be1c3809",
+      "jmeterStartMs": 1794977900925,
+      "jmeterEndMs": 1794977937872,
+      "elapsed": 36947,
+      "Connect": 7527,
+      "Latency": 36947,
+      "server": {
+        "traceId": "jm-c101-u14544",
+        "kind": "http",
+        "clientKey": "jm-c101-u14544",
+        "reservationId": "39a04741e6da4959a4cbd220be1c3809",
+        "campaignId": 101,
+        "remotePort": 53304,
+        "status": 200,
+        "startMs": 1794977908456.1318,
+        "durationMs": 1081.9793
+      },
+      "acceptMs": 1794977908453.2522,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977908456.209,
+          "durationMs": 0.4102
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977908457.272,
+          "durationMs": 1080.2598
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977908457.1929,
+          "durationMs": 1080.3805
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977908455,
+        "endMs": 1794977909537,
+        "durationUs": 1082387,
+        "status": "200",
+        "thread": "http-nio-127.0.0.1-28080-exec-70"
+      },
+      "settlement": {
+        "traceId": "settle-39a04741e6da4959a4cbd220be1c3809",
+        "kind": "settle",
+        "clientKey": "jm-c101-u14544",
+        "reservationId": "39a04741e6da4959a4cbd220be1c3809",
+        "campaignId": 0,
+        "remotePort": 0,
+        "status": 0,
+        "startMs": 1794977941289.947,
+        "durationMs": 1175.2543,
+        "phases": [
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977941289.981,
+            "durationMs": 23.389799999999997
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977941485.121,
+            "durationMs": 59.5026
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockRequest",
+            "startMs": 1794977941544.676,
+            "durationMs": 4.036600000000001
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.receipt",
+            "startMs": 1794977941548.755,
+            "durationMs": 3.7815000000000003
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.touchLock",
+            "startMs": 1794977941552.5989,
+            "durationMs": 12.2924
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockDecision",
+            "startMs": 1794977941564.955,
+            "durationMs": 33.0367
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.alreadyOwnsMaterial",
+            "startMs": 1794977941598.037,
+            "durationMs": 11.9321
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockCampaign",
+            "startMs": 1794977941610.014,
+            "durationMs": 7.848600000000001
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.activeBlacklist",
+            "startMs": 1794977941617.91,
+            "durationMs": 11.005799999999999
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.FeedMapper.post",
+            "startMs": 1794977941628.9739,
+            "durationMs": 4.218
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.tryIncrementSold",
+            "startMs": 1794977941633.258,
+            "durationMs": 11.0085
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertOrder",
+            "startMs": 1794977941644.332,
+            "durationMs": 9.4824
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertEntitlement",
+            "startMs": 1794977941653.869,
+            "durationMs": 7.1812000000000005
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.finishRequest",
+            "startMs": 1794977941661.094,
+            "durationMs": 9.2894
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertReceipt",
+            "startMs": 1794977941670.444,
+            "durationMs": 22.822599999999998
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977941693.348,
+            "durationMs": 11.5056
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977941704.906,
+            "durationMs": 19.7887
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977941724.756,
+            "durationMs": 19.6223
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977941777.194,
+            "durationMs": 0.019700000000000002
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request",
+            "startMs": 1794977941777.163,
+            "durationMs": 6.7476
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977941784.081,
+            "durationMs": 0.019700000000000002
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977941802.5168,
+            "durationMs": 9.8887
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977941812.47,
+            "durationMs": 5.6267000000000005
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.request",
+            "startMs": 1794977941818.1519,
+            "durationMs": 11.4783
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied",
+            "startMs": 1794977941844.0671,
+            "durationMs": 38.9089
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977941883.058,
+            "durationMs": 129.6187
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977942042.103,
+            "durationMs": 0.0453
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977942058.5078,
+            "durationMs": 5.2885
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977942063.841,
+            "durationMs": 6.0521
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.orderByUserPost",
+            "startMs": 1794977942069.982,
+            "durationMs": 6.9264
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.winner",
+            "startMs": 1794977942076.965,
+            "durationMs": 4.481
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied",
+            "startMs": 1794977942086.8472,
+            "durationMs": 29.034999999999997
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977942115.9412,
+            "durationMs": 331.2039
+          }
+        ]
+      }
+    },
+    {
+      "clientKey": "jm-c101-u12687",
+      "userId": "12687",
+      "status": "200",
+      "businessCode": "",
+      "reservationId": "ef3134bc01a54115b9fef4b2aaa0a0e1",
+      "jmeterStartMs": 1794977907650,
+      "jmeterEndMs": 1794977939890,
+      "elapsed": 32240,
+      "Connect": 776,
+      "Latency": 32239,
+      "server": {
+        "traceId": "jm-c101-u12687",
+        "kind": "http",
+        "clientKey": "jm-c101-u12687",
+        "reservationId": "ef3134bc01a54115b9fef4b2aaa0a0e1",
+        "campaignId": 101,
+        "remotePort": 53285,
+        "status": 200,
+        "startMs": 1794977908428.144,
+        "durationMs": 795.5767000000001
+      },
+      "acceptMs": 1794977908426.62,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977908428.219,
+          "durationMs": 0.42719999999999997
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977908432.3499,
+          "durationMs": 789.9272000000001
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977908429.445,
+          "durationMs": 792.9239
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977908427,
+        "endMs": 1794977909223,
+        "durationUs": 796016,
+        "status": "200",
+        "thread": "http-nio-127.0.0.1-28080-exec-56"
+      },
+      "settlement": {
+        "traceId": "settle-ef3134bc01a54115b9fef4b2aaa0a0e1",
+        "kind": "settle",
+        "clientKey": "jm-c101-u12687",
+        "reservationId": "ef3134bc01a54115b9fef4b2aaa0a0e1",
+        "campaignId": 0,
+        "remotePort": 0,
+        "status": 0,
+        "startMs": 1794977986532.5269,
+        "durationMs": 644.456,
+        "phases": [
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977986532.553,
+            "durationMs": 16.9291
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977986616.3699,
+            "durationMs": 16.0191
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockRequest",
+            "startMs": 1794977986632.447,
+            "durationMs": 20.563299999999998
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.receipt",
+            "startMs": 1794977986653.131,
+            "durationMs": 15.3501
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.touchLock",
+            "startMs": 1794977986668.549,
+            "durationMs": 249.99450000000002
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockDecision",
+            "startMs": 1794977986918.587,
+            "durationMs": 15.1929
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.alreadyOwnsMaterial",
+            "startMs": 1794977986933.86,
+            "durationMs": 13.640899999999998
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockCampaign",
+            "startMs": 1794977986947.533,
+            "durationMs": 5.7074
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.activeBlacklist",
+            "startMs": 1794977986953.276,
+            "durationMs": 8.610899999999999
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.FeedMapper.post",
+            "startMs": 1794977986961.931,
+            "durationMs": 5.3587
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.tryIncrementSold",
+            "startMs": 1794977986967.344,
+            "durationMs": 8.7639
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertOrder",
+            "startMs": 1794977986976.1619,
+            "durationMs": 8.8687
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertEntitlement",
+            "startMs": 1794977986985.06,
+            "durationMs": 12.2071
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.finishRequest",
+            "startMs": 1794977986997.311,
+            "durationMs": 9.4018
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertReceipt",
+            "startMs": 1794977987006.762,
+            "durationMs": 6.7261999999999995
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977987013.561,
+            "durationMs": 7.0044
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977987020.619,
+            "durationMs": 7.394699999999999
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977987028.063,
+            "durationMs": 16.7292
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977987052.491,
+            "durationMs": 0.0068000000000000005
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request",
+            "startMs": 1794977987052.464,
+            "durationMs": 5.2938
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977987057.816,
+            "durationMs": 0.0073
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977987068.7202,
+            "durationMs": 4.1187000000000005
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977987072.873,
+            "durationMs": 2.7668
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.request",
+            "startMs": 1794977987075.673,
+            "durationMs": 3.9046
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied",
+            "startMs": 1794977987084.748,
+            "durationMs": 11.599
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977987096.4019,
+            "durationMs": 23.5246
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977987131.691,
+            "durationMs": 0.0074
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977987147.478,
+            "durationMs": 6.9387
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977987154.47,
+            "durationMs": 8.0199
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977987162.532,
+            "durationMs": 4.9616
+          }
+        ]
+      }
+    },
+    {
+      "clientKey": "jm-c101-u12154",
+      "userId": "12154",
+      "status": "200",
+      "businessCode": "",
+      "reservationId": "279b52e304d0470e892f39c8e600262a",
+      "jmeterStartMs": 1794977907668,
+      "jmeterEndMs": 1794977939908,
+      "elapsed": 32240,
+      "Connect": 727,
+      "Latency": 32240,
+      "server": {
+        "traceId": "jm-c101-u12154",
+        "kind": "http",
+        "clientKey": "jm-c101-u12154",
+        "reservationId": "279b52e304d0470e892f39c8e600262a",
+        "campaignId": 101,
+        "remotePort": 53211,
+        "status": 200,
+        "startMs": 1794977908403.281,
+        "durationMs": 500.6062
+      },
+      "acceptMs": 1794977908396.6638,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977908403.341,
+          "durationMs": 0.6375000000000001
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977908433.6482,
+          "durationMs": 469.0472
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977908426.1301,
+          "durationMs": 476.74260000000004
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977908402,
+        "endMs": 1794977908904,
+        "durationUs": 501099,
+        "status": "200",
+        "thread": "http-nio-127.0.0.1-28080-exec-91"
+      },
+      "settlement": {
+        "traceId": "settle-279b52e304d0470e892f39c8e600262a",
+        "kind": "settle",
+        "clientKey": "jm-c101-u12154",
+        "reservationId": "279b52e304d0470e892f39c8e600262a",
+        "campaignId": 0,
+        "remotePort": 0,
+        "status": 0,
+        "startMs": 1794977930656.3362,
+        "durationMs": 1077.4186,
+        "phases": [
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977930656.364,
+            "durationMs": 0.0375
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977930739.836,
+            "durationMs": 46.4303
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockRequest",
+            "startMs": 1794977930786.315,
+            "durationMs": 39.6216
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.receipt",
+            "startMs": 1794977930826.011,
+            "durationMs": 32.103100000000005
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.touchLock",
+            "startMs": 1794977930858.161,
+            "durationMs": 71.9766
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockDecision",
+            "startMs": 1794977930930.177,
+            "durationMs": 4.8852
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.alreadyOwnsMaterial",
+            "startMs": 1794977930935.105,
+            "durationMs": 12.4625
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockCampaign",
+            "startMs": 1794977930947.605,
+            "durationMs": 43.0375
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.activeBlacklist",
+            "startMs": 1794977930990.692,
+            "durationMs": 20.2999
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.FeedMapper.post",
+            "startMs": 1794977931011.041,
+            "durationMs": 5.4975
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.tryIncrementSold",
+            "startMs": 1794977931016.604,
+            "durationMs": 16.1271
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertOrder",
+            "startMs": 1794977931032.797,
+            "durationMs": 18.7977
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertEntitlement",
+            "startMs": 1794977931051.6401,
+            "durationMs": 8.4336
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.finishRequest",
+            "startMs": 1794977931060.127,
+            "durationMs": 22.4748
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertReceipt",
+            "startMs": 1794977931082.663,
+            "durationMs": 7.685499999999999
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977931090.431,
+            "durationMs": 6.8994
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977931097.4,
+            "durationMs": 8.0043
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977931105.487,
+            "durationMs": 28.331
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977931159.793,
+            "durationMs": 0.036399999999999995
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request",
+            "startMs": 1794977931159.752,
+            "durationMs": 11.174800000000001
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977931171.022,
+            "durationMs": 0.034499999999999996
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977931196.255,
+            "durationMs": 17.538
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977931213.872,
+            "durationMs": 22.5077
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.request",
+            "startMs": 1794977931236.4358,
+            "durationMs": 19.945600000000002
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied",
+            "startMs": 1794977931273.894,
+            "durationMs": 54.1012
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977931328.1191,
+            "durationMs": 134.02870000000001
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977931502.926,
+            "durationMs": 0.027800000000000002
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977931578.479,
+            "durationMs": 7.4479999999999995
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977931585.957,
+            "durationMs": 9.6109
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.orderByUserPost",
+            "startMs": 1794977931595.624,
+            "durationMs": 4.0439
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.winner",
+            "startMs": 1794977931599.728,
+            "durationMs": 27.4024
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied",
+            "startMs": 1794977931636.2368,
+            "durationMs": 7.9586
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977931644.255,
+            "durationMs": 31.0688
+          }
+        ]
+      }
+    },
+    {
+      "clientKey": "jm-c101-u10698",
+      "userId": "10698",
+      "status": "200",
+      "businessCode": "",
+      "reservationId": "83375ad3e8d84b96a51020817b9c19f2",
+      "jmeterStartMs": 1794977908286,
+      "jmeterEndMs": 1794977939933,
+      "elapsed": 31647,
+      "Connect": 88,
+      "Latency": 31647,
+      "server": {
+        "traceId": "jm-c101-u10698",
+        "kind": "http",
+        "clientKey": "jm-c101-u10698",
+        "reservationId": "83375ad3e8d84b96a51020817b9c19f2",
+        "campaignId": 101,
+        "remotePort": 53237,
+        "status": 200,
+        "startMs": 1794977908375.801,
+        "durationMs": 383.81890000000004
+      },
+      "acceptMs": 1794977908374.5981,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977908375.864,
+          "durationMs": 4.5913
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977908483.9421,
+          "durationMs": 247.74540000000002
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977908483.696,
+          "durationMs": 248.54399999999998
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977908375,
+        "endMs": 1794977908763,
+        "durationUs": 387911,
+        "status": "200",
+        "thread": "http-nio-127.0.0.1-28080-exec-42"
+      },
+      "settlement": {
+        "traceId": "settle-83375ad3e8d84b96a51020817b9c19f2",
+        "kind": "settle",
+        "clientKey": "jm-c101-u10698",
+        "reservationId": "83375ad3e8d84b96a51020817b9c19f2",
+        "campaignId": 0,
+        "remotePort": 0,
+        "status": 0,
+        "startMs": 1794977989438.502,
+        "durationMs": 358.4524,
+        "phases": [
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977989438.523,
+            "durationMs": 0.0081
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977989452.917,
+            "durationMs": 5.4393
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockRequest",
+            "startMs": 1794977989458.404,
+            "durationMs": 4.0351
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.receipt",
+            "startMs": 1794977989462.494,
+            "durationMs": 7.0543000000000005
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.touchLock",
+            "startMs": 1794977989469.6072,
+            "durationMs": 12.4099
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockDecision",
+            "startMs": 1794977989482.064,
+            "durationMs": 3.8094
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.alreadyOwnsMaterial",
+            "startMs": 1794977989485.916,
+            "durationMs": 4.8223
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockCampaign",
+            "startMs": 1794977989490.7761,
+            "durationMs": 4.162100000000001
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.activeBlacklist",
+            "startMs": 1794977989494.98,
+            "durationMs": 3.3915
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.FeedMapper.post",
+            "startMs": 1794977989498.415,
+            "durationMs": 2.9941999999999998
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.tryIncrementSold",
+            "startMs": 1794977989501.457,
+            "durationMs": 10.5206
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertOrder",
+            "startMs": 1794977989512.034,
+            "durationMs": 7.2622
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertEntitlement",
+            "startMs": 1794977989519.331,
+            "durationMs": 10.8473
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.finishRequest",
+            "startMs": 1794977989530.224,
+            "durationMs": 9.9881
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertReceipt",
+            "startMs": 1794977989540.274,
+            "durationMs": 7.6891
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977989548.044,
+            "durationMs": 15.860800000000001
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977989563.9639,
+            "durationMs": 16.5749
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977989580.595,
+            "durationMs": 22.845000000000002
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977989609.813,
+            "durationMs": 0.0070999999999999995
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request",
+            "startMs": 1794977989609.7961,
+            "durationMs": 3.7935999999999996
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977989613.6501,
+            "durationMs": 0.0056
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977989623.7,
+            "durationMs": 4.0052
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977989627.748,
+            "durationMs": 3.9134
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.request",
+            "startMs": 1794977989631.697,
+            "durationMs": 3.7879
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied",
+            "startMs": 1794977989639.16,
+            "durationMs": 8.1057
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977989647.306,
+            "durationMs": 19.976399999999998
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977989673.737,
+            "durationMs": 0.0069
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977989685.926,
+            "durationMs": 5.2923
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977989691.257,
+            "durationMs": 8.7138
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.orderByUserPost",
+            "startMs": 1794977989700.032,
+            "durationMs": 11.694700000000001
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.winner",
+            "startMs": 1794977989711.77,
+            "durationMs": 3.3709000000000002
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied",
+            "startMs": 1794977989724.261,
+            "durationMs": 19.4944
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977989743.809,
+            "durationMs": 40.7498
+          }
+        ]
+      }
+    },
+    {
+      "clientKey": "jm-c101-u13416",
+      "userId": "13416",
+      "status": "200",
+      "businessCode": "",
+      "reservationId": "3ce421a4e21a49b6a1dcae3d669f2cd3",
+      "jmeterStartMs": 1794977908261,
+      "jmeterEndMs": 1794977939901,
+      "elapsed": 31640,
+      "Connect": 74,
+      "Latency": 31640,
+      "server": {
+        "traceId": "jm-c101-u13416",
+        "kind": "http",
+        "clientKey": "jm-c101-u13416",
+        "reservationId": "3ce421a4e21a49b6a1dcae3d669f2cd3",
+        "campaignId": 101,
+        "remotePort": 53209,
+        "status": 200,
+        "startMs": 1794977908371.357,
+        "durationMs": 813.569
+      },
+      "acceptMs": 1794977908337.583,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977908400.0771,
+          "durationMs": 0.43810000000000004
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977908450.661,
+          "durationMs": 733.4922
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977908450.5762,
+          "durationMs": 733.6419
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977908355,
+        "endMs": 1794977909184,
+        "durationUs": 829481,
+        "status": "200",
+        "thread": "http-nio-127.0.0.1-28080-exec-48"
+      },
+      "settlement": {
+        "traceId": "settle-3ce421a4e21a49b6a1dcae3d669f2cd3",
+        "kind": "settle",
+        "clientKey": "jm-c101-u13416",
+        "reservationId": "3ce421a4e21a49b6a1dcae3d669f2cd3",
+        "campaignId": 0,
+        "remotePort": 0,
+        "status": 0,
+        "startMs": 1794977946176.6602,
+        "durationMs": 1740.9719,
+        "phases": [
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977946176.689,
+            "durationMs": 8.5382
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977946333.249,
+            "durationMs": 15.5982
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockRequest",
+            "startMs": 1794977946348.9102,
+            "durationMs": 29.9748
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.receipt",
+            "startMs": 1794977946378.948,
+            "durationMs": 13.496599999999999
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.touchLock",
+            "startMs": 1794977946392.497,
+            "durationMs": 21.1452
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockDecision",
+            "startMs": 1794977946413.697,
+            "durationMs": 9.8652
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.alreadyOwnsMaterial",
+            "startMs": 1794977946423.626,
+            "durationMs": 56.446799999999996
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockCampaign",
+            "startMs": 1794977946480.116,
+            "durationMs": 127.1069
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.activeBlacklist",
+            "startMs": 1794977946607.2659,
+            "durationMs": 15.784099999999999
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.FeedMapper.post",
+            "startMs": 1794977946623.094,
+            "durationMs": 24.944399999999998
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.tryIncrementSold",
+            "startMs": 1794977946648.126,
+            "durationMs": 38.9474
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertOrder",
+            "startMs": 1794977946687.1082,
+            "durationMs": 23.9062
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertEntitlement",
+            "startMs": 1794977946711.038,
+            "durationMs": 15.5405
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.finishRequest",
+            "startMs": 1794977946726.636,
+            "durationMs": 14.4119
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertReceipt",
+            "startMs": 1794977946741.112,
+            "durationMs": 15.6005
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977946756.802,
+            "durationMs": 33.1078
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977946789.958,
+            "durationMs": 53.2784
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977946843.2888,
+            "durationMs": 70.0869
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977946945.508,
+            "durationMs": 0.0161
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request",
+            "startMs": 1794977946945.485,
+            "durationMs": 13.2041
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977946958.7559,
+            "durationMs": 0.0143
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977947006.52,
+            "durationMs": 44.1096
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977947050.676,
+            "durationMs": 33.3125
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.request",
+            "startMs": 1794977947084.029,
+            "durationMs": 15.3272
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied",
+            "startMs": 1794977947246.2659,
+            "durationMs": 52.997299999999996
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977947299.326,
+            "durationMs": 130.48329999999999
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977947529.799,
+            "durationMs": 0.0247
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977947615.748,
+            "durationMs": 113.8274
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977947729.658,
+            "durationMs": 131.6684
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977947861.37,
+            "durationMs": 28.1756
+          }
+        ]
+      }
+    },
+    {
+      "clientKey": "jm-c101-u11190",
+      "userId": "11190",
+      "status": "200",
+      "businessCode": "",
+      "reservationId": "d6947dbac6ce4fdc88e8ffbe921fdebf",
+      "jmeterStartMs": 1794977908318,
+      "jmeterEndMs": 1794977939901,
+      "elapsed": 31583,
+      "Connect": 76,
+      "Latency": 31583,
+      "server": {
+        "traceId": "jm-c101-u11190",
+        "kind": "http",
+        "clientKey": "jm-c101-u11190",
+        "reservationId": "d6947dbac6ce4fdc88e8ffbe921fdebf",
+        "campaignId": 101,
+        "remotePort": 53251,
+        "status": 200,
+        "startMs": 1794977908404.634,
+        "durationMs": 757.4974
+      },
+      "acceptMs": 1794977908396.3362,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977908404.967,
+          "durationMs": 0.2958
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977908432.853,
+          "durationMs": 728.2941000000001
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977908427.5369,
+          "durationMs": 733.7496
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977908404,
+        "endMs": 1794977909162,
+        "durationUs": 757806,
+        "status": "200",
+        "thread": "http-nio-127.0.0.1-28080-exec-28"
+      },
+      "settlement": {
+        "traceId": "settle-d6947dbac6ce4fdc88e8ffbe921fdebf",
+        "kind": "settle",
+        "clientKey": "jm-c101-u11190",
+        "reservationId": "d6947dbac6ce4fdc88e8ffbe921fdebf",
+        "campaignId": 0,
+        "remotePort": 0,
+        "status": 0,
+        "startMs": 1794977982009.366,
+        "durationMs": 1171.827,
+        "phases": [
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977982009.386,
+            "durationMs": 6.2483
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977982033.194,
+            "durationMs": 5.1004
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockRequest",
+            "startMs": 1794977982038.344,
+            "durationMs": 35.6472
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.receipt",
+            "startMs": 1794977982074.044,
+            "durationMs": 5.7351
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.touchLock",
+            "startMs": 1794977982079.8372,
+            "durationMs": 6.0539000000000005
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockDecision",
+            "startMs": 1794977982085.9429,
+            "durationMs": 5.1235
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.alreadyOwnsMaterial",
+            "startMs": 1794977982091.115,
+            "durationMs": 8.6433
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockCampaign",
+            "startMs": 1794977982099.7961,
+            "durationMs": 5.0491
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.activeBlacklist",
+            "startMs": 1794977982104.8838,
+            "durationMs": 5.1615
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.FeedMapper.post",
+            "startMs": 1794977982110.084,
+            "durationMs": 6.901400000000001
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.tryIncrementSold",
+            "startMs": 1794977982117.045,
+            "durationMs": 9.9931
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertOrder",
+            "startMs": 1794977982127.0981,
+            "durationMs": 7.2934
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertEntitlement",
+            "startMs": 1794977982134.426,
+            "durationMs": 10.3097
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.finishRequest",
+            "startMs": 1794977982144.784,
+            "durationMs": 7.2604999999999995
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertReceipt",
+            "startMs": 1794977982152.103,
+            "durationMs": 30.7183
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977982182.898,
+            "durationMs": 8.3591
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977982191.326,
+            "durationMs": 20.2361
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977982211.7158,
+            "durationMs": 69.2673
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977982295.5881,
+            "durationMs": 0.016399999999999998
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request",
+            "startMs": 1794977982295.5278,
+            "durationMs": 14.102500000000001
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977982309.694,
+            "durationMs": 0.0108
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977982329.19,
+            "durationMs": 5.8721
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977982335.1099,
+            "durationMs": 8.562800000000001
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.request",
+            "startMs": 1794977982343.719,
+            "durationMs": 26.2629
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied",
+            "startMs": 1794977982376.946,
+            "durationMs": 123.2413
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977982500.251,
+            "durationMs": 506.2411
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977983034.1401,
+            "durationMs": 0.0067
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977983059.157,
+            "durationMs": 3.4985
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977983062.695,
+            "durationMs": 105.1442
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977983167.8792,
+            "durationMs": 2.7796000000000003
+          }
+        ]
+      }
+    },
+    {
+      "clientKey": "jm-c101-u11809",
+      "userId": "11809",
+      "status": "200",
+      "businessCode": "",
+      "reservationId": "6b379b97258f47bc83fbc70712248870",
+      "jmeterStartMs": 1794977908338,
+      "jmeterEndMs": 1794977939909,
+      "elapsed": 31571,
+      "Connect": 43,
+      "Latency": 31571,
+      "server": {
+        "traceId": "jm-c101-u11809",
+        "kind": "http",
+        "clientKey": "jm-c101-u11809",
+        "reservationId": "6b379b97258f47bc83fbc70712248870",
+        "campaignId": 101,
+        "remotePort": 53227,
+        "status": 200,
+        "startMs": 1794977908399.3809,
+        "durationMs": 497.0978
+      },
+      "acceptMs": 1794977908365.109,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977908399.483,
+          "durationMs": 1.2385
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977908451.133,
+          "durationMs": 443.8192
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977908451.049,
+          "durationMs": 444.0132
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977908399,
+        "endMs": 1794977908896,
+        "durationUs": 497651,
+        "status": "200",
+        "thread": "http-nio-127.0.0.1-28080-exec-93"
+      },
+      "settlement": {
+        "traceId": "settle-6b379b97258f47bc83fbc70712248870",
+        "kind": "settle",
+        "clientKey": "jm-c101-u11809",
+        "reservationId": "6b379b97258f47bc83fbc70712248870",
+        "campaignId": 0,
+        "remotePort": 0,
+        "status": 0,
+        "startMs": 1794977959407.021,
+        "durationMs": 1142.1365,
+        "phases": [
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977959407.0461,
+            "durationMs": 8.5611
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977959494.792,
+            "durationMs": 16.0606
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockRequest",
+            "startMs": 1794977959510.905,
+            "durationMs": 11.3037
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.receipt",
+            "startMs": 1794977959522.308,
+            "durationMs": 9.4642
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.touchLock",
+            "startMs": 1794977959531.862,
+            "durationMs": 41.6281
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockDecision",
+            "startMs": 1794977959573.6338,
+            "durationMs": 14.259
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.alreadyOwnsMaterial",
+            "startMs": 1794977959587.965,
+            "durationMs": 17.223499999999998
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockCampaign",
+            "startMs": 1794977959605.236,
+            "durationMs": 16.8323
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.activeBlacklist",
+            "startMs": 1794977959622.1362,
+            "durationMs": 14.1857
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.FeedMapper.post",
+            "startMs": 1794977959636.3882,
+            "durationMs": 25.2155
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.tryIncrementSold",
+            "startMs": 1794977959661.683,
+            "durationMs": 143.8411
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertOrder",
+            "startMs": 1794977959805.5698,
+            "durationMs": 51.1713
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertEntitlement",
+            "startMs": 1794977959856.7751,
+            "durationMs": 45.6905
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.finishRequest",
+            "startMs": 1794977959902.515,
+            "durationMs": 22.6921
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertReceipt",
+            "startMs": 1794977959925.261,
+            "durationMs": 22.5777
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977959947.9111,
+            "durationMs": 12.5789
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977959960.667,
+            "durationMs": 23.933200000000003
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977959984.664,
+            "durationMs": 71.1707
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977960085.597,
+            "durationMs": 0.0125
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request",
+            "startMs": 1794977960085.5679,
+            "durationMs": 7.918700000000001
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977960093.556,
+            "durationMs": 0.007500000000000001
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977960149.311,
+            "durationMs": 40.9107
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977960190.278,
+            "durationMs": 19.4642
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.request",
+            "startMs": 1794977960209.792,
+            "durationMs": 25.6934
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied",
+            "startMs": 1794977960293.842,
+            "durationMs": 33.149499999999996
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977960327.046,
+            "durationMs": 108.8304
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977960468.667,
+            "durationMs": 0.0097
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977960492.056,
+            "durationMs": 6.329300000000001
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977960498.429,
+            "durationMs": 26.9964
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977960525.449,
+            "durationMs": 8.855500000000001
+          }
+        ]
+      }
+    },
+    {
+      "clientKey": "jm-c101-u10863",
+      "userId": "10863",
+      "status": "200",
+      "businessCode": "",
+      "reservationId": "b484b7fc1f3a46629784d7517064618d",
+      "jmeterStartMs": 1794977908360,
+      "jmeterEndMs": 1794977939901,
+      "elapsed": 31541,
+      "Connect": 6,
+      "Latency": 31541,
+      "server": {
+        "traceId": "jm-c101-u10863",
+        "kind": "http",
+        "clientKey": "jm-c101-u10863",
+        "reservationId": "b484b7fc1f3a46629784d7517064618d",
+        "campaignId": 101,
+        "remotePort": 53231,
+        "status": 200,
+        "startMs": 1794977908371.381,
+        "durationMs": 805.3869
+      },
+      "acceptMs": 1794977908367.043,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977908378.292,
+          "durationMs": 20.6873
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977908445.4429,
+          "durationMs": 728.1288999999999
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977908445.3372,
+          "durationMs": 728.3327
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977908367,
+        "endMs": 1794977909176,
+        "durationUs": 808947,
+        "status": "200",
+        "thread": "http-nio-127.0.0.1-28080-exec-92"
+      },
+      "settlement": {
+        "traceId": "settle-b484b7fc1f3a46629784d7517064618d",
+        "kind": "settle",
+        "clientKey": "jm-c101-u10863",
+        "reservationId": "b484b7fc1f3a46629784d7517064618d",
+        "campaignId": 0,
+        "remotePort": 0,
+        "status": 0,
+        "startMs": 1794977975475.946,
+        "durationMs": 670.0777,
+        "phases": [
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977975475.971,
+            "durationMs": 4.1503
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977975497.793,
+            "durationMs": 4.5801
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockRequest",
+            "startMs": 1794977975502.425,
+            "durationMs": 10.0603
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.receipt",
+            "startMs": 1794977975512.5662,
+            "durationMs": 6.4218
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.touchLock",
+            "startMs": 1794977975519.0498,
+            "durationMs": 23.334899999999998
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockDecision",
+            "startMs": 1794977975542.47,
+            "durationMs": 15.9049
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.alreadyOwnsMaterial",
+            "startMs": 1794977975558.455,
+            "durationMs": 9.5032
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockCampaign",
+            "startMs": 1794977975568.033,
+            "durationMs": 11.267
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.activeBlacklist",
+            "startMs": 1794977975579.3718,
+            "durationMs": 9.4165
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.FeedMapper.post",
+            "startMs": 1794977975588.875,
+            "durationMs": 89.7908
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.tryIncrementSold",
+            "startMs": 1794977975678.7651,
+            "durationMs": 53.8632
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertOrder",
+            "startMs": 1794977975732.758,
+            "durationMs": 51.437400000000004
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertEntitlement",
+            "startMs": 1794977975784.248,
+            "durationMs": 68.4063
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.finishRequest",
+            "startMs": 1794977975852.7278,
+            "durationMs": 36.515699999999995
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertReceipt",
+            "startMs": 1794977975889.2961,
+            "durationMs": 24.2712
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977975913.635,
+            "durationMs": 26.779
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977975940.459,
+            "durationMs": 15.327800000000002
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977975955.843,
+            "durationMs": 28.331200000000003
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977976003.814,
+            "durationMs": 0.0072
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request",
+            "startMs": 1794977976003.791,
+            "durationMs": 11.0951
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977976014.9382,
+            "durationMs": 0.0048
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977976034.803,
+            "durationMs": 2.9795
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977976037.8152,
+            "durationMs": 9.6122
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.request",
+            "startMs": 1794977976047.4702,
+            "durationMs": 3.9549
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied",
+            "startMs": 1794977976055.633,
+            "durationMs": 12.4973
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977976068.1711,
+            "durationMs": 34.3892
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977976110.242,
+            "durationMs": 0.0061
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977976123.995,
+            "durationMs": 5.225
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977976129.2751,
+            "durationMs": 4.2352
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977976133.565,
+            "durationMs": 4.0638000000000005
+          }
+        ]
+      }
+    },
+    {
+      "clientKey": "jm-c101-u13380",
+      "userId": "13380",
+      "status": "200",
+      "businessCode": "",
+      "reservationId": "b617c55a148040af8e01434dc3b5bb52",
+      "jmeterStartMs": 1794977908398,
+      "jmeterEndMs": 1794977939931,
+      "elapsed": 31533,
+      "Connect": 3,
+      "Latency": 31532,
+      "server": {
+        "traceId": "jm-c101-u13380",
+        "kind": "http",
+        "clientKey": "jm-c101-u13380",
+        "reservationId": "b617c55a148040af8e01434dc3b5bb52",
+        "campaignId": 101,
+        "remotePort": 53259,
+        "status": 200,
+        "startMs": 1794977908408.259,
+        "durationMs": 444.8463
+      },
+      "acceptMs": 1794977908401.3901,
+      "phases": [
+        {
+          "phase": "auth.verify",
+          "startMs": 1794977908408.3408,
+          "durationMs": 0.5159
+        },
+        {
+          "phase": "redis.reserve.lua",
+          "startMs": 1794977908479.497,
+          "durationMs": 371.6116
+        },
+        {
+          "phase": "purchase.total",
+          "startMs": 1794977908479.385,
+          "durationMs": 371.9636
+        }
+      ],
+      "accessLog": {
+        "beginMs": 1794977908407,
+        "endMs": 1794977908853,
+        "durationUs": 445720,
+        "status": "200",
+        "thread": "http-nio-127.0.0.1-28080-exec-29"
+      },
+      "settlement": {
+        "traceId": "settle-b617c55a148040af8e01434dc3b5bb52",
+        "kind": "settle",
+        "clientKey": "jm-c101-u13380",
+        "reservationId": "b617c55a148040af8e01434dc3b5bb52",
+        "campaignId": 0,
+        "remotePort": 0,
+        "status": 0,
+        "startMs": 1794977976149.108,
+        "durationMs": 504.37109999999996,
+        "phases": [
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977976149.16,
+            "durationMs": 3.3102
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977976162.834,
+            "durationMs": 3.1917999999999997
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockRequest",
+            "startMs": 1794977976166.073,
+            "durationMs": 3.3329
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.receipt",
+            "startMs": 1794977976169.494,
+            "durationMs": 2.9486999999999997
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.touchLock",
+            "startMs": 1794977976172.498,
+            "durationMs": 9.7321
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockDecision",
+            "startMs": 1794977976182.2961,
+            "durationMs": 7.2364
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.alreadyOwnsMaterial",
+            "startMs": 1794977976189.5771,
+            "durationMs": 4.3512
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockCampaign",
+            "startMs": 1794977976193.97,
+            "durationMs": 4.4665
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.activeBlacklist",
+            "startMs": 1794977976198.488,
+            "durationMs": 5.442
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.FeedMapper.post",
+            "startMs": 1794977976203.98,
+            "durationMs": 4.5982
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.tryIncrementSold",
+            "startMs": 1794977976208.643,
+            "durationMs": 7.3309999999999995
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertOrder",
+            "startMs": 1794977976216.023,
+            "durationMs": 7.068
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertEntitlement",
+            "startMs": 1794977976223.124,
+            "durationMs": 12.0517
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.finishRequest",
+            "startMs": 1794977976235.23,
+            "durationMs": 30.764799999999997
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertReceipt",
+            "startMs": 1794977976266.0461,
+            "durationMs": 11.7058
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977976277.823,
+            "durationMs": 12.5274
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty",
+            "startMs": 1794977976290.395,
+            "durationMs": 8.5025
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977976298.964,
+            "durationMs": 39.9418
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977976348.8718,
+            "durationMs": 0.0083
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request",
+            "startMs": 1794977976348.769,
+            "durationMs": 13.3056
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977976362.4612,
+            "durationMs": 0.0098
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977976387.6392,
+            "durationMs": 22.028699999999997
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977976409.738,
+            "durationMs": 14.4052
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.request",
+            "startMs": 1794977976424.216,
+            "durationMs": 20.136000000000003
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied",
+            "startMs": 1794977976459.506,
+            "durationMs": 27.7895
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977976487.354,
+            "durationMs": 29.8811
+          },
+          {
+            "phase": "jdbc.acquire",
+            "startMs": 1794977976529.509,
+            "durationMs": 0.0191
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard",
+            "startMs": 1794977976555.923,
+            "durationMs": 40.196200000000005
+          },
+          {
+            "phase": "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job",
+            "startMs": 1794977976596.204,
+            "durationMs": 14.514199999999999
+          },
+          {
+            "phase": "jdbc.commit",
+            "startMs": 1794977976610.769,
+            "durationMs": 11.4802
+          }
+        ]
+      }
+    }
+  ],
+  "caveats": [
+    "accept.to.filter includes request bytes/parse/worker scheduling, not exclusively executor queue.",
+    "SQL spans include MyBatis mapping and nested JDBC acquisition; nested phases must not be summed.",
+    "Filter end includes MVC serialization but is not wire ACK; JTL end observes HTTP completion.",
+    "Raw JFR stays private; no environment, headers, SQL parameters or token fields exported."
+  ]
+}

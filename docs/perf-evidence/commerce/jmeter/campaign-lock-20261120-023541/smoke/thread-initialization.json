@@ -1,0 +1,39 @@
+{
+  "firstFormalHttpMs": {
+    "count": 4,
+    "p50": 30,
+    "p95": 58,
+    "p99": 58,
+    "max": 58
+  },
+  "allFormalHttpMs": {
+    "count": 16,
+    "p50": 23,
+    "p95": 58,
+    "p99": 58,
+    "max": 58
+  },
+  "firstFormalPermitToSamplerMs": {
+    "count": 4,
+    "p50": 2,
+    "p95": 5,
+    "p99": 5,
+    "max": 5
+  },
+  "allFormalPermitToSamplerMs": {
+    "count": 16,
+    "p50": 2,
+    "p95": 28,
+    "p99": 28,
+    "max": 28
+  },
+  "warmHttpMs": {
+    "count": 4,
+    "p50": 468,
+    "p95": 473,
+    "p99": 473,
+    "max": 473
+  },
+  "formalWorkersUsed": 4,
+  "interpretation": "Timing is preserved, not subtracted. Permit-to-sampler includes scheduling and sampler setup; not an isolated initialization measurement."
+}

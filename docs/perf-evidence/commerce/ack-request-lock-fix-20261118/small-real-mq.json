@@ -1,0 +1,306 @@
+{
+  "campaignId": 102,
+  "postId": 115,
+  "buyers": 8,
+  "stock": 8,
+  "controlledMqReplays": 1,
+  "lockInjection": "Separate test SQL session holds the same request-row X lock as a consumer; all MQ sends/ACKs use the actual application and Broker.",
+  "accepted": [
+    {
+      "userId": 10640,
+      "clientKey": "jm-c102-u10640",
+      "reservationId": "dab5e512b8a748ef85011cc78949829f",
+      "httpElapsedMs": 63.0
+    },
+    {
+      "userId": 10641,
+      "clientKey": "jm-c102-u10641",
+      "reservationId": "8d651f4cc9804821bf8c4e7a6dd9b9f4",
+      "httpElapsedMs": 31.0
+    },
+    {
+      "userId": 10642,
+      "clientKey": "jm-c102-u10642",
+      "reservationId": "8fe3a38b9d21448b9ddfad86907ad0e1",
+      "httpElapsedMs": 16.0
+    },
+    {
+      "userId": 10643,
+      "clientKey": "jm-c102-u10643",
+      "reservationId": "ee0e0f98a29148ef9cdce055e3f76c4e",
+      "httpElapsedMs": 15.0
+    },
+    {
+      "userId": 10644,
+      "clientKey": "jm-c102-u10644",
+      "reservationId": "81c9971be4bc4b97b2878f0bf7634429",
+      "httpElapsedMs": 32.0
+    },
+    {
+      "userId": 10645,
+      "clientKey": "jm-c102-u10645",
+      "reservationId": "b7f8fd50783c4b9c8d96703908e711bd",
+      "httpElapsedMs": 15.0
+    },
+    {
+      "userId": 10646,
+      "clientKey": "jm-c102-u10646",
+      "reservationId": "05d73c48e2054bf395100821d1fceadb",
+      "httpElapsedMs": 47.0
+    },
+    {
+      "userId": 10647,
+      "clientKey": "jm-c102-u10647",
+      "reservationId": "53e6cecde657411fa2761a0e48e92835",
+      "httpElapsedMs": 31.0
+    }
+  ],
+  "beforeReplay": {
+    "stockCap": 8,
+    "sold": 0,
+    "remaining": 8,
+    "requests": [
+      [
+        "05d73c48e2054bf395100821d1fceadb",
+        "10646",
+        "jm-c102-u10646",
+        "PROCESSING",
+        "0",
+        "",
+        "0",
+        "0",
+        ""
+      ],
+      [
+        "53e6cecde657411fa2761a0e48e92835",
+        "10647",
+        "jm-c102-u10647",
+        "PROCESSING",
+        "0",
+        "",
+        "0",
+        "0",
+        ""
+      ],
+      [
+        "81c9971be4bc4b97b2878f0bf7634429",
+        "10644",
+        "jm-c102-u10644",
+        "PROCESSING",
+        "0",
+        "",
+        "0",
+        "0",
+        ""
+      ],
+      [
+        "8d651f4cc9804821bf8c4e7a6dd9b9f4",
+        "10641",
+        "jm-c102-u10641",
+        "PROCESSING",
+        "0",
+        "",
+        "0",
+        "0",
+        ""
+      ],
+      [
+        "8fe3a38b9d21448b9ddfad86907ad0e1",
+        "10642",
+        "jm-c102-u10642",
+        "PROCESSING",
+        "0",
+        "",
+        "0",
+        "0",
+        ""
+      ],
+      [
+        "b7f8fd50783c4b9c8d96703908e711bd",
+        "10645",
+        "jm-c102-u10645",
+        "PROCESSING",
+        "0",
+        "",
+        "0",
+        "0",
+        ""
+      ],
+      [
+        "dab5e512b8a748ef85011cc78949829f",
+        "10640",
+        "jm-c102-u10640",
+        "PROCESSING",
+        "0",
+        "",
+        "0",
+        "0",
+        ""
+      ],
+      [
+        "ee0e0f98a29148ef9cdce055e3f76c4e",
+        "10643",
+        "jm-c102-u10643",
+        "PROCESSING",
+        "0",
+        "",
+        "0",
+        "0",
+        ""
+      ]
+    ],
+    "entitlements": [
+      0,
+      0
+    ],
+    "orders": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "cache": {
+      "stock": 0,
+      "version": 2,
+      "invalidRequests": 0,
+      "processing": 8,
+      "streamLag": 0,
+      "streamPending": 0,
+      "ready": "1",
+      "dispatchCount": 8,
+      "dispatchPending": 0,
+      "cacheJobsPending": 0
+    }
+  },
+  "ackWhileRequestLocked": {
+    "reservationId": "dab5e512b8a748ef85011cc78949829f",
+    "sqlLockConnectionId": 294,
+    "grantedRequestRowLocks": 1,
+    "dispatchState": "SENT",
+    "attempts": 3,
+    "token": 4,
+    "requeuedAtDbMs": 1795012197363,
+    "ackRecordedAtDbMs": 1795012197460,
+    "ackRecordAfterRequeueMs": 97,
+    "requestLockReleased": false
+  },
+  "final": {
+    "stockCap": 8,
+    "sold": 8,
+    "remaining": 0,
+    "requests": [
+      [
+        "05d73c48e2054bf395100821d1fceadb",
+        "10646",
+        "jm-c102-u10646",
+        "SUCCEEDED",
+        "10326",
+        "PAID",
+        "1795012198518",
+        "1",
+        "SUCCEEDED"
+      ],
+      [
+        "53e6cecde657411fa2761a0e48e92835",
+        "10647",
+        "jm-c102-u10647",
+        "SUCCEEDED",
+        "10330",
+        "PAID",
+        "1795012199332",
+        "1",
+        "SUCCEEDED"
+      ],
+      [
+        "81c9971be4bc4b97b2878f0bf7634429",
+        "10644",
+        "jm-c102-u10644",
+        "SUCCEEDED",
+        "10331",
+        "PAID",
+        "1795012199428",
+        "1",
+        "SUCCEEDED"
+      ],
+      [
+        "8d651f4cc9804821bf8c4e7a6dd9b9f4",
+        "10641",
+        "jm-c102-u10641",
+        "SUCCEEDED",
+        "10324",
+        "PAID",
+        "1795012198360",
+        "1",
+        "SUCCEEDED"
+      ],
+      [
+        "8fe3a38b9d21448b9ddfad86907ad0e1",
+        "10642",
+        "jm-c102-u10642",
+        "SUCCEEDED",
+        "10329",
+        "PAID",
+        "1795012199152",
+        "1",
+        "SUCCEEDED"
+      ],
+      [
+        "b7f8fd50783c4b9c8d96703908e711bd",
+        "10645",
+        "jm-c102-u10645",
+        "SUCCEEDED",
+        "10328",
+        "PAID",
+        "1795012198819",
+        "1",
+        "SUCCEEDED"
+      ],
+      [
+        "dab5e512b8a748ef85011cc78949829f",
+        "10640",
+        "jm-c102-u10640",
+        "SUCCEEDED",
+        "10325",
+        "PAID",
+        "1795012198444",
+        "1",
+        "SUCCEEDED"
+      ],
+      [
+        "ee0e0f98a29148ef9cdce055e3f76c4e",
+        "10643",
+        "jm-c102-u10643",
+        "SUCCEEDED",
+        "10327",
+        "PAID",
+        "1795012198633",
+        "1",
+        "SUCCEEDED"
+      ]
+    ],
+    "entitlements": [
+      8,
+      0
+    ],
+    "orders": [
+      8,
+      8,
+      0,
+      0
+    ],
+    "cache": {
+      "stock": 0,
+      "version": 2,
+      "invalidRequests": 0,
+      "processing": 0,
+      "streamLag": 0,
+      "streamPending": 0,
+      "ready": "1",
+      "dispatchCount": 8,
+      "dispatchPending": 0,
+      "cacheJobsPending": 0
+    }
+  },
+  "drainAfterReleaseSec": 3.516,
+  "pass": true
+}

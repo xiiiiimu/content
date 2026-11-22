@@ -1,0 +1,16 @@
+{
+  "followers" : 100000,
+  "seed_ms" : 1263,
+  "publish_tx_ms" : 20.7768,
+  "publish_to_task_created_ms" : 35.8817,
+  "publish_to_last_follower_written_ms" : 95233,
+  "worker_ticks" : 1,
+  "sql_statements" : 114078,
+  "sql_per_follower" : 1.141,
+  "sql_per_sec" : 1198,
+  "redis_commands" : 500001,
+  "redis_per_follower" : 5.0,
+  "redis_per_sec" : 5250,
+  "followers_per_sec" : 1050,
+  "note" : "Questions and Redis counters are server-wide; the only other clients are this test's own polling (1 COUNT per tick) and the two feed reads"
+}

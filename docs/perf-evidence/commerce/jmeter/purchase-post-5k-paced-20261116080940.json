@@ -1,0 +1,101 @@
+{
+  "band": "purchase-5k-paced-t5000",
+  "kind": "in-stock-firstbuy-paced-ramp",
+  "comparedTo": "purchase-5k-stock-t5000-purchase-t5000-20261116025653 (barrier retained)",
+  "dir": "purchase-5k-paced-t5000-purchase-t5000-20261116080328",
+  "configuredThreads": 5000,
+  "rampSec": 100,
+  "barrierEnabled": false,
+  "clientKeyMode": "unique",
+  "clientKeyNote": "unique avoids cross-campaign byClient(jm-{userId}) short-circuit found in barrier audit",
+  "measuredPeakActiveThreads": 1090.0,
+  "peakHttpInFlight": 441.0,
+  "emitSpanMs": 82750,
+  "samples": 5000,
+  "classification": {
+    "samples": 5000,
+    "emitSpanSec": 82.75,
+    "windowSec": 83.599,
+    "achievedEmitRate": 60.42,
+    "targetEmitRate": 50.0,
+    "http200": 4290,
+    "http401": 0,
+    "http409": 0,
+    "http5xx": 0,
+    "connectionRefused": 710,
+    "connectionReset": 0,
+    "connectTimeout": 0,
+    "localSocket": 0,
+    "readTimeout": 0,
+    "other": 0,
+    "acceptQps": 51.32,
+    "acceptP95": 9106,
+    "acceptP99": 13633,
+    "peakAllThreads": 1090.0,
+    "hasReservationCol": true,
+    "hasUserIdCol": true,
+    "hasEffCkCol": true
+  },
+  "campaignId": 73,
+  "stockCap": 5000,
+  "drain": {
+    "drainSec": 179.088,
+    "processingLeft": 0,
+    "peakProcessingObserved": 3147
+  },
+  "reconcile": {
+    "sold": 4290,
+    "paidOrdersDistinct": 4290,
+    "paidBuyersDistinct": 4290,
+    "succReq": 4290,
+    "ents": 4290,
+    "processing": 0,
+    "stockCap": 5000,
+    "byState": "SUCCEEDED\t4290",
+    "ok": true
+  },
+  "tcpBefore": {
+    "at": "2026-11-16T08:03:19.7300000+08:00",
+    "freeRamGB": 1.88,
+    "tcpListen": [
+      {
+        "LocalAddress": "127.0.0.1",
+        "LocalPort": 28080,
+        "State": 2
+      }
+    ],
+    "tcpEstablished28080": 0
+  },
+  "tcpAfter": {
+    "at": "2026-11-16T08:05:41.5604641+08:00",
+    "freeRamGB": 2.3,
+    "tcpListen": [
+      {
+        "LocalAddress": "127.0.0.1",
+        "LocalPort": 28080,
+        "State": 2
+      }
+    ],
+    "tcpEstablished28080": 0
+  },
+  "join": {
+    "jtlWithReservationId": 4290,
+    "jtlHttp200": 4290,
+    "note": "Join key reservationId from RegexExtractor when body present"
+  },
+  "throughput": {
+    "targetEmitRate": 50.0,
+    "achievedEmitRate": 60.42,
+    "acceptQpsFromHttp": 51.32,
+    "paidThroughDrain": 4290,
+    "settleFullTps": 11.75,
+    "fullWallSec": 365.14,
+    "backlogPeakProcessing": 3147,
+    "drainSec": 179.088
+  },
+  "tomcatUnchanged": {
+    "note": "not raised for this control",
+    "threadsMax": 5000,
+    "acceptCount": 5000
+  }
+}

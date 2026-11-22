@@ -1,7 +1,6 @@
 package io.github.xiiiiimu.content.domain;
 
 import io.github.xiiiiimu.content.infrastructure.*;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.support.TransactionTemplate;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -20,19 +19,20 @@ public final class MaterialService {
 
  private final FeedMapper posts;private final PostAuthoringMapper authoring;private final UserMapper users;private final MaterialMapper db;private final TransactionTemplate tx;
  private final ObjectStore store;private final VisibilityService visibility;private final String bucket;private final String ffmpegImage;
- private final MaterialGrants grants;private final BCryptPasswordEncoder passwords=new BCryptPasswordEncoder();
+ private final MaterialGrants grants;private final PasswordHasher passwords;
  private final PipelineObserver observer;private final java.util.function.Consumer<Long> onVersionReady;
  /** Optional giveaway/entitlement gate: args are viewer, postId, versionId. */
  private final java.util.function.Predicate<long[]> entitlementAccess;
 
  public MaterialService(FeedMapper posts,PostAuthoringMapper authoring,UserMapper users,MaterialMapper db,TransactionTemplate tx,ObjectStore store,
-                        VisibilityService visibility,String bucket,String ffmpegImage,MaterialGrants grants,PipelineObserver observer){
-  this(posts,authoring,users,db,tx,store,visibility,bucket,ffmpegImage,grants,observer,id->{},q->false);
+                        VisibilityService visibility,String bucket,String ffmpegImage,MaterialGrants grants,PipelineObserver observer,PasswordHasher passwords){
+  this(posts,authoring,users,db,tx,store,visibility,bucket,ffmpegImage,grants,observer,passwords,id->{},q->false);
  }
  public MaterialService(FeedMapper posts,PostAuthoringMapper authoring,UserMapper users,MaterialMapper db,TransactionTemplate tx,ObjectStore store,
                         VisibilityService visibility,String bucket,String ffmpegImage,MaterialGrants grants,PipelineObserver observer,
-                        java.util.function.Consumer<Long> onVersionReady,java.util.function.Predicate<long[]> entitlementAccess){
+                        PasswordHasher passwords,java.util.function.Consumer<Long> onVersionReady,java.util.function.Predicate<long[]> entitlementAccess){
   this.posts=posts;this.authoring=authoring;this.users=users;this.db=db;this.tx=tx;this.store=store;this.visibility=visibility;
+  this.passwords=passwords; // share-password BCrypt runs on the A4 bounded pool (hardening A9)
   this.bucket=bucket;this.ffmpegImage=ffmpegImage;this.grants=grants;this.observer=observer;
   this.onVersionReady=onVersionReady==null?id->{}:onVersionReady;
   this.entitlementAccess=entitlementAccess==null?q->false:entitlementAccess;
@@ -223,11 +223,16 @@ public final class MaterialService {
 
  public Signed signOriginal(long viewer,long postId,Long versionId,long ttlMillis,String grant){
   if(ttlMillis<=0 || ttlMillis>900_000L)throw new FeedFailure(400,"INVALID_REQUEST");
-  var view=visibility.read(viewer,postId).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+  if(viewer<=0)throw new FeedFailure(401,"UNAUTHENTICATED");
+  var post=posts.post(postId);
+  if(post==null||!"PUBLISHED".equals(post.status())||post.time()==null)throw new FeedFailure(404,"POST_NOT_VISIBLE");
+  Long purchasedVersion=db.activePurchaseVersion(viewer,postId);
+  boolean purchased=purchasedVersion!=null && (versionId==null || versionId.equals(purchasedVersion));
+  if(!purchased)visibility.read(viewer,postId).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   var profile=db.profile(postId);if(profile==null)throw new FeedFailure(404,"NOT_MATERIAL");
-  boolean author=view.authorId()==viewer;
-  var version=resolveVersion(postId,versionId,profile);
-  boolean entitled=!author && entitlementAccess.test(new long[]{viewer,postId,version.id()});
+  boolean author=post.authorId()==viewer;
+  var version=resolveVersion(postId,versionId==null && purchased?purchasedVersion:versionId,profile);
+  boolean entitled=purchased || (!author && entitlementAccess.test(new long[]{viewer,postId,version.id()}));
   if(!author && !entitled){
    if(!"PASSWORD_ORIGINAL".equals(profile.shareMode()))throw new FeedFailure(403,"ORIGINAL_FORBIDDEN");
    grants.verify(grant,viewer,postId,profile.shareEpoch(),"ORIGINAL");

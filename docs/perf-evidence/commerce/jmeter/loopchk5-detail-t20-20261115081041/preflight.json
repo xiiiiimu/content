@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "buyers": 40,
+  "sampled": 5,
+  "postId": 44,
+  "campaignId": 31,
+  "campaignState": "OPEN",
+  "remainingStock": 100,
+  "stockCap": 100
+}

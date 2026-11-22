@@ -21,18 +21,12 @@ public final class TrendGuardService {
   String d=detail==null?"":detail;
   return Boolean.TRUE.equals(tx.execute(status->insertNew(eventId,topic,kind,windowStartMs,now,postId,d)));
  }
- /** Same-transaction emit used by TrendingService after ledger/bucket writes. */
+ /** Same-transaction emit used by TopicAggregator after it folds a batch into the buckets (B1). */
  public boolean recordInCurrentTx(String eventId,String topic,String kind,long windowStartMs,Long postId,String detail){
   validate(eventId,topic,kind,detail,windowStartMs);
   long now=System.currentTimeMillis();
   String d=detail==null?"":detail;
   return insertNew(eventId,topic,kind,windowStartMs,now,postId,d);
- }
- /** Lock order: caller already holds interaction/ledger/bucket row locks; then ensure+FOR UPDATE this topic serial row only. */
- public void lockTopicForEmit(String topic){
-  if(topic==null||topic.isBlank()||topic.length()>128)throw new FeedFailure(400,"INVALID_REQUEST");
-  db.ensureTopicSerial(topic);
-  if(db.lockTopicSerial(topic)==null)throw new FeedFailure(503,"TREND_TOPIC_LOCK");
  }
  private boolean insertNew(String eventId,String topic,String kind,long windowStartMs,long now,Long postId,String detail){
   try{return db.insert(eventId,SCHEMA_VERSION,topic,kind,windowStartMs,now,postId,detail,now)==1;}

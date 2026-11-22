@@ -15,7 +15,7 @@ public final class FeedIdentityFilter extends OncePerRequestFilter {
  @Override protected void doFilterInternal(HttpServletRequest request,HttpServletResponse response,FilterChain chain)throws ServletException,IOException {
   String header=request.getHeader("Authorization");if(header==null){chain.doFilter(request,response);return;}
   HttpServletRequest authenticated;
-  try{
+  try(var timing=io.github.xiiiiimu.content.infrastructure.SaleLatency.phase("auth.verify")){
    if(!header.startsWith("Bearer "))throw new IllegalArgumentException();
    var identity=tokens.verify(header.substring(7),FeedTokens.Identity.class);long now=System.currentTimeMillis();
    if(identity.version()!=1 || identity.reader()<=0 || identity.issuedAt()<=0 || identity.issuedAt()>now+30_000 || identity.expiresAt()<=now

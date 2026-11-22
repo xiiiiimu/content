@@ -1,0 +1,1477 @@
+{
+  "configuredBatchSize": 20,
+  "identityCommitCoverageComplete": true,
+  "newRequestIdsObserved": 3482,
+  "expectedNewRequests": 3482,
+  "committedFormalBatches": 176,
+  "actualReadSizeDistribution": {
+    "2": 1,
+    "10": 2,
+    "20": 173
+  },
+  "actualNormalSizeDistribution": {
+    "2": 1,
+    "10": 2,
+    "20": 173
+  },
+  "normalBatchSqlCount": 1232,
+  "normalBatchSqlStatements": {
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard": 176,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.campaigns": 176,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.requests": 176,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.ensureFences": 176,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.fences": 176,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.insertRequests": 176,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.enqueue": 176
+  },
+  "normalBatchSqlPerBatch": {
+    "count": 176,
+    "p50": 7,
+    "p95": 7,
+    "p99": 7,
+    "max": 7
+  },
+  "normalBatchExplicitJdbcCommits": 176,
+  "normalBatchSuccessfulTransactions": 176,
+  "normalBatchJdbcRollbacks": 0,
+  "normalBatchTransactionMs": {
+    "count": 176,
+    "p50": 1560,
+    "p95": 2437,
+    "p99": 3892,
+    "max": 4384
+  },
+  "normalBatchSqlPerPersistedRequest": 0.35381964388282594,
+  "windowBridgePersistedRequests": 472,
+  "windowBridgePersistRate": 7.866666666666666,
+  "fullBridgePersistRate": 10.391641324232937,
+  "windowAllBridgeSqlCount": 436,
+  "windowAllBridgeSqlStatements": {
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.runtime": 52,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.unresolved": 26,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard": 90,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.campaigns": 26,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.requests": 26,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.ensureFences": 26,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.fences": 26,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.insertRequests": 26,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.enqueue": 25,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.jobs": 25,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job": 64,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.orderByUserPost": 8,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.winner": 8,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied": 8
+  },
+  "windowAllBridgeExplicitJdbcCommits": 89,
+  "allBridgeSqlScope": "Includes prepare/scans including empty scans and quarantine; statement start in window. Batch commits use return in window. No per-request autocommit SELECT transaction counts inferred.",
+  "batchDetails": [
+    {
+      "traceId": "diag-f46ccc0abd0142c89baac0bc0aa8086b",
+      "readCount": 2,
+      "normalCount": 2,
+      "insertCount": 2,
+      "commitReturnedAtMs": 1795086967015,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-df46fc30c8784950b8af0877dd1145ac",
+      "readCount": 10,
+      "normalCount": 10,
+      "insertCount": 10,
+      "commitReturnedAtMs": 1795086967360,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-c46d9ad9b6824508a1a48b4aa31d25d2",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795086969801,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-aebaeef5b4454957aaffbf753eddb3cc",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795086972264,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-dfb353b024c3425d846f470602104ca9",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795086977130,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-c9736d3747394d089166349eaf78f17f",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795086980977,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-b53943100e2d4769b9e38eaf1ab10b27",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795086983543,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-4edf94da33994794a4021d8ac81dc6cb",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795086986298,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-5989a958a94a49409a96642cc047439e",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795086988443,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-0e7217cbe8eb404fa07093b754ded0b6",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795086991395,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-8a20ae6ff30f487689eadd25bf7289ee",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795086995790,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-564c963689a44effb156ae30c0078872",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795086998377,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-1ea212abc47d4ae2b3cd4e85902544ce",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795086999304,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-84e6f1dccbab4d60a9294dfd1c754122",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087001236,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-eed90b397960400596c261b55707fd0c",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087003984,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-9933b80c746c40c4acb397f9bf2056ac",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087006525,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-bd4f7cfd919647e7bc921562b5824b2f",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087008945,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-18f068208216422bbe2ec81532b6d891",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087011602,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-71a171640ff040879e1169951e9684a0",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087014675,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-b714c0feac704162a6b031df0866df04",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087016204,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-5bf0285057954d66ba742c8350f03bd8",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087017701,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-977afa6be5b54dc6b8e6cfa963b4b88b",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087019530,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-8510f546462f40b7bd2908c77534241b",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087021303,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-9d4b6882527649a3acd5a95ed0bd0f79",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087023558,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-1dc9f3d9bc9b44798ef139755614eaee",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087026319,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-5508c2afcef84bd09e32a98d9a4b0255",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087029396,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-02f46ec4d2ff4c2f92a88b2ab710cb76",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087031606,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-8869e65e0685449ca152b4046109fa10",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087033510,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-18af15e640ff4f8f8f5d931507ded4c7",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087035386,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-4c1c6d4092da413988d0e0a43aa72ccf",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087036658,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-08ac376376a1470c8b08102edd6e2919",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087038481,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-410caaed0e2a4ba883c818620e5d4b14",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087040362,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-67bae2c7dd7640f99a4476f918d96533",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087041942,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-a4d136d651904e9a9f8221cc6134c297",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087044129,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-6bf250e50a064b4eabcb14c0f5997741",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087047038,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-a9f116bd44cf4a688a4acc61fb56c990",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087049257,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-462a2cd4e0fd46bcbd97fa59f14ea958",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087050858,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-7cce8bd3ea744d51ba7077f0230ad245",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087052525,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-f918b63ed9474b6393b9e40d63698d9b",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087054309,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-281af4d32b864ff6bfbf1dbdd0e5b44d",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087056032,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-1a8a85806520452eb5d0e27602826b81",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087057340,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-317926924c7b41608fcce0dab8b2de7a",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087058974,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-1a8f1fb7f733498ea0ed1c0331154c1a",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087060543,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-48073f0497b944a6aa05d33351299a9a",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087061905,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-e2aa1523d7684c36b71672256e0b06b8",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087064599,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-2e05afcbea3d49709eee7e74091fdf2c",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087066806,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-0d3efab6fa59440ab5c658396d7780bd",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087068471,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-cbdd3538be2148f1b6358af24c18c436",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087069935,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-beb0fca1283344d199cf3e87dfb4e26b",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087071509,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-b1b2e10006754e93ba16be3cabb7738c",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087072911,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-254135f8c6694cc185129449ea0c5311",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087074809,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-07e811fb4c3d4c90805e2d3a983fde4e",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087076246,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-07890a4971db4853bfc04bd9d09ac845",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087077817,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-2b311dce6b1d41939a53382de2073795",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087079578,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-a77fdb2260df44f194055998efc1b0e5",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087081701,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-3cc1adc9253745b9bcc2e7e7277e821f",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087084094,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-c9fe58c588ea475891eb14307c8ee5e3",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087086143,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-5993d4212d2b47b4a4f9ac5f9b7123b9",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087087533,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-05083b7ab37d4fd8861e7b12d02f49b2",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087089082,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-4a55c197e317472996c3119334c8bb1a",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087090711,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-cfe478d2deda44a59e958bcb28a68409",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087091950,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-7de59fc4b22e46e493f91a79a24d6e8c",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087093832,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-a1065725360e4289931d063c5e7349b6",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087095683,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-af605cfbc575425980adc526a2dc481a",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087097095,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-c36434f7a4c3499f908c32f386aba852",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087099594,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-f659925fec2643bd9758db9875892e46",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087101754,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-0ac3a737c31e4ec49835983d8c6df77c",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087103597,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-b732d94a7de34cd9936645216e924b05",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087105287,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-c579c0421ccf4019a4970a4331ecae06",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087106906,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-8ed56f83640847bb875a0a1ca7c754d6",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087108879,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-ef139cb0b3424019b58b148ef8255738",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087110751,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-532718415d0545d5aceb77dad89624a6",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087112317,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-366b656c034d409ebea88e4fdf5f63a7",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087113854,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-2cc692a273644fbd95cfea87d09f4a49",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087116018,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-ef0023a8002d4744ba43d4e2f39a9ddc",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087118551,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-5f3194b10b8f437eb4b99d5f37893247",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087120728,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-e02fc85fd9de4461890d4f6ee3d0c505",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087122185,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-8dbf09dfc72b451d922cc3e576de7592",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087124378,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-6727b83899884f32a5c227f26e6a2b1d",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087125847,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-c7ef574a7d7343269432b21bcf86f7b0",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087127674,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-0e9f01232e294c86811f6ac7ac1fda98",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087129430,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-73cf1c935bb4447e995bd85478408fa2",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087130899,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-1a837a1a0d544f82940dfcaae4094c26",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087132080,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-ca64ce0bdda442c08cb9c22d95a5525b",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087135016,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-96f9ed1d48cf4f129bd1314be79e3ad7",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087137526,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-19d5ecbad64b420387550ffd403cef05",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087139648,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-40231363bcab4b2fbd04ace2e56f2e0a",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087140977,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-a580442fe2f94fda9206060a1a960e96",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087142982,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-ebe29b29d30e4be59803a452d442c219",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087144941,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-86cdeab798e94358a66095a7ea92de30",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087146407,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-d766a498e7a74b09b729836eefed6703",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087148149,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-6b129bc52bd84ca59a2f896eec58c35e",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087149881,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-94a396849de342208bf9ab23c0802785",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087151591,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-f8300fed848048bb9a811c1544c869eb",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087153900,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-cbcc146ec12d4d15910d5c1220fafd44",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087156209,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-24009d2a60d842478a6994576d211841",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087158018,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-8e6688a0fdaa4f04974b563e326f167d",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087160075,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-5f1e2970400147608a80d77695415cab",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087161217,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-0ce9213908e44d37b9ac88aeb6ca3b08",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087163104,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-27257b9eb6b7415a9412c86fd72421e1",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087164807,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-93b6b2afdfb04a05a6028815ccbd0843",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087166440,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-bb18c3035ede44e582d024d6746695f8",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087168021,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-3047f6d86fbe442db2d698ead0906774",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087169932,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-638755ce29164d73abfc5822e88f18b3",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087172081,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-04a59a01b85043f2a88eaf2e159eb8c5",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087174724,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-18b191dab54f47e3b5f94bb7ce3a0e5c",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087176899,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-c0b4ad390bdf4473b5c7a9e3bc2e9273",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087178550,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-a2f067f2be5f436f8e520222fc864b0d",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087180186,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-124fdcc3de914b6bad7576a4646d4387",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087181462,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-1868c38969854fde8b4951fe3488ef69",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087183282,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-7a5bb4cbdde3406bb23b7a4489da4acc",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087185220,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-d4ea827123654fa3b1e87edec174d04a",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087186670,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-7a130b6b9e8d4735b2982a37dba9b39f",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087188736,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-54cc42916f5d4a4aaa1aa973434bf37d",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087191236,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-96a08cb8dd0244ceb547ba502c70df8b",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087192715,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-fa581b98f0bc4723b14ae41510a5c68c",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087194714,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-46c56021e77244b095778efd98217e59",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087196417,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-d0195ea8d42f473580c433736f7738f5",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087198732,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-9a7f696c3ba045309a55467ffcd4f79a",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087200437,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-71a4c2c4f3b147eba9c44383d0cfaabc",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087202476,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-6e99e318e33e4eeaa24f17452e79bb11",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087204508,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-fcefaa9219e74484bccee20eb93e5dcf",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087206761,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-8283cfa5b11a4c1092618bd8625c245f",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087209524,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-b17f659fcc744289bbd8307b32867aa5",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087210929,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-f90b3f60238c4bc38cef1335c44a1983",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087212833,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-5cf31651af3644ddba7d9f79ec19789e",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087214887,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-0f47a2cb98b7447a8b50be60db73025b",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087216683,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-ae6fd5af83d0448e8bc0682bd29709d9",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087218696,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-1ec260079c7f4d95817b65907027e0e7",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087220205,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-4d33e021d1924b7db811720476bb3ab2",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087221518,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-ea3e92e5f7d6452fb9ff1bc2e60596b6",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087223334,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-c0e459162c94488cb70c22b5208500b7",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087226068,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-df644309969d485bb68bdbac3f64938e",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087227955,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-57263e86eca744839a49394a7369f430",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087230251,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-8b17a318ac5149f991674710142f916b",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087231361,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-ba7c47caf2c2426396257f911dedd21e",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087233420,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-3b9382c2ca9e4785ac651b77fdb34a00",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087234970,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-9a4a1f500a7144b7bc44f316314f2b6f",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087236652,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-1af79a9c12574a4aaae71b4d5d63051d",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087238128,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-33f0d7a22df648da962612108da9b77d",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087239742,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-c3e9104b8ad54e23be112d967cef3917",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087241475,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-063b9d32a5ff4f1eab45b2e5274a07cf",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087244082,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-9c563a416deb4e37b36daf1442dad005",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087246390,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-87163c14fc4a49ff8f19baceee659880",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087247946,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-794fe2b408694440a847b55002cc9f7a",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087249519,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-f80211531f034195865a12be4260a182",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087251303,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-19438f624c3a4e14b8e4b3829aa4e428",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087252295,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-9fc31932bb2440838cb4c22e391a1c66",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087253996,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-c86f517f8f324f9b8c4c68cb216d5da6",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087255769,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-76faff5d9f9643eab76059b3a64b9a8d",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087257438,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-93858ffa79e441d58932bd9901d6c483",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087258937,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-1cb4e4b380e94f5f86676b981faf5d1f",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087261120,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-9014a29f6daa479282b51bf75556d8fd",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087262526,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-8f42475892f647abadeaea0742dc2de8",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087264602,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-6214b773b5634afc949c3773e7d06890",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087266305,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-ae4265ecc47d44bb8b23f715e91928db",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087267895,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-e9a2bec4ddd748cdaabe2b38ce6635c3",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087269307,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-780a4772532b4cb2a19fd212f4d8edf9",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087270451,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-410840fce53545eb89d9197b20cf1c75",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087272451,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-25d67636e8114d7f9210c3ed11725b6b",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087274080,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-511ced97f7bd478f882a9a8741a963e1",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087276286,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-7c3220c7926f43f984e0d6699522cb62",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087278250,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-e0888f2721db4afe9c62b0f25de7a883",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087280537,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-f8644368b3a94735b326be7bd363889c",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087282147,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-6afe1e6809d74321884f2bf4a1d30d44",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087283927,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-b15484589ceb44aba16c69b10a768d39",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087285317,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-437de0e317f1423ca9df7e735c1a1791",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087286980,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-e50bfa7326e045cba4a7df8e17a135ae",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087288722,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-c95a8abdf5634024b847ef890160d63b",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087290392,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-80c2518ba5d140a3a87171cac2b2cecd",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087291567,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-182b6b1f26c44b6abdc01ffbcc8282ad",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087293262,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-d729bb504f8c435d9de8dea5ed2f71c9",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087295243,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-04224fb785b946ce923d1e0733576bcf",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087297401,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-97682a5948c7473a822fe4aa5164f63e",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087299182,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-37147977a84a45ceaa9174ea30c78891",
+      "readCount": 20,
+      "normalCount": 20,
+      "insertCount": 20,
+      "commitReturnedAtMs": 1795087300838,
+      "sqlCount": 7
+    },
+    {
+      "traceId": "diag-4ca386a641cf4f0691d2741566a453f1",
+      "readCount": 10,
+      "normalCount": 10,
+      "insertCount": 10,
+      "commitReturnedAtMs": 1795087302000,
+      "sqlCount": 7
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1794755694792,417,POST-purchase,200,,commerce-threads 1-20,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,415,0,121
+1794755694792,417,POST-purchase,200,,commerce-threads 1-14,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,417,0,121
+1794755694792,417,POST-purchase,200,,commerce-threads 1-15,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,415,0,123
+1794755694792,417,POST-purchase,200,,commerce-threads 1-7,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,415,0,124
+1794755694792,417,POST-purchase,200,,commerce-threads 1-3,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,416,0,120
+1794755694790,420,POST-purchase,200,,commerce-threads 1-4,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,417,0,122
+1794755694790,419,POST-purchase,200,,commerce-threads 1-13,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,417,0,125
+1794755694793,416,POST-purchase,200,,commerce-threads 1-18,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,415,0,120
+1794755694792,417,POST-purchase,200,,commerce-threads 1-11,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,415,0,122
+1794755694792,417,POST-purchase,200,,commerce-threads 1-17,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,415,0,123
+1794755694790,419,POST-purchase,200,,commerce-threads 1-12,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,419,0,124
+1794755694790,419,POST-purchase,200,,commerce-threads 1-5,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,418,0,122
+1794755694790,436,POST-purchase,200,,commerce-threads 1-19,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,432,0,124
+1794755694792,443,POST-purchase,200,,commerce-threads 1-1,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,442,0,120
+1794755694790,445,POST-purchase,200,,commerce-threads 1-16,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,445,0,125
+1794755694790,445,POST-purchase,200,,commerce-threads 1-2,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,444,0,125
+1794755694792,443,POST-purchase,200,,commerce-threads 1-8,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,443,0,122
+1794755694792,444,POST-purchase,200,,commerce-threads 1-10,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,443,0,121
+1794755694796,447,POST-purchase,200,,commerce-threads 1-9,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,447,0,119
+1794755694792,451,POST-purchase,200,,commerce-threads 1-6,text,true,,309,418,20,20,http://127.0.0.1:28080/api/sale-campaigns/57/purchase,450,0,124

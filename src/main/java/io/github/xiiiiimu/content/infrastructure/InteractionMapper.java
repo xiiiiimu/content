@@ -7,6 +7,8 @@ public interface InteractionMapper {
  record Stats(long postId,long likes,long comments,long dislikes,long reports) {}
  record Comment(long id,long postId,long userId,Long parentId,Long materialVersionId,Long offsetMs,Long acceptedAtMs,String body,long createdAtMs) {}
  record Bucket(String topic,long bucket,long net,long active) {}
+ /** Hardening B10: the reacting user's own row, locked first by every like/unlike/dislike/undislike (see InteractionService). */
+ @Select("SELECT id FROM users WHERE id=#{user} FOR UPDATE") Long lockReactor(long user);
  @Insert("INSERT IGNORE INTO post_likes(post_id,user_id,created_at_ms) VALUES(#{post},#{user},#{at})") int like(@Param("post")long post,@Param("user")long user,@Param("at")long at);
  @Delete("DELETE FROM post_likes WHERE post_id=#{post} AND user_id=#{user}") int unlike(@Param("post")long post,@Param("user")long user);
  @Select("SELECT COUNT(*) FROM post_likes WHERE post_id=#{post}") long likeCount(long post);
@@ -20,9 +22,15 @@ public interface InteractionMapper {
  @Insert("INSERT IGNORE INTO post_dislikes(post_id,user_id,created_at_ms) VALUES(#{post},#{user},#{at})") int dislike(@Param("post")long post,@Param("user")long user,@Param("at")long at);
  @Delete("DELETE FROM post_dislikes WHERE post_id=#{post} AND user_id=#{user}") int undislike(@Param("post")long post,@Param("user")long user);
  @Select("SELECT COUNT(*) FROM post_dislikes WHERE post_id=#{post}") long dislikeCount(long post);
+ /**
+  * One report per (post, reporter) (V29 uq_report_post_reporter). A repeat fails with a duplicate key, which the caller
+  * treats as "already reported"; every other error (bad JSON, truncation) still fails. Hardening B2: the former
+  * ON DUPLICATE KEY UPDATE id=id returned 1 for a repeat too (Connector/J reports found rows), so a repeat looked new.
+  */
  @Insert("INSERT INTO post_reports(post_id,reporter_user_id,reason,detail,context_json,created_at_ms) VALUES(#{post},#{user},#{reason},#{detail},#{context},#{at})")
  int report(@Param("post")long post,@Param("user")long user,@Param("reason")String reason,@Param("detail")String detail,@Param("context")String context,@Param("at")long at);
  @Select("SELECT COUNT(*) FROM post_reports WHERE post_id=#{post}") long reportCount(long post);
+ @Select("SELECT id FROM post_reports WHERE post_id=#{post} AND reporter_user_id=#{user}") Long reportId(@Param("post")long post,@Param("user")long user);
  @Insert("""
   INSERT INTO post_comments(post_id,user_id,parent_id,material_version_id,offset_ms,body,idempotency_key,created_at_ms)
   VALUES(#{post},#{user},#{parent},#{version},#{offset},#{body},#{key},#{at})
@@ -47,16 +55,54 @@ public interface InteractionMapper {
  void upsertStats(@Param("post")long post,@Param("likes")long likes,@Param("dislikes")long dislikes,@Param("comments")long comments,@Param("reports")long reports);
  @Select("SELECT post_id AS postId,like_count AS likes,comment_count AS comments,dislike_count AS dislikes,report_count AS reports FROM post_stats WHERE post_id=#{post}")
  Stats stats(long post);
- @Insert("INSERT IGNORE INTO topic_event_ledger(event_id,topic,post_id,occurred_at_ms,delta,kind) VALUES(#{id},#{topic},#{post},#{at},#{delta},#{kind})")
+ /**
+  * Hardening B2: moves the counters by this transaction's own changes. Returns matched rows (Connector/J reports found
+  * rows), so 1 whenever the row exists. GREATEST only stops a drifted counter from going negative; the reconciler repairs it.
+  */
+ @Update("UPDATE post_stats SET like_count=GREATEST(like_count+#{likes},0),dislike_count=GREATEST(dislike_count+#{dislikes},0),comment_count=GREATEST(comment_count+#{comments},0),report_count=GREATEST(report_count+#{reports},0) WHERE post_id=#{post}")
+ int addStats(@Param("post")long post,@Param("likes")long likes,@Param("dislikes")long dislikes,@Param("comments")long comments,@Param("reports")long reports);
+ /**
+  * First stats row of a post: built from COUNT(*), which sees this transaction's own change (so the deltas are not added).
+  * If another transaction created the row meanwhile, its COUNT could not see our uncommitted change: add the deltas.
+  * The SELECT is a consistent read under READ COMMITTED (no locks on the counted tables).
+  */
+ @Insert("""
+  INSERT INTO post_stats(post_id,like_count,dislike_count,comment_count,report_count)
+  SELECT #{post},(SELECT COUNT(*) FROM post_likes WHERE post_id=#{post}),(SELECT COUNT(*) FROM post_dislikes WHERE post_id=#{post}),
+         (SELECT COUNT(*) FROM post_comments WHERE post_id=#{post}),(SELECT COUNT(*) FROM post_reports WHERE post_id=#{post})
+  ON DUPLICATE KEY UPDATE like_count=GREATEST(like_count+#{likes},0),dislike_count=GREATEST(dislike_count+#{dislikes},0),
+   comment_count=GREATEST(comment_count+#{comments},0),report_count=GREATEST(report_count+#{reports},0)
+  """)
+ void createStats(@Param("post")long post,@Param("likes")long likes,@Param("dislikes")long dislikes,@Param("comments")long comments,@Param("reports")long reports);
+ /** Reconciler: the stored counters, row-locked so no online ±1 can interleave with the recount. */
+ @Select("SELECT post_id AS postId,like_count AS likes,comment_count AS comments,dislike_count AS dislikes,report_count AS reports FROM post_stats WHERE post_id=#{post} FOR UPDATE")
+ Stats statsForUpdate(long post);
+ @Select("SELECT post_id FROM post_stats WHERE post_id>#{after} ORDER BY post_id LIMIT #{limit}")
+ List<Long> statsPostIdsAfter(@Param("after")long after,@Param("limit")int limit);
+ /** Hardening B1: a pending row (aggregated_at_ms NULL) for the aggregator; a duplicate event id inserts nothing. */
+ @Insert("INSERT IGNORE INTO topic_event_ledger(event_id,topic,post_id,occurred_at_ms,delta,kind,aggregated_at_ms) VALUES(#{id},#{topic},#{post},#{at},#{delta},#{kind},NULL)")
  int ledger(@Param("id")String id,@Param("topic")String topic,@Param("post")long post,@Param("at")long at,@Param("delta")int delta,@Param("kind")String kind);
- @Insert("INSERT INTO topic_minute_buckets(topic,bucket_start_ms,net_events,active_interactions) VALUES(#{topic},#{bucket},#{net},#{active}) ON DUPLICATE KEY UPDATE net_events=net_events+#{net},active_interactions=active_interactions+#{active}")
- void bucket(@Param("topic")String topic,@Param("bucket")long bucket,@Param("net")long net,@Param("active")long active);
  @Select("SELECT topic,bucket_start_ms AS bucket,net_events AS net,active_interactions AS active FROM topic_minute_buckets WHERE bucket_start_ms>=#{since} ORDER BY topic,bucket_start_ms")
  List<Bucket> bucketsSince(long since);
- @Delete("DELETE FROM topic_minute_buckets") void clearBuckets();
- @Select("SELECT event_id AS id,topic,post_id AS post,occurred_at_ms AS at,delta,kind FROM topic_event_ledger WHERE occurred_at_ms>=#{since}")
- List<Ledger> ledgerSince(long since);
- @Select("SELECT DISTINCT post_id FROM topic_event_ledger WHERE topic=#{topic} ORDER BY post_id DESC LIMIT #{limit}")
- List<Long> postsForTopic(@Param("topic")String topic,@Param("limit")int limit);
- record Ledger(String id,String topic,long post,long at,int delta,String kind) {}
+ record LikeEvent(String topic,long at,boolean pending) {}
+ /** The ledger row of a like (event id like:{post}:{user}), locked; pending = not folded into a bucket yet. Null if none. */
+ @Select("SELECT topic,occurred_at_ms AS at,aggregated_at_ms IS NULL AS pending FROM topic_event_ledger WHERE event_id=#{id} FOR UPDATE")
+ LikeEvent likeEventForUpdate(String id);
+ @Delete("DELETE FROM topic_event_ledger WHERE event_id=#{id}")
+ int deleteLedger(String id);
+ /** Queues a folded like for revocation: renamed off its like id and pending again (B1, see TrendingService.revokeLike). */
+ @Update("UPDATE topic_event_ledger SET event_id=#{newId},revoked_at_ms=#{at},aggregated_at_ms=NULL WHERE event_id=#{id} AND aggregated_at_ms IS NOT NULL")
+ int revokeCounted(@Param("id")String id,@Param("newId")String newId,@Param("at")long at);
+ /** Retention: delete at most {@code limit} expired buckets, oldest first, via ix_bucket_start. */
+ @Delete("DELETE FROM topic_minute_buckets WHERE bucket_start_ms<#{cutoff} ORDER BY bucket_start_ms LIMIT #{limit}")
+ int purgeBuckets(@Param("cutoff")long cutoff,@Param("limit")int limit);
+ /** Retention: delete at most {@code limit} expired ledger rows, oldest first, via ix_ledger_time. */
+ @Delete("DELETE FROM topic_event_ledger WHERE occurred_at_ms<#{cutoff} ORDER BY occurred_at_ms LIMIT #{limit}")
+ int purgeLedger(@Param("cutoff")long cutoff,@Param("limit")int limit);
+ /** The post's own topic (author-set); null means the post takes no part in topic statistics. */
+ @Select("SELECT topic FROM posts WHERE id=#{post}")
+ String postTopic(long post);
+ /** Topic page source: published posts carrying the topic attribute, newest first (ix_posts_topic). */
+ @Select("SELECT id FROM posts WHERE topic=#{topic} AND status='PUBLISHED' ORDER BY published_at_ms DESC,id DESC LIMIT #{limit}")
+ List<Long> postsWithTopic(@Param("topic")String topic,@Param("limit")int limit);
 }

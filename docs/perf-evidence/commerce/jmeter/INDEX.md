@@ -1,0 +1,226 @@
+# Material commerce JMeter evidence (PR #15)
+
+Formal load uses Apache JMeter 5.6.3 CLI (`infra/jmeter/`). Payment/refund simulated. FFmpeg container cleanup unverified.
+
+## Correctness (pre-JMeter)
+
+| Evidence | Result |
+|---|---|
+| `../sale-short-20261115042949` | **Retained suspect**: `systemErrors=32` misclassified (SaleController missing from `FeedErrors` + PS `HttpResponseException` isa `HttpRequestException`) |
+| `../sale-short-classified-20261115054231` | **GREEN**: 8 SUCCEEDED, 8 IDEMPOTENT_REPLAY, 32 `BIZ_HTTP:SOLD_OUT`, 0 system; sold=paid=ents=8 |
+| `../correctness-barrier-redelivery-20261115053617` | **GREEN**: hold→blacklist→REJECTED/BLACKLISTED; seat resold; fail-after-commit redelivery → 1 order / 1 entitlement |
+
+## How to re-run
+
+```powershell
+# API: async MQ + fault-hooks; Hikari/Redis via env; pipeline scan off; purchase accept defers MQ send
+pwsh -File infra/jmeter/run-java-commerce.ps1 -Package -SkipAssistant
+
+# Optional MySQL headroom for 200-thread storms
+docker exec -e MYSQL_PWD=11111 content-mysql-1 mysql -uroot -e "SET GLOBAL max_connections=500;"
+
+# Correctness
+pwsh -File infra/jmeter/correctness-short.ps1
+pwsh -File infra/jmeter/correctness-barrier-redelivery.ps1
+
+# Seed OUTSIDE formal window (CSV under target/jmeter-data — not committed)
+pwsh -File infra/jmeter/seed-commerce-data.ps1 -Buyers 200 -Stock 500 -Prefix b200 -PaidOrders 80
+pwsh -File infra/jmeter/seed-commerce-data.ps1 -Buyers 200 -Stock 200 -Prefix b200m
+
+# Preflight then steady QPS (loops=-1, DurationSec>0). Warmup excluded from window.
+pwsh -File infra/jmeter/run-commerce-jmeter.ps1 -Scenario sign -Threads 200 -RampSec 15 -DurationSec 20 -Loops 0 `
+  -MetaJson target/jmeter-data/meta-<id>.json -Band baseline200-r6 -TimeoutMs 20000
+pwsh -File infra/jmeter/run-commerce-jmeter.ps1 -Scenario mixed -Threads 200 -RampSec 8 -DurationSec 0 -Loops 1 `
+  -MetaJson target/jmeter-data/meta-<id>.json -Band baseline200-r6 -TimeoutMs 20000
+
+# Full baseline pack
+pwsh -File infra/jmeter/run-baseline-200.ps1 -Threads 200 -DurationSec 20 -RampSec 15
+
+# Scenario C TPS (MySQL unique commits; same window math for settle / buyer / giveaway-auto)
+pwsh -File infra/jmeter/run-tps-window.ps1 -Buyers 100 -Stock 100 -WindowSec 20
+pwsh -File infra/jmeter/run-tps-giveaway-auto.ps1 -Buyers 20
+
+# Distributed 5k/10k (requires injectors)
+# see infra/jmeter/distributed/README.md
+```
+
+Config before/after for sign/mixed: `config-before-after-sign-mixed.md`. r4 syserr classification: `baseline200-r4-sign-mixed-syserr-classification.md`.
+
+## Concurrency reporting rule
+
+Configured `-Jthreads` is **not** a capacity ceiling. Each run’s `host-metrics.json` records configured threads, peak active threads, `peakHttpInFlight` (servlet filter) and `peakSettleInFlight` (settle hooks) separately via `GET /api/sale-debug/inflight`.
+
+## Detail GET 35 system errors — before / after
+
+See `syserr-35-remediation.md` and `band5k-detail-detail-t200-20261115060906/syserr-classification.md`.
+
+| Phase | Evidence | CONNECT_FAIL | Other system | Notes |
+|---|---|---:|---:|---|
+| Before | `band5k-detail-detail-t200-20261115060906` | **35/35** | 0 | Connection refused; one-iter (loops mangled) |
+| Loop fix | `loopchk5-detail-t20-20261115081041` | 0 | 0 | samples=470≫20; multiIterOk |
+| After (formal) | `baseline200-r4-detail-t200-20261115094647` | **0** | **0** | Hikari max-pool=80 via env; Tomcat accept-count=500 |
+
+Root causes fixed: Tomcat accept backlog; JMX `__P(csvVars,…)` 4-arg compile fail; FeedConfiguration hard-cap Hikari=16 (now `CONTENT_HIKARI_MAX_POOL`); seed/warmup outside formal window; `loops=-1` for duration runs.
+
+## Baseline 200 (r6, authoritative for sign/mixed pass)
+
+Machine: single-box JMeter 5.6.3 + Java 21. TimeoutMs=20000 unchanged. Steady: DurationSec=20, RampSec=15. Mixed: Loops=1, RampSec=8. Seeds: `r6s80bj` (sign), `r6mq7p9` (mixed). JVM: pool=120, jdbc socket=60s, pipeline.scan=false, redis io/cpu=8, consume-threads=20, scan-delay=50ms; purchase accept defers MQ send.
+
+| Scenario | Samples | Req QPS | P50 | P95 | P99 | OK | Biz | Sys | peakHttp | peakSettle |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| sign (r6) | 1152 | 106.8 | 1077 | 6049 | 9988 | 1152 | 0 | **0** | 200 | 0 |
+| mixed (r6) | 1992 | 139.2 | 205 | 3479 | 5273 | 1992 | 0 | **0** | 200 | 20 |
+
+Mixed by label (r6, **whole-run windowSec=14.306**; all 1992 rows are HTTP samplers with URL; 200+200+1592=1992). See `baseline200-r6-mixed-qps-correction.md`.
+
+| Label | n | windowSec | QPS | P50 | P95 | P99 | activeQps (optional) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| MIX-detail | 200 | 14.306 | **13.98** | 1781 | 3402 | 5637 | 1851.85 (start-span 0.108s; not for capacity) |
+| MIX-purchase | 200 | 14.306 | **13.98** | 3291 | 5471 | 6387 | 32.67 |
+| MIX-poll | 1592 | 14.306 | **111.28** | 149 | 829 | 1372 | 150.61 |
+
+Reconcile after MQ drain: sold=paid=succReq=ents=**200**/200 (`baseline200-r6-mixed-reconcile.txt`). High tails retained (**sign P99 ≈ 10s**; purchase p99≈6.4s) — not closed by widening TimeoutMs. JVM keeps **`pipeline.scan-enabled=false`** for commerce load (see `config-before-after-sign-mixed.md`).
+
+### Prior r4 archive (retained; sign/mixed failed bar)
+
+Summary JSON: `baseline200-summary-20261115100806.json`. Evidence dirs `baseline200-r4-*`.
+
+| Scenario | Samples | Req QPS | P50 | P95 | P99 | OK | Biz | Sys | peakHttp | peakSettle |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| detail | 798 | 99.3 | 1413 | 6081 | 9041 | 798 | 0 | **0** | 200 | 0 |
+| purchase | 427 | 55.2 | 3007 | 10556 | 11562 | 427 | 0 | **0** | (see host-metrics) | |
+| poll | 2590 | 282.8 | 450 | 1231 | 1696 | 2590 | 0 | **0** | | |
+| order | 1743 | 180.1 | 758 | 2702 | 5021 | 1743 | 0 | **0** | | |
+| sign | 1075 | 107.9 | 1300 | 7019 | 10903 | 1072 | 0 | 3 | | |
+| flash | 200 | 372.4 | 6762 | 8383 | 8606 | 80 | 120 | **0** | 200 | |
+| mixed | 1651 | 57.2 | 1080 | 12656 | 17787 | 1612 | 0 | 39 | 200 | |
+
+Flash reconcile: sold=paid=ents=**80**/80. Intermediate: r5 sign sys=0 / mixed 4 TIMEOUT; r5b consume-threads=48 worsened to 20 sys — retained under `baseline200-r5*` / `baseline200-r5b*`.
+
+### Root cause → fix (sign/mixed)
+
+1. **r4 503/500**: JDBC `socketTimeout=5000` + pool starvation + pipeline scan → raised socket/connect timeouts, pool=120, `pipeline.scan-enabled=false`.
+2. **r5 MIX-purchase Read timed out**: accept path blocked on sync RocketMQ send under 200-way storm; Lettuce 2/2 starved Lua reserve → defer MQ to `SalePendingScanner` (50ms), Redis io/cpu=8. Raising consume-threads to 48 increased `lockCampaign` contention (r5b) — kept at 20.
+
+### TPS windows (MySQL unique commits; r6)
+
+Same measurement contract: window `[t0,tWindowEnd)` commits / exact seconds = steady; through-drain / full wall = full TPS. Deduped by unique order / refund row for the run’s campaign.
+
+| Metric | Window | Steady / burst | Full / note | Evidence |
+|---|---|---|---|---|
+| Settle (PAID) | 20.107s; backlog 0→19; drain 9.996s | **3.78 TPS** (76 in window) | **3.10 TPS** (100 through drain / 32.223s) | `tps-window-20261115111219` |
+| Buyer refund | 16.676s | **1.20 TPS** (20/20) | sample OK | same |
+| Giveaway auto-refund | commit span 0.956s; wall 3.909s | **18.83** = 18 commits in 0.956s **提交段吞吐** (not sustained steady-window) | **4.60** = 含等待的全程吞吐 (18/3.909s); smoke 1 refund+1 notify OK | `tps-giveaway-auto-20261115111403` |
+
+Legacy r4 **4.82 TPS / ~20s / 100 单**: taken from wall that **included ~0.7s drain** (fullTps style: 100/≈20.744s), not steady-in-window. Corrected split above. Giveaway route was 404 on `/api/materials/{post}/giveaways`; fixed via `POST /api/sale-debug/giveaway-auto-refund` (fault-hooks, same service path as IT).
+
+Reconcile TPS settle campaign: sold=80, orders PAID|REFUNDED=100, active purchase ents=80 after 20 buyer refunds. Giveaway: winners keep GIVEAWAY ents; PURCHASE revoked on auto-refund.
+
+## Purchase-POST local bands (500 / 1,000) — not the 200 multi-API baseline
+
+Orchestrator: `infra/jmeter/run-purchase-post-bands.ps1` → `run-commerce-jmeter.ps1` (**no** `MaxLocalThreads` clamp; that clamp exists only in `run-formal-bands.ps1`). Scenario=`purchase` (POST only). Sold-out uses `-JclientKeyMode=unique`. Index JSON: `purchase-post-bands-20261116001954.json`.
+
+JVM for this series: Tomcat `threads.max=800`, `accept-count=2000`, `max-connections=20000` (after first 500 attempt showed CONNECT_FAIL).
+
+| Run | cfg threads | peakActive | peakHttp | peakSettle | POST n | metric | P95/P99 | sys (connect) | reconcile |
+|---|---:|---:|---:|---:|---:|---|---|---:|---|
+| sold-out 500 (retest) | 500 | **411** | 409 | 0 | 1232 | SOLD_OUT QPS **84.62** (1230) | 4216 / 4791 | **0** | n/a (reject path) |
+| in-stock 500 (retest) | 500 | **231** | 227 | 20 | 500 | burst accept QPS **30.8**; settle full **7.03** TPS (500/≈55s incl drain 28s) | 2940 / 3202 | **0** | sold=paid=ents=**500**/500 |
+| sold-out 1000 | 1000 | **424** | 420 | 0 | 2209 | SOLD_OUT QPS **58.64** (2207) | 3556 / 4371 | **0** | n/a |
+| in-stock 1000 | 1000 | **234** | 231 | 20 | 1000 | burst accept QPS **25.14**; settle full **9.34** TPS (1000, drain 36s) | 2733 / 3187 | **0** | sold=paid=ents=**1000**/1000 |
+
+Notes:
+- In-stock runs are **Loops=1 first-buy burst** (not steady-window accept QPS). Polling/settle after accept; drain times above.
+- Peak active ≪ configured on stock bursts (~230) and ~410–420 on sold-out continuous — **injector-side** limit (RAM ~2.5GB free, single-box JMeter), not silent downscale in runner. Samples still completed for Loops=1.
+- Earlier attempt `purchase-post-bands-20261116000502` / `…000208`+`…00405`: peakActive=500 but **CONNECT_FAIL** 200/190 — **server accept** limit before Tomcat bump; JTLs retained.
+- **2000** skipped: stock@1000 peakActive=234 &lt; 0.8×1000 effective-launch bar.
+- Commands: `pwsh -File infra/jmeter/run-purchase-post-bands.ps1 -SkipSmoke -Band1 500 -Band2 1000 -SoldOutDurationSec 20 -Try2000After1000`
+
+## Bands 5,000 / 10,000
+
+| Band | Status |
+|---|---|
+| baseline 200 | **Passed** (r6: sign+mixed sys=0, reconcile OK, three TPS windows valid; QPS correction applied) |
+| purchase-POST 500/1000 | **Executed** (see table above; effective concurrency ~230–420) |
+| 5,000 purchase-POST (local, barrier) | **Attempted on single box** — see table below; not a clean capacity claim |
+| 10,000 | **待验** — remote injectors still empty; distributed playbook unchanged |
+
+### Purchase-POST 5,000 local formal (barrier, no silent downscale)
+
+Orchestrator: `infra/jmeter/run-purchase-post-5k.ps1` → `run-commerce-jmeter.ps1` with `-Jthreads=5000` (no `MaxLocalThreads`), start-barrier in `commerce-sale.jmx` (limited wait; `barrier-stats.json`). Seed reuses prior buyers (login+follow, `ThrottleLimit=6`) **outside** the window. Index: `purchase-post-5k-20261116024415.json`.
+
+| Run | cfg | peakActive | barrier ready | emitSpan | peakHttp | POST n | accept / SOLD_OUT | sys (connect/timeout/5xx) | settle / drain | reconcile |
+|---|---:|---:|---:|---:|---:|---:|---|---|---|---|
+| limited stock=100 | 5000 | **5000** | **5000** (no timeout) | 21.8s | **800** (=Tomcat max then) | 5000 | HTTP200=753; 409=870 | **3377** (1945/648/518[+266×500]) | leftover stock 39 | sold=paid=ents=**61**/100 **ok** |
+| in-stock stock=5000 (after Tomcat bump) | 5000 | **5000** | **5000** | 32.8s | **477** | 5000 | acceptQPS **10.16** (571 HTTP ok); SOLD_OUT=0 | **4417** (3606/322/489) | settleFull **1.45** TPS (357/247s); backlog peak PROCESSING **133**; drain **11.7s** | sold=paid=ents=**357**/5000 **ok** |
+
+Notes:
+- Injector **did** start all 5000 threads; do **not** report cfg as capacity — report measured peakActive / peakHttp / syserr.
+- Limited-run bottleneck: `peakHttpInFlight` pinned at Tomcat `threads.max=800` → CONNECT_FAIL/503. Remediation applied in `run-java-commerce.ps1`: `threads.max=5000`, `accept-count=5000`.
+- In-stock after bump: pool pin gone, but CONNECT_FAIL still dominates (OS/backlog/client herd under barrier release). Next evidence lever: listen backlog / ephemeral ports / split injectors — **not** auto-fallback to lower `-Jthreads`.
+- Distributed 5k/10k multi-host still **待验** (injector inventory empty). Playbook: `infra/jmeter/distributed/README.md`.
+
+```powershell
+pwsh -File infra/jmeter/run-purchase-post-5k.ps1 -Threads 5000 -LimitedStock 100
+# Paced control (no barrier; unique clientKey; Tomcat unchanged)
+pwsh -File infra/jmeter/run-purchase-post-5k-paced.ps1 -Threads 5000 -RampSec 100
+```
+
+### Audit: why barrier in-stock only settled 357 (not 358)
+
+Full write-up: `purchase-5k-stock-audit-20261116025653.md`. Live MySQL/Redis/JTL agree on **357** PAID/SUCCEEDED/ents for campaign **72**; **358 never appears** in artifacts. Of 583 non-sys JTL rows (571×200 + 12×401), **214** HTTP 200 were cross-campaign `byClient(jm-{userId})` idempotent replays (no camp-72 row), **12** were 401, **357** were real camp-72 accepts. CONNECT_FAIL **3606/3606** = `Connection refused: getsockopt` (no reset/connect-timeout). Old JTL lacks clientKey/reservationId/response bodies; Tomcat access log absent.
+
+Paced control campaign **73**: emit ≈60/s, HTTP200=**4290**=PAID, refused=710, drain 179s, reconcile OK — see `purchase-post-5k-paced-20261116080940.json`.
+
+Do not report configured thread sum as capacity when peakActive ≪ configured (barrier peakActive matched cfg; HTTP accept did not).
+
+## Boundaries
+
+- Payment / refund: **simulated**
+- FFmpeg container cleanup: **未验证**
+- PR #15 remains **open**
+
+## Earlier archives (non-authoritative)
+
+- `band5k-*` / `band10k-*` @200 before Hikari/JMX fixes — retained for CONNECT_FAIL comparison only.
+- `baseline200-retest-*` — first post-Tomcat pass; residual 503 under pool=16.
+- Empty JTLs (`loopchk3`/`loopchk4`) — JMX `__P` compile failure; do not use.
+- `baseline200-r4-*` — pre-fix archive for sign/mixed syserr.
+- `baseline200-r5*` / `r5b*` — intermediate JDBC/consume-thread experiments; JTLs retained.
+
+
+## 2026-11-18 Windows 同步秒杀最终验收
+
+[最终报告](../flash-sale-final-20261118-024645.md) · [同步契约](../flash-sync-contract-20261118.md) · [机读批次验收](flash-acceptance-20261118024645/final-batch-acceptance.json)。
+
+最终活动90/91：1000/5000完整屏障，启动跨度913/3898ms；各100笔PAID、100份有效权益、库存0，无401/5xx/连接失败/超时，PASS。5000人P95/P99仍41.049/43.967秒，不代表30秒总耗时SLA或持续5000TPS。旧经典Groovy的5000轮虽原报告PASS，112802ms拖尾已复核否决同步容量，原证据保留。源码和证据未提交/推送，未运行CI。
+
+
+## 2026-11-18 HTTP 长尾分段诊断
+
+[完整本地诊断报告](../purchase-latency-diagnosis-20261118.md)：原 campaign91 的 P95=41.049s；新增 campaign92/94/95/97 的实际 JTL、JFR、服务端日志和逐笔对账。仅 campaign94 满足同步门槛；两个修复试验未证明有效性能改善，未调整默认参数，未提交或推送。
+
+
+## ACK 请求行锁解耦：2026-11-18（收紧范围）
+
+- [锁修复、37 项集成回归与一次 8 买家真实 MQ 验证](../ack-request-lock-fix-20261118.md)：请求行 X 锁保持期间，SENT 已提交；ACK 记录差值 97ms，8 单/8 权益、库存 0。
+- [旧 5,000 人发压失败独立归档](injector-failure-ingress-v2-20261118125422/README.md)：发射跨度 96.134s、151 次 ConnectTimeoutException；原始文件逐字保留。
+- 下一轮 5,000 人发压暂停；本轮未提交或推送。
+
+
+## 固定口径 QPS / 成交 TPS 离线复算：2026-11-18
+
+- [复算报告](../flash-metrics-recompute-20261118.md)：用原始 JTL、逐笔对账和 JFR 时间线复算 c91–c101。c91 缺逐笔提交时刻，成交 TPS 标为缺证据；c94 W 内成交 2.690 TPS、首末提交间 5.05 单/s；c101（无效同步）首末提交间 1.51 单/s，MQ 发送跨度 65.7s。离线执行，没有新发压，V23 尚未规模化验证。
+
+
+## Stream→MySQL 真批处理：2026-11-19
+
+- [同构建批次1/20/57实测与隔离恢复验证](../stream-bridge-batch-20261119.md)：三档对账与提交证据通过，默认保留20；持续成交及排空仍受后续发送链路限制。
+- [机器对照摘要](bridge-batch-20261119-022551/comparison.json)；保留首次MQ超时与原设置复核通过记录。本轮未提交、推送或合并。
+
+
+## 原始证据存放说明：2026-11-20
+
+- 仓库只收录汇总报告和不超过 256KB 的小 JSON。原始压测产物只保存在本地，不进入 git：JTL、ndjson、TSV、JMeter HTML 报告目录、逐笔 JSON（`commit-evidence.json`、`client-result-polls.json`、`reconciliation.json`、`*request-db-timelines.json`、`phase-timelines.json` 的正式运行版本）和超过 256KB 的聚合 JSON。规则见根目录 `.gitignore`。
+- 完整本地备份位于 `E:\content-backup-20261120`，排除了 `target\` 和 `m2\`。报告中指向上述原始文件的链接只能在本地备份中打开。
+- 历史提交中已跟踪的 JTL/ndjson 保持不变。私有 Token、买家 CSV 和 meta 文件只放在 `target/`，不提交。

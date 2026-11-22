@@ -1,0 +1,37 @@
+{
+  "atMs": 1795063895921,
+  "businessCorrectness": true,
+  "orderCommitCoverage": true,
+  "httpTimingCoverage": true,
+  "bridgeCommitCoverage": true,
+  "noPostSql": true,
+  "jfrNoDataLoss": true,
+  "noLeaseViolation": true,
+  "noSystemErrors": true,
+  "noDispatchTableLockWaits": true,
+  "brokerLagSampled": true,
+  "queuesAfter": {
+    "atMs": 1795063896617,
+    "database": [
+      [
+        "0"
+      ],
+      [
+        "0"
+      ],
+      [
+        "0"
+      ],
+      [
+        "0"
+      ]
+    ],
+    "redis": {
+      "globalStreamLag": 0,
+      "globalStreamLength": 18092,
+      "globalStreamPending": 0,
+      "ready": "1"
+    },
+    "unresolvedQuarantine": 0
+  }
+}

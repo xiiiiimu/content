@@ -1,0 +1,34 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\baseline200-r3-detail-t200-20261115093359\\results.jtl",
+  "samples": 452,
+  "spanSec": 10.322,
+  "requestQps": 43.79,
+  "acceptQps": 36.72,
+  "businessRejects": 0,
+  "systemErrors": 73,
+  "connectFail": 0,
+  "timeouts": 0,
+  "http503": 73,
+  "ok": 379,
+  "p50Ms": 3486,
+  "p95Ms": 8302,
+  "p99Ms": 9886,
+  "byLabel": [
+    {
+      "n": 452,
+      "p95": 8302,
+      "label": "GET-campaign-detail",
+      "qps": 43.79
+    }
+  ],
+  "byClass": [
+    {
+      "cls": "HTTP_503",
+      "count": 73
+    },
+    {
+      "cls": "OK",
+      "count": 379
+    }
+  ]
+}

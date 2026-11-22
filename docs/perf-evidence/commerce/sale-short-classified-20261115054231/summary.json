@@ -1,0 +1,45 @@
+{
+  "runId": "20261115054231",
+  "mode": "async-rocketmq-short-classified",
+  "priorSuspectEvidence": "docs/perf-evidence/commerce/sale-short-20261115042949",
+  "stock": 8,
+  "buyers": 24,
+  "duplicateExtraPerBuyer": 1,
+  "totalRequests": 48,
+  "elapsedSec": 20.415,
+  "classificationCounts": [
+    {
+      "count": 32,
+      "classification": "BIZ_HTTP:SOLD_OUT"
+    },
+    {
+      "count": 8,
+      "classification": "IDEMPOTENT_REPLAY"
+    },
+    {
+      "count": 8,
+      "classification": "SUCCEEDED"
+    }
+  ],
+  "succeeded": 8,
+  "idempotentReplay": 8,
+  "businessRejectOrHttp": 32,
+  "systemErrors": 0,
+  "drainSec": 3.944,
+  "reconcile": {
+    "one_order_per_user": true,
+    "sold_matches_paid": true,
+    "paid_orders": 8,
+    "distinct_order_users": 8,
+    "active_purchase_entitlements": 8,
+    "redis_remaining": 0,
+    "terminal_requests": 8,
+    "sold_count": 8,
+    "no_oversell": true
+  },
+  "boundaries": {
+    "payment": "simulated",
+    "refund": "simulated",
+    "ffmpegContainerCleanup": "unverified"
+  }
+}

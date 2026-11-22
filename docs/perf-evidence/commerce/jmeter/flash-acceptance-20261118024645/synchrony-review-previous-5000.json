@@ -1,0 +1,9 @@
+{
+  "originalReport": "docs/perf-evidence/commerce/jmeter/flash-5000-purchase-t5000-final17-20261118040434/acceptance-report.json",
+  "originalMachinePass": true,
+  "businessAndInventoryPass": true,
+  "requestStartSpanMs": 112802,
+  "syncStartSpanLimitMs": 5000,
+  "synchronizedCapacityPass": false,
+  "reason": "Old report checked full barrier but not emission span; original evidence retained unchanged"
+}

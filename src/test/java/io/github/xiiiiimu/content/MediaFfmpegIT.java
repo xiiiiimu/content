@@ -43,8 +43,10 @@ class MediaFfmpegIT {
   r.add("content.media.enabled",()->"true");
   r.add("content.media.s3-endpoint",()->"http://"+S3.getHost()+":"+S3.getMappedPort(9090));
   r.add("content.media.bucket",()->"content-media");
-  r.add("content.media.secret-key",()->"content-secret-key-32-bytes-minimum");
+  r.add("content.media.secret-key",()->"media-test-secret-key-not-for-production-01");
   r.add("content.media.ffmpeg-image",()->FFMPEG);
+  // Tests drive media.tick() themselves; keep the scheduled scanner (runs once at startup) from claiming their tasks (D3).
+  r.add("content.media.scan-delay-millis",()->"3600000");
  }
  @Autowired JdbcTemplate db;@Autowired PublishService publish;@Autowired MediaService media;@Autowired ObjectStore store;@Autowired RelationshipService follows;
  byte[] fixture;
@@ -101,6 +103,19 @@ class MediaFfmpegIT {
   assertThat(db.queryForObject("SELECT state FROM media_tasks WHERE post_id=510102",String.class)).isEqualTo("DONE");
   String out=db.queryForObject("SELECT output_key FROM media_tasks WHERE post_id=510102",String.class);
   assertThat(new FfmpegTranscoder(FFMPEG).verifyDecodable(store.get("content-media",out))).contains("streams");
+ }
+ /**
+  * D3 fixture guard: every test drives media.tick() itself, so no background worker may claim a task. If the
+  * scheduled media scanner (MediaScanConfiguration, 1 s) is active it can claim a task between attach() and the test's
+  * tick() -- the hook then runs on the scanner thread, or not at all -- which made the offline race test flaky.
+  */
+ @Test void backgroundScannerDoesNotClaimTasksDrivenByTheTest()throws Exception{
+  db.update("INSERT INTO posts(id,author_id,status,body) VALUES(510104,5101,'DRAFT','guard')");
+  var p=publish.publish(5101,510104,UUID.randomUUID().toString(),0);
+  media.attach(5101,510104,p.postVersion(),fixture,"video/mp4");
+  Thread.sleep(3_000);
+  assertThat(db.queryForObject("SELECT state FROM media_tasks WHERE post_id=510104",String.class)).as("task claimed by a background worker").isEqualTo("NEW");
+  assertThat(db.queryForObject("SELECT attempt FROM media_tasks WHERE post_id=510104",Integer.class)).isZero();
  }
  @Test void offlineDuringProcessingFailsLeaseWithoutCompleting(){
   db.update("INSERT INTO posts(id,author_id,status,body) VALUES(510103,5101,'DRAFT','race')");

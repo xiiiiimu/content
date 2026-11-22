@@ -17,6 +17,9 @@ const status = ref<'loading' | 'ok' | 'error' | 'auth'>('loading')
 const errorCode = ref('')
 const busy = ref(false)
 const commentBody = ref('')
+// D4: one key per comment box, reused by retries and rotated only after a successful send.
+const commentKey = createCommentKey('web')
+watch(postId, () => commentKey.reset())
 const followState = ref<boolean | null>(null)
 
 useHead({ title: () => `帖子 ${postId.value} · Content` })
@@ -79,8 +82,8 @@ async function sendComment() {
   if (!post.value || !commentBody.value.trim() || busy.value) return
   busy.value = true
   try {
-    const key = `web-${post.value.postId}-${Date.now()}`
-    const r = await api.comment(post.value.postId, commentBody.value.trim(), key, topic.value)
+    const id = post.value.postId
+    const r = await commentKey.send(key => api.comment(id, commentBody.value.trim(), key, topic.value))
     stats.value = { postId: post.value.postId, likes: stats.value?.likes ?? 0, comments: r.commentCount }
     commentBody.value = ''
   }

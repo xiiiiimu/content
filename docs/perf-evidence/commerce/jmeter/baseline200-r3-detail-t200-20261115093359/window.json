@@ -1,0 +1,24 @@
+{
+  "jmeter": {
+    "firstSampleTs": 1794706507744.0,
+    "rampSec": 15,
+    "peakActiveThreads": 200.0,
+    "emitSpanMs": 10322,
+    "samples": 452,
+    "durationSec": 20,
+    "configuredThreads": 200,
+    "loops": -1,
+    "multiIterCheck": {
+      "expectedMinSamples": 400,
+      "ok": true
+    },
+    "lastSampleTs": 1794706518066.0
+  },
+  "formalWindow": {
+    "seedAndPreflightExcluded": true,
+    "startEpochMs": 1794706474245,
+    "endEpochMs": 1794706524272,
+    "wallSec": 56.578,
+    "warmupExcluded": true
+  }
+}

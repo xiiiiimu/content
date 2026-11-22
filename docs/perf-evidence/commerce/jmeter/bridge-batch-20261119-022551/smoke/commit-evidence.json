@@ -1,0 +1,503 @@
+{
+  "commitEvidenceComplete": true,
+  "dataLossEvents": 0,
+  "missingOrAmbiguous": [],
+  "uniqueOrderCommits": [
+    {
+      "reservationId": "48e8983ad4b64d238d243cf3257777c6",
+      "clientKey": "jm-c109-u10898",
+      "orderId": "14256",
+      "commitReturnedAtMs": 1795040526523,
+      "paidAtRecordMs": 1795040526378,
+      "httpStartToCommitReturnedMs": 918,
+      "settleStartMs": 1795040526128,
+      "settleEndMs": 1795040526696
+    },
+    {
+      "reservationId": "95071230c36b4a3a803b6b1e1cfa86f9",
+      "clientKey": "jm-c109-u10899",
+      "orderId": "14258",
+      "commitReturnedAtMs": 1795040527525,
+      "paidAtRecordMs": 1795040527429,
+      "httpStartToCommitReturnedMs": 923,
+      "settleStartMs": 1795040527342,
+      "settleEndMs": 1795040527749
+    },
+    {
+      "reservationId": "ae0ac570342349dea9803becab0db818",
+      "clientKey": "jm-c109-u10897",
+      "orderId": "14257",
+      "commitReturnedAtMs": 1795040526789,
+      "paidAtRecordMs": 1795040526619,
+      "httpStartToCommitReturnedMs": 684,
+      "settleStartMs": 1795040526550,
+      "settleEndMs": 1795040527303
+    },
+    {
+      "reservationId": "162cd2d6ff9a4375af624fc86dc75023",
+      "clientKey": "jm-c109-u10902",
+      "orderId": "14260",
+      "commitReturnedAtMs": 1795040528563,
+      "paidAtRecordMs": 1795040528452,
+      "httpStartToCommitReturnedMs": 958,
+      "settleStartMs": 1795040528364,
+      "settleEndMs": 1795040528709
+    },
+    {
+      "reservationId": "568d1ad87d934c9c86cff84e014b0ef3",
+      "clientKey": "jm-c109-u10896",
+      "orderId": "14259",
+      "commitReturnedAtMs": 1795040528144,
+      "paidAtRecordMs": 1795040527887,
+      "httpStartToCommitReturnedMs": 1042,
+      "settleStartMs": 1795040527635,
+      "settleEndMs": 1795040528349
+    },
+    {
+      "reservationId": "aaf23e8a7a194fe18dad63af7dc47c2e",
+      "clientKey": "jm-c109-u10905",
+      "orderId": "14263",
+      "commitReturnedAtMs": 1795040529619,
+      "paidAtRecordMs": 1795040529536,
+      "httpStartToCommitReturnedMs": 513,
+      "settleStartMs": 1795040529486,
+      "settleEndMs": 1795040530163
+    },
+    {
+      "reservationId": "2a30133ba6284218b3c80c5e7e851e2f",
+      "clientKey": "jm-c109-u10900",
+      "orderId": "14262",
+      "commitReturnedAtMs": 1795040529410,
+      "paidAtRecordMs": 1795040529331,
+      "httpStartToCommitReturnedMs": 805,
+      "settleStartMs": 1795040529276,
+      "settleEndMs": 1795040529517
+    },
+    {
+      "reservationId": "6bb7d01a19c44234bfe59bcf01a7169b",
+      "clientKey": "jm-c109-u10901",
+      "orderId": "14261",
+      "commitReturnedAtMs": 1795040528918,
+      "paidAtRecordMs": 1795040528778,
+      "httpStartToCommitReturnedMs": 814,
+      "settleStartMs": 1795040528713,
+      "settleEndMs": 1795040529243
+    },
+    {
+      "reservationId": "2125197d32284ace999ba43b2519a0e5",
+      "clientKey": "jm-c109-u10904",
+      "orderId": "14264",
+      "commitReturnedAtMs": 1795040530521,
+      "paidAtRecordMs": 1795040530276,
+      "httpStartToCommitReturnedMs": 914,
+      "settleStartMs": 1795040530198,
+      "settleEndMs": 1795040530840
+    },
+    {
+      "reservationId": "10d5280eed754618ac6b307afe0d42b5",
+      "clientKey": "jm-c109-u10908",
+      "orderId": "14266",
+      "commitReturnedAtMs": 1795040531696,
+      "paidAtRecordMs": 1795040531610,
+      "httpStartToCommitReturnedMs": 1083,
+      "settleStartMs": 1795040531547,
+      "settleEndMs": 1795040531833
+    },
+    {
+      "reservationId": "20b48e909092480fb6ab78658507508f",
+      "clientKey": "jm-c109-u10903",
+      "orderId": "14265",
+      "commitReturnedAtMs": 1795040531173,
+      "paidAtRecordMs": 1795040531050,
+      "httpStartToCommitReturnedMs": 1068,
+      "settleStartMs": 1795040530906,
+      "settleEndMs": 1795040531532
+    },
+    {
+      "reservationId": "4560fb854d3c4241a3e06fae2d6733f7",
+      "clientKey": "jm-c109-u10911",
+      "orderId": "14269",
+      "commitReturnedAtMs": 1795040532797,
+      "paidAtRecordMs": 1795040532664,
+      "httpStartToCommitReturnedMs": 692,
+      "settleStartMs": 1795040532483,
+      "settleEndMs": 1795040532959
+    },
+    {
+      "reservationId": "cb83d183e58d49fc8ab7e4a7f927f42f",
+      "clientKey": "jm-c109-u10907",
+      "orderId": "14268",
+      "commitReturnedAtMs": 1795040532613,
+      "paidAtRecordMs": 1795040532396,
+      "httpStartToCommitReturnedMs": 1500,
+      "settleStartMs": 1795040532254,
+      "settleEndMs": 1795040532870
+    },
+    {
+      "reservationId": "5773500798914d6e8e8e61ba4f86258b",
+      "clientKey": "jm-c109-u10906",
+      "orderId": "14267",
+      "commitReturnedAtMs": 1795040532224,
+      "paidAtRecordMs": 1795040532033,
+      "httpStartToCommitReturnedMs": 619,
+      "settleStartMs": 1795040531904,
+      "settleEndMs": 1795040532436
+    },
+    {
+      "reservationId": "4f2f66bf7a5344379b0bae3520c8ec46",
+      "clientKey": "jm-c109-u10910",
+      "orderId": "14270",
+      "commitReturnedAtMs": 1795040533254,
+      "paidAtRecordMs": 1795040533092,
+      "httpStartToCommitReturnedMs": 649,
+      "settleStartMs": 1795040532970,
+      "settleEndMs": 1795040533490
+    },
+    {
+      "reservationId": "5e075995b53f4a4395fc97a8a502fa73",
+      "clientKey": "jm-c109-u10909",
+      "orderId": "14271",
+      "commitReturnedAtMs": 1795040534014,
+      "paidAtRecordMs": 1795040533629,
+      "httpStartToCommitReturnedMs": 897,
+      "settleStartMs": 1795040533550,
+      "settleEndMs": 1795040534374
+    }
+  ],
+  "windowCommittedOrders": 14,
+  "windowCommittedTps": 1.8584893136864462,
+  "fullCommittedTps": 1.9027232726840289,
+  "httpStartToServerCommitReturnedMs": {
+    "count": 16,
+    "p50": 897,
+    "p95": 1500,
+    "p99": 1500,
+    "max": 1500
+  },
+  "httpApplicationMs": {
+    "count": 16,
+    "p50": 20,
+    "p95": 101,
+    "p99": 101,
+    "max": 101
+  },
+  "httpSqlCounts": {
+    "0": 16
+  },
+  "matchedHttpCount": 16,
+  "serverGcPauseMs": {
+    "count": 1,
+    "p50": 8,
+    "p95": 8,
+    "p99": 8,
+    "max": 8
+  },
+  "settlementPhasesMs": {
+    "jdbc.acquire": {
+      "count": 64,
+      "p50": 0,
+      "p95": 4,
+      "p99": 14,
+      "max": 14
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard": {
+      "count": 48,
+      "p50": 6,
+      "p95": 20,
+      "p99": 72,
+      "max": 72
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.unknownHoldCurrent": {
+      "count": 16,
+      "p50": 8,
+      "p95": 20,
+      "p99": 20,
+      "max": 20
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleBridgeMapper.fence": {
+      "count": 16,
+      "p50": 5,
+      "p95": 16,
+      "p99": 16,
+      "max": 16
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockRequest": {
+      "count": 16,
+      "p50": 5,
+      "p95": 15,
+      "p99": 15,
+      "max": 15
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.receipt": {
+      "count": 16,
+      "p50": 6,
+      "p95": 56,
+      "p99": 56,
+      "max": 56
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.touchLock": {
+      "count": 16,
+      "p50": 13,
+      "p95": 80,
+      "p99": 80,
+      "max": 80
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockDecision": {
+      "count": 16,
+      "p50": 4,
+      "p95": 16,
+      "p99": 16,
+      "max": 16
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.alreadyOwnsMaterial": {
+      "count": 16,
+      "p50": 5,
+      "p95": 27,
+      "p99": 27,
+      "max": 27
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.lockCampaign": {
+      "count": 16,
+      "p50": 6,
+      "p95": 58,
+      "p99": 58,
+      "max": 58
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.activeBlacklist": {
+      "count": 16,
+      "p50": 5,
+      "p95": 29,
+      "p99": 29,
+      "max": 29
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.FeedMapper.post": {
+      "count": 16,
+      "p50": 5,
+      "p95": 15,
+      "p99": 15,
+      "max": 15
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.tryIncrementSold": {
+      "count": 16,
+      "p50": 11,
+      "p95": 24,
+      "p99": 24,
+      "max": 24
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertOrder": {
+      "count": 16,
+      "p50": 10,
+      "p95": 64,
+      "p99": 64,
+      "max": 64
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertEntitlement": {
+      "count": 16,
+      "p50": 9,
+      "p95": 25,
+      "p99": 25,
+      "max": 25
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.finishRequest": {
+      "count": 16,
+      "p50": 11,
+      "p95": 23,
+      "p99": 23,
+      "max": 23
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertReceipt": {
+      "count": 16,
+      "p50": 12,
+      "p95": 46,
+      "p99": 46,
+      "max": 46
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dirty": {
+      "count": 32,
+      "p50": 12,
+      "p95": 28,
+      "p99": 83,
+      "max": 83
+    },
+    "jdbc.commit": {
+      "count": 48,
+      "p50": 23,
+      "p95": 87,
+      "p99": 186,
+      "max": 186
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request": {
+      "count": 16,
+      "p50": 6,
+      "p95": 19,
+      "p99": 19,
+      "max": 19
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.job": {
+      "count": 32,
+      "p50": 10,
+      "p95": 67,
+      "p99": 94,
+      "max": 94
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.request": {
+      "count": 16,
+      "p50": 7,
+      "p95": 38,
+      "p99": 38,
+      "max": 38
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.applied": {
+      "count": 20,
+      "p50": 15,
+      "p95": 46,
+      "p99": 67,
+      "max": 67
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.orderByUserPost": {
+      "count": 4,
+      "p50": 12,
+      "p95": 42,
+      "p99": 42,
+      "max": 42
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.winner": {
+      "count": 4,
+      "p50": 5,
+      "p95": 63,
+      "p99": 63,
+      "max": 63
+    }
+  },
+  "http": [
+    {
+      "clientKey": "jm-c109-u10897",
+      "reservationId": "ae0ac570342349dea9803becab0db818",
+      "startMs": 1795040526113,
+      "endMs": 1795040526130,
+      "durationMs": 17,
+      "sqlCount": 0
+    },
+    {
+      "clientKey": "jm-c109-u10898",
+      "reservationId": "48e8983ad4b64d238d243cf3257777c6",
+      "startMs": 1795040525616,
+      "endMs": 1795040525630,
+      "durationMs": 14,
+      "sqlCount": 0
+    },
+    {
+      "clientKey": "jm-c109-u10899",
+      "reservationId": "95071230c36b4a3a803b6b1e1cfa86f9",
+      "startMs": 1795040526622,
+      "endMs": 1795040526642,
+      "durationMs": 20,
+      "sqlCount": 0
+    },
+    {
+      "clientKey": "jm-c109-u10901",
+      "reservationId": "6bb7d01a19c44234bfe59bcf01a7169b",
+      "startMs": 1795040528107,
+      "endMs": 1795040528154,
+      "durationMs": 47,
+      "sqlCount": 0
+    },
+    {
+      "clientKey": "jm-c109-u10902",
+      "reservationId": "162cd2d6ff9a4375af624fc86dc75023",
+      "startMs": 1795040527611,
+      "endMs": 1795040527636,
+      "durationMs": 25,
+      "sqlCount": 0
+    },
+    {
+      "clientKey": "jm-c109-u10896",
+      "reservationId": "568d1ad87d934c9c86cff84e014b0ef3",
+      "startMs": 1795040527149,
+      "endMs": 1795040527233,
+      "durationMs": 84,
+      "sqlCount": 0
+    },
+    {
+      "clientKey": "jm-c109-u10905",
+      "reservationId": "aaf23e8a7a194fe18dad63af7dc47c2e",
+      "startMs": 1795040529112,
+      "endMs": 1795040529133,
+      "durationMs": 21,
+      "sqlCount": 0
+    },
+    {
+      "clientKey": "jm-c109-u10900",
+      "reservationId": "2a30133ba6284218b3c80c5e7e851e2f",
+      "startMs": 1795040528608,
+      "endMs": 1795040528629,
+      "durationMs": 21,
+      "sqlCount": 0
+    },
+    {
+      "clientKey": "jm-c109-u10903",
+      "reservationId": "20b48e909092480fb6ab78658507508f",
+      "startMs": 1795040530112,
+      "endMs": 1795040530131,
+      "durationMs": 19,
+      "sqlCount": 0
+    },
+    {
+      "clientKey": "jm-c109-u10904",
+      "reservationId": "2125197d32284ace999ba43b2519a0e5",
+      "startMs": 1795040529610,
+      "endMs": 1795040529623,
+      "durationMs": 13,
+      "sqlCount": 0
+    },
+    {
+      "clientKey": "jm-c109-u10907",
+      "reservationId": "cb83d183e58d49fc8ab7e4a7f927f42f",
+      "startMs": 1795040531117,
+      "endMs": 1795040531151,
+      "durationMs": 34,
+      "sqlCount": 0
+    },
+    {
+      "clientKey": "jm-c109-u10908",
+      "reservationId": "10d5280eed754618ac6b307afe0d42b5",
+      "startMs": 1795040530619,
+      "endMs": 1795040530720,
+      "durationMs": 101,
+      "sqlCount": 0
+    },
+    {
+      "clientKey": "jm-c109-u10911",
+      "reservationId": "4560fb854d3c4241a3e06fae2d6733f7",
+      "startMs": 1795040532107,
+      "endMs": 1795040532126,
+      "durationMs": 19,
+      "sqlCount": 0
+    },
+    {
+      "clientKey": "jm-c109-u10906",
+      "reservationId": "5773500798914d6e8e8e61ba4f86258b",
+      "startMs": 1795040531609,
+      "endMs": 1795040531620,
+      "durationMs": 11,
+      "sqlCount": 0
+    },
+    {
+      "clientKey": "jm-c109-u10909",
+      "reservationId": "5e075995b53f4a4395fc97a8a502fa73",
+      "startMs": 1795040533120,
+      "endMs": 1795040533132,
+      "durationMs": 12,
+      "sqlCount": 0
+    },
+    {
+      "clientKey": "jm-c109-u10910",
+      "reservationId": "4f2f66bf7a5344379b0bae3520c8ec46",
+      "startMs": 1795040532609,
+      "endMs": 1795040532630,
+      "durationMs": 21,
+      "sqlCount": 0
+    }
+  ],
+  "note": "JDBC commit RETURN boundary, not physical disk instant. paidAtRecordMs is separate. Post-transaction cache commits excluded."
+}

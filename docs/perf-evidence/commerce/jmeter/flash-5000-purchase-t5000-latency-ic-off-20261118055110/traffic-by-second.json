@@ -1,0 +1,113 @@
+[
+  {
+    "epochSecond": 1794957798,
+    "requestStarts": 2623
+  },
+  {
+    "epochSecond": 1794957799,
+    "requestStarts": 357
+  },
+  {
+    "epochSecond": 1794957800,
+    "requestStarts": 1
+  },
+  {
+    "epochSecond": 1794957811,
+    "requestStarts": 6
+  },
+  {
+    "epochSecond": 1794957812,
+    "requestStarts": 4
+  },
+  {
+    "epochSecond": 1794957813,
+    "requestStarts": 67
+  },
+  {
+    "epochSecond": 1794957814,
+    "requestStarts": 127,
+    "httpResponses": 109
+  },
+  {
+    "epochSecond": 1794957815,
+    "httpResponses": 268,
+    "requestStarts": 176
+  },
+  {
+    "epochSecond": 1794957816,
+    "httpResponses": 180,
+    "requestStarts": 195
+  },
+  {
+    "epochSecond": 1794957817,
+    "requestStarts": 539,
+    "httpResponses": 196
+  },
+  {
+    "epochSecond": 1794957818,
+    "httpResponses": 208,
+    "requestStarts": 191
+  },
+  {
+    "epochSecond": 1794957819,
+    "httpResponses": 248,
+    "requestStarts": 121
+  },
+  {
+    "epochSecond": 1794957820,
+    "requestStarts": 125,
+    "httpResponses": 88
+  },
+  {
+    "epochSecond": 1794957821,
+    "httpResponses": 196
+  },
+  {
+    "epochSecond": 1794957822,
+    "httpResponses": 105,
+    "requestStarts": 5
+  },
+  {
+    "epochSecond": 1794957823,
+    "requestStarts": 201,
+    "httpResponses": 115
+  },
+  {
+    "epochSecond": 1794957824,
+    "httpResponses": 156
+  },
+  {
+    "epochSecond": 1794957825,
+    "requestStarts": 261,
+    "httpResponses": 59
+  },
+  {
+    "epochSecond": 1794957826,
+    "httpResponses": 73,
+    "requestStarts": 1
+  },
+  {
+    "epochSecond": 1794957827,
+    "httpResponses": 1566
+  },
+  {
+    "epochSecond": 1794957828,
+    "httpResponses": 280
+  },
+  {
+    "epochSecond": 1794957829,
+    "httpResponses": 342
+  },
+  {
+    "epochSecond": 1794957830,
+    "httpResponses": 165
+  },
+  {
+    "epochSecond": 1794957831,
+    "httpResponses": 280
+  },
+  {
+    "epochSecond": 1794957832,
+    "httpResponses": 366
+  }
+]

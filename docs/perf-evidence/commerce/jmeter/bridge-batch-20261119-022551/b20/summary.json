@@ -1,0 +1,144 @@
+{
+  "config": {
+    "runId": "b20",
+    "campaignId": 113,
+    "postId": 126,
+    "warmCampaignId": 114,
+    "count": 3600,
+    "stock": 4000,
+    "rate": 60,
+    "workers": 64,
+    "windowSec": 60,
+    "timeoutMs": 30000,
+    "loopsPerBuyer": 1,
+    "sameJvmWarmup": true,
+    "heap": "128m/384m",
+    "clientJfr": false,
+    "clientThreadDump": false,
+    "temporarySystemSleepPrevention": true,
+    "hostInterruptionInvalidatesRunMs": 30000,
+    "sourceRevision": "V24-bridge-batch",
+    "backendPid": 23056,
+    "bridgeBatchSize": 20,
+    "requireSuccessfulSettlementRoot": true,
+    "jarSha256": "c1c7cd41f07c565582d89fad3e4445e3cd0822c5e6fbf6a3260df07cd9ee83d8",
+    "warmupSettlementPoll": "Each worker, 1 second interval, 60 second bound, outside formal; same HTTP POST sampler/thread",
+    "finalResultPolling": "After formal HTTP only; fair round-robin, concurrency16, max100 calls/batch, >=1s between batches, global120s deadline. Per-request interval grows with outstanding set. No per-request starvation; actual attempt timestamps archived.",
+    "drainObservationLimitSec": 3600,
+    "observerIntervalSec": 2,
+    "pacer": "One serialized coordinator; Windows park leaves 16ms headroom then spins; at400/s may use one CPU core, captured in host load, never subtracted",
+    "serverJfr": "Only custom sale events + GC pause + DataLoss, no stacks/environment/JVM properties",
+    "hostMemoryBefore": {
+      "observedAtMs": 1795042732275,
+      "memoryLoadPercent": 85,
+      "totalPhysicalBytes": 16864305152,
+      "availablePhysicalBytes": 2392674304,
+      "commitLimitBytes": 32015659008,
+      "availableCommitBytes": 2902626304
+    },
+    "diskFreeBytesBefore": 9036271616
+  },
+  "window": {
+    "startEpochMs": 1795042813182,
+    "endEpochMs": 1795042873182,
+    "targetRate": 60,
+    "workers": 64,
+    "sameJvm": true,
+    "sameHttpSamplerAndThreads": true,
+    "deadlinePolicy": "No catch-up; serialized minimum-spaced permits"
+  },
+  "windowSeconds": 60.0,
+  "samples": 3465,
+  "warmSamples": 64,
+  "requestStartSpanMs": 59993,
+  "requestArrivalRate": 57.74006967479539,
+  "windowStarts": 3464,
+  "windowStartQps": 57.733333333333334,
+  "outsideFixedWindowStarts": 1,
+  "normalBusinessCompletionQps": 57.733333333333334,
+  "groups": {
+    "accepted": {
+      "count": 3465,
+      "windowCompleted": 3464,
+      "elapsed": {
+        "count": 3465,
+        "p50": 12,
+        "p95": 49,
+        "p99": 80,
+        "max": 136
+      },
+      "Latency": {
+        "count": 3465,
+        "p50": 11,
+        "p95": 48,
+        "p99": 77,
+        "max": 136
+      },
+      "Connect": {
+        "count": 3465,
+        "p50": 0,
+        "p95": 0,
+        "p99": 10,
+        "max": 81
+      },
+      "completionQps": 57.733333333333334
+    },
+    "soldOut": {
+      "count": 0,
+      "windowCompleted": 0,
+      "elapsed": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "max": null
+      },
+      "Latency": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "max": null
+      },
+      "Connect": {
+        "count": 0,
+        "p50": null,
+        "p95": null,
+        "p99": null,
+        "max": null
+      },
+      "completionQps": 0.0
+    }
+  },
+  "httpStatuses": {
+    "200": 3465
+  },
+  "systemErrors": [],
+  "paidOrders": 3465,
+  "remainingStock": 535,
+  "activeEntitlements": 3465,
+  "processingLeft": 0,
+  "drainConfirmedAfterLastHttpSec": 656.695,
+  "drainObservationNote": "Confirmation upper bound includes post-load polling and reconciliation, not exact queue empty instant; use observations for tighter bracket.",
+  "windowCommittedTps": 4.533333333333333,
+  "fullCommittedTps": 4.864298017921394,
+  "clientObservedSucceededMs": {
+    "count": 879,
+    "p50": 69140,
+    "p95": 147805,
+    "p99": 153513,
+    "max": 155288
+  },
+  "checks": {
+    "sampleCount": true,
+    "uniqueBuyers": true,
+    "noSystemErrors": true,
+    "noReconciliationMismatch": true,
+    "ledgerInvariant": true,
+    "drained": true,
+    "redisInventory": true,
+    "replays": true
+  },
+  "correctnessPass": true,
+  "reconciliationMismatches": []
+}

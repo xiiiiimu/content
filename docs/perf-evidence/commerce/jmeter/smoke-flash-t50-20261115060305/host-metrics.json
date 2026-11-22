@@ -1,0 +1,21 @@
+{
+  "configuredThreads": 50,
+  "jmeterElapsedSec": 58.348,
+  "cpuLoadPctBefore": 68.0,
+  "cpuLoadPctAfter": 20.0,
+  "freeMemMBBefore": 451.7,
+  "freeMemMBAfter": 1704.2,
+  "totalMemMB": 16083.1,
+  "serverInFlight": {
+    "before": {
+      "peakInFlight": 10,
+      "inFlight": 0
+    },
+    "after": {
+      "peakInFlight": 20,
+      "inFlight": 2
+    },
+    "measurement": "GET /api/sale-debug/inflight (SaleFaultHooks AtomicLong; settle enter/leave)"
+  },
+  "note": "Report actual peak active threads from JMeter jmeter.log / HTML; do not treat -Jthreads as capacity ceiling."
+}

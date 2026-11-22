@@ -1,0 +1,55 @@
+{
+ "path": "soldout",
+ "levels": [
+  200,
+  500,
+  1000,
+  1500,
+  2000,
+  3000
+ ],
+ "seconds": 30,
+ "rest": 15,
+ "expectedRtMs": 50,
+ "vus": {
+  "200": 30,
+  "500": 75,
+  "1000": 150,
+  "1500": 225,
+  "2000": 300,
+  "3000": 450
+ },
+ "stock": 4,
+ "loadBuyers": 1000,
+ "k6Affinity": "0xfc00",
+ "k6Cpus": [
+  10,
+  11,
+  12,
+  13,
+  14,
+  15
+ ],
+ "backendAffinity": "0x3ff",
+ "backendCpus": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9
+ ],
+ "dockerVm": "not pinned",
+ "k6": "tools\\k6-v0.55.0\\k6-v0.55.0-windows-amd64\\k6.exe",
+ "tool": "k6 v0.55.0 constant-arrival-rate",
+ "backendPid": 45300,
+ "backendAffinityObserved": 1023,
+ "campaignId": 144,
+ "postId": 157,
+ "loginSec": 28.7,
+ "soldOutAtMs": 1795126753351
+}

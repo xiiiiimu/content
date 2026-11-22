@@ -1,0 +1,427 @@
+{
+  "rollingOneSecondMaxStarts": 254,
+  "perSecond": [
+    {
+      "epochSecond": 1795019803,
+      "starts": 54,
+      "completed200": 44
+    },
+    {
+      "epochSecond": 1795019804,
+      "completed200": 56,
+      "starts": 140,
+      "completed409": 72
+    },
+    {
+      "epochSecond": 1795019805,
+      "completed409": 63,
+      "starts": 108
+    },
+    {
+      "epochSecond": 1795019806,
+      "completed409": 72,
+      "starts": 109
+    },
+    {
+      "epochSecond": 1795019807,
+      "completed409": 20,
+      "starts": 44
+    },
+    {
+      "epochSecond": 1795019808,
+      "completed409": 34,
+      "starts": 4
+    },
+    {
+      "epochSecond": 1795019809,
+      "completed409": 218,
+      "starts": 130
+    },
+    {
+      "epochSecond": 1795019810,
+      "completed409": 176,
+      "starts": 187
+    },
+    {
+      "epochSecond": 1795019811,
+      "completed409": 147,
+      "starts": 145
+    },
+    {
+      "epochSecond": 1795019812,
+      "completed409": 221,
+      "starts": 209
+    },
+    {
+      "epochSecond": 1795019813,
+      "completed409": 203,
+      "starts": 205
+    },
+    {
+      "epochSecond": 1795019814,
+      "completed409": 239,
+      "starts": 237
+    },
+    {
+      "epochSecond": 1795019815,
+      "completed409": 188,
+      "starts": 190
+    },
+    {
+      "epochSecond": 1795019816,
+      "completed409": 187,
+      "starts": 197
+    },
+    {
+      "epochSecond": 1795019817,
+      "completed409": 60,
+      "starts": 41
+    }
+  ],
+  "httpSegmentsByCodeMs": {
+    "200": {
+      "samplerStartToAppEnterMs": {
+        "count": 100,
+        "p50": 15,
+        "p95": 54,
+        "p99": 75,
+        "max": 80
+      },
+      "appEnterToAppExitMs": {
+        "count": 100,
+        "p50": 86,
+        "p95": 199,
+        "p99": 210,
+        "max": 212
+      },
+      "appExitToHttpSamplerEndMs": {
+        "count": 100,
+        "p50": 0,
+        "p95": 1,
+        "p99": 3,
+        "max": 15
+      }
+    },
+    "409": {
+      "samplerStartToAppEnterMs": {
+        "count": 1900,
+        "p50": 2,
+        "p95": 1708,
+        "p99": 2559,
+        "max": 2771
+      },
+      "appEnterToAppExitMs": {
+        "count": 1900,
+        "p50": 46,
+        "p95": 442,
+        "p99": 845,
+        "max": 972
+      },
+      "appExitToHttpSamplerEndMs": {
+        "count": 1900,
+        "p50": 1,
+        "p95": 16,
+        "p99": 96,
+        "max": 143
+      }
+    }
+  },
+  "httpPhaseMs": {
+    "auth.verify": {
+      "count": 2000,
+      "p50": 0,
+      "p95": 1,
+      "p99": 2,
+      "max": 41
+    },
+    "redis.reserve.lua": {
+      "count": 2000,
+      "p50": 43,
+      "p95": 390,
+      "p99": 699,
+      "max": 968
+    },
+    "purchase.total": {
+      "count": 2000,
+      "p50": 44,
+      "p95": 391,
+      "p99": 700,
+      "max": 968
+    }
+  },
+  "observedHttpWindowMs": 13639,
+  "plannedWindowFirstSamplerOffsetMs": 5,
+  "dispatchPhasesMs": {
+    "jdbc.acquire": {
+      "count": 300,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "max": 1
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard": {
+      "count": 100,
+      "p50": 7,
+      "p95": 37,
+      "p99": 115,
+      "max": 134
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.next": {
+      "count": 100,
+      "p50": 9,
+      "p95": 37,
+      "p99": 62,
+      "max": 257
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.claim": {
+      "count": 100,
+      "p50": 14,
+      "p95": 82,
+      "p99": 131,
+      "max": 134
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.dispatch": {
+      "count": 100,
+      "p50": 7,
+      "p95": 43,
+      "p99": 128,
+      "max": 129
+    },
+    "jdbc.commit": {
+      "count": 200,
+      "p50": 22,
+      "p95": 62,
+      "p99": 122,
+      "max": 164
+    },
+    "dispatch.claim": {
+      "count": 100,
+      "p50": 97,
+      "p95": 430,
+      "p99": 800,
+      "max": 1335
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request": {
+      "count": 100,
+      "p50": 7,
+      "p95": 45,
+      "p99": 70,
+      "max": 70
+    },
+    "mq.send": {
+      "count": 100,
+      "p50": 18,
+      "p95": 88,
+      "p99": 123,
+      "max": 139
+    },
+    "mq.ack.success": {
+      "count": 100,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "max": 0
+    },
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.sent": {
+      "count": 100,
+      "p50": 15,
+      "p95": 64,
+      "p99": 331,
+      "max": 448
+    },
+    "dispatch.confirm": {
+      "count": 100,
+      "p50": 75,
+      "p95": 292,
+      "p99": 557,
+      "max": 566
+    }
+  },
+  "ackConfirmationSqlStatements": [
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.sent"
+  ],
+  "settlementRootStartToMainCommitReturnedMs": {
+    "count": 100,
+    "p50": 247,
+    "p95": 1048,
+    "p99": 1785,
+    "max": 2364
+  },
+  "campaignLockReturnToMainCommitReturnMs": {
+    "count": 100,
+    "p50": 143,
+    "p95": 744,
+    "p99": 828,
+    "max": 1047
+  },
+  "lockDurationCaveat": "Return-to-commit is a lower bound on lock holding; SQL lockCampaign includes query/RTT as well as possible lock wait.",
+  "resourcePeaks": {
+    "/actuator/metrics/sale.http.queue.depth": 0,
+    "/actuator/metrics/tomcat.threads.current": 100.0,
+    "/actuator/metrics/tomcat.threads.busy": 91.0,
+    "/actuator/metrics/tomcat.threads.config.max": 100.0,
+    "/actuator/metrics/tomcat.connections.current": 140.0,
+    "/actuator/metrics/tomcat.connections.config.max": 20000.0,
+    "/actuator/metrics/jvm.memory.used?tag=area:heap": 218762352.0,
+    "/actuator/metrics/jvm.memory.max?tag=area:heap": 4217372670.0,
+    "/actuator/metrics/process.cpu.usage": 0.10224279081237246,
+    "/actuator/metrics/jvm.threads.live": 265.0,
+    "/actuator/metrics/jvm.threads.states?tag=state:runnable": 35.0,
+    "/actuator/metrics/jvm.threads.states?tag=state:blocked": 0,
+    "/actuator/metrics/jvm.threads.states?tag=state:waiting": 190.0,
+    "/actuator/metrics/jvm.threads.states?tag=state:timed-waiting": 127.0,
+    "/actuator/metrics/hikaricp.connections.active": 7.0,
+    "/actuator/metrics/hikaricp.connections.pending": 0,
+    "/actuator/metrics/hikaricp.connections": 35.0,
+    "/actuator/metrics/hikaricp.connections.max": 120.0,
+    "/actuator/metrics/hikaricp.connections.min": 30.0,
+    "/actuator/metrics/hikaricp.connections.idle": 34.0
+  },
+  "unavailableMetricSampleCounts": {
+    "/actuator/metrics/tomcat.connections.config.max": 1,
+    "/actuator/metrics/jvm.gc.pause": 1,
+    "/actuator/metrics/process.cpu.usage": 1
+  },
+  "sampledLockWaitTableObservations": {
+    "material_sale_campaigns": 9
+  },
+  "processingPeak": 4,
+  "streamLagPeakGlobal": 51,
+  "streamPendingPeakGlobal": 48,
+  "dispatchPendingPeak": 3,
+  "firstObservedFullyDrainedAfterLastHttp": {
+    "startMs": 1795019836007,
+    "endMs": 1795019836754
+  },
+  "drainAfterLastHttpSecUpperBound": 19.365,
+  "windowEdges": {
+    "start": {
+      "startEpochMs": 1795019803767,
+      "database": {
+        "campaign": [
+          [
+            "1",
+            "1",
+            "0",
+            "0"
+          ]
+        ],
+        "cacheJobs": [
+          [
+            "0"
+          ]
+        ],
+        "receipts": [
+          [
+            "0"
+          ]
+        ],
+        "dispatch": [
+          [
+            "1",
+            "1",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "lockWaitsByTable": [],
+        "campaignForUpdateDigest": [
+          [
+            "1",
+            "364",
+            "20020557257000"
+          ]
+        ],
+        "appAccountTransactions": [
+          [
+            "436735",
+            "2113526755484000"
+          ]
+        ]
+      },
+      "redis": {
+        "globalStreamLag": 51,
+        "campaignStock": 0,
+        "globalStreamLength": 578,
+        "globalStreamPending": 47,
+        "ready": "1"
+      },
+      "endEpochMs": 1795019808078,
+      "sampleStartOffsetFromBoundaryMs": 22,
+      "sampleEndOffsetFromBoundaryMs": 4333
+    },
+    "end": {
+      "startEpochMs": 1795019819522,
+      "database": {
+        "campaign": [
+          [
+            "29",
+            "3",
+            "26",
+            "27"
+          ]
+        ],
+        "cacheJobs": [
+          [
+            "2"
+          ]
+        ],
+        "receipts": [
+          [
+            "26"
+          ]
+        ],
+        "dispatch": [
+          [
+            "29",
+            "2",
+            "0",
+            "27",
+            "1"
+          ]
+        ],
+        "lockWaitsByTable": [],
+        "campaignForUpdateDigest": [
+          [
+            "1",
+            "391",
+            "21611538196000"
+          ]
+        ],
+        "appAccountTransactions": [
+          [
+            "437001",
+            "2155658184505000"
+          ]
+        ]
+      },
+      "redis": {
+        "globalStreamLag": 51,
+        "campaignStock": 0,
+        "globalStreamLength": 578,
+        "globalStreamPending": 17,
+        "ready": "1"
+      },
+      "endEpochMs": 1795019821366,
+      "sampleStartOffsetFromBoundaryMs": 2132,
+      "sampleEndOffsetFromBoundaryMs": 3976
+    }
+  },
+  "windowPaidAtRecordOrders": 16,
+  "clientPollCalls": 686,
+  "clientPollSeconds": 15.881,
+  "clientPollAverageQps": 43.19627227504565,
+  "clientPollObservedSucceeded": 100,
+  "clientPollAcceptedTotal": 100,
+  "clientPollIntervalsMs": {
+    "count": 586,
+    "p50": 999,
+    "p95": 1470,
+    "p99": 1569,
+    "max": 1626
+  },
+  "clientReservationsWithPollError": 0,
+  "hostMinimumAvailableCommitBytes": 1970843648,
+  "maxObserverStartGapMs": 3294
+}

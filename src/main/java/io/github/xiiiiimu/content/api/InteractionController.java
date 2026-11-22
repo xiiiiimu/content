@@ -8,25 +8,30 @@ import java.util.List;
 
 @RestController @ConditionalOnProperty(name="content.feed.enabled",havingValue="true")
 public class InteractionController {
- private final InteractionService interactions;private final TrendingService trending;
- public InteractionController(InteractionService interactions,TrendingService trending){this.interactions=interactions;this.trending=trending;}
+ private final InteractionService interactions;private final TrendingService trending;private final io.github.xiiiiimu.content.infrastructure.RateLimiter limits;
+ public InteractionController(InteractionService interactions,TrendingService trending,io.github.xiiiiimu.content.infrastructure.RateLimiter limits){this.interactions=interactions;this.trending=trending;this.limits=limits;}
+ /** Authenticated user id after taking one token from that user's bucket for {@code rule} (hardening A2). */
+ private long limited(String rule,Principal p){long u=user(p);limits.acquire(rule,Long.toString(u));return u;}
  private long user(Principal p){if(p==null||p.getName()==null)throw new FeedFailure(401,"UNAUTHENTICATED");try{long id=Long.parseLong(p.getName());if(id<=0)throw new FeedFailure(401,"UNAUTHENTICATED");return id;}catch(NumberFormatException e){throw new FeedFailure(401,"UNAUTHENTICATED");}}
- @PutMapping("/api/posts/{post}/likes") public InteractionService.LikeResult like(@PathVariable long post,@RequestParam(required=false)String topic,Principal p){return interactions.like(user(p),post,topic);}
- @DeleteMapping("/api/posts/{post}/likes") public InteractionService.LikeResult unlike(@PathVariable long post,@RequestParam(required=false)String topic,Principal p){return interactions.unlike(user(p),post,topic);}
- @PutMapping("/api/posts/{post}/dislikes") public InteractionService.DislikeResult dislike(@PathVariable long post,Principal p){return interactions.dislike(user(p),post);}
- @DeleteMapping("/api/posts/{post}/dislikes") public InteractionService.DislikeResult undislike(@PathVariable long post,Principal p){return interactions.undislike(user(p),post);}
+ // The topic request parameter is accepted for compatibility and ignored: topic statistics use posts.topic.
+ @PutMapping("/api/posts/{post}/likes") public InteractionService.LikeResult like(@PathVariable long post,@RequestParam(required=false)String topic,Principal p){return interactions.like(limited("interact",p),post,topic);}
+ @DeleteMapping("/api/posts/{post}/likes") public InteractionService.LikeResult unlike(@PathVariable long post,@RequestParam(required=false)String topic,Principal p){return interactions.unlike(limited("interact",p),post,topic);}
+ @PutMapping("/api/posts/{post}/dislikes") public InteractionService.DislikeResult dislike(@PathVariable long post,Principal p){return interactions.dislike(limited("interact",p),post);}
+ @DeleteMapping("/api/posts/{post}/dislikes") public InteractionService.DislikeResult undislike(@PathVariable long post,Principal p){return interactions.undislike(limited("interact",p),post);}
  @PostMapping("/api/posts/{post}/reports") public InteractionService.ReportResult report(@PathVariable long post,@RequestBody java.util.Map<String,Object> body,Principal p){
+  long reporter=limited("report",p);
   Object ctx=body.get("context");String context=ctx==null?null:String.valueOf(ctx);
   if(ctx instanceof java.util.Map<?,?>)try{context=new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(ctx);}catch(Exception ignored){context=null;}
   Object reason=body.get("reason");Object detail=body.get("detail");
-  return interactions.report(user(p),post,reason==null?null:String.valueOf(reason),detail==null?null:String.valueOf(detail),context);
+  return interactions.report(reporter,post,reason==null?null:String.valueOf(reason),detail==null?null:String.valueOf(detail),context);
  }
  @PostMapping("/api/posts/{post}/comments") public InteractionService.CommentResult comment(@PathVariable long post,@RequestHeader("Idempotency-Key")String key,@RequestBody java.util.Map<String,Object> body,Principal p){
+  long commenter=limited("comment",p);
   Long parentId=num(body.get("parentId"));
   Long versionId=num(body.get("versionId"));if(versionId==null)versionId=num(body.get("materialVersionId"));
   Long offsetMs=num(body.get("offsetMs"));
   Object rawBody=body.get("body");Object topic=body.get("topic");
-  return interactions.comment(user(p),post,rawBody==null?null:String.valueOf(rawBody),key,topic==null?null:String.valueOf(topic),parentId,versionId,offsetMs);
+  return interactions.comment(commenter,post,rawBody==null?null:String.valueOf(rawBody),key,topic==null?null:String.valueOf(topic),parentId,versionId,offsetMs);
  }
  @GetMapping("/api/posts/{post}/stats") public Object stats(@PathVariable long post,Principal p){user(p);return interactions.stats(post);}
  @GetMapping("/api/posts/{post}/comments") public List<InteractionService.CommentView> comments(@PathVariable long post,@RequestParam(defaultValue="50")int limit,Principal p){

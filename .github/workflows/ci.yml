@@ -5,22 +5,81 @@ on:
     branches: [main]
 permissions:
   contents: read
+# Hardening D1: parallel jobs, Maven jobs capped at 35 minutes, Python at 10 and the frontend at 15. If a job outgrows
+# its cap, split it further instead of raising the timeout. Skipped on purpose (see docs/hardening-plan.md D1):
+# MediaMinioIT (no maintainable official MinIO image) and PerfHarnessIT (performance experiment, not CI).
 jobs:
-  maven:
+  # The frontend is a pnpm project (packageManager in package.json, pnpm-lock.yaml; no package-lock.json), so the
+  # lockfile-exact install is `pnpm install --frozen-lockfile`, the pnpm equivalent of `npm ci`.
+  frontend:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run typecheck
+      - run: pnpm run test
+
+  assistant-python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: assistant-python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: assistant-python/requirements.txt
+      - run: pip install -r requirements.txt
+      - run: python -m pytest -q tests
+
+  # Unit tests + every IT except the opt-in real-MQ suites (they skip themselves without CONTENT_REAL_MQ_IT), split
+  # by the first letter of the IT class name (A-L / M-Z) so a new IT class is always picked up by one of the two jobs.
+  # Unit tests run in the A-L shard only. FFmpeg runs through the Docker image below (FfmpegTranscoder never calls a
+  # host ffmpeg); pulling it up front keeps the pull out of the FFmpeg tests' own timeouts.
+  maven:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - shard: a-l
+            tests: ''
+            its: A*IT,B*IT,C*IT,D*IT,E*IT,F*IT,G*IT,H*IT,I*IT,J*IT,K*IT,L*IT
+          - shard: m-z
+            tests: -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false
+            its: M*IT,N*IT,O*IT,P*IT,Q*IT,R*IT,S*IT,T*IT,U*IT,V*IT,W*IT,X*IT,Y*IT,Z*IT
+    name: maven (${{ matrix.shard }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
           cache: maven
-      - run: mvn --batch-mode --no-transfer-progress -Pintegration verify
+      - run: docker pull -q linuxserver/ffmpeg:version-7.1-cli
+      - run: >-
+          mvn --batch-mode --no-transfer-progress -Pintegration verify
+          ${{ matrix.tests }} "-Dit.test=${{ matrix.its }}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: mysql-rocketmq-test-evidence
+          name: mysql-rocketmq-test-evidence-${{ matrix.shard }}
           retention-days: 7
           path: |
             target/surefire-reports/**
@@ -31,3 +90,32 @@ jobs:
             target/pipeline-evidence/**
             target/recovery-evidence/**
             target/distribution-evidence/**
+            target/m6-m8-batch/**
+
+  # Commerce suites against a real RocketMQ broker started by Testcontainers (CommerceMqFixture). Unit tests run in
+  # the maven job, so surefire is limited to a non-existent test here.
+  maven-real-mq:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      CONTENT_REAL_MQ_IT: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - run: >-
+          mvn --batch-mode --no-transfer-progress -Pintegration verify
+          -Dtest=NoSuchTest -Dsurefire.failIfNoSpecifiedTests=false
+          -Dit.test=CommerceRealMqIT,CommerceDispatchBatchRealMqIT
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: real-mq-test-evidence
+          retention-days: 7
+          path: |
+            target/failsafe-reports/**
+            target/commerce-real-mq-topic.log
+            target/commerce-dispatch-batch-topic.log

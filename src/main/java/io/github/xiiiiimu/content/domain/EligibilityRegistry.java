@@ -20,6 +20,9 @@ public final class EligibilityRegistry {
  private final ObjectMapper json;
 
  public EligibilityRegistry(InteractionMapper interactions,GiveawayMapper giveaways,FeedMapper posts,ObjectMapper json){
+  this(interactions,giveaways,posts,json,null);
+ }
+ public EligibilityRegistry(InteractionMapper interactions,GiveawayMapper giveaways,FeedMapper posts,ObjectMapper json,SaleMapper sales){
   this.json=json;
   register(new Checker(){
    public String type(){return "LIKE";}
@@ -51,9 +54,15 @@ public final class EligibilityRegistry {
   });
   register(new Checker(){
    public String type(){return "PURCHASE";}
-   public boolean enabled(){return false;} // order source not wired
+   public boolean enabled(){return sales!=null;}
    public Set<Long> qualifyingAccounts(long postId,long authorId,Long windowStartMs,Long deadlineMs,JsonNode params){
-    throw new FeedFailure(409,"PURCHASE_TOOL_DISABLED");
+    if(sales==null)throw new FeedFailure(409,"PURCHASE_TOOL_DISABLED");
+    try{
+     Long scopePost=postId;
+     if(params!=null && params.has("postId") && params.get("postId").canConvertToLong())scopePost=params.get("postId").longValue();
+     return new LinkedHashSet<>(sales.purchaseEligible(authorId,scopePost,windowStartMs,deadlineMs));
+    }catch(FeedFailure e){throw e;}
+    catch(RuntimeException e){throw new FeedFailure(409,"PURCHASE_SOURCE_UNAVAILABLE");}
    }
   });
  }
@@ -118,8 +127,24 @@ public final class EligibilityRegistry {
  public void validateTreeOrThrow(JsonNode tree){
   evaluateEnabledOnly(tree);
  }
+ /** A11: only these keys exist in the rule language; anything else (negate, includeAuthor, …) is refused, not ignored. */
+ private static final Set<String> NODE_KEYS=Set.of("op","k","children");
+ private static final Map<String,Set<String>> LEAF_PARAMS=Map.of("PURCHASE",Set.of("postId"));
  private void evaluateEnabledOnly(JsonNode node){
-  if(node.has("type")){require(node.path("type").asText());return;}
+  if(node==null || !node.isObject())throw new FeedFailure(400,"INVALID_RULE_TREE");
+  if(node.has("type")){
+   String type=node.path("type").asText();
+   require(type);
+   for(var it=node.fieldNames();it.hasNext();){String f=it.next();if(!"type".equals(f) && !"params".equals(f))throw new FeedFailure(400,"UNKNOWN_RULE_FIELD");}
+   JsonNode params=node.get("params");
+   if(params!=null && !params.isNull()){
+    if(!params.isObject())throw new FeedFailure(400,"UNKNOWN_RULE_FIELD");
+    Set<String> allowed=LEAF_PARAMS.getOrDefault(type,Set.of());
+    for(var it=params.fieldNames();it.hasNext();)if(!allowed.contains(it.next()))throw new FeedFailure(400,"UNKNOWN_RULE_FIELD");
+   }
+   return;
+  }
+  for(var it=node.fieldNames();it.hasNext();)if(!NODE_KEYS.contains(it.next()))throw new FeedFailure(400,"UNKNOWN_RULE_FIELD");
   String op=node.path("op").asText();
   if(!Set.of("ALL","ANY","AT_LEAST").contains(op))throw new FeedFailure(400,"INVALID_RULE_OP");
   var children=node.path("children");

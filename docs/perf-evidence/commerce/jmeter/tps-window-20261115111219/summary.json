@@ -1,0 +1,48 @@
+{
+  "runId": "20261115111219",
+  "campaignId": 52,
+  "postId": 65,
+  "configuredWindowSec": 20,
+  "settle": {
+    "measurement": "COUNT unique PAID orders with paid_at_ms in [t0,tWindowEnd)",
+    "t0Ms": 1794712383363,
+    "tWindowEndMs": 1794712403470,
+    "tDrainEndMs": 1794712415586,
+    "windowExactSec": 20.107,
+    "drainSec": 9.996,
+    "fullWallSec": 32.223,
+    "backlogAtWindowStart": 0,
+    "backlogAtWindowEnd": 19,
+    "commitsInWindow": 76,
+    "commitsThroughDrain": 100,
+    "steadyTps": 3.78,
+    "fullTpsIncludingDrain": 3.1,
+    "noteLegacy482": "r4 archive 4.82 = 100 commits / ~20.744s wall that included ~0.7s drain (fullTps style)"
+  },
+  "buyerRefund": {
+    "measurement": "COUNT SUCCEEDED BUYER_REQUESTED refunds with resolved_at_ms in refund window",
+    "t0Ms": 1794712417450,
+    "t1Ms": 1794712434127,
+    "windowExactSec": 16.676,
+    "attempted": 20,
+    "sampleSize": 20,
+    "commitsInWindow": 20,
+    "steadyTps": 1.2,
+    "notificationsInWindow": 20,
+    "sampleInsufficient": false
+  },
+  "giveawayAutoRefund": {
+    "note": "see run-tps-giveaway-auto.ps1",
+    "tps": null
+  },
+  "reconcile": {
+    "active_purchase_ents": 80,
+    "sold_count": 80,
+    "orders_paid_or_refunded": 100
+  },
+  "boundaries": {
+    "payment": "simulated",
+    "refund": "simulated",
+    "ffmpegContainerCleanup": "unverified"
+  }
+}

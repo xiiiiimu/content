@@ -1,0 +1,65 @@
+{
+ "checkedAtLocal": "2026-11-20 06:05",
+ "lastBootUpTime": "2026-11-16 16:10:23 (Kernel-Boot event 27 bootType=1 at 2026-11-20 04:47:32: fast startup, not a full restart)",
+ "wslconfig": "C:/Users/<user>/.wslconfig present: [wsl2] memory=5GB, autoMemoryReclaim=gradual",
+ "dockerMemTotalBytes": 5156753408,
+ "dockerMemTotalGiB": 4.8,
+ "dockerNCPU": 16,
+ "vmmemWSLMiBAtCheck": 1256,
+ "freeMiB": 7454,
+ "power": "AC (BatteryStatus=2), plan High performance 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c",
+ "cpu": "12th Gen Intel Core i7-1260P, 16 logical, MaxClockSpeed 2100 MHz (nominal)",
+ "idleHost": {
+  "samples": 20,
+  "intervalSec": 2,
+  "cpuMeanPct": 24.8,
+  "effectiveMHzP50": 3022.0,
+  "effectiveMHzMin": 2380.0,
+  "effectiveMHzMax": 3190.0
+ },
+ "idleDockerCpuPct60s": {
+  "content-minio-1": {
+   "n": 121,
+   "p50": 0.03,
+   "p95": 2.69,
+   "mean": 0.7,
+   "samplesOver100pct": 0
+  },
+  "content-mysql-1": {
+   "n": 121,
+   "p50": 18.97,
+   "p95": 23.43,
+   "mean": 19.9,
+   "samplesOver100pct": 0
+  },
+  "content-redis-1": {
+   "n": 121,
+   "p50": 0.72,
+   "p95": 3.29,
+   "mean": 1.2,
+   "samplesOver100pct": 0
+  },
+  "content-broker-1": {
+   "n": 121,
+   "p50": 5.33,
+   "p95": 137.62,
+   "mean": 20.2,
+   "samplesOver100pct": 8
+  },
+  "content-namesrv-1": {
+   "n": 121,
+   "p50": 2.69,
+   "p95": 5.8,
+   "mean": 2.3,
+   "samplesOver100pct": 0
+  }
+ },
+ "brokerIdleVerdict": "not continuously > 1 core (p50 5.3%, mean 20.2%; 8/121 one-off samples >100% from healthcheck mqadmin JVM)",
+ "middlewareHealthy": [
+  "content-mysql-1",
+  "content-redis-1",
+  "content-namesrv-1",
+  "content-broker-1",
+  "content-minio-1"
+ ]
+}

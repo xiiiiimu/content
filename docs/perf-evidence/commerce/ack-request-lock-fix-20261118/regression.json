@@ -1,0 +1,626 @@
+{
+  "unit": {
+    "tests": 52,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "suites": [
+      {
+        "name": "io.github.xiiiiimu.content.ContentApplicationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.ContentApplicationTest.xml",
+        "cases": [
+          {
+            "name": "loadsApplicationWiringWithoutMiddleware",
+            "seconds": 25.354,
+            "result": "PASS"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.domain.FfmpegTranscoderExecTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.domain.FfmpegTranscoderExecTest.xml",
+        "cases": [
+          {
+            "name": "waitForDestroysHungUnixProcess",
+            "seconds": 0.0,
+            "result": "SKIPPED"
+          },
+          {
+            "name": "waitForDestroysHungWindowsProcess",
+            "seconds": 7.065,
+            "result": "PASS"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.FeedMemberCodecTest",
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.FeedMemberCodecTest.xml",
+        "cases": [
+          {
+            "name": "rejectsNullMember",
+            "seconds": 0.002,
+            "result": "PASS"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[1]",
+            "seconds": 0.009,
+            "result": "PASS"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[2]",
+            "seconds": 0.002,
+            "result": "PASS"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[3]",
+            "seconds": 0.002,
+            "result": "PASS"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[4]",
+            "seconds": 0.001,
+            "result": "PASS"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[5]",
+            "seconds": 0.001,
+            "result": "PASS"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[6]",
+            "seconds": 0.002,
+            "result": "PASS"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[7]",
+            "seconds": 0.003,
+            "result": "PASS"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[8]",
+            "seconds": 0.003,
+            "result": "PASS"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[9]",
+            "seconds": 0.003,
+            "result": "PASS"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[10]",
+            "seconds": 0.003,
+            "result": "PASS"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[11]",
+            "seconds": 0.001,
+            "result": "PASS"
+          },
+          {
+            "name": "rejectsNonCanonicalMembers(String)[12]",
+            "seconds": 0.002,
+            "result": "PASS"
+          },
+          {
+            "name": "canonicalAsciiEncodingAndLongLimits",
+            "seconds": 0.011,
+            "result": "PASS"
+          },
+          {
+            "name": "invalidNumericInputsAreRejected",
+            "seconds": 0.01,
+            "result": "PASS"
+          },
+          {
+            "name": "localeDoesNotChangeWireDigits",
+            "seconds": 0.002,
+            "result": "PASS"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.FeedMergerTest",
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.FeedMergerTest.xml",
+        "cases": [
+          {
+            "name": "authorityTimeoutAndRejectedExecutorCannotReturnPartialSuccess",
+            "seconds": 0.067,
+            "result": "PASS"
+          },
+          {
+            "name": "authorityFailureDiscardsRequestAndCannotCommitUnprocessedPositions",
+            "seconds": 0.023,
+            "result": "PASS"
+          },
+          {
+            "name": "invalidBatchesAndConflictingCanonicalIdentityAreErrors",
+            "seconds": 0.016,
+            "result": "PASS"
+          },
+          {
+            "name": "prefetchSurvivesRequestReconstructionAndEqualHeadsAreConsumedTogether",
+            "seconds": 0.026,
+            "result": "PASS"
+          },
+          {
+            "name": "lateCandidatesRespectConsumedBoundaryAndSnapshot",
+            "seconds": 0.017,
+            "result": "PASS"
+          },
+          {
+            "name": "absentAndFollowEpochRejectedCandidatesAreFilteredWithoutLosingFollowingItems",
+            "seconds": 0.01,
+            "result": "PASS"
+          },
+          {
+            "name": "checksAndReadsAreBoundedAndPositionsOnlyAdvanceOnConsumption",
+            "seconds": 0.01,
+            "result": "PASS"
+          },
+          {
+            "name": "sourceTimeoutIsAnErrorAndRetryUsesOriginalContinuation",
+            "seconds": 0.089,
+            "result": "PASS"
+          },
+          {
+            "name": "unknownHeadBlocksConsumptionUntilAllSourcesConfirm",
+            "seconds": 0.064,
+            "result": "PASS"
+          },
+          {
+            "name": "duplicateHeadsWithinAndAcrossSourcesConsumeOneCheckAndScan",
+            "seconds": 0.076,
+            "result": "PASS"
+          },
+          {
+            "name": "randomizedFixedSourcesMatchIndependentNumericOrderAcrossRequests",
+            "seconds": 1.143,
+            "result": "PASS"
+          },
+          {
+            "name": "allFilteredAndExactBudgetCanStillConfirmExhaustion",
+            "seconds": 0.012,
+            "result": "PASS"
+          },
+          {
+            "name": "initialAndRefillExceptionsNeverBecomeExhaustionOrPartialSuccess",
+            "seconds": 0.012,
+            "result": "PASS"
+          },
+          {
+            "name": "continuousEmptyUnknownPagesAdvanceConsumedBoundaryWithoutMovingGlobalBoundary",
+            "seconds": 0.052,
+            "result": "PASS"
+          },
+          {
+            "name": "insufficientReadBudgetBeforeUnknownHeadCannotConsumeSmallerKnownItem",
+            "seconds": 0.005,
+            "result": "PASS"
+          },
+          {
+            "name": "statesAreCandidateKnowledgeNotPromisesOfVisibleItems",
+            "seconds": 0.01,
+            "result": "PASS"
+          },
+          {
+            "name": "rejectsInvalidConfigurationBeforeReading",
+            "seconds": 0.007,
+            "result": "PASS"
+          },
+          {
+            "name": "extremeTuplesAndInputSharedBoundariesAreRespected",
+            "seconds": 0.009,
+            "result": "PASS"
+          },
+          {
+            "name": "invalidContinuationAndAdditionalBudgetBoundsAreRejectedBeforeSourceCalls",
+            "seconds": 0.004,
+            "result": "PASS"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.FeedTokensTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.FeedTokensTest.xml",
+        "cases": [
+          {
+            "name": "roundTripAndPurposeSeparation",
+            "seconds": 0.319,
+            "result": "PASS"
+          },
+          {
+            "name": "invalidEncodingAndOversizeCannotPassMac",
+            "seconds": 0.004,
+            "result": "PASS"
+          },
+          {
+            "name": "weakKeyIsRejected",
+            "seconds": 0.001,
+            "result": "PASS"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.RelayPolicyTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.RelayPolicyTest.xml",
+        "cases": [
+          {
+            "name": "exponentialBackoffCapsWithoutOverflow",
+            "seconds": 0.002,
+            "result": "PASS"
+          },
+          {
+            "name": "onlyExactSendOkAcknowledges(String)[1]",
+            "seconds": 0.006,
+            "result": "PASS"
+          },
+          {
+            "name": "onlyExactSendOkAcknowledges(String)[2]",
+            "seconds": 0.002,
+            "result": "PASS"
+          },
+          {
+            "name": "onlyExactSendOkAcknowledges(String)[3]",
+            "seconds": 0.002,
+            "result": "PASS"
+          },
+          {
+            "name": "onlyExactSendOkAcknowledges(String)[4]",
+            "seconds": 0.002,
+            "result": "PASS"
+          },
+          {
+            "name": "onlyExactSendOkAcknowledges(String)[5]",
+            "seconds": 0.002,
+            "result": "PASS"
+          },
+          {
+            "name": "onlyExactSendOkAcknowledges(String)[6]",
+            "seconds": 0.001,
+            "result": "PASS"
+          },
+          {
+            "name": "leaseMustExceedSendTimeout",
+            "seconds": 0.003,
+            "result": "PASS"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.SaleLatencyTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.SaleLatencyTest.xml",
+        "cases": [
+          {
+            "name": "recordsPhasesAndClearsRequestContext",
+            "seconds": 1.176,
+            "result": "PASS"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.WindowsListenBacklogTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\surefire-reports\\TEST-io.github.xiiiiimu.content.WindowsListenBacklogTest.xml",
+        "cases": [
+          {
+            "name": "holdsThousandConnectionsBeforeAcceptWithoutRefusal",
+            "seconds": 1.283,
+            "result": "PASS"
+          },
+          {
+            "name": "customTomcatConnectorServesRealHttp",
+            "seconds": 2.343,
+            "result": "PASS"
+          }
+        ]
+      }
+    ]
+  },
+  "integration": {
+    "tests": 37,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": [
+      {
+        "name": "io.github.xiiiiimu.content.CommerceIngressRevisionIT",
+        "tests": 18,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\failsafe-reports\\TEST-io.github.xiiiiimu.content.CommerceIngressRevisionIT.xml",
+        "cases": [
+          {
+            "name": "activePurchaseDownloadsAfterUnfollowEvenWhenShareModeIsAuthorOnly",
+            "seconds": 6.931,
+            "result": "PASS"
+          },
+          {
+            "name": "brokerAckConfirmationDoesNotWaitForTheConsumerRequestRowLock",
+            "seconds": 1.054,
+            "result": "PASS"
+          },
+          {
+            "name": "rollbackBeforeBridgeCommitLeavesPendingAndReplayPersistsExactlyOnce",
+            "seconds": 0.963,
+            "result": "PASS"
+          },
+          {
+            "name": "redisLossPausesAndRestoresCommittedReservationWithoutInventingLostRequest",
+            "seconds": 1.368,
+            "result": "PASS"
+          },
+          {
+            "name": "winningKeepsPaidOrderAndRequiresIdempotentUserRequestedRefund",
+            "seconds": 3.004,
+            "result": "PASS"
+          },
+          {
+            "name": "commitBeforeStreamAckAndAbandonedConsumerAreRecoverable",
+            "seconds": 1.091,
+            "result": "PASS"
+          },
+          {
+            "name": "reservationIsOnlyInRedisUntilRealStreamIsDrained",
+            "seconds": 1.017,
+            "result": "PASS"
+          },
+          {
+            "name": "loggedInNonFollowerWithRestrictedPreviewCanBuyWithoutEntrySql",
+            "seconds": 2.383,
+            "result": "PASS"
+          },
+          {
+            "name": "failedRecoveryLeaseCanBeTakenOverAndOldGenerationCannotInstall",
+            "seconds": 2.648,
+            "result": "PASS"
+          },
+          {
+            "name": "failedSettlementRollsBackEveryRowAndCrossCampaignReplayDoesNotReserveAgain",
+            "seconds": 3.048,
+            "result": "PASS"
+          },
+          {
+            "name": "wrongStreamTypeDoesNotDecrementStockAndOfflinePreventsFinalOrder",
+            "seconds": 2.684,
+            "result": "PASS"
+          },
+          {
+            "name": "staleDispatchTokenCannotCompleteOrRetryAfterTakeover",
+            "seconds": 1.979,
+            "result": "PASS"
+          },
+          {
+            "name": "purchaseSettlementAndRealDrawSerializeOnTheSameAccountMaterial",
+            "seconds": 3.777,
+            "result": "PASS"
+          },
+          {
+            "name": "legacyCrossCampaignClientReplayIsAuditedWithoutCreatingAnotherRequest",
+            "seconds": 3.204,
+            "result": "PASS"
+          },
+          {
+            "name": "opaqueClientKeysHaveIdenticalExactIdentityInRedisAndMySql",
+            "seconds": 2.482,
+            "result": "PASS"
+          },
+          {
+            "name": "controlRetryFinalBlacklistCheckAndRepeatedReleaseAreConsistent",
+            "seconds": 0.978,
+            "result": "PASS"
+          },
+          {
+            "name": "aofRestartPreservesUnbridgedStreamAndReservationIdentity",
+            "seconds": 1.46,
+            "result": "PASS"
+          },
+          {
+            "name": "ordinaryApprovedRefundRemovesPurchaseEligibilityAndCannotBecomeWinningRefund",
+            "seconds": 1.399,
+            "result": "PASS"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.CommerceRealMqIT",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\failsafe-reports\\TEST-io.github.xiiiiimu.content.CommerceRealMqIT.xml",
+        "cases": [
+          {
+            "name": "realBrokerAckThenLostSenderConfirmationAndConsumerAckReplayOneOrder",
+            "seconds": 5.977,
+            "result": "PASS"
+          },
+          {
+            "name": "unavailableRealProducerLeavesDurableRetryThenRealBrokerCompletes",
+            "seconds": 2.91,
+            "result": "PASS"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.MaterialCommercePurchaseIT",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\failsafe-reports\\TEST-io.github.xiiiiimu.content.MaterialCommercePurchaseIT.xml",
+        "cases": [
+          {
+            "name": "blacklistAfterReserveRejectsAndReleasesStock",
+            "seconds": 7.396,
+            "result": "PASS"
+          },
+          {
+            "name": "unfinishedGiveawayCanCoexistWithSale",
+            "seconds": 1.39,
+            "result": "PASS"
+          },
+          {
+            "name": "diagnosticConnectionKeepsRealCommitAndRollback",
+            "seconds": 1.879,
+            "result": "PASS"
+          },
+          {
+            "name": "newCampaignSettlesAgainstTheVersionPinnedBeforeDefaultChanges",
+            "seconds": 3.37,
+            "result": "PASS"
+          },
+          {
+            "name": "concurrentStockAndOneOrderPerAccount(int)[1]",
+            "seconds": 11.521,
+            "result": "PASS"
+          },
+          {
+            "name": "concurrentStockAndOneOrderPerAccount(int)[2]",
+            "seconds": 49.866,
+            "result": "PASS"
+          },
+          {
+            "name": "recoverSettleIdempotentAndBlacklistRejectReleasesStock",
+            "seconds": 2.048,
+            "result": "PASS"
+          },
+          {
+            "name": "rejectsOutsideSaleWindowAndCloseWinsAgainstPendingSettlement",
+            "seconds": 1.437,
+            "result": "PASS"
+          },
+          {
+            "name": "giveawayOwnerCannotBuyWhileOtherUsersCan",
+            "seconds": 1.176,
+            "result": "PASS"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.MaterialCommerceRefundBlacklistIT",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\failsafe-reports\\TEST-io.github.xiiiiimu.content.MaterialCommerceRefundBlacklistIT.xml",
+        "cases": [
+          {
+            "name": "requestedGiveawayRefundKeepsEntitlementAndPurchaseEligibility",
+            "seconds": 7.713,
+            "result": "PASS"
+          },
+          {
+            "name": "buyerForcedRefundExcludesPurchaseAndCrossMaterialBlacklist",
+            "seconds": 2.157,
+            "result": "PASS"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.MaterialFlowIT",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\failsafe-reports\\TEST-io.github.xiiiiimu.content.MaterialFlowIT.xml",
+        "cases": [
+          {
+            "name": "laterReadyOfOlderRevisionDoesNotRegressDefaultVersion",
+            "seconds": 2.465,
+            "result": "PASS"
+          },
+          {
+            "name": "materialDiscoverPreviewTimestampCommentNewVersionAcceptOfflinePassword",
+            "seconds": 2.899,
+            "result": "PASS"
+          },
+          {
+            "name": "expiredLeaseTakeoverKeepsOldWorkerFromPublishingObjectRefs",
+            "seconds": 0.668,
+            "result": "PASS"
+          }
+        ]
+      },
+      {
+        "name": "io.github.xiiiiimu.content.MySqlMigrationIT",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "source": "target\\commerce-revision-20261118082417\\build\\target\\failsafe-reports\\TEST-io.github.xiiiiimu.content.MySqlMigrationIT.xml",
+        "cases": [
+          {
+            "name": "upgradesExistingV1WithoutLosingDrafts",
+            "seconds": 9.228,
+            "result": "PASS"
+          },
+          {
+            "name": "upgradesV2WithAnUnsentPublicationWithoutChangingItsIdentity",
+            "seconds": 10.123,
+            "result": "PASS"
+          },
+          {
+            "name": "migratesEmptySchemaAndCanRunAgain",
+            "seconds": 8.638,
+            "result": "PASS"
+          }
+        ]
+      }
+    ]
+  },
+  "python": {
+    "tests": 21,
+    "failures": 0,
+    "source": "target\\commerce-revision-20261118082417\\python-regression-scoped.log"
+  },
+  "execution": {
+    "firstSegment": "target\\commerce-revision-20261118082417\\green-verify6b.log",
+    "firstSegmentCompletedIntegrationTests": 20,
+    "firstSegmentFinalBuildResult": "INTERRUPTED",
+    "remainingSegment": "target\\commerce-revision-20261118082417\\green-verify6-remaining.log",
+    "remainingIntegrationTests": 17,
+    "remainingBuildResult": "SUCCESS",
+    "note": "Same production source across segments; only the four unfinished integration classes were resumed."
+  },
+  "red": {
+    "source": "target\\commerce-revision-20261118082417\\ack-rowlock-red.log",
+    "test": "brokerAckConfirmationDoesNotWaitForTheConsumerRequestRowLock",
+    "failureType": "java.util.concurrent.TimeoutException",
+    "requestLockHeld": true,
+    "completionDeadlineSec": 2
+  },
+  "smallRun": "docs\\perf-evidence\\commerce\\ack-request-lock-fix-20261118\\small-real-mq.json",
+  "noNew5000Run": true
+}

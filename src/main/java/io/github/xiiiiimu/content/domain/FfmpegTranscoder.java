@@ -7,13 +7,20 @@ import java.nio.file.*;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /** Runs real FFmpeg via Docker image. Host ffmpeg binary is optional and not required. */
 public final class FfmpegTranscoder {
  public record Result(byte[] video,byte[] cover,String metadataJson) {}
- private final String image;
- public FfmpegTranscoder(String image){if(image==null || image.isBlank())throw new IllegalArgumentException("ffmpeg image required");this.image=image;}
+ private static final Duration DEFAULT_TIMEOUT=Duration.ofMinutes(2);
+ private static final Duration REMOVE_TIMEOUT=Duration.ofSeconds(30);
+ static final String CONTAINER_LABEL="io.github.xiiiiimu.content.ffmpeg=1";
+ /** The child process did not finish within its wall-clock timeout. */
+ static final class TimeoutFailure extends IllegalStateException{TimeoutFailure(String m){super(m);}}
+ private final String image;private final Duration timeout;
+ public FfmpegTranscoder(String image){this(image,DEFAULT_TIMEOUT);}
+ FfmpegTranscoder(String image,Duration timeout){if(image==null || image.isBlank())throw new IllegalArgumentException("ffmpeg image required");this.image=image;this.timeout=timeout;}
  /** Fixture helper: generate a tiny real MP4 (ftyp) for upload tests. */
  public byte[] synthesizeFixture(){
   Path dir=null;
@@ -58,19 +65,40 @@ public final class FfmpegTranscoder {
   }catch(Exception e){throw new IllegalStateException("verifyDecodable failed: "+e.getMessage(),e);}
   finally{cleanup(dir);}
  }
- private static String dockerBin(){
+ static String dockerBin(){
   String override=System.getenv("DOCKER_BIN");if(override!=null && !override.isBlank())return override;
   Path win=Path.of("C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe");
   if(Files.isExecutable(win) || Files.exists(win))return win.toString();
   return "docker";
  }
- private void run(Path dir,String... args)throws Exception{
-  List<String> cmd=new ArrayList<>();cmd.add(dockerBin());cmd.add("run");cmd.add("--rm");cmd.add("-v");cmd.add(dir.toAbsolutePath()+":/work");cmd.add("-w");cmd.add("/work");cmd.add("--entrypoint");cmd.add("ffmpeg");cmd.add(image);cmd.addAll(List.of(args));
-  exec(cmd,Duration.ofMinutes(2));
+ void run(Path dir,String... args)throws Exception{
+  String name=containerName();
+  List<String> cmd=new ArrayList<>(dockerRun(dir,"ffmpeg",name));cmd.addAll(List.of(args));
+  execContainer(cmd,name);
  }
  private String probe(Path dir,String input)throws Exception{
-  List<String> cmd=List.of(dockerBin(),"run","--rm","-v",dir.toAbsolutePath()+":/work","-w","/work","--entrypoint","ffprobe",image,"-v","quiet","-print_format","json","-show_format","-show_streams",input);
-  return new String(exec(cmd,Duration.ofMinutes(2)),StandardCharsets.UTF_8);
+  String name=containerName();
+  List<String> cmd=new ArrayList<>(dockerRun(dir,"ffprobe",name));cmd.addAll(List.of("-v","quiet","-print_format","json","-show_format","-show_streams",input));
+  return new String(execContainer(cmd,name),StandardCharsets.UTF_8);
+ }
+ /** Every run gets a unique name and label so a timed-out container can be stopped and removed by name. */
+ private List<String> dockerRun(Path dir,String entrypoint,String name){
+  return List.of(dockerBin(),"run","--rm","--name",name,"--label",CONTAINER_LABEL,"-v",dir.toAbsolutePath()+":/work","-w","/work","--entrypoint",entrypoint,image);
+ }
+ static String containerName(){return "content-ffmpeg-"+UUID.randomUUID();}
+ /**
+  * Killing the local docker CLI on timeout does not stop the container ({@code --rm} only removes it once it exits),
+  * so on timeout or interrupt the container is force-removed by name. A removal failure is attached as suppressed.
+  */
+ private byte[] execContainer(List<String> cmd,String name)throws Exception{
+  try{return exec(cmd,timeout);}
+  catch(TimeoutFailure|InterruptedException e){
+   boolean interrupted=Thread.interrupted();
+   try{exec(List.of(dockerBin(),"rm","-f",name),REMOVE_TIMEOUT);}
+   catch(Exception removal){e.addSuppressed(removal);}
+   finally{if(interrupted || e instanceof InterruptedException)Thread.currentThread().interrupt();}
+   throw e;
+  }
  }
  /**
   * Wait with a hard wall-clock timeout. Stdout is drained on a daemon thread so a hung child that
@@ -83,11 +111,13 @@ public final class FfmpegTranscoder {
    try(InputStream in=p.getInputStream()){in.transferTo(buf);}catch(Exception ignored){/* process killed or closed */}
   },"content-ffmpeg-out");
   reader.setDaemon(true);reader.start();
-  boolean finished=p.waitFor(timeout.toMillis(),TimeUnit.MILLISECONDS);
+  boolean finished;
+  try{finished=p.waitFor(timeout.toMillis(),TimeUnit.MILLISECONDS);}
+  catch(InterruptedException e){p.destroyForcibly();throw e;}
   if(!finished){
    p.destroyForcibly();
    reader.join(TimeUnit.SECONDS.toMillis(5));
-   throw new IllegalStateException("timeout "+cmd);
+   throw new TimeoutFailure("timeout "+cmd);
   }
   reader.join(TimeUnit.SECONDS.toMillis(5));
   if(p.exitValue()!=0)throw new IllegalStateException("exit="+p.exitValue()+" cmd="+cmd+" out="+buf.toString(StandardCharsets.UTF_8));

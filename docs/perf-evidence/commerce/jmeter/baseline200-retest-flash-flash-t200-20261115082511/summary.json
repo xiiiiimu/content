@@ -1,0 +1,37 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\baseline200-retest-flash-flash-t200-20261115082511\\results.jtl",
+  "samples": 200,
+  "spanSec": 0.134,
+  "requestQps": 1492.54,
+  "acceptQps": 589.55,
+  "businessRejects": 111,
+  "systemErrors": 10,
+  "connectFail": 0,
+  "timeouts": 0,
+  "ok": 79,
+  "p50Ms": 5396,
+  "p95Ms": 7332,
+  "p99Ms": 7956,
+  "byLabel": [
+    {
+      "p95": 7332,
+      "qps": 1492.54,
+      "n": 200,
+      "label": "POST-purchase"
+    }
+  ],
+  "byClass": [
+    {
+      "cls": "BIZ:",
+      "count": 111
+    },
+    {
+      "cls": "OK",
+      "count": 79
+    },
+    {
+      "cls": "SYSTEM",
+      "count": 10
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "atMs": 1794942685060,
+    "processing": 100,
+    "paid": 0
+  },
+  {
+    "atMs": 1794942687733,
+    "processing": 95,
+    "paid": 5
+  },
+  {
+    "atMs": 1794942690575,
+    "processing": 85,
+    "paid": 15
+  },
+  {
+    "atMs": 1794942692755,
+    "processing": 64,
+    "paid": 36
+  },
+  {
+    "atMs": 1794942694837,
+    "processing": 44,
+    "paid": 56
+  },
+  {
+    "atMs": 1794942697484,
+    "processing": 18,
+    "paid": 82
+  },
+  {
+    "atMs": 1794942699343,
+    "processing": 1,
+    "paid": 99
+  },
+  {
+    "atMs": 1794942701585,
+    "processing": 0,
+    "paid": 100
+  }
+]

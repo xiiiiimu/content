@@ -1,0 +1,34 @@
+{
+  "runId": "20261115100548",
+  "campaignId": 44,
+  "windowSec": 20,
+  "settle": {
+    "wallSec": 20.744,
+    "uniquePaidOrdersInWindow": 100,
+    "tps": 4.82,
+    "drainSec": 0.689,
+    "measurement": "COUNT DISTINCT PAID orders with paid_at_ms in window"
+  },
+  "buyerRefund": {
+    "wallSec": 18.418,
+    "succeededRows": 20,
+    "attempted": 20,
+    "tps": 1.09,
+    "measurement": "COUNT SUCCEEDED BUYER_REQUESTED refunds resolved in window"
+  },
+  "giveawayAutoRefund": {
+    "tps": null,
+    "note": "see run-tps-giveaway-auto.ps1 / mq-demo evidence"
+  },
+  "reconcile": {
+    "active_purchase_ents": 80,
+    "paid_orders": 80,
+    "sold_count": 80
+  },
+  "peakBacklog": 0,
+  "boundaries": {
+    "refund": "simulated",
+    "payment": "simulated",
+    "ffmpegContainerCleanup": "unverified"
+  }
+}

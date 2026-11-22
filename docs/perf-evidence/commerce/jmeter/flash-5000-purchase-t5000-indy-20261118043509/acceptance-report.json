@@ -1,0 +1,59 @@
+{
+  "configuredThreads": 5000,
+  "campaignId": 91,
+  "postId": 104,
+  "readyCount": 5000,
+  "barrierTimedOut": false,
+  "samples": 5000,
+  "uniqueUsers": 5000,
+  "requestStartSpanMs": 3898,
+  "syncStartSpanLimitMs": 5000,
+  "synchronyValid": true,
+  "firstRequestStartMs": 1794947828297,
+  "lastHttpCompletionMs": 1794947872681,
+  "barrierReleaseEpochMs": 1794947799269,
+  "requestQps": 1282.7090815802976,
+  "httpCompletionQps": 112.65320836337419,
+  "sampleCompletionQps": 112.65320836337419,
+  "http200Qps": 2.2530641672674836,
+  "qpsDefinitions": {
+    "requestQps": "all JTL sample starts / (last start - first start); HTTP sampler start, not NIC wire timestamp",
+    "httpCompletionQps": "HTTP responses only / (last sample completion - first start); excludes connection errors",
+    "http200Qps": "HTTP 200 / (last completion - first start)",
+    "finalPaidTps": "unique PAID orders / (last recorded paid_at - first HTTP start); paid_at is transaction-record time, not commit timestamp",
+    "fullRunPaidTps": "unique PAID / (confirmed drain observation - first HTTP start)"
+  },
+  "httpStatusCounts": {
+    "409": 4900,
+    "200": 100
+  },
+  "http401": 0,
+  "http5xx": 0,
+  "businessRejects": {
+    "SOLD_OUT": 4900
+  },
+  "httpErrorCodes": {
+    "SOLD_OUT": 4900
+  },
+  "connectFailures": 0,
+  "timeouts": 0,
+  "p50Ms": 24926,
+  "p95Ms": 41049,
+  "p99Ms": 43967,
+  "paidOrders": 100,
+  "remainingStock": 0,
+  "activeEntitlements": 100,
+  "duplicateOrders": 0,
+  "duplicateEntitlements": 0,
+  "processingLeft": 0,
+  "redisRemainingStock": 0,
+  "redisProcessingLeft": 0,
+  "drainAfterLastHttpSec": 2.547,
+  "finalPaidTps": 2.493579033987482,
+  "fullRunPaidTps": 2.1307877522320005,
+  "observedLastPaidAfterHttpSec": 0,
+  "drainConfirmedAtMs": 1794947875228,
+  "drainMeasurement": "upper bound to first post-HTTP observer confirming all requests/receipts succeeded, or final committed reconciliation snapshot",
+  "pass": true,
+  "failureReasons": []
+}

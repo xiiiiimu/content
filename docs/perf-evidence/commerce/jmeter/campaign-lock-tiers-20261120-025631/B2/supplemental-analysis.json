@@ -1,0 +1,567 @@
+{
+  "rollingOneSecondMaxStarts": 59,
+  "perSecond": [
+    {
+      "epochSecond": 1795116046,
+      "starts": 43,
+      "completed200": 40
+    },
+    {
+      "epochSecond": 1795116047,
+      "completed200": 26,
+      "starts": 37
+    },
+    {
+      "epochSecond": 1795116048,
+      "completed200": 55,
+      "starts": 46
+    },
+    {
+      "epochSecond": 1795116049,
+      "completed200": 41,
+      "starts": 40
+    },
+    {
+      "epochSecond": 1795116050,
+      "completed200": 29,
+      "starts": 35
+    },
+    {
+      "epochSecond": 1795116051,
+      "completed200": 54,
+      "starts": 49
+    },
+    {
+      "epochSecond": 1795116052,
+      "completed200": 40,
+      "starts": 41
+    },
+    {
+      "epochSecond": 1795116053,
+      "completed200": 34,
+      "starts": 38
+    },
+    {
+      "epochSecond": 1795116054,
+      "completed200": 45,
+      "starts": 39
+    },
+    {
+      "epochSecond": 1795116055,
+      "completed200": 47,
+      "starts": 44
+    },
+    {
+      "epochSecond": 1795116056,
+      "completed200": 40,
+      "starts": 43
+    },
+    {
+      "epochSecond": 1795116057,
+      "completed200": 47,
+      "starts": 49
+    },
+    {
+      "epochSecond": 1795116058,
+      "completed200": 41,
+      "starts": 35
+    },
+    {
+      "epochSecond": 1795116059,
+      "starts": 50,
+      "completed200": 49
+    },
+    {
+      "epochSecond": 1795116060,
+      "starts": 53,
+      "completed200": 52
+    },
+    {
+      "epochSecond": 1795116061,
+      "completed200": 49,
+      "starts": 52
+    },
+    {
+      "epochSecond": 1795116062,
+      "starts": 47,
+      "completed200": 46
+    },
+    {
+      "epochSecond": 1795116063,
+      "completed200": 48,
+      "starts": 46
+    },
+    {
+      "epochSecond": 1795116064,
+      "completed200": 47,
+      "starts": 44
+    },
+    {
+      "epochSecond": 1795116065,
+      "completed200": 44,
+      "starts": 47
+    },
+    {
+      "epochSecond": 1795116066,
+      "completed200": 48,
+      "starts": 50
+    },
+    {
+      "epochSecond": 1795116067,
+      "completed200": 49,
+      "starts": 44
+    },
+    {
+      "epochSecond": 1795116068,
+      "completed200": 44,
+      "starts": 50
+    },
+    {
+      "epochSecond": 1795116069,
+      "completed200": 52,
+      "starts": 47
+    },
+    {
+      "epochSecond": 1795116070,
+      "completed200": 50,
+      "starts": 52
+    },
+    {
+      "epochSecond": 1795116071,
+      "completed200": 56,
+      "starts": 56
+    },
+    {
+      "epochSecond": 1795116072,
+      "completed200": 56,
+      "starts": 53
+    },
+    {
+      "epochSecond": 1795116073,
+      "completed200": 36,
+      "starts": 38
+    },
+    {
+      "epochSecond": 1795116074,
+      "completed200": 42,
+      "starts": 46
+    },
+    {
+      "epochSecond": 1795116075,
+      "completed200": 60,
+      "starts": 55
+    },
+    {
+      "epochSecond": 1795116076,
+      "completed200": 44,
+      "starts": 46
+    },
+    {
+      "epochSecond": 1795116077,
+      "completed200": 55,
+      "starts": 52
+    },
+    {
+      "epochSecond": 1795116078,
+      "completed200": 48,
+      "starts": 49
+    },
+    {
+      "epochSecond": 1795116079,
+      "completed200": 50,
+      "starts": 49
+    },
+    {
+      "epochSecond": 1795116080,
+      "completed200": 46,
+      "starts": 51
+    },
+    {
+      "epochSecond": 1795116081,
+      "completed200": 45,
+      "starts": 41
+    },
+    {
+      "epochSecond": 1795116082,
+      "completed200": 41,
+      "starts": 40
+    },
+    {
+      "epochSecond": 1795116083,
+      "completed200": 50,
+      "starts": 49
+    },
+    {
+      "epochSecond": 1795116084,
+      "starts": 50,
+      "completed200": 46
+    },
+    {
+      "epochSecond": 1795116085,
+      "completed200": 54,
+      "starts": 54
+    },
+    {
+      "epochSecond": 1795116086,
+      "completed200": 56,
+      "starts": 54
+    },
+    {
+      "epochSecond": 1795116087,
+      "completed200": 57,
+      "starts": 56
+    },
+    {
+      "epochSecond": 1795116088,
+      "completed200": 51,
+      "starts": 53
+    },
+    {
+      "epochSecond": 1795116089,
+      "completed200": 47,
+      "starts": 47
+    },
+    {
+      "epochSecond": 1795116090,
+      "completed200": 46,
+      "starts": 49
+    },
+    {
+      "epochSecond": 1795116091,
+      "completed200": 57,
+      "starts": 51
+    },
+    {
+      "epochSecond": 1795116092,
+      "starts": 52,
+      "completed200": 51
+    },
+    {
+      "epochSecond": 1795116093,
+      "completed200": 39,
+      "starts": 47
+    },
+    {
+      "epochSecond": 1795116094,
+      "completed200": 57,
+      "starts": 49
+    },
+    {
+      "epochSecond": 1795116095,
+      "completed200": 57,
+      "starts": 57
+    },
+    {
+      "epochSecond": 1795116096,
+      "completed200": 53,
+      "starts": 53
+    },
+    {
+      "epochSecond": 1795116097,
+      "completed200": 54,
+      "starts": 56
+    },
+    {
+      "epochSecond": 1795116098,
+      "completed200": 50,
+      "starts": 48
+    },
+    {
+      "epochSecond": 1795116099,
+      "completed200": 47,
+      "starts": 49
+    },
+    {
+      "epochSecond": 1795116100,
+      "completed200": 43,
+      "starts": 42
+    },
+    {
+      "epochSecond": 1795116101,
+      "completed200": 39,
+      "starts": 41
+    },
+    {
+      "epochSecond": 1795116102,
+      "completed200": 49,
+      "starts": 47
+    },
+    {
+      "epochSecond": 1795116103,
+      "completed200": 42,
+      "starts": 42
+    },
+    {
+      "epochSecond": 1795116104,
+      "completed200": 45,
+      "starts": 51
+    },
+    {
+      "epochSecond": 1795116105,
+      "completed200": 58,
+      "starts": 51
+    },
+    {
+      "epochSecond": 1795116106,
+      "completed200": 5,
+      "starts": 4
+    }
+  ],
+  "httpSegmentsByCodeMs": {
+    "200": {
+      "samplerStartToAppEnterMs": {
+        "count": 2849,
+        "p50": 2,
+        "p95": 50,
+        "p99": 121,
+        "max": 225
+      },
+      "appEnterToAppExitMs": {
+        "count": 2849,
+        "p50": 28,
+        "p95": 215,
+        "p99": 330,
+        "max": 537
+      },
+      "appExitToHttpSamplerEndMs": {
+        "count": 2849,
+        "p50": 1,
+        "p95": 12,
+        "p99": 49,
+        "max": 227
+      }
+    }
+  },
+  "httpPhaseMs": {
+    "auth.verify": {
+      "count": 2849,
+      "p50": 0,
+      "p95": 2,
+      "p99": 23,
+      "max": 321
+    },
+    "redis.reserve.lua": {
+      "count": 2849,
+      "p50": 21,
+      "p95": 167,
+      "p99": 281,
+      "max": 450
+    },
+    "purchase.total": {
+      "count": 2849,
+      "p50": 21,
+      "p95": 169,
+      "p99": 281,
+      "max": 451
+    }
+  },
+  "observedHttpWindowMs": 60027,
+  "plannedWindowFirstSamplerOffsetMs": 12,
+  "dispatchPhasesMs": {},
+  "ackConfirmationSqlStatements": [],
+  "settlementRootStartToMainCommitReturnedMs": {
+    "count": 2849,
+    "p50": 370,
+    "p95": 1038,
+    "p99": 1812,
+    "max": 3055
+  },
+  "campaignLockReturnToMainCommitReturnMs": {
+    "count": 2849,
+    "p50": 49,
+    "p95": 213,
+    "p99": 461,
+    "max": 1935
+  },
+  "lockDurationCaveat": "Return-to-commit is a lower bound on lock holding; measured from the first campaign-row locking statement (lockCampaign before V26, the final tryIncrementSold from V26), whose own duration includes query/RTT and possible lock wait.",
+  "resourcePeaks": {
+    "/actuator/metrics/sale.http.queue.depth": 10.0,
+    "/actuator/metrics/tomcat.threads.current": 100.0,
+    "/actuator/metrics/tomcat.threads.busy": 17.0,
+    "/actuator/metrics/tomcat.threads.config.max": 100.0,
+    "/actuator/metrics/tomcat.connections.current": 73.0,
+    "/actuator/metrics/tomcat.connections.config.max": 20000.0,
+    "/actuator/metrics/jvm.memory.used?tag=area:heap": 107020920.0,
+    "/actuator/metrics/jvm.memory.max?tag=area:heap": 4217372670.0,
+    "/actuator/metrics/process.cpu.usage": 0.20740383720066496,
+    "/actuator/metrics/jvm.threads.live": 267.0,
+    "/actuator/metrics/jvm.threads.states?tag=state:runnable": 36.0,
+    "/actuator/metrics/jvm.threads.states?tag=state:blocked": 0,
+    "/actuator/metrics/jvm.threads.states?tag=state:waiting": 184.0,
+    "/actuator/metrics/jvm.threads.states?tag=state:timed-waiting": 85.0,
+    "/actuator/metrics/hikaricp.connections.active": 15.0,
+    "/actuator/metrics/hikaricp.connections.pending": 0,
+    "/actuator/metrics/hikaricp.connections": 44.0,
+    "/actuator/metrics/hikaricp.connections.max": 120.0,
+    "/actuator/metrics/hikaricp.connections.min": 30.0,
+    "/actuator/metrics/hikaricp.connections.idle": 41.0
+  },
+  "unavailableMetricSampleCounts": {},
+  "sampledLockWaitTableObservations": {
+    "material_sale_campaigns": 192,
+    "material_sale_cache_jobs": 11
+  },
+  "processingPeak": 1497,
+  "streamLagPeakGlobal": 2149,
+  "streamPendingPeakGlobal": 20,
+  "dispatchPendingPeak": 1492,
+  "firstObservedFullyDrainedAfterLastHttp": {
+    "startMs": 1795116330532,
+    "endMs": 1795116331698
+  },
+  "drainAfterLastHttpSecUpperBound": 225.581,
+  "windowEdges": {
+    "start": {
+      "startEpochMs": 1795116046216,
+      "database": {
+        "campaign": [
+          [
+            "40",
+            "36",
+            "4",
+            "8"
+          ]
+        ],
+        "cacheJobs": [
+          [
+            "5"
+          ]
+        ],
+        "receipts": [
+          [
+            "4"
+          ]
+        ],
+        "dispatch": [
+          [
+            "40",
+            "28",
+            "4",
+            "8",
+            "1"
+          ]
+        ],
+        "lockWaitsByTable": [
+          [
+            "material_sale_campaigns",
+            "10"
+          ]
+        ],
+        "campaignForUpdateDigest": [
+          [
+            "3",
+            "25155",
+            "11248316506274000"
+          ]
+        ],
+        "appAccountTransactions": [
+          [
+            "5069085",
+            "48802860254427000"
+          ]
+        ]
+      },
+      "redis": {
+        "globalStreamLag": 242,
+        "campaignStock": 3678,
+        "globalStreamLength": 31832,
+        "globalStreamPending": 0,
+        "ready": "1"
+      },
+      "endEpochMs": 1795116057120,
+      "redisKnownFormalBuyers": {
+        "staleGuards": 0,
+        "checkedUsers": 3600,
+        "invalid": 0,
+        "processing": 386,
+        "redisEpochMs": 1795116056227
+      },
+      "sampleStartOffsetFromBoundaryMs": 138,
+      "sampleEndOffsetFromBoundaryMs": 11042
+    },
+    "end": {
+      "startEpochMs": 1795116106115,
+      "database": {
+        "campaign": [
+          [
+            "720",
+            "440",
+            "280",
+            "284"
+          ]
+        ],
+        "cacheJobs": [
+          [
+            "7"
+          ]
+        ],
+        "receipts": [
+          [
+            "280"
+          ]
+        ],
+        "dispatch": [
+          [
+            "720",
+            "432",
+            "4",
+            "284",
+            "1"
+          ]
+        ],
+        "lockWaitsByTable": [
+          [
+            "material_sale_campaigns",
+            "1"
+          ]
+        ],
+        "campaignForUpdateDigest": [
+          [
+            "3",
+            "25155",
+            "11248316506274000"
+          ]
+        ],
+        "appAccountTransactions": [
+          [
+            "5071221",
+            "49323654277345000"
+          ]
+        ]
+      },
+      "redis": {
+        "globalStreamLag": 2109,
+        "campaignStock": 1151,
+        "globalStreamLength": 34359,
+        "globalStreamPending": 0,
+        "ready": "1"
+      },
+      "endEpochMs": 1795116111474,
+      "redisKnownFormalBuyers": {
+        "staleGuards": 0,
+        "checkedUsers": 3600,
+        "invalid": 0,
+        "processing": 2546,
+        "redisEpochMs": 1795116111321
+      },
+      "sampleStartOffsetFromBoundaryMs": 37,
+      "sampleEndOffsetFromBoundaryMs": 5396
+    }
+  },
+  "windowPaidAtRecordOrders": 276,
+  "clientPollCalls": 11900,
+  "clientPollSeconds": 120.355,
+  "clientPollAverageQps": 98.87416393170204,
+  "clientPollObservedSucceeded": 1467,
+  "clientPollAcceptedTotal": 2849,
+  "clientPollIntervalsMs": {
+    "count": 9051,
+    "p50": 22401,
+    "p95": 25783,
+    "p99": 28499,
+    "max": 29236
+  },
+  "clientReservationsWithPollError": 0,
+  "hostMinimumAvailableCommitBytes": 6006726656,
+  "maxObserverStartGapMs": 5346
+}

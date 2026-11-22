@@ -1,0 +1,33 @@
+{
+  "atMs": 1795040552058,
+  "businessCorrectness": true,
+  "orderCommitCoverage": true,
+  "httpTimingCoverage": true,
+  "bridgeCommitCoverage": true,
+  "batchReadBound": true,
+  "noPostSql": true,
+  "queuesAfter": {
+    "atMs": 1795040554294,
+    "database": [
+      [
+        "0"
+      ],
+      [
+        "0"
+      ],
+      [
+        "0"
+      ],
+      [
+        "0"
+      ]
+    ],
+    "redis": {
+      "globalStreamLag": 0,
+      "globalStreamLength": 4062,
+      "globalStreamPending": 0,
+      "ready": "1"
+    },
+    "unresolvedQuarantine": 0
+  }
+}

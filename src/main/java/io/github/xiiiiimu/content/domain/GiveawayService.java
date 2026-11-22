@@ -15,6 +15,7 @@ public final class GiveawayService {
  private final NotificationMapper notifications;private final UserMapper users;private final EligibilityRegistry eligibility;
  private final VisibilityService visibility;private final TransactionTemplate tx;private final ObjectMapper json;
  private final SecureRandom random=new SecureRandom();
+ private java.util.function.Supplier<SaleService> sales;
 
  public GiveawayService(GiveawayMapper db,InteractionMapper comments,FeedMapper posts,MaterialMapper materials,
                         NotificationMapper notifications,UserMapper users,EligibilityRegistry eligibility,
@@ -22,6 +23,8 @@ public final class GiveawayService {
   this.db=db;this.comments=comments;this.posts=posts;this.materials=materials;this.notifications=notifications;
   this.users=users;this.eligibility=eligibility;this.visibility=visibility;this.tx=tx;this.json=json;
  }
+ public Set<String> enabledTools(){return eligibility.enabledTypes();}
+ public void setSaleBridgeProvider(java.util.function.Supplier<SaleService> sales){this.sales=sales;}
 
  public FavoriteResult favorite(long user,long post){
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
@@ -42,14 +45,23 @@ public final class GiveawayService {
   var post=posts.post(postId);if(post==null)throw new FeedFailure(404,"POST_NOT_FOUND");
   if(post.authorId()!=authorId)throw new FeedFailure(403,"POST_FORBIDDEN");
   if(cmd==null)throw new FeedFailure(400,"INVALID_GIVEAWAY");
-  JsonNode tree=json.readTree(cmd.ruleTreeJson());
+  JsonNode tree;
+  try{tree=cmd.ruleTreeJson()==null?null:json.readTree(cmd.ruleTreeJson());}
+  catch(com.fasterxml.jackson.core.JsonProcessingException e){throw new FeedFailure(400,"INVALID_RULE_TREE");}
+  if(tree==null || !tree.isObject())throw new FeedFailure(400,"INVALID_RULE_TREE");
   eligibility.validateTreeOrThrow(tree);
   Long reward=resolveRewardVersion(postId,cmd.rewardVersionHint());
   if(reward==null)throw new FeedFailure(409,"REWARD_VERSION_UNAVAILABLE");
   if(cmd.deadlineMs()==null || cmd.deadlineMs()<=System.currentTimeMillis())throw new FeedFailure(400,"INVALID_DEADLINE");
+  if(cmd.windowStartMs()!=null && cmd.windowStartMs()>=cmd.deadlineMs())throw new FeedFailure(400,"INVALID_WINDOW");
   if(cmd.winnerCount()<=0 || cmd.winnerCount()>100)throw new FeedFailure(400,"INVALID_WINNER_COUNT");
   String license=cmd.rewardLicense()==null?"DOWNLOAD":cmd.rewardLicense();
   if(!Set.of("DOWNLOAD","COMMERCIAL").contains(license))throw new FeedFailure(400,"INVALID_LICENSE");
+  // Hardening A11: the material's own licence bounds what a giveaway may grant (read from material_posts, not the parser).
+  if("COMMERCIAL".equals(license)){
+   var profile=materials.profile(postId);
+   if(profile==null || !profile.licenseCommercial())throw new FeedFailure(409,"COMMERCIAL_LICENSE_NOT_ALLOWED");
+  }
   var existing=db.bySource(sourceCommentId);
   if(existing!=null)return existing.summaryText()!=null?existing.summaryText():("活动 #"+existing.id()+" 已存在，状态 "+existing.state());
 
@@ -116,6 +128,8 @@ public final class GiveawayService {
   if(g==null || g.rewardVersionId()==null)return;
   for(var w:db.winners(g.id())){
    if(w.entitlementId()!=null)continue;
+   SaleService bridge=sales==null?null:sales.get();
+   boolean saleLinked=bridge!=null&&bridge.lockForGiveawayAward(w.accountId(),g.postId());
    var ent=new GiveawayMapper.EntitlementInsert();
    ent.account=w.accountId();ent.post=g.postId();ent.version=g.rewardVersionId();ent.license=g.rewardLicense();
    ent.kind="GIVEAWAY";ent.source=g.id();ent.at=System.currentTimeMillis();
@@ -124,6 +138,7 @@ public final class GiveawayService {
     if(existing!=null)ent.id=existing.id();
    }
    if(ent.id>0)db.setWinnerEntitlement(g.id(),w.accountId(),ent.id,System.currentTimeMillis());
+   if(bridge!=null)bridge.giveawayAwarded(w.accountId(),g.postId(),g.id(),saleLinked);
    String dedupe="giveaway-win:"+g.id()+":"+w.accountId();
    long synthetic=Math.floorMod(Objects.hash(g.id(),w.accountId()),1_000_000_000)+3_000_000_000L;
    notifications.insertWithMeta(w.accountId(),synthetic,"GIVEAWAY_WIN",g.authorId(),g.postId(),g.sourceCommentId(),
@@ -168,8 +183,11 @@ public final class GiveawayService {
  private Long resolveRewardVersion(long postId,String hint){
   var profile=materials.profile(postId);if(profile==null)return null;
   if(hint==null || "DEFAULT".equalsIgnoreCase(hint) || "最新版".equals(hint))return profile.defaultVersionId();
-  try{long id=Long.parseLong(hint);var v=materials.version(id);return v!=null && v.postId()==postId && "READY".equals(v.state())?id:null;}
-  catch(Exception e){return profile.defaultVersionId();}
+  // A11: a hint must be a READY version of this post; anything else is refused instead of silently defaulted.
+  long id;
+  try{id=Long.parseLong(hint.trim());}catch(NumberFormatException e){return null;}
+  var v=materials.version(id);
+  return v!=null && v.postId()==postId && "READY".equals(v.state())?id:null;
  }
  private String buildSummary(AssistantParser.GiveawayCommand cmd,long rewardVersionId){
   return (cmd.summary()==null?"抽奖活动":cmd.summary())+"；奖励版本 #"+rewardVersionId+"；资格在截止后封池时核验；每账号一次。";

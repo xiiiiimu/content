@@ -1,0 +1,18 @@
+{
+  "runsChecked": 4,
+  "newSamplesChecked": 20000,
+  "acceptedAndCommitted": 400,
+  "soldOut": 19600,
+  "accessLogCoverage": 20000,
+  "gitIndexUnchanged": true,
+  "originalJarUnchanged": true,
+  "publicTokenScan": "no signed identity token pattern found",
+  "validNewSynchronizedRuns": [
+    "probe"
+  ],
+  "invalidNewSynchronizedRuns": [
+    "diagnostic",
+    "fixed",
+    "ic-off"
+  ]
+}

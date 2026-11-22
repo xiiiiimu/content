@@ -33,6 +33,10 @@ function clearToken() {
               <span class="i-ri-home-5-line text-lg" />
               <span class="hidden xl:inline">关注 Feed</span>
             </NuxtLink>
+            <NuxtLink to="/posts/new" class="nav-link" active-class="bg-active text-primary">
+              <span class="i-ri-quill-pen-line text-lg" />
+              <span class="hidden xl:inline">发帖</span>
+            </NuxtLink>
             <NuxtLink to="/materials" class="nav-link" active-class="bg-active text-primary">
               <span class="i-ri-video-line text-lg" />
               <span class="hidden xl:inline">素材发现</span>

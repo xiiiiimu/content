@@ -1,0 +1,20 @@
+{
+ "id": "msg_synthetic_hello",
+ "type": "message",
+ "role": "assistant",
+ "model": "claude-haiku-5-5",
+ "content": [
+  {
+   "type": "text",
+   "text": "{\"intent\": \"UNKNOWN\", \"decision\": \"CLARIFY\", \"reasons\": [\"UNRECOGNIZED\"], \"unsupportedConditions\": [], \"droppedRequirements\": [], \"search\": null, \"subscribe\": null, \"giveaway\": null}"
+  }
+ ],
+ "stop_reason": "end_turn",
+ "stop_sequence": null,
+ "usage": {
+  "input_tokens": 5200,
+  "output_tokens": 120,
+  "cache_creation_input_tokens": 0,
+  "cache_read_input_tokens": 0
+ }
+}

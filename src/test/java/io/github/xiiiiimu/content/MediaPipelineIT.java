@@ -32,8 +32,10 @@ class MediaPipelineIT {
   r.add("content.media.enabled",()->"true");
   r.add("content.media.s3-endpoint",()->"http://"+S3.getHost()+":"+S3.getMappedPort(9090));
   r.add("content.media.bucket",()->"content-media");
-  r.add("content.media.secret-key",()->"content-secret-key-32-bytes-minimum");
+  r.add("content.media.secret-key",()->"media-test-secret-key-not-for-production-01");
   r.add("content.media.ffmpeg-image",()->""); // placeholder path; real FFmpeg covered by MediaFfmpegIT
+  // Tests drive media.tick() themselves; keep the scheduled scanner (runs once at startup) from claiming their tasks (D3).
+  r.add("content.media.scan-delay-millis",()->"3600000");
  }
  @Autowired JdbcTemplate db;@Autowired PublishService publish;@Autowired MediaService media;@Autowired VisibilityService visibility;
  @Autowired RelationshipService follows;@Autowired MediaMapper mediaMapper;@Autowired MockMvc http;

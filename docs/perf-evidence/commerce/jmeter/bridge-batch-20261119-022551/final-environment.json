@@ -1,0 +1,36 @@
+{
+  "readiness": {
+    "status": "UP"
+  },
+  "selectedBatchSize": 20,
+  "pid": 34108,
+  "jarSha256": "c1c7cd41f07c565582d89fad3e4445e3cd0822c5e6fbf6a3260df07cd9ee83d8",
+  "backlog": {
+    "atMs": 1795044925660,
+    "database": [
+      [
+        "0"
+      ],
+      [
+        "0"
+      ],
+      [
+        "0"
+      ],
+      [
+        "0"
+      ]
+    ],
+    "redis": {
+      "globalStreamLag": 0,
+      "globalStreamLength": 14541,
+      "globalStreamPending": 0,
+      "ready": "1"
+    },
+    "unresolvedQuarantine": 0
+  },
+  "stagedDiffUnchanged": true,
+  "committed": false,
+  "pushed": false,
+  "merged": false
+}

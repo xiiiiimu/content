@@ -1,0 +1,28 @@
+{
+ "id": "2658fc2a-3372-4806-93f7-a8772a073508",
+ "object": "chat.completion",
+ "created": 1795271120,
+ "model": "deepseek-flash",
+ "choices": [
+  {
+   "index": 0,
+   "message": {
+    "role": "assistant",
+    "content": "{\"intent\": \"GIVEAWAY\", \"decision\": \"EXECUTE\", \"reasons\": [], \"unsupportedConditions\": [], \"droppedRequirements\": [], \"search\": null, \"subscribe\": null, \"giveaway\": {\"conditions\": [\"LIKE\"], \"op\": \"ALL\", \"k\": null, \"deadline\": \"2027-01-15T20:00:00+08:00\", \"windowStart\": null, \"winnerCount\": 1, \"rewardLicense\": \"DOWNLOAD\"}}"
+   },
+   "logprobs": null,
+   "finish_reason": "stop"
+  }
+ ],
+ "usage": {
+  "prompt_tokens": 17529,
+  "completion_tokens": 110,
+  "total_tokens": 17639,
+  "prompt_tokens_details": {
+   "cached_tokens": 256
+  },
+  "prompt_cache_hit_tokens": 256,
+  "prompt_cache_miss_tokens": 17273
+ },
+ "system_fingerprint": "bc19ba97cbe016479903222bb1578db6"
+}

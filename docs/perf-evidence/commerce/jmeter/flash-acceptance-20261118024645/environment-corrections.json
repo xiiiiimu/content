@@ -1,0 +1,9 @@
+{
+  "note": "environment.json is the INITIAL DECLARED configuration, not an observed JVM configuration. Retained unchanged for provenance. Per-run barrier/JMeter/GC records override declared settings.",
+  "corrections": [
+    "Earlier JMeter launcher used PATH Java 21 despite JAVA_HOME=17; final runs explicitly select Java 17.",
+    "Local setenv.bat overrode declared HEAP=256m/1g; actual effective heap was 512m/3072m. Final JVM_ARGS pin these same measured settings.",
+    "Tomcat worker cap changed from 5000/min200 to 100/min100 after diagnosis.",
+    "Public final observed environment is environment-final-observed.json."
+  ]
+}

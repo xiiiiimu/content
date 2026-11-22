@@ -1,0 +1,25 @@
+{
+  "beforePaid": 3597,
+  "afterPaid": 3597,
+  "requests": [
+    {
+      "clientKey": "jm-c160-u10908",
+      "originalReservationId": "1ab3d38878b542caacca77aaaa11aab5",
+      "returnedReservationId": "1ab3d38878b542caacca77aaaa11aab5",
+      "returnedState": "SUCCEEDED"
+    },
+    {
+      "clientKey": "jm-c160-u10950",
+      "originalReservationId": "eb5d06679f6a4903aea46836c2298eb7",
+      "returnedReservationId": "eb5d06679f6a4903aea46836c2298eb7",
+      "returnedState": "SUCCEEDED"
+    },
+    {
+      "clientKey": "jm-c160-u10900",
+      "originalReservationId": "4311a1b053814f4e953c94dc12d20b45",
+      "returnedReservationId": "4311a1b053814f4e953c94dc12d20b45",
+      "returnedState": "SUCCEEDED"
+    }
+  ],
+  "pass": true
+}

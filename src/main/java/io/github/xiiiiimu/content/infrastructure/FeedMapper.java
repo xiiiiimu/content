@@ -9,9 +9,9 @@ public interface FeedMapper {
  record Control(String state,long generation) {}
  record Author(String mode,long epoch,long sequence) {}
  record Relation(String status,long epoch,long cutoff,long sinceMs,int historyLimit) {}
- record Post(long id,long authorId,Long time,Long sequence,String body,String status,long version,String mode,Long epoch) {}
+ record Post(long id,long authorId,Long time,Long sequence,String body,String status,long version,String mode,Long epoch,String topic) {}
  record Authority(long id,Long time,String body,boolean allowed) {}
- String POST="id,author_id AS authorId,published_at_ms AS time,publish_seq AS sequence,body,status,version,delivery_mode AS mode,delivery_epoch AS epoch";
+ String POST="id,author_id AS authorId,published_at_ms AS time,publish_seq AS sequence,body,status,version,delivery_mode AS mode,delivery_epoch AS epoch,topic";
  @Select("SELECT state,generation FROM feed_control WHERE id=1 FOR SHARE") Control gate();
  @Select("SELECT state,generation FROM feed_control WHERE id=1") Control control();
  @Select("SELECT CAST(UNIX_TIMESTAMP(CURRENT_TIMESTAMP(3))*1000 AS UNSIGNED)") long now();

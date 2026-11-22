@@ -1,0 +1,27 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\smoke-detail-t20-20261115054823\\results.jtl",
+  "samples": 78469,
+  "spanSec": 614.604,
+  "requestQps": 127.67,
+  "acceptQps": 127.67,
+  "businessRejects": 0,
+  "systemErrors": 0,
+  "ok": 78469,
+  "p50Ms": 100,
+  "p95Ms": 441,
+  "p99Ms": 591,
+  "byLabel": [
+    {
+      "label": "GET-campaign-detail",
+      "qps": 127.67,
+      "n": 78469,
+      "p95": 441
+    }
+  ],
+  "byClass": [
+    {
+      "cls": "OK",
+      "count": 78469
+    }
+  ]
+}

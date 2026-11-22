@@ -1,0 +1,39 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\smoke-mixed-t10-20261115054501\\results.jtl",
+  "samples": 65,
+  "spanSec": 3.156,
+  "requestQps": 20.6,
+  "acceptQps": 20.6,
+  "businessRejects": 0,
+  "systemErrors": 0,
+  "ok": 65,
+  "p50Ms": 41,
+  "p95Ms": 475,
+  "p99Ms": 504,
+  "byLabel": [
+    {
+      "n": 10,
+      "qps": 3333.33,
+      "p95": 454,
+      "label": "MIX-detail"
+    },
+    {
+      "n": 45,
+      "qps": 23.49,
+      "p95": 78,
+      "label": "MIX-poll"
+    },
+    {
+      "n": 10,
+      "qps": 123.46,
+      "p95": 504,
+      "label": "MIX-purchase"
+    }
+  ],
+  "byClass": [
+    {
+      "cls": "OK",
+      "count": 65
+    }
+  ]
+}

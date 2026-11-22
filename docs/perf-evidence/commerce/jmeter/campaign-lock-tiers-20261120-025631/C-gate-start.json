@@ -1,0 +1,46 @@
+{
+  "label": "C-start",
+  "memoryBefore": {
+    "atLocal": "2026-11-20T03:26:02.184666+08:00",
+    "freeMiB": 4301,
+    "totalMiB": 16083
+  },
+  "minFreeMiB": 3072,
+  "runningTestcontainers": [],
+  "dockerHealth": {
+    "content-namesrv-1": "healthy 0",
+    "content-broker-1": "unhealthy 19"
+  },
+  "brokerProbes": [
+    {
+      "probe": 1,
+      "ok": true,
+      "rc": 0,
+      "elapsedMs": 5922,
+      "at": "2026-11-20T03:26:08.633815+08:00"
+    },
+    {
+      "probe": 2,
+      "ok": true,
+      "rc": 0,
+      "elapsedMs": 7984,
+      "at": "2026-11-20T03:26:21.620027+08:00"
+    },
+    {
+      "probe": 3,
+      "ok": true,
+      "rc": 0,
+      "elapsedMs": 5938,
+      "at": "2026-11-20T03:26:32.556719+08:00"
+    }
+  ],
+  "memoryAfter": {
+    "atLocal": "2026-11-20T03:26:34.467715+08:00",
+    "freeMiB": 4711,
+    "totalMiB": 16083
+  },
+  "failures": [
+    "content-broker-1-not-healthy"
+  ],
+  "pass": false
+}

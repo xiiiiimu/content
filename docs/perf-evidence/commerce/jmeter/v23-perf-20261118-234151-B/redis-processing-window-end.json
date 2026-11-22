@@ -1,0 +1,14 @@
+{
+  "boundaryEpochMs": 1795020177681,
+  "captureStartEpochMs": 1795020177681,
+  "captureEndEpochMs": 1795020178347,
+  "redisSnapshot": {
+    "staleGuards": 0,
+    "checkedUsers": 3600,
+    "invalid": 0,
+    "processing": 3047,
+    "redisEpochMs": 1795020178197
+  },
+  "redisSampleOffsetMs": 516,
+  "atomicRedisView": true
+}

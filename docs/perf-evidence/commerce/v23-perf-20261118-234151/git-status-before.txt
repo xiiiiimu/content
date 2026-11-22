@@ -1,0 +1,150 @@
+ M docs/material-commerce-addendum.md
+MM docs/perf-evidence/commerce/jmeter/INDEX.md
+A  docs/perf-evidence/commerce/jmeter/purchase-5k-limited-t5000-purchase-t5000-20261116023232/barrier-stats.json
+A  docs/perf-evidence/commerce/jmeter/purchase-5k-limited-t5000-purchase-t5000-20261116023232/host-metrics.json
+A  docs/perf-evidence/commerce/jmeter/purchase-5k-limited-t5000-purchase-t5000-20261116023232/preflight.json
+A  docs/perf-evidence/commerce/jmeter/purchase-5k-limited-t5000-purchase-t5000-20261116023232/purchase-5k-report.json
+A  docs/perf-evidence/commerce/jmeter/purchase-5k-limited-t5000-purchase-t5000-20261116023232/results.jtl
+A  docs/perf-evidence/commerce/jmeter/purchase-5k-limited-t5000-purchase-t5000-20261116023232/summary.json
+A  docs/perf-evidence/commerce/jmeter/purchase-5k-limited-t5000-purchase-t5000-20261116023232/window.json
+A  docs/perf-evidence/commerce/jmeter/purchase-5k-stock-t5000-purchase-t5000-20261116025653/barrier-stats.json
+A  docs/perf-evidence/commerce/jmeter/purchase-5k-stock-t5000-purchase-t5000-20261116025653/host-metrics.json
+A  docs/perf-evidence/commerce/jmeter/purchase-5k-stock-t5000-purchase-t5000-20261116025653/preflight.json
+A  docs/perf-evidence/commerce/jmeter/purchase-5k-stock-t5000-purchase-t5000-20261116025653/purchase-5k-report.json
+A  docs/perf-evidence/commerce/jmeter/purchase-5k-stock-t5000-purchase-t5000-20261116025653/results.jtl
+A  docs/perf-evidence/commerce/jmeter/purchase-5k-stock-t5000-purchase-t5000-20261116025653/summary.json
+A  docs/perf-evidence/commerce/jmeter/purchase-5k-stock-t5000-purchase-t5000-20261116025653/window.json
+A  docs/perf-evidence/commerce/jmeter/purchase-post-5k-20261116024415.json
+ M docs/v1.1-material-commerce.md
+ M frontend/composables/useContentApi.ts
+ M frontend/nuxt.config.ts
+ M frontend/pages/posts/[id].vue
+MM infra/jmeter/commerce-sale.jmx
+ M infra/jmeter/preflight-commerce.ps1
+MM infra/jmeter/run-commerce-jmeter.ps1
+MM infra/jmeter/run-java-commerce.ps1
+AM infra/jmeter/run-purchase-post-5k.ps1
+ M infra/jmeter/run-tps-giveaway-auto.ps1
+MM infra/jmeter/seed-commerce-data.ps1
+ M pom.xml
+ M src/main/java/io/github/xiiiiimu/content/api/FeedIdentityFilter.java
+ M src/main/java/io/github/xiiiiimu/content/api/SaleController.java
+ M src/main/java/io/github/xiiiiimu/content/api/SaleGiveawayDebugController.java
+ M src/main/java/io/github/xiiiiimu/content/domain/GiveawayService.java
+ M src/main/java/io/github/xiiiiimu/content/domain/MaterialService.java
+ M src/main/java/io/github/xiiiiimu/content/domain/RelationshipService.java
+ M src/main/java/io/github/xiiiiimu/content/domain/SaleFaultHooks.java
+ M src/main/java/io/github/xiiiiimu/content/domain/SaleService.java
+ M src/main/java/io/github/xiiiiimu/content/infrastructure/MaterialMapper.java
+ M src/main/java/io/github/xiiiiimu/content/infrastructure/RocketMqSaleSender.java
+ M src/main/java/io/github/xiiiiimu/content/infrastructure/SaleConfiguration.java
+ M src/main/java/io/github/xiiiiimu/content/infrastructure/SaleMapper.java
+ M src/main/java/io/github/xiiiiimu/content/infrastructure/SaleRedis.java
+ M src/main/java/io/github/xiiiiimu/content/worker/SaleConsumer.java
+ M src/test/java/io/github/xiiiiimu/content/MaterialCommercePurchaseIT.java
+ M src/test/java/io/github/xiiiiimu/content/MaterialCommerceRefundBlacklistIT.java
+ M src/test/java/io/github/xiiiiimu/content/MySqlMigrationIT.java
+?? docs/commerce-ingress-v2.md
+?? docs/perf-evidence/capacity/push-capacity-20261109-220307-GREEN/load-c16-d30/raw.ndjson
+?? docs/perf-evidence/capacity/push-capacity-20261109-220307-GREEN/load-c24-d30/raw.ndjson
+?? docs/perf-evidence/capacity/push-capacity-20261109-220307-GREEN/load-c4-d30/raw.ndjson
+?? docs/perf-evidence/capacity/push-capacity-20261109-220307-GREEN/load-c8-d30/raw.ndjson
+?? docs/perf-evidence/capacity/push-capacity-20261109-220307-GREEN/load-c8-d60/raw.ndjson
+?? docs/perf-evidence/capacity/push-capacity-20261109-220307-GREEN/load-c8-d600/raw.ndjson
+?? docs/perf-evidence/commerce/ack-request-lock-fix-20261118.md
+?? docs/perf-evidence/commerce/ack-request-lock-fix-20261118/
+?? docs/perf-evidence/commerce/flash-metrics-recompute-20261118.md
+?? docs/perf-evidence/commerce/flash-metrics-recompute-20261118/
+?? docs/perf-evidence/commerce/flash-sale-final-20261118-024645.md
+?? docs/perf-evidence/commerce/flash-sync-contract-20261118.md
+?? docs/perf-evidence/commerce/jmeter/baseline200-r2-detail-t200-20261115092836/
+?? docs/perf-evidence/commerce/jmeter/baseline200-r3-detail-t200-20261115093359/
+?? docs/perf-evidence/commerce/jmeter/baseline200-r3-mixed-t200-20261115093720/
+?? docs/perf-evidence/commerce/jmeter/baseline200-r5-mixed-t200-20261115104949/html/
+?? docs/perf-evidence/commerce/jmeter/baseline200-r5-sign-t200-20261115104739/html/
+?? docs/perf-evidence/commerce/jmeter/baseline200-r5b-mixed-t200-20261115105626/html/
+?? docs/perf-evidence/commerce/jmeter/baseline200-r6-mixed-t200-20261115110827/html/
+?? docs/perf-evidence/commerce/jmeter/baseline200-r6-sign-t200-20261115110651/html/
+?? docs/perf-evidence/commerce/jmeter/baseline200-retest-flash-flash-t200-20261115082511/
+?? docs/perf-evidence/commerce/jmeter/baseline200-retest-mixed-t200-20261115082608/
+?? docs/perf-evidence/commerce/jmeter/baseline200-retest-order-t200-20261115082221/
+?? docs/perf-evidence/commerce/jmeter/baseline200-retest-poll-t200-20261115082046/
+?? docs/perf-evidence/commerce/jmeter/baseline200-retest-purchase-t200-20261115081923/
+?? docs/perf-evidence/commerce/jmeter/baseline200-retest-sign-t200-20261115082355/
+?? docs/perf-evidence/commerce/jmeter/baseline200-summary-partial.json
+?? docs/perf-evidence/commerce/jmeter/bootstrap-smoke-purchase-t8-bootstrap-smoke-20261118055110/
+?? docs/perf-evidence/commerce/jmeter/bootstrap-smoke-purchase-t8-bootstrap-smoke2-20261118055110/
+?? docs/perf-evidence/commerce/jmeter/capacity-probe-local-20261115123826/
+?? docs/perf-evidence/commerce/jmeter/commerce-ingress-v2-20261118082417/
+?? docs/perf-evidence/commerce/jmeter/flash-1000-purchase-t1000-final17-20261118034739/
+?? docs/perf-evidence/commerce/jmeter/flash-1000-purchase-t1000-flash-1000-20261118023216/
+?? docs/perf-evidence/commerce/jmeter/flash-1000-purchase-t1000-indy-20261118042558/
+?? docs/perf-evidence/commerce/jmeter/flash-1000-purchase-t1000-native-20261118033827/
+?? docs/perf-evidence/commerce/jmeter/flash-1000-purchase-t1000-verified-20261118031010/
+?? docs/perf-evidence/commerce/jmeter/flash-5000-purchase-t5000-final17-20261118040434/
+?? docs/perf-evidence/commerce/jmeter/flash-5000-purchase-t5000-indy-20261118043509/
+?? docs/perf-evidence/commerce/jmeter/flash-5000-purchase-t5000-ingress-v2-20261118125422/
+?? docs/perf-evidence/commerce/jmeter/flash-5000-purchase-t5000-latency-diag-20261118055110/
+?? docs/perf-evidence/commerce/jmeter/flash-5000-purchase-t5000-latency-fixed-20261118055110/
+?? docs/perf-evidence/commerce/jmeter/flash-5000-purchase-t5000-latency-ic-off-20261118055110/
+?? docs/perf-evidence/commerce/jmeter/flash-5000-purchase-t5000-latency-probe-20261118055110/
+?? docs/perf-evidence/commerce/jmeter/flash-acceptance-20261118024645/
+?? docs/perf-evidence/commerce/jmeter/flash-smoke-purchase-t12-auth-20261118024826/
+?? docs/perf-evidence/commerce/jmeter/flash-smoke-purchase-t8-indy-20261118042101/
+?? docs/perf-evidence/commerce/jmeter/ic-smoke-purchase-t8-ic-smoke-20261118055110/
+?? docs/perf-evidence/commerce/jmeter/injector-failure-ingress-v2-20261118125422/
+?? docs/perf-evidence/commerce/jmeter/latency-smoke-purchase-t8-latency-smoke-20261118055110/
+?? docs/perf-evidence/commerce/jmeter/loopchk3-detail-t20-20261115075410/
+?? docs/perf-evidence/commerce/jmeter/loopchk4-detail-t20-20261115075452/
+?? docs/perf-evidence/commerce/jmeter/purchase-5k-paced-t5000-purchase-t5000-20261116080328/
+?? docs/perf-evidence/commerce/jmeter/purchase-5k-stock-audit-20261116025653.md
+?? docs/perf-evidence/commerce/jmeter/purchase-capacity-diagnostics-20261117.md
+?? docs/perf-evidence/commerce/jmeter/purchase-conservative-optimization-20261117.md
+?? docs/perf-evidence/commerce/jmeter/purchase-latency-20261118055110/
+?? docs/perf-evidence/commerce/jmeter/purchase-post-5k-paced-20261116080940.json
+?? docs/perf-evidence/commerce/jmeter/purchase-smoke-purchase-t20-20261115231241/
+?? docs/perf-evidence/commerce/jmeter/tps-giveaway-auto-20261115111306/
+?? docs/perf-evidence/commerce/jmeter/tps-window-20261115082725/
+?? docs/perf-evidence/commerce/jmeter/tps-window-20261115111110/
+?? docs/perf-evidence/commerce/jmeter/v2-smoke-purchase-t12-v2-smoke-20261118124340/
+?? docs/perf-evidence/commerce/purchase-latency-diagnosis-20261118.md
+?? frontend/pages/sales/
+?? frontend/tests/commerce-api.spec.ts
+?? infra/jmeter/JfrStackSummary.java
+?? infra/jmeter/__pycache__/
+?? infra/jmeter/analyze_purchase_latency.py
+?? infra/jmeter/analyze_sale_jfr.py
+?? infra/jmeter/correlate_injector_waits.py
+?? infra/jmeter/flash_acceptance.py
+?? infra/jmeter/flash_window_metrics.py
+?? infra/jmeter/purchase_capacity.py
+?? infra/jmeter/refresh_commerce_tokens.py
+?? infra/jmeter/run-flash-acceptance.ps1
+?? infra/jmeter/run-purchase-capacity.ps1
+?? infra/jmeter/run-purchase-post-5k-paced.ps1
+?? infra/jmeter/summarize_jfr_stacks.py
+?? infra/jmeter/summarize_jmeter_safepoints.py
+?? infra/jmeter/test-jmeter-scripts.groovy
+?? infra/jmeter/test_flash_acceptance.py
+?? infra/jmeter/test_flash_window_metrics.py
+?? infra/jmeter/test_purchase_capacity.py
+?? infra/jmeter/test_purchase_latency.py
+?? infra/jmeter/verify_sale_ack_lock.py
+?? src/main/java/io/github/xiiiiimu/content/domain/SaleIngress.java
+?? src/main/java/io/github/xiiiiimu/content/infrastructure/LocalWindowsBacklogConfiguration.java
+?? src/main/java/io/github/xiiiiimu/content/infrastructure/LocalWindowsNioProtocol.java
+?? src/main/java/io/github/xiiiiimu/content/infrastructure/SaleEntryRedis.java
+?? src/main/java/io/github/xiiiiimu/content/infrastructure/SaleIngressMapper.java
+?? src/main/java/io/github/xiiiiimu/content/infrastructure/SaleLatency.java
+?? src/main/java/io/github/xiiiiimu/content/infrastructure/SaleLatencyConfiguration.java
+?? src/main/java/io/github/xiiiiimu/content/infrastructure/WindowsListenBacklog.java
+?? src/main/resources/db/migration/V18__sale_campaign_frozen_version.sql
+?? src/main/resources/db/migration/V19__sale_eligibility_blocks.sql
+?? src/main/resources/db/migration/V20__commerce_stream_dispatch_and_refund.sql
+?? src/main/resources/db/migration/V21__purchase_client_key_exact_identity.sql
+?? src/main/resources/db/migration/V22__sale_legacy_client_replay_audit.sql
+?? src/main/resources/db/migration/V23__sale_dispatch_ack_timestamp.sql
+?? src/test/java/io/github/xiiiiimu/content/CommerceIngressRevisionIT.java
+?? src/test/java/io/github/xiiiiimu/content/CommerceRealMqIT.java
+?? src/test/java/io/github/xiiiiimu/content/SaleLatencyTest.java
+?? src/test/java/io/github/xiiiiimu/content/WindowsListenBacklogTest.java

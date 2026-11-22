@@ -1,0 +1,38 @@
+{
+  "firstFormalHttpMs": {
+    "count": 64,
+    "p50": 39,
+    "p95": 97,
+    "p99": 142,
+    "max": 142
+  },
+  "allFormalHttpMs": {
+    "count": 3400,
+    "p50": 11,
+    "p95": 50,
+    "p99": 87,
+    "max": 154
+  },
+  "firstFormalPermitToSamplerMs": {
+    "count": 64,
+    "p50": 3,
+    "p95": 22,
+    "p99": 32,
+    "max": 32
+  },
+  "allFormalPermitToSamplerMs": {
+    "count": 3400,
+    "p50": 1,
+    "p95": 6,
+    "p99": 14,
+    "max": 46
+  },
+  "warmHttpMs": {
+    "count": 64,
+    "p50": 530,
+    "p95": 535,
+    "p99": 538,
+    "max": 538
+  },
+  "formalWorkersUsed": 64
+}

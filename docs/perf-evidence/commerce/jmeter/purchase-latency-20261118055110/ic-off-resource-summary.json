@@ -1,0 +1,43 @@
+{
+  "campaignId": 97,
+  "formalWindowOverlappingObserverTicks": 16,
+  "metricPeaks": {
+    "sale.http.queue.depth": 243.0,
+    "tomcat.threads.current": 100.0,
+    "tomcat.threads.busy": 100.0,
+    "tomcat.connections.current": 5007.0,
+    "jvm.memory.used?tag=area:heap": 293926760.0,
+    "jvm.memory.max?tag=area:heap": 4217372670.0,
+    "jvm.threads.live": 327.0,
+    "process.cpu.usage": 0.09928358069555938,
+    "hikaricp.connections.active": 61.0,
+    "hikaricp.connections.pending": 49.0,
+    "hikaricp.connections": 82.0,
+    "hikaricp.connections.timeout": 0.0
+  },
+  "missingMetricTicks": {
+    "sale.http.queue.depth": 0,
+    "tomcat.threads.current": 0,
+    "tomcat.threads.busy": 0,
+    "tomcat.connections.current": 0,
+    "jvm.memory.used?tag=area:heap": 0,
+    "jvm.memory.max?tag=area:heap": 0,
+    "jvm.threads.live": 0,
+    "process.cpu.usage": 0,
+    "hikaricp.connections.active": 0,
+    "hikaricp.connections.pending": 0,
+    "hikaricp.connections": 0,
+    "hikaricp.connections.timeout": 0
+  },
+  "processingPeak": 90,
+  "campaignLockWaitEdgesPeak": 190,
+  "establishedServerTcpPeak": 5005,
+  "caveats": [
+    "Observer metric calls are staggered within a tick, not simultaneous. Peaks can miss short events.",
+    "MySQL data_lock_waits counts wait edges, not distinct threads. SQL durations are client spans.",
+    "accept.to.filter includes sender delay/parsing and dispatch; not exclusively Tomcat queue.",
+    "Windows netstat does not expose exact listen-backlog occupancy."
+  ],
+  "hikariTimeoutCounterDelta": 0.0,
+  "hikariTimeoutStatistic": "COUNT (counter), not VALUE"
+}

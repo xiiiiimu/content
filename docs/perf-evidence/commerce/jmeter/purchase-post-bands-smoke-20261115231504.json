@@ -1,0 +1,69 @@
+{
+  "band": "purchase-smoke",
+  "kind": "in-stock-burst",
+  "dir": "purchase-smoke-purchase-t20-20261115231440",
+  "configuredThreads": 20,
+  "peakActiveThreads": 20.0,
+  "peakHttpInFlight": 20.0,
+  "peakSettleInFlight": 11.0,
+  "emitSpanMs": 6,
+  "hostBefore": {
+    "at": "2026-11-15T23:14:36.3831852+08:00",
+    "freeRamGB": 1.46,
+    "totalRamGB": 15.7,
+    "cpuLoad": 10.0
+  },
+  "hostAfter": {
+    "at": "2026-11-15T23:15:00.2576700+08:00",
+    "freeRamGB": 1.28,
+    "totalRamGB": 15.7,
+    "cpuLoad": 3.0
+  },
+  "classification": {
+    "postPurchaseSamples": 20,
+    "windowSec": 0.006,
+    "windowEndInclusiveSec": 0.453,
+    "requestQps": 3333.33,
+    "soldOut": 0,
+    "soldOutQps": 0.0,
+    "soldOutP95": null,
+    "soldOutP99": null,
+    "acceptHttpOk": 20,
+    "acceptQps": 3333.33,
+    "acceptP95": 447,
+    "acceptP99": 447,
+    "idempotentReplay": 0,
+    "bizOther": 0,
+    "systemErrors": 0,
+    "timeouts": 0,
+    "connectFail": 0,
+    "http5xx": 0,
+    "peakAllThreads": 20.0
+  },
+  "campaignId": 57,
+  "throughput": {
+    "label": "burst (Loops=1 first-buy); not steady-window accept QPS unless buyers/stock cover full duration",
+    "uniqueProcessingAccepts": 20,
+    "acceptQpsFromHttp": 3333.33,
+    "paidInFormalWindow": 20,
+    "settleSteadyTps": 1.32,
+    "paidThroughDrain": 20,
+    "settleFullTps": 0.95,
+    "drain": {
+      "drainSec": 0.472,
+      "processingLeft": 0
+    },
+    "formalWindowSec": 15.166,
+    "fullWallSec": 21.132
+  },
+  "reconcile": {
+    "sold": 20,
+    "paid": 20,
+    "succReq": 20,
+    "ents": 20,
+    "processing": 0,
+    "stockCap": 20,
+    "ok": true,
+    "raw": "20\t20\t20\t20\t0\t20"
+  }
+}

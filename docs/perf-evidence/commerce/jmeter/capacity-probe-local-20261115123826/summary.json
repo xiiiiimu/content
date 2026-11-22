@@ -1,0 +1,27 @@
+{
+  "purpose": "Single-box short capacity probe (not 200-thread baseline redo)",
+  "configuredThreads": 50,
+  "peakActiveThreads": null,
+  "peakHttpInFlight": null,
+  "samples": null,
+  "systemErrors": null,
+  "connectFail": null,
+  "timeouts": null,
+  "requestQps": null,
+  "hostBefore": {
+    "at": "2026-11-15T12:38:27.5808750+08:00",
+    "freeRamGB": 1.87,
+    "totalRamGB": 15.7,
+    "logicalCpus": 16,
+    "cpuLoad": 12.0
+  },
+  "hostAfter": {
+    "at": "2026-11-15T12:38:36.7350992+08:00",
+    "freeRamGB": 1.87,
+    "cpuLoad": 40.0,
+    "evidenceDir": null
+  },
+  "jmeterEvidence": null,
+  "remoteInjectorsFound": 0,
+  "conclusion": "Local free RAM ~1.7–2GB; 50-thread probe only. Cannot host 5000 threads on this box. Need remote injectors for distributed bands."
+}

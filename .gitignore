@@ -22,3 +22,29 @@ docker-compose.override.yml
 infra/docker/data/
 /m2/
 /broker-diagnostic-logs/
+/tools/
+/content/
+
+# Python bytecode
+__pycache__/
+
+# Raw performance evidence stays local only (full backup: E:\content-backup-20261120).
+# Summary reports and small JSON are committed; files already tracked are unaffected by these rules.
+docs/perf-evidence/**/*.jtl
+docs/perf-evidence/**/*.ndjson
+docs/perf-evidence/**/*.tsv
+docs/perf-evidence/**/html/
+docs/perf-evidence/**/observer.stop
+docs/perf-evidence/**/*.csv
+docs/perf-evidence/**/*.gz
+# Per-request JSON (one entry per request; > 256 KB for formal runs). Small smoke-run copies may be committed with -f.
+docs/perf-evidence/**/*request-db-timelines.json
+docs/perf-evidence/**/phase-timelines.json
+docs/perf-evidence/**/commit-evidence.json
+docs/perf-evidence/**/client-result-polls.json
+docs/perf-evidence/**/reconciliation.json
+# Aggregates over 256 KB whose file names are shared with small committed summaries (gitignore cannot match by size).
+docs/perf-evidence/commerce/jmeter/bridge-batch-20261119-022551/b1/bridge-batch-metrics.json
+docs/perf-evidence/commerce/jmeter/campaign-lock-env-20261120-051830-B/B/dispatch-batch-metrics.json
+docs/perf-evidence/commerce/jmeter/mq-dispatch-20261119-185405/B/dispatch-batch-metrics.json
+docs/perf-evidence/commerce/jmeter/purchase-latency-20261118055110/injector-safepoints.json

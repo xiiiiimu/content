@@ -1,0 +1,46 @@
+{
+  "jtl": "E:\\content\\docs\\perf-evidence\\commerce\\jmeter\\baseline200-r5-mixed-t200-20261115104949\\results.jtl",
+  "samples": 1825,
+  "spanSec": 25.432,
+  "requestQps": 71.76,
+  "acceptQps": 71.6,
+  "businessRejects": 0,
+  "systemErrors": 4,
+  "connectFail": 0,
+  "timeouts": 4,
+  "http503": 0,
+  "ok": 1821,
+  "p50Ms": 499,
+  "p95Ms": 9372,
+  "p99Ms": 14105,
+  "byLabel": [
+    {
+      "qps": 199.0,
+      "p95": 6362,
+      "n": 200,
+      "label": "MIX-detail"
+    },
+    {
+      "qps": 68.69,
+      "p95": 2330,
+      "n": 1425,
+      "label": "MIX-poll"
+    },
+    {
+      "qps": 17.58,
+      "p95": 14642,
+      "n": 200,
+      "label": "MIX-purchase"
+    }
+  ],
+  "byClass": [
+    {
+      "count": 1821,
+      "cls": "OK"
+    },
+    {
+      "count": 4,
+      "cls": "TIMEOUT"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "head": "dd2ab174a01288964e51df4bdd01a7fb05d9550e",
+  "backendPid": 26632,
+  "instrumentedJar": "target\\purchase-latency-20261118055110\\build\\target\\content-0.1.0-SNAPSHOT.jar",
+  "instrumentedJarSha256": "b7cdccbbcd5c7bf758fb9b5d372aace374406eedc4b94b8b3ad8bba91668c96f",
+  "sourceHashes": {
+    "src/main/java/io/github/xiiiiimu/content/infrastructure/SaleLatency.java": "d4005d8d9190012132a9f295877502b132727c0960e8f99f19c09c9a875f8700",
+    "src/main/java/io/github/xiiiiimu/content/infrastructure/SaleLatencyConfiguration.java": "0f6ed53a68e8985055a35bbc66104fb3821cd6be14ef70d7baab93af02c5ecc7",
+    "src/main/java/io/github/xiiiiimu/content/domain/SaleService.java": "bd1a6d17e08b3a128422f6edbf4553e6f1c16bc4006b77971161be14fccb7670",
+    "src/main/java/io/github/xiiiiimu/content/infrastructure/SaleRedis.java": "288df193126f6a237a1ebe51a2334d401fbb40d677f0075998f5e755bfb7f96d",
+    "infra/jmeter/commerce-sale.jmx": "d796c0ef9ddc2f65ca8305e3c794b2c9e3158a26e604fe932b4b9454b1bef4d8"
+  },
+  "rawPrivateJfrs": {
+    "target\\purchase-latency-20261118055110\\diagnostic-5000.jfr": "e75a7161816de2195516fc84155614f10882f3a270213a5dcdfbe844c1c39484",
+    "target\\purchase-latency-20261118055110\\probe-5000.jfr": "40f4c0b619809b02b9c56c3a3ffa07edb9d9162438015be9d7090a1c801e3a03",
+    "target\\purchase-latency-20261118055110\\fixed-5000.jfr": "a229bbed665a9249b418294062f884ac529886e0f421cd4867e2cb1f93fb9211",
+    "target\\purchase-latency-20261118055110\\ic-off-5000.jfr": "f032d29d011841176dffcf7a4f8d48e458ad297ce82a7649f22c0752e4cb5649",
+    "target\\flash-observer-latency-probe-20261118055110\\injector.jfr": "d1b4acfd204fc42bd4f848332963314d3c63029c26f77d8d856a790e8943af4b"
+  },
+  "gitIndexUnchanged": true,
+  "note": "Runtime jar contains original dirty worktree plus diagnostic instrumentation. No commits/push. Raw recordings stay private. Experimental bootstrap code archived; active wiring withdrawn after invalid synchronization result.",
+  "experimentHashes": {
+    "docs\\perf-evidence\\commerce\\jmeter\\purchase-latency-20261118055110\\experiment\\commerce-sale.jmx": "ec60fc7de9920afa9e5178b9fd213d3238812aa45bbc4794fda1c42e6e6a6e3f",
+    "docs\\perf-evidence\\commerce\\jmeter\\purchase-latency-20261118055110\\experiment\\README.md": "f25cec0d531b12fd7ed035ee15b5100285ca859fe5473cebf88ef7f46203d5e6",
+    "docs\\perf-evidence\\commerce\\jmeter\\purchase-latency-20261118055110\\experiment\\run-commerce-jmeter.ps1": "a0749e77ad3e7a20fae951e67e908a27efa85ab20983382038acce8bb7312317",
+    "docs\\perf-evidence\\commerce\\jmeter\\purchase-latency-20261118055110\\experiment\\run-flash-acceptance.ps1": "cea16b64ed06a4df02fb1125160d258d2ad269c5eb58647e05319a356711951c",
+    "docs\\perf-evidence\\commerce\\jmeter\\purchase-latency-20261118055110\\experiment\\transport-bootstrap.groovy": "32b409b82fd985c48bce07639972f32e6a57e3a92506b7fe1af3354d1270f30c"
+  },
+  "sourceHashScope": "Current source after experimental bootstrap wiring withdrawal; run95 uses archived experimental JMX/scripts."
+}

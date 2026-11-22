@@ -1,0 +1,9 @@
+{
+  "atMs": 1795062519308,
+  "error": "RuntimeError",
+  "detail": "Stop before adding load: brokerLagSampled in docs\\perf-evidence\\commerce\\jmeter\\mq-dispatch-20261119-122421\\smoke",
+  "backendPids": {
+    "smoke": 38240
+  },
+  "nextProfileStarted": false
+}

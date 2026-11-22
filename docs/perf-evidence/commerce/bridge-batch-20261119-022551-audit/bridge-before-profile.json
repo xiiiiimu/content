@@ -1,0 +1,51 @@
+{
+  "run": "docs\\perf-evidence\\commerce\\jmeter\\v23-perf-20261118-234151-A3",
+  "messages": 100,
+  "distributions": {
+    "rootDurationMs": {
+      "count": 100,
+      "p50": 192,
+      "p95": 802,
+      "p99": 1416,
+      "max": 1666
+    },
+    "sqlPerMessage": {
+      "count": 100,
+      "p50": 5,
+      "p95": 5,
+      "p99": 5,
+      "max": 5
+    },
+    "commitsPerMessage": {
+      "count": 100,
+      "p50": 1,
+      "p95": 1,
+      "p99": 1,
+      "max": 1
+    },
+    "sqlTotalMs": {
+      "count": 100,
+      "p50": 118,
+      "p95": 467,
+      "p99": 646,
+      "max": 806
+    },
+    "commitTotalMs": {
+      "count": 100,
+      "p50": 24,
+      "p95": 59,
+      "p99": 153,
+      "max": 255
+    }
+  },
+  "totalSql": 500,
+  "totalCommits": 100,
+  "statementCounts": {
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.guard": 100,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.campaign": 100,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.request": 100,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleMapper.insertRequest": 100,
+    "sql.io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.enqueue": 100
+  },
+  "caveat": "persist root includes Redis XACK after the database transaction; commit/SQL timings reported separately."
+}
