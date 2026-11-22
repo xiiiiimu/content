@@ -7,6 +7,8 @@ public interface InteractionMapper {
  record Stats(long postId,long likes,long comments,long dislikes,long reports) {}
  record Comment(long id,long postId,long userId,Long parentId,Long materialVersionId,Long offsetMs,Long acceptedAtMs,String body,long createdAtMs) {}
  record Bucket(String topic,long bucket,long net,long active) {}
+ /** Hardening B10: the reacting user's own row, locked first by every like/unlike/dislike/undislike (see InteractionService). */
+ @Select("SELECT id FROM users WHERE id=#{user} FOR UPDATE") Long lockReactor(long user);
  @Insert("INSERT IGNORE INTO post_likes(post_id,user_id,created_at_ms) VALUES(#{post},#{user},#{at})") int like(@Param("post")long post,@Param("user")long user,@Param("at")long at);
  @Delete("DELETE FROM post_likes WHERE post_id=#{post} AND user_id=#{user}") int unlike(@Param("post")long post,@Param("user")long user);
  @Select("SELECT COUNT(*) FROM post_likes WHERE post_id=#{post}") long likeCount(long post);

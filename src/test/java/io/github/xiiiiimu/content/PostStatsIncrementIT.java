@@ -136,8 +136,8 @@ class PostStatsIncrementIT {
    int per=operations/threads;
    for(int t=0;t<threads;t++){long seed=t;futures.add(pool.submit(()->{
     var rnd=new Random(seed);
-    // Each thread owns its users: a like and a dislike by the same user on the same post can deadlock (like locks
-    // post_dislikes then post_likes, dislike the reverse); that pre-existing issue is recorded in the round B report.
+    // Each thread owns its users, so this test isolates counter arithmetic. Same-user concurrency (the B10 deadlock,
+    // fixed by the per-user reaction lock) is covered by ReactionDeadlockIT; these users have no users row, so no lock.
     int own=users/threads;
     for(int i=0;i<per;i++){
      long u=firstUser+seed*own+rnd.nextInt(own);

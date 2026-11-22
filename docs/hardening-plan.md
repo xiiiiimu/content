@@ -41,7 +41,7 @@
 | B7 | 关注潮：缩短作者行锁（R6） | P1 | 未开始（本轮不实现） |
 | B8 | 推模式扩散优化（R7） | P1 | 未开始（本轮不实现） |
 | B9 | 帖子计数行分片或异步化 | P2 | 未开始（本轮不实现） |
-| B10 | 同一用户同帖点赞与点踩并发死锁 | P1 | 未开始（本轮不实现） |
+| B10 | 同一用户同帖点赞与点踩并发死锁 | P1 | 完成（RED/GREEN 本地通过，待 CI） |
 | C1 | 只增不减的表和 Redis 结构盘点 | P2 | 完成（基于 `703ac60`） |
 | C2 | 保留策略与清理任务（已决定） | P2 | 完成（CI run 44953911519 通过） |
 | C3 | 抢购 Redis 状态哈希随全部请求增长（C-10） | P1 | 未开始 |
@@ -271,10 +271,25 @@
 - **证据**（B 轮互动压测）：b/c 场景 4 个热门帖子，200 rps 时达成约 150–180 rps（无错误，k6 丢弃迭代）；行锁等待采样 100% 在 `post_stats` PRIMARY，每帖约 40–45 次/秒。
 - **方向**：计数分片（读时求和）或像 B1 一样由账本异步汇总，二选一需决定（后者会让计数有秒级滞后）。
 
-### B10 同一用户同帖点赞与点踩并发死锁（2026-11-22 新增，未开始）
+### B10 同一用户同帖点赞与点踩并发死锁（2026-11-22 新增，已完成）
 - **问题**：`like` 先删 `post_dislikes` 再插 `post_likes`，`dislike` 先删 `post_likes` 再插 `post_dislikes`，同一用户对同一帖并发点赞和点踩时加锁顺序相反，可能死锁，其中一个请求失败。正确性问题。
 - **证据**：B2 的 `PostStatsIncrementIT` 并发用例在用户可同时点赞、点踩时出现 `Deadlock found when trying to get lock`（`target/hardening-b/red-b2-*` 中保留的夹具失败日志）；测试已改为按线程划分用户回避。
 - **方向**：统一加锁顺序（例如两种操作都先锁同一行，或按表固定顺序），先写复现 RED。
+- **成因**（READ COMMITTED，两表主键都是 `(post_id,user_id)`）：
+  - 两条路径对同两行的加锁顺序相反：点赞 `DELETE post_dislikes` → `INSERT IGNORE post_likes`；点踩 `DELETE post_likes` → `INSERT IGNORE post_dislikes`。
+  - RC 下 `DELETE` 没找到行时不加锁（没有间隙锁），所以并发的点赞和点踩可以都先删空、再各自插入并提交，结果用户**同时点赞又点踩**（计数仍与行数一致，但状态违反“二选一”）。
+  - 从这个状态出发，下一对点赞/点踩各自删掉一行（X 锁），再去插对方已锁的行（重复键检查要 S 锁），互相等待，InnoDB 判死锁，回滚一方，客户端得到 503。
+  - 取消赞只碰 `post_likes`、取消踩只碰 `post_dislikes`，单独不成环，但会参与上面的等待链。
+- **方案**：点赞、取消赞、点踩、取消踩在事务里先 `SELECT id FROM users WHERE id=? FOR UPDATE`（`InteractionMapper.lockReactor`），之后才碰两张表。理由：
+  - 每个反应事务在拿到这把锁之前不持有任何锁，之后的锁都在它保护下，不可能经由它成环，从根上消除死锁，同时修掉“同时点赞又点踩”。
+  - 只串行同一用户自己的反应（一个人自己的请求，等待可忽略）；不同用户互不影响，不碰热门帖子的 `post_stats` 行（B2b 的“计数最后”不变）。
+  - 没有其他事务在写反应的同时锁 `users` 行，表也没有指向 `users` 的外键。
+  - 只调换表顺序不够：RC 下删空行不加锁，“同时点赞又点踩”的竞态仍在。合并成一张 `post_reactions` 表结构上最干净，但要迁移数据并改所有读路径，本轮不做。
+  - 不靠重试：死锁不再发生，没有加任何重试。
+- **结果**：
+  - RED `target/hardening-b10/red-122831`：`ReactionDeadlockIT` 4 个用户 × 8 线程 × 60 次随机点赞/点踩/取消（同一帖子）共 1920 个 HTTP 请求，426 次 InnoDB 死锁、426 个 503；成对并发点赞+点踩第 1 轮就出现同时点赞又点踩。（之前的 `red-122647` 是夹具问题：用户未关注作者，全部 404，日志保留，不算 RED。）
+  - GREEN `target/hardening-b10/green-123026`：1920 个请求全部 200，`lock_deadlocks` 增量 0，最终每个用户点赞/点踩二选一，`post_stats` 与行数一致；成对用例 300 轮通过。同批 `InteractionConnectionIT`、`LikeTopicFlipIT`、`PostStatsIncrementIT`、`RateLimitIT`、`TopicAggregationIT` 和单元测试通过（105 例）。
+  - 测试只把该类的 interact 限流调大，避免 429 掩盖竞态，其他不变。
 
 ---
 
@@ -525,3 +540,4 @@
 | 2026-11-22 | C | CI run `44953911519`（`803bce9`）5 个 job 全部通过：frontend 24 s、assistant-python 16 s、maven (a-l) 9m00s、maven (m-z) 9m20s、maven-real-mq 2m43s（95/95）；新增 IT 均实际运行。C2 完成；C3（P1）、D6（P3）未开始 |
 | 2026-11-22 | B | B1–B3（含 B2b）完成，B4/B5 代码与测试完成，RED/GREEN 见 `target/hardening-b/`；报告 `docs/perf-evidence/hardening-b-20261122/README.md`。B6 实测因系统内存告急被中止，R6 部分有数；B4/B5 抢购压测与 B6 剩余部分待确认后跑。未提交 |
 | 2026-11-22 | B | 分主题本地提交；补测 B6（R6 64 线程、R7 1 万/10 万）和 B4/B5 改前改后（`CommerceSyncPerfIT`，同口径）；新增 B7–B10（未开始） |
+| 2026-11-22 | B | B10 完成：反应写入先锁用户行，消除点赞/点踩死锁和“同时点赞又点踩”；RED/GREEN 见 `target/hardening-b10/` |

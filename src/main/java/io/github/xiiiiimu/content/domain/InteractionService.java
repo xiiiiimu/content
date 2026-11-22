@@ -28,6 +28,7 @@ public final class InteractionService {
  public LikeResult like(long user,long post,String clientTopic){
   return tx.execute(status->{
    var view=visible(user,post);
+   lockReactions(user);
    int undisliked=db.undislike(post,user);
    boolean inserted=db.like(post,user,System.currentTimeMillis())==1;
    String topic=inserted?view.topic():null;
@@ -41,6 +42,7 @@ public final class InteractionService {
  public LikeResult unlike(long user,long post,String clientTopic){
   return tx.execute(status->{
    visible(user,post);
+   lockReactions(user);
    boolean removed=db.unlike(post,user)==1;
    // Only a real true→false flip revokes the like's own topic contribution (no separate -1 event).
    if(removed)trending.revokeLike(post,user);
@@ -51,6 +53,7 @@ public final class InteractionService {
  public DislikeResult dislike(long user,long post){
   return tx.execute(status->{
    visible(user,post);
+   lockReactions(user);
    // Disliking removes an existing like: that is a true→false like flip as well.
    boolean unliked=db.unlike(post,user)==1;
    if(unliked)trending.revokeLike(post,user);
@@ -61,6 +64,7 @@ public final class InteractionService {
  public DislikeResult undislike(long user,long post){
   return tx.execute(status->{
    visible(user,post);
+   lockReactions(user);
    int removed=db.undislike(post,user);
    return new DislikeResult(false,applyCounts(post,0,-removed,0,0).dislikes());
   });
@@ -155,6 +159,18 @@ public final class InteractionService {
   * This is the authoritative check (AuthoritativeVisibility, MySQL only), not the cached PostDetailService.
   * A rejection throws inside the transaction, which rolls back with nothing written.
   */
+ /**
+  * Hardening B10: like and dislike write the same two rows in opposite orders (like: delete post_dislikes, insert
+  * post_likes; dislike: delete post_likes, insert post_dislikes). Under READ COMMITTED a DELETE that finds no row takes
+  * no lock, so concurrent like and dislike by one user on one post could both commit (the user likes and dislikes the
+  * post), and from that state the next pair each held one row and waited for the other's: an InnoDB deadlock.
+  * <p>Every reaction write therefore takes one lock first, the user's own {@code users} row, and holds nothing before it.
+  * Reactions of the same user are serialized (on every post: a person's own requests, so the wait is negligible), and
+  * since the lock is taken before any other, no cycle can form through it. Other users never touch this row lock, and
+  * nothing else locks {@code users} rows in a transaction that also writes reactions. A user id with no row (only in
+  * tests that skip registration) locks nothing.
+  */
+ private void lockReactions(long user){db.lockReactor(user);}
  private VisibilityService.View visible(long user,long post){
   return visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
  }
