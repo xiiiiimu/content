@@ -41,10 +41,10 @@
 | B7 | 关注潮：缩短作者行锁（R6） | P1 | 未开始（本轮不实现） |
 | B8 | 推模式扩散优化（R7） | P1 | 未开始（本轮不实现） |
 | B9 | 帖子计数行分片或异步化 | P2 | 未开始（本轮不实现） |
-| B10 | 同一用户同帖点赞与点踩并发死锁 | P1 | 完成（RED/GREEN 本地通过，待 CI） |
+| B10 | 同一用户同帖点赞与点踩并发死锁 | P1 | 完成（CI run 44986890751 通过） |
 | C1 | 只增不减的表和 Redis 结构盘点 | P2 | 完成（基于 `703ac60`） |
 | C2 | 保留策略与清理任务（已决定） | P2 | 完成（CI run 44953911519 通过） |
-| C3 | 抢购 Redis 状态哈希随全部请求增长（C-10） | P1 | 未开始 |
+| C3 | 抢购 Redis 状态哈希随全部请求增长（C-10） | P1 | 实现完成（RED/GREEN 本地通过，未推送；测量缺证据） |
 | D1 | CI 跳过项评估与启用（已决定） | P3 | 完成（CI run 44941020312 通过） |
 | D2 | FFmpeg 超时后的容器清理测试 | P3 | 完成 |
 | D3 | `offlineDuringProcessingFailsLeaseWithoutCompleting` 偶发失败 | P3 | 完成（连续 10 次，置信度有限） |
@@ -425,6 +425,135 @@
   5. `v:` 字段可以在 cache job 应用后清除，但要和 `material_sale_cache_jobs` 的版本号协议一起设计（见 C1 结论 3）。
 - **验收**（草案）：给出方案对比和推荐，等决定；实现后用同样的方法测量，单请求常驻字节数下降，并且恢复时间不再随历史请求总数增长。
 
+#### C3 设计（2026-11-22；决定见第 8 点，按方案 B 实现，结果见“C3 结果”）
+
+**目标**：Redis 只保存“活跃集合”，即未结束的活动加宽限期内的数据。已终结活动的请求状态只留在 MySQL；内存和恢复时间随活跃数据量增长，不再随历史请求总数增长。MySQL 仍是唯一的真相来源，Redis 只是入口的缓存与准入层。
+
+**1. 每类字段的去留**（`sale:{entry-v2}:state`）
+
+| 字段 | 用途（读它的地方） | 随什么增长 | 设计 |
+|---|---|---|---|
+| `c:<campaign>:*` | 准入：活动存在、开放、时间、库存（`RESERVE`） | 活动数 | 活动归档后删除；Lua 返回 `CAMPAIGN_NOT_FOUND` 时，Java 回 MySQL 查活动，存在则返回原来的 409（`CAMPAIGN_CLOSED` / `ENDED`），对外语义不变 |
+| `r:<rid>` | `k:` / `o:` / `u:` 命中后返回已有请求；`getRequest` 先读 Redis；隔离释放脚本 | 请求数 | 活动归档后删除（属于活跃帖子归属人的除外，见 `o:`）；`getRequest` 已有回落 MySQL 的路径（`SaleService.getRequest`，Redis 未命中时查 `material_purchase_requests`） |
+| `k:<user>:<sha256(key)>` | clientKey 幂等，跨活动唯一（对应 MySQL `uq_purchase_client(user_id,client_key)`） | 请求数（约 160 B/请求） | 活动归档后删除，并改为“未命中先回 MySQL”（第 2 点） |
+| `o:<user>:<post>` | 每个账号每个素材只能拥有一次，跨活动 | 订单数 + 赠送数 | 只保留**有活跃活动的帖子**的 `o:`（连同对应的 `r:`）；条数受这些活动的库存总和限制。活动启用时整帖加载（第 3 点） |
+| `u:<user>:<post>` | 处理中占位 | 处理中请求数 | 不变（终结时已删除） |
+| `v:<kind>:<key>` | cache job 版本号，防止旧任务覆盖新状态 | 结算次数 | 随活动归档删除；活跃期间保留（与 `material_sale_cache_jobs` 行锁 + revision 的协议不变） |
+| `refund:<id>` | 退款加回库存只做一次（`HSETNX`） | 退款数 | 随活动归档删除（活动结束后库存不再有意义）；归档后的退款任务不写 Redis（第 4 点） |
+| `released:<rid>` | 隔离释放的幂等 | 隔离数 | 归档前提是活动没有未处理的隔离，随归档删除 |
+| `b:<merchant>:<user>` | 黑名单 | 黑名单条数 | 不变（不随请求增长） |
+| `t:<streamId>`、`stage:<gen>` | 桥接完成证明、恢复暂存 | 已由 C2 的 R-STREAM 清理 | 不变 |
+
+**2. clientKey（`k:`）为什么不能直接删，以及替代方案**
+- 直接删的后果：用户在新活动重用旧 clientKey，Redis 认为是新请求，扣库存并写 Stream；桥接写 MySQL 时撞 `uq_purchase_client`，进入 `CLIENT_KEY_CONFLICT` 隔离，按现有逻辑暂停该活动。一个客户端的错误会让整场活动停下。
+- **方案 A（推荐）：保留跨活动唯一的语义，未命中时回 MySQL。**
+  - `RESERVE` 在 `k:` 未命中时先返回 `CHECK_KEY`，不做其他事。
+  - Java 用 `uq_purchase_client` 查 MySQL（唯一索引点查）。命中就按 `EXISTING` 返回 MySQL 里的请求（与今天跨活动重放的结果相同）；未命中再调用一次 `RESERVE`（带 `skip_archive=1`），走原来的准入。
+  - **正确性**：只有“已写入 MySQL 且已终结”的请求才会被归档（第 4 点），所以 Redis 里没有的 key，要么从未用过，要么一定在 MySQL 里。未落库、处理中的请求都在活跃集合里，Lua 自己能命中。两个并发的同 key 请求在第二次 Lua 调用里由 `k:` 原子判定，只有一个被受理。
+  - **代价**：每个新购买请求多 1 次 MySQL 点查和 1 次 Lua 调用；重放（`k:` 命中）仍然只走 Redis。实现后用 `CommerceSyncPerfIT` 同口径测入口时延。
+- 方案 B：clientKey 改为按活动作用域（唯一键改为 `(user_id,campaign_id,client_key)`，`k:` 加上活动 id）。入口始终不碰 MySQL，但对外语义改变（同 key 换一个活动会成为新购买，而不是重放旧请求），还要改大表的唯一键。
+- 方案 C：只归档 `r:` / `o:` / `v:`，`k:` 永久保留。最简单，但每个历史请求仍常驻约 160 B（约为现在 591 B 的 27%），仍随历史线性增长。
+
+**3. 活动启用时加载归属**
+- 新活动（或重新开放）在 `entry=1` 之前，必须把该帖子在 MySQL 的全部归属（已付订单和赠送）写成 `o:` 和对应的 `r:`。做法：在同一个 `CAMPAIGN` cache job 的 Lua 里先写归属、后写 `c:*`，原子完成。
+- 不写的后果：`RESERVE` 依赖 `o:` 拒绝重复购买，缺失时会放行，靠 MySQL 订单唯一约束兜底，结果是隔离加暂停。
+- 归属变化的 `OWNER` 任务：帖子没有活跃活动时，只在 MySQL 里标记已应用，不写 Redis。这里没有竞态：任务总是在归属变化提交之后才执行；活动启用时读的是已提交的归属。所以要么任务看到活动已启用并写入，要么活动加载时已经读到这次变化。
+
+**4. 归档（迁出 Redis）的条件与过程**
+- **新任务 R-SALE-STATE**：与 C2 的清理任务同一套租约和分批框架。
+- **归档条件**（全部满足）：
+  - 活动已结束（`end_ms`）或已关闭，并超过宽限期 G（建议 24 h，可配置）；
+  - 该活动没有 `PROCESSING` 请求，Stream 和桥接里没有未持久化的条目（`bridge.held(id)=0`），没有未处理的隔离；
+  - 该活动请求的 cache job 都已应用。
+- **过程**：在 MySQL 标记活动 `cache_archived_at_ms`（新列，V33），之后对它的 cache job 只在 MySQL 标记已应用，不写 Redis，防止迁出后又被写回。然后用带 generation 栅栏的 Lua 分批 `HDEL`（每批约 500 个字段，避免长时间阻塞 Redis），删除内容：
+  - 该活动请求的 `r:`、`k:`、`v:REQUEST:*`；
+  - 该活动的 `refund:*`、`released:*` 和 `c:<id>:*`；
+  - 帖子不再有活跃活动时，再删该帖的 `o:`、`v:OWNER:*`，以及归属人对应的 `r:`。
+- **幂等与可重入**：中断后重跑只会再删一次（`HDEL` 不存在的字段无害）；恢复流程本身也只加载未归档的数据，两条路径最终一致。
+
+**5. 迁出后的回落**
+- **本人查询** `getRequest`：Redis 未命中查 MySQL（已有）。隔离状态的特殊显示只针对 Redis 视图，归档的活动没有隔离，不受影响。
+- **幂等重放** `purchase`：第 2 点方案 A，从 MySQL 返回原请求。
+- **已归档活动的新购买**：Lua 返回 `CAMPAIGN_NOT_FOUND`，Java 查 MySQL 得知活动存在且已结束，返回 409（与今天相同）。
+- **订单、退款、赠送**：本来就只走 MySQL，不受影响。
+
+**6. 对恢复流程的影响**（`SaleIngress.recover`）
+- 只加载未归档活动的 `c:*`；只加载这些活动的请求（`campaign_id IN (...)`，走 `ix_purchase_campaign_state`），代替现在无过滤的 `db.requests(cursor)`。
+- 加载这些活动所在帖子的全部归属（`o:`、`r:`、`GIVEAWAY`）；`refund:` 只加载这些活动的；`b:` 不变。
+- 结果：stage 哈希和恢复时间与活跃数据成正比；恢复时“两份完整哈希”的峰值内存也随之下降。
+- **注意**：`install` 用 `RENAME` 覆盖旧哈希时，Redis 会同步释放旧哈希，第一次从全量切换到活跃集合时可能阻塞数十到数百毫秒（6,200 万字节、33 万个字段，未实测）。需要先确认 `lazyfree-lazy-server-del yes`，或在安装前 `UNLINK` 旧哈希（要论证与入口的并发：此时入口已因 `ready=0` 暂停）。
+
+**7. 旧数据的迁移**
+- MySQL 只加一列（V33 `material_sale_campaigns.cache_archived_at_ms`，可空），不改已有数据。
+- Redis 里的历史字段有两种处理方式：
+  - **推荐**：上线后由 R-SALE-STATE 按活动 id 从旧到新分批归档，入口不停，每批耗时可观测；
+  - 或者手动暂停后触发一次恢复，直接建出只含活跃集合的新哈希（受第 6 点的同步释放影响）。
+- 回滚：旧版本代码遇到被归档的字段缺失时，会对旧 key 重用放行，进入隔离加暂停，而不是静默出错。回滚前要先执行一次全量恢复（旧代码的恢复会全量重建）。
+
+**8. 决定（2026-11-22）**：C3-1 采用**方案 B**（不采用方案 A：它让每个新购买请求多一次 MySQL 查询，破坏“入口零 SQL”）；C3-2 宽限期 24 h；C3-3 归档时删除版本字段；C3-4 后台分批归档旧活动。第 2、5、7 点中与方案 A 有关的内容以第 9 点为准。
+
+**9. 方案 B 的落地（取代第 2 点的推荐）**
+
+*核实：哪些流程依赖 clientKey 跨活动唯一*（逐个检查 `client_key` / `clientKey` 的全部使用点）：
+
+| 使用点 | 是否依赖跨活动唯一 | 方案 B 下的处理 |
+|---|---|---|
+| `RESERVE` 的 `k:` 查找（`SaleEntryRedis.client`） | 是 | 字段改为 `k:<user>:<campaign>:<sha256(key)>` |
+| 桥接批量写入前的已有行查询和 `CLIENT_KEY_CONFLICT` 判定（`SaleBridgeMapper.requests`、`SaleBridgeBatch`） | 是：按 `(user_id,client_key)` 查，会把另一活动的同 key 请求当成冲突 | 改为按 `(user_id,campaign_id,client_key)` 查和判定；冲突只在同一活动内 |
+| 逐条持久化遇到重复键时的重放判断（`SaleIngress.persist` → `SaleMapper.byClient`） | 是 | 改为按活动查 |
+| 隔离释放脚本写回规范请求的 `k:`（`RELEASE_QUARANTINE` 的 ARGV[5]） | 是 | 用规范请求所在活动的新格式字段；方案 B 下 `CLIENT_KEY_CONFLICT` 的规范请求必然同活动 |
+| **V21**（`client_key` 改为 `utf8mb4_0900_bin`） | 否：只规定 key 精确匹配（与 Redis 的 SHA-256 一致） | 不变；新唯一键沿用这一排序规则 |
+| **V22 历史复用审计**（`material_sale_legacy_replays`，`SaleIngress.persistLegacy`） | **是**：旧版每活动 Stream 中的请求如果复用了另一活动已落库的 (账号, key)，记为对首个请求的重放，不新建请求 | **保留原规则**：只作用于旧版数据的导入（C-11，新环境没有这类数据），方案 B 的约束更宽，旧规则更严，不会违反新约束；已有审计行和 `getRequest` 的规范请求回落不受影响。查找改为确定性（`ORDER BY created_at_ms, reservation_id`，取最早的请求，与“首个请求为准”一致）。恢复时为每条审计行写回该旧活动维度的 `k:`（指向规范请求），所以同一旧活动内用同一 key 重试仍得到原结果（现有用例 `legacyCrossCampaignClientReplayIsAuditedWithoutCreatingAnotherRequest` 断言的正是这一点） |
+| 落单、退款、抽奖、下载权益 | 否：按 reservationId / 订单 / (账号, 素材) | 不变 |
+| 前端（`pages/posts/[id].vue`、`pages/sales/[token].vue`） | 否：key 本来就按活动生成（`sale-attempt:<reader>:<campaign>`） | 不变 |
+
+结论：**没有无法解决的问题**。V22 是唯一以跨活动唯一为前提的流程，它只处理旧版数据，保留原规则即可。
+
+*客户端可见的行为变化*：同一账号在**不同活动**中使用同一个 clientKey，视为两个不同的购买请求（以前第二个活动会返回第一个活动的请求）。同一活动内的重放不变。同一账号同一素材仍只能有一单（Redis `o:` 加 MySQL `UNIQUE(user_id,post_id)`）：在同一素材的新活动里，已拥有的账号仍得到原来的请求或 `ALREADY_OWNED`。写入 `docs/commerce-ingress-v2.md`。
+
+*数据库*（V33）：`uq_purchase_client(user_id,client_key)` 改为 `uq_purchase_client_campaign(user_id,campaign_id,client_key)`；`material_sale_campaigns` 加 `cache_archived_at_ms`（MySQL 侧已归档，之后它的 cache job 不再写 Redis）和 `cache_released_at_ms`（Redis 字段已删完），两步分开，中断后从第二步继续。
+
+*已归档活动的入口*：Lua 在 `k:` 未命中、活动字段不存在时返回 `CAMPAIGN_NOT_FOUND`；只在这条路径上 Java 查 MySQL：活动存在且已归档时，按 (账号, 活动, key) 查请求（含旧版审计行），命中就重放，否则返回原来的 409（`CAMPAIGN_CLOSED` 或 `ENDED`）。未归档活动的入口仍然零 SQL。
+
+*归档期间与 cache job 的竞态*：归档先在 MySQL 标记，再用 Lua 分批删除，第一批写入墓碑 `x:<campaign>`；`APPLY` 遇到墓碑就不写 Redis（只在 MySQL 标记已应用）。`OWNER` 任务只在帖子有活跃活动（`pc:<post>` 存在）时写 `o:`；活动启用（`CAMPAIGN` 任务）时加载该帖全部归属和 `pc:<post>`。极端交错下漏掉的归属由现有兜底修复：落单时 MySQL 判定 `ALREADY_OWNED`，拒绝请求并重新同步 `OWNER`，不会产生第二单。墓碑只在两次恢复之间存在（每个归档活动一个字段）。
+
+*升级（旧格式 `k:` 的迁移，按 C3-4 后台分批，不停入口）*：
+1. 新代码上线后，`RESERVE` 先查新格式字段，未命中再查旧格式字段（迁移期间保持旧语义，不会误放行）；新请求只写新格式。
+2. 迁移任务记下开始时间 T0，等 Stream 中 T0 之前的条目全部持久化（与归档的未持久化检查相同），再分批为未归档活动的请求写入新格式 `k:`、为活跃帖子写入 `pc:<post>`，并删除所有请求的旧格式 `k:`。
+3. 全部完成后在控制哈希写入格式标记 `fmt=3`：入口停止查旧格式，归档和 `OWNER` 跳过规则开始生效。
+4. 期间如果发生恢复，恢复直接建出新格式的活跃集合并写入 `fmt=3`，迁移自然结束。
+- 回滚：旧代码只认旧格式 `k:`，回滚前需要执行一次旧版本的全量恢复；数据库唯一键放宽后无法自动回滚（同一账号不同活动的同 key 请求在旧唯一键下冲突），回滚需要人工处理这些行。
+
+**验收**（实现后）：
+- RED/GREEN 覆盖：归档后字段确实删除；本人查询和同 key 重放从 MySQL 返回原请求；旧 key 在新活动中重放，不触发隔离；归属人在同帖新活动中被拒绝或重放；归档后的退款或 OWNER 任务不写回 Redis；恢复只加载活跃集合；中断后的归档可以重跑。
+- 测量：用 C3 证据的同一方法测单个归档请求的常驻字节（目标 0）；准备 N 与 10N 个已归档请求，恢复时间基本不变；入口时延改前改后同口径对比。
+
+#### C3 结果（2026-11-22，未推送）
+
+*实现*（V33、`SaleStateArchiver`、`SaleEntryRedis`、`SaleIngress`、`SaleService`、`SaleBridgeBatch`/`SaleBridgeMapper`、`SaleMapper`、`SaleIngressMapper`、`RetentionConfiguration`）：
+- V33：唯一键改为 `uq_purchase_client_campaign(user_id,campaign_id,client_key)`；活动表加 `cache_archived_at_ms`、`cache_released_at_ms`。
+- `k:<user>:<campaign>:<sha256(key)>`；`RESERVE` 在 `fmt=3` 之前回落查旧格式字段。桥接冲突判定、逐条持久化重放、隔离释放写回均按活动。`SaleMapper.byClient`（只剩 V22 遗留导入使用）改为确定性的“最早请求”。
+- 归档任务 `sale-state-archiver`（`content.retention.sale-state.*`，默认开启，宽限 24 h，按 `batch`/`max-batches` 分批）。条件：停止超过宽限期；该活动无 PROCESSING 请求；Stream 中无该活动的未持久化条目（pending 与未投递，超过 1000 条时本轮不归档任何活动）；无该活动未解决的隔离，且不存在活动未知的未解决隔离。先在 MySQL 标记，再用带 generation 栅栏的 Lua 分批删除（第一批写墓碑 `x:<campaign>`），最后标记已释放；中断后从释放步骤继续。删除的字段：`c:<id>:*`、`v:CAMPAIGN`、各请求的 `k:`/`v:REQUEST`/`released:`、无订单请求的 `r:`、遗留 `k:`、`refund:`、`v:REFUND`；帖子已无未归档活动时，`POST_SWEEP` 同时删除 `pc:<post>` 与该帖全部 `o:`、拥有者 `r:`、`v:OWNER`（若期间有新活动登记到 `pc:`，则保留）。
+- 缓存任务：已归档活动的 `CAMPAIGN`/`REQUEST`/`REFUND` 任务只在 MySQL 标记已应用；`APPLY` 遇墓碑不写；`OWNER` 任务在 `fmt=3` 且无 `pc:<post>` 时不写。`CAMPAIGN` 任务（未归档）同时装入该帖全部拥有者和 `pc:<post>`，其中 `o:`/`r:` 只填空位（HSETNX），不覆盖较新的 `OWNER`/`REQUEST` 结果。
+- 恢复只装载活跃集合（未归档活动的 `c:`、请求、退款标记、遗留重放 `k:`，相关帖子的拥有者与 `pc:`）；`publish` 写 `fmt=3`。
+- 入口：Lua 返回 `CAMPAIGN_NOT_FOUND` 时才查 MySQL；活动已归档则按 (账号, 活动, key)（含 V22 遗留行）重放，否则 409 `ENDED`/`CAMPAIGN_CLOSED`。本人查询原有的 MySQL 回落不变。
+- 迁移：`migrate()` 记 T0，等 T0 前的 Stream 条目全部持久化后，按 `reservation_id` 分批把旧 `k:<user>:<sha>` 改写为新格式（已归档活动只删不写），游标存控制哈希 `fmt_cursor`，最后写 `pc:`、遗留 `k:` 并置 `fmt=3`。归档在 `fmt=3` 前不运行。
+- 文档：`docs/commerce-ingress-v2.md` 新增“C3”一节（客户端可见变化）。
+
+*与设计的差异*：
+- 设计第 9 点曾列“没有待应用的 REQUEST/CAMPAIGN/REFUND 任务”作为归档条件；实现改为“已归档活动的任务在 MySQL 直接标记已应用”加墓碑，效果相同（MySQL 本来就是这些任务的来源），且不会因一个卡住的任务挡住归档。
+- 墓碑 `x:<campaign>` 不在释放后删除（删除会重新打开“读到活跃、释放后写回”的窗口），每个已归档活动常驻一个字段，直到下次恢复建新哈希时消失。
+
+*测试*：
+- RED `target/hardening-c3/red-125843`：`CommerceStateArchiveIT` 7 个用例全部因缺少目标行为失败（编译通过，容器健康；V33 先只加两列，归档器为空实现）。
+- 新增用例（GREEN 共 8 个）：同 key 不同活动为两个请求且不隔离；归档后本人查询和同 key 重放来自 MySQL 且结果正确，新 key 得 409 而非 404；PROCESSING、未持久化、隔离中的活动不归档，终结后再归档；恢复只装载活跃集合；归档后同帖新活动装回拥有者，同账号仍只一单；归档后退款任务不写回；中断的归档可续做；旧全局 `k:` 原地迁移。
+- 修改的既有用例（`CommerceIngressRevisionIT`，`CommerceDispatchBatchIT` 继承）：三个隔离用例原来用“另一活动的同 key 请求”制造 `CLIENT_KEY_CONFLICT`，方案 B 下那不再是冲突。改为在同一活动内放一条已终结（`REJECTED`）的规范请求，冲突、释放和库存断言保持原意；`incompleteRedisReleaseProof…` 最后的 503 断言改为对被隔离的活动本身（另一活动的同 key 现在是新请求）。第一次回归 `target/hardening-c3/green-reg-130656`、`green-131926` 的失败即这三处，日志保留。
+- GREEN `target/hardening-c3/green-132455`：单元测试 + `CommerceCampaignLockIT` 14、`CommerceDispatchBatchIT` 62、`CommerceIngressRevisionIT` 39、`CommerceStateArchiveIT` 8、`MaterialCommercePurchaseIT` 9、`MaterialCommerceRefundBlacklistIT` 2、`SaleRetentionIT` 4，共 213 运行 0 失败 1 跳过（FFmpeg 单元测试的既有跳过）。
+- 真实 MQ `target/hardening-c3/green-mq-133817`：`CommerceDispatchBatchRealMqIT` 64、`CommerceRealMqIT` 41，0 失败（`green-mq-133810` 是批次名写错，未运行）。
+- 完整验证交给 CI（新类按首字母进入 A-L 分片）。
+
+*测量*：单个归档请求的常驻字节、N/10N 已归档请求下的恢复时间、入口时延改前改后——**缺证据**（本轮未测）。功能上，归档后该请求的 `r:`、`k:`、`v:`、`o:` 等字段被删除已由用例断言。
+
 ---
 
 ## 第 D 轮：P3 测试缺口
@@ -541,3 +670,4 @@
 | 2026-11-22 | B | B1–B3（含 B2b）完成，B4/B5 代码与测试完成，RED/GREEN 见 `target/hardening-b/`；报告 `docs/perf-evidence/hardening-b-20261122/README.md`。B6 实测因系统内存告急被中止，R6 部分有数；B4/B5 抢购压测与 B6 剩余部分待确认后跑。未提交 |
 | 2026-11-22 | B | 分主题本地提交；补测 B6（R6 64 线程、R7 1 万/10 万）和 B4/B5 改前改后（`CommerceSyncPerfIT`，同口径）；新增 B7–B10（未开始） |
 | 2026-11-22 | B | B10 完成：反应写入先锁用户行，消除点赞/点踩死锁和“同时点赞又点踩”；RED/GREEN 见 `target/hardening-b10/` |
+| 2026-11-22 | B/C | B10 与 README 推送，CI run `44986890751`（`33d1434`）5 个 job 全部通过。C3 决定（方案 B、24 h、删除版本字段、后台分批）并实现：V33、归档任务、活跃集合恢复、旧格式迁移；RED/GREEN 本地通过（213 + 真实 MQ 105，0 失败），测量缺证据；本地提交，未推送 |
