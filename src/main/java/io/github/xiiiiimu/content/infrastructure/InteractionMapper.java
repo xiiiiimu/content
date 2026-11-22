@@ -21,10 +21,11 @@ public interface InteractionMapper {
  @Delete("DELETE FROM post_dislikes WHERE post_id=#{post} AND user_id=#{user}") int undislike(@Param("post")long post,@Param("user")long user);
  @Select("SELECT COUNT(*) FROM post_dislikes WHERE post_id=#{post}") long dislikeCount(long post);
  /**
-  * One report per (post, reporter) (V29 uq_report_post_reporter): 1 = inserted, 0 = the reporter already reported this post.
-  * ON DUPLICATE KEY UPDATE id=id instead of INSERT IGNORE so every other error (bad JSON, truncation) still fails the statement.
+  * One report per (post, reporter) (V29 uq_report_post_reporter). A repeat fails with a duplicate key, which the caller
+  * treats as "already reported"; every other error (bad JSON, truncation) still fails. Hardening B2: the former
+  * ON DUPLICATE KEY UPDATE id=id returned 1 for a repeat too (Connector/J reports found rows), so a repeat looked new.
   */
- @Insert("INSERT INTO post_reports(post_id,reporter_user_id,reason,detail,context_json,created_at_ms) VALUES(#{post},#{user},#{reason},#{detail},#{context},#{at}) ON DUPLICATE KEY UPDATE id=id")
+ @Insert("INSERT INTO post_reports(post_id,reporter_user_id,reason,detail,context_json,created_at_ms) VALUES(#{post},#{user},#{reason},#{detail},#{context},#{at})")
  int report(@Param("post")long post,@Param("user")long user,@Param("reason")String reason,@Param("detail")String detail,@Param("context")String context,@Param("at")long at);
  @Select("SELECT COUNT(*) FROM post_reports WHERE post_id=#{post}") long reportCount(long post);
  @Select("SELECT id FROM post_reports WHERE post_id=#{post} AND reporter_user_id=#{user}") Long reportId(@Param("post")long post,@Param("user")long user);
@@ -52,6 +53,30 @@ public interface InteractionMapper {
  void upsertStats(@Param("post")long post,@Param("likes")long likes,@Param("dislikes")long dislikes,@Param("comments")long comments,@Param("reports")long reports);
  @Select("SELECT post_id AS postId,like_count AS likes,comment_count AS comments,dislike_count AS dislikes,report_count AS reports FROM post_stats WHERE post_id=#{post}")
  Stats stats(long post);
+ /**
+  * Hardening B2: moves the counters by this transaction's own changes. Returns matched rows (Connector/J reports found
+  * rows), so 1 whenever the row exists. GREATEST only stops a drifted counter from going negative; the reconciler repairs it.
+  */
+ @Update("UPDATE post_stats SET like_count=GREATEST(like_count+#{likes},0),dislike_count=GREATEST(dislike_count+#{dislikes},0),comment_count=GREATEST(comment_count+#{comments},0),report_count=GREATEST(report_count+#{reports},0) WHERE post_id=#{post}")
+ int addStats(@Param("post")long post,@Param("likes")long likes,@Param("dislikes")long dislikes,@Param("comments")long comments,@Param("reports")long reports);
+ /**
+  * First stats row of a post: built from COUNT(*), which sees this transaction's own change (so the deltas are not added).
+  * If another transaction created the row meanwhile, its COUNT could not see our uncommitted change: add the deltas.
+  * The SELECT is a consistent read under READ COMMITTED (no locks on the counted tables).
+  */
+ @Insert("""
+  INSERT INTO post_stats(post_id,like_count,dislike_count,comment_count,report_count)
+  SELECT #{post},(SELECT COUNT(*) FROM post_likes WHERE post_id=#{post}),(SELECT COUNT(*) FROM post_dislikes WHERE post_id=#{post}),
+         (SELECT COUNT(*) FROM post_comments WHERE post_id=#{post}),(SELECT COUNT(*) FROM post_reports WHERE post_id=#{post})
+  ON DUPLICATE KEY UPDATE like_count=GREATEST(like_count+#{likes},0),dislike_count=GREATEST(dislike_count+#{dislikes},0),
+   comment_count=GREATEST(comment_count+#{comments},0),report_count=GREATEST(report_count+#{reports},0)
+  """)
+ void createStats(@Param("post")long post,@Param("likes")long likes,@Param("dislikes")long dislikes,@Param("comments")long comments,@Param("reports")long reports);
+ /** Reconciler: the stored counters, row-locked so no online ±1 can interleave with the recount. */
+ @Select("SELECT post_id AS postId,like_count AS likes,comment_count AS comments,dislike_count AS dislikes,report_count AS reports FROM post_stats WHERE post_id=#{post} FOR UPDATE")
+ Stats statsForUpdate(long post);
+ @Select("SELECT post_id FROM post_stats WHERE post_id>#{after} ORDER BY post_id LIMIT #{limit}")
+ List<Long> statsPostIdsAfter(@Param("after")long after,@Param("limit")int limit);
  /** Hardening B1: a pending row (aggregated_at_ms NULL) for the aggregator; a duplicate event id inserts nothing. */
  @Insert("INSERT IGNORE INTO topic_event_ledger(event_id,topic,post_id,occurred_at_ms,delta,kind,aggregated_at_ms) VALUES(#{id},#{topic},#{post},#{at},#{delta},#{kind},NULL)")
  int ledger(@Param("id")String id,@Param("topic")String topic,@Param("post")long post,@Param("at")long at,@Param("delta")int delta,@Param("kind")String kind);

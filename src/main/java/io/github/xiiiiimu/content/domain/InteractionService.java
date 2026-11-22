@@ -28,39 +28,41 @@ public final class InteractionService {
  public LikeResult like(long user,long post,String clientTopic){
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
-   db.undislike(post,user);
+   int undisliked=db.undislike(post,user);
    boolean inserted=db.like(post,user,System.currentTimeMillis())==1;
-   reconcile(post);
    String topic=inserted?db.postTopic(post):null;
    if(topic!=null)trending.recordLike(post,user,topic);
-   return new LikeResult(true,db.stats(post).likes());
+   // Counter last: the hot post_stats row lock is held only for this UPDATE, the read after it and commit (B2b).
+   var stats=applyCounts(post,inserted?1:0,-undisliked,0,0);
+   return new LikeResult(true,stats.likes());
   });
  }
  /** @param clientTopic ignored, see {@link #like}. */
  public LikeResult unlike(long user,long post,String clientTopic){
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
-   boolean removed=db.unlike(post,user)==1;reconcile(post);
+   boolean removed=db.unlike(post,user)==1;
    // Only a real true→false flip revokes the like's own topic contribution (no separate -1 event).
    if(removed)trending.revokeLike(post,user);
-   return new LikeResult(false,db.stats(post).likes());
+   var stats=applyCounts(post,removed?-1:0,0,0,0);   // counter last (B2b)
+   return new LikeResult(false,stats.likes());
   });
  }
  public DislikeResult dislike(long user,long post){
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
    // Disliking removes an existing like: that is a true→false like flip as well.
-   if(db.unlike(post,user)==1)trending.revokeLike(post,user);
-   db.dislike(post,user,System.currentTimeMillis());
-   reconcile(post);
-   return new DislikeResult(true,db.stats(post).dislikes());
+   boolean unliked=db.unlike(post,user)==1;
+   if(unliked)trending.revokeLike(post,user);
+   boolean disliked=db.dislike(post,user,System.currentTimeMillis())==1;
+   return new DislikeResult(true,applyCounts(post,unliked?-1:0,disliked?1:0,0,0).dislikes());
   });
  }
  public DislikeResult undislike(long user,long post){
   visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
-   db.undislike(post,user);reconcile(post);
-   return new DislikeResult(false,db.stats(post)==null?0:db.stats(post).dislikes());
+   int removed=db.undislike(post,user);
+   return new DislikeResult(false,applyCounts(post,0,-removed,0,0).dislikes());
   });
  }
  public ReportResult report(long user,long post,String reason,String detail,String contextJson){
@@ -68,10 +70,13 @@ public final class InteractionService {
   if(reason==null || reason.isBlank() || reason.length()>64)throw new FeedFailure(400,"INVALID_REQUEST");
   if(detail!=null && detail.length()>1000)throw new FeedFailure(400,"INVALID_REQUEST");
   // Hardening A3: one report per (post, reporter). A concurrent repeat waits on the unique key until the first commits
-  // (READ COMMITTED), then inserts nothing and reads the committed first row; counts are recomputed only on a new row.
+  // (READ COMMITTED), then inserts nothing and reads the committed first row; only a new row moves the counter.
   return tx.execute(status->{
-   boolean inserted=db.report(post,user,reason,detail==null?"":detail,contextJson,System.currentTimeMillis())==1;
-   long count=inserted?reconcile(post).reports():currentReports(post);
+   boolean inserted;
+   // A duplicate key fails only this statement (MySQL statement rollback); the transaction continues.
+   try{inserted=db.report(post,user,reason,detail==null?"":detail,contextJson,System.currentTimeMillis())==1;}
+   catch(org.springframework.dao.DuplicateKeyException repeat){inserted=false;}
+   long count=applyCounts(post,0,0,0,inserted?1:0).reports();
    Long id=db.reportId(post,user);
    if(id==null)throw new IllegalStateException("report row missing after insert for post "+post);
    return new ReportResult(id,count,!inserted);
@@ -116,7 +121,7 @@ public final class InteractionService {
     }
    }
    if(db.comment(post,user,parentId,version,offset,body,key,System.currentTimeMillis())!=1)throw new IllegalStateException("comment insert failed");
-   var created=db.existingComment(user,key);reconcile(post);
+   var created=db.existingComment(user,key);
    String topic=db.postTopic(post);
    // Hardening A10: one ledger row per created comment. The idempotency key is only unique per user, so it cannot be
    // the event id; a replay returns before this point and records nothing.
@@ -129,6 +134,7 @@ public final class InteractionService {
    events.emit("CommentCreated",post,fields);
    // Ordinary comment commits first; assistant work is enqueued asynchronously in the same TX.
    if(assistantEnqueue!=null)assistantEnqueue.apply(new AssistantEnqueue(post,created.id(),user,parentId,body));
+   applyCounts(post,0,0,1,0);   // counter last (B2b): ledger, outbox and assistant rows are written before the hot row lock
    return toResult(created,false);
   });
  }
@@ -153,10 +159,32 @@ public final class InteractionService {
    .map(c->new CommentView(c.id(),c.userId(),c.parentId(),c.materialVersionId(),c.offsetMs(),c.acceptedAtMs(),c.body(),c.createdAtMs()))
    .toList();
  }
- private long currentReports(long post){var s=db.stats(post);return s==null?db.reportCount(post):s.reports();}
+ /**
+  * Hardening B2 (R3): post_stats moves by this transaction's own changes (the affected rows of its INSERT IGNORE / DELETE)
+  * instead of four COUNT(*) per interaction. Every writer changes the counted rows first and post_stats last (B2b: after its ledger/outbox rows too), in the
+  * same transaction, so the post_stats row lock order is unchanged and a transaction's changes become visible together
+  * with its counter change ({@link StatsReconciler} relies on this). A post without a stats row (never counted yet, or
+  * cleared while OFFLINE by PipelineReconcile) gets one built from COUNT(*) once, see {@code InteractionMapper.createStats}.
+  * Returns the row after the change.
+  */
+ private InteractionMapper.Stats applyCounts(long post,int likes,int dislikes,int comments,int reports){
+  boolean changed=likes!=0 || dislikes!=0 || comments!=0 || reports!=0;
+  if(changed && db.addStats(post,likes,dislikes,comments,reports)==1)return db.stats(post);
+  var s=changed?null:db.stats(post);
+  if(s!=null)return s;
+  db.createStats(post,likes,dislikes,comments,reports);
+  return db.stats(post);
+ }
+ /**
+  * Recounts one post under its post_stats row lock and stores the counts (operators and tests). Online interactions never
+  * call this; drift is found by the {@link StatsReconciler} job.
+  */
  public InteractionMapper.Stats reconcile(long post){
-  long likes=db.likeCount(post),comments=db.commentCount(post),dislikes=db.dislikeCount(post),reports=db.reportCount(post);
-  db.upsertStats(post,likes,dislikes,comments,reports);return db.stats(post);
+  return tx.execute(status->{
+   if(db.statsForUpdate(post)==null)db.createStats(post,0,0,0,0);
+   long likes=db.likeCount(post),comments=db.commentCount(post),dislikes=db.dislikeCount(post),reports=db.reportCount(post);
+   db.upsertStats(post,likes,dislikes,comments,reports);return db.stats(post);
+  });
  }
  private CommentResult toResult(InteractionMapper.Comment c,boolean replay){
   var s=db.stats(c.postId());

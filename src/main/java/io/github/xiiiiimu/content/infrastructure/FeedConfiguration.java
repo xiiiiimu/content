@@ -152,6 +152,31 @@ public class FeedConfiguration {
   }
   @Override public void close(){scheduler.shutdownNow();}
  }
+ /** Hardening B2: offline post_stats reconciliation. content.stats.reconcile.batch (posts per run, 200). */
+ @Bean StatsReconciler statsReconciler(InteractionMapper interactions,TransactionTemplate tx,@Value("${content.stats.reconcile.batch:200}")int batch){
+  return new StatsReconciler(interactions,tx,batch);
+ }
+ /**
+  * content.stats.reconcile.enabled (default true); interval-millis (default 60000, minimum 1000): one batch per run, so a
+  * full pass over N posts takes about N / batch runs. Drift found is logged with its size.
+  */
+ @Bean(destroyMethod="close") @ConditionalOnProperty(name="content.stats.reconcile.enabled",havingValue="true",matchIfMissing=true)
+ StatsReconcileJob statsReconcileJob(StatsReconciler reconciler,@Value("${content.stats.reconcile.interval-millis:60000}")long interval){
+  return new StatsReconcileJob(reconciler,interval);
+ }
+ public static final class StatsReconcileJob implements AutoCloseable {
+  private final ScheduledExecutorService scheduler=Executors.newSingleThreadScheduledExecutor(r->{var t=new Thread(r,"stats-reconcile");t.setDaemon(true);return t;});
+  StatsReconcileJob(StatsReconciler reconciler,long interval){
+   long every=Math.max(1_000L,interval);
+   scheduler.scheduleWithFixedDelay(()->{
+    try{var r=reconciler.runBatch();
+     if(r.corrected()>0)org.slf4j.LoggerFactory.getLogger(StatsReconciler.class).warn("post_stats drift corrected: posts={} of {} checked, drift likes={} dislikes={} comments={} reports={}",
+      r.corrected(),r.checked(),r.likeDrift(),r.dislikeDrift(),r.commentDrift(),r.reportDrift());}
+    catch(Exception e){org.slf4j.LoggerFactory.getLogger(StatsReconciler.class).warn("post_stats reconcile failed; will retry",e);}
+   },every,every,TimeUnit.MILLISECONDS);
+  }
+  @Override public void close(){scheduler.shutdownNow();}
+ }
  @Bean InteractionService interactionService(VisibilityService visibility,InteractionMapper interactions,TransactionTemplate tx,TrendingService trending,RelationshipService relationships,org.springframework.beans.factory.ObjectProvider<MaterialService> materials,org.springframework.beans.factory.ObjectProvider<AssistantService> assistant){
   return new InteractionService(visibility,interactions,tx,trending,relationships,materials.getIfAvailable(),enq->{
    var a=assistant.getIfAvailable();if(a==null)return null;
