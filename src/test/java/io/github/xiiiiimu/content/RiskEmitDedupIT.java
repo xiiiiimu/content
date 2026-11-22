@@ -25,7 +25,7 @@ class RiskEmitDedupIT {
   r.add("content.feed.cursor-key",()->"cursor-test-key-32-bytes-minimum-00001");r.add("content.feed.identity-key",()->"identity-test-key-32-bytes-minimum-0001");
   r.add("content.trendguard.spike-threshold",()->"2");
  }
- @Autowired JdbcTemplate db;@Autowired PublishService publish;@Autowired InteractionService interactions;@Autowired RelationshipService follows;@Autowired TransactionTemplate tx;
+ @Autowired JdbcTemplate db;@Autowired PublishService publish;@Autowired InteractionService interactions;@Autowired RelationshipService follows;@Autowired TransactionTemplate tx;@Autowired TopicAggregator aggregator;
  final StatementDigests digests=new StatementDigests(MYSQL);
  static final String RISK_INSERT="INSERT INTO `trend_risk_events`%",SERIAL_LOCK="SELECT `topic` FROM `trend_topic_serial`%",BUCKET_READ="SELECT%`topic_minute_buckets`%";
  @BeforeEach void reset(){
@@ -40,7 +40,9 @@ class RiskEmitDedupIT {
   publish.publish(1001,id,UUID.randomUUID().toString(),0);
  }
  void followers(long from,int n){for(int i=0;i<n;i++)follows.change(from+i,1001,true);}
- long risks(String topic){return db.queryForObject("SELECT COUNT(*) FROM trend_risk_events WHERE topic=?",Long.class,topic);}
+
+ /** Hardening B1: buckets and risk events are written by the background aggregator; read them once it has caught up. */
+ long risks(String topic){aggregator.drain();return db.queryForObject("SELECT COUNT(*) FROM trend_risk_events WHERE topic=?",Long.class,topic);}
  static long hour(){return System.currentTimeMillis()/3_600_000L*3_600_000L;}
 
  @Test void reportedWindowSkipsTheRiskInsertTheTopicLockAndTheScan(){
@@ -63,7 +65,8 @@ class RiskEmitDedupIT {
   long h=hour();
   db.update("INSERT INTO trend_risk_events(event_id,schema_version,topic,kind,window_start_ms,occurred_at_ms,post_id,detail,created_at_ms) VALUES(?,1,'learned','TOPIC_SPIKE',?,?,140201,'other-node',?)",
    TrendGuardService.spikeEventId("learned",h),h,System.currentTimeMillis(),System.currentTimeMillis());
-  interactions.like(3101,140201,"learned");interactions.like(3102,140201,"learned");   // threshold reached → duplicate learned
+  interactions.like(3101,140201,"learned");interactions.like(3102,140201,"learned");
+  aggregator.drain();                                                                  // threshold reached → duplicate learned
   digests.reset();
   interactions.like(3103,140201,"learned");interactions.like(3104,140201,"learned");interactions.like(3105,140201,"learned");
   assertThat(risks("learned")).isEqualTo(1);

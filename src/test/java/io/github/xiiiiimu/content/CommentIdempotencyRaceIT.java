@@ -28,7 +28,7 @@ class CommentIdempotencyRaceIT {
   r.add("content.feed.enabled",()->"true");r.add("content.feed.redis-uri",()->"redis://"+REDIS.getHost()+":"+REDIS.getMappedPort(6379));
   r.add("content.feed.cursor-key",()->"cursor-test-key-32-bytes-minimum-00001");r.add("content.feed.identity-key",()->"identity-test-key-32-bytes-minimum-0001");
  }
- @Autowired JdbcTemplate db;@Autowired PublishService publish;@Autowired InteractionService interactions;@Autowired RelationshipService follows;
+ @Autowired JdbcTemplate db;@Autowired PublishService publish;@Autowired InteractionService interactions;@Autowired RelationshipService follows;@Autowired TopicAggregator aggregator;
 
  @Test void concurrentSubmissionsOfOneKeyReturnTheFirstCommentWithoutErrors()throws Exception{
   db.update("INSERT IGNORE INTO author_feed_mode(author_id,mode) VALUES(1501,'PULL')");
@@ -52,6 +52,7 @@ class CommentIdempotencyRaceIT {
   assertThat(results.stream().filter(r->!r.replay()).count()).as("exactly one fresh result").isEqualTo(1);
   assertThat(db.queryForObject("SELECT COUNT(*) FROM post_comments WHERE post_id=150101",Long.class)).isEqualTo(1);
   assertThat(db.queryForObject("SELECT COUNT(*) FROM outbox_events WHERE event_type='CommentCreated'",Long.class)-outboxBefore).isEqualTo(1);
+  aggregator.drain();   // B1: buckets are folded by the background aggregator
   assertThat(db.queryForObject("SELECT COALESCE(SUM(net_events),0) FROM topic_minute_buckets WHERE topic='race'",Long.class)).isEqualTo(1);
   assertThat(db.queryForObject("SELECT comment_count FROM post_stats WHERE post_id=150101",Long.class)).isEqualTo(1);
  }

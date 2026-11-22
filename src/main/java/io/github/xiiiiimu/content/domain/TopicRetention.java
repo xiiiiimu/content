@@ -11,11 +11,11 @@ import org.springframework.transaction.support.TransactionTemplate;
  * purge on rows that are already past retention, and wait at most one batch.
  * <p>Retention must cover the longest trending window (24h) plus at least one hour of margin, so a window read never
  * misses rows. The default is 48h.
- * <p>Hardening C2 (C-13, reserved for B1): ledger rows are deleted only before the <i>processed watermark</i>: every ledger
- * event with {@code occurred_at_ms} below it has been folded into the minute buckets. Today the buckets are written in the
- * same transaction as the ledger, so the watermark is unbounded and only the time cutoff applies. If B1 moves aggregation
- * off the write path, the aggregator supplies its watermark and the purge can never drop an event it has not counted.
- * Buckets are the aggregated output and are not bounded by the watermark.
+ * <p>Hardening C2 (C-13) / B1: ledger rows are deleted only before the <i>processed watermark</i>: every ledger event with
+ * {@code occurred_at_ms} below it has been folded into the minute buckets. The application wires
+ * {@link TopicAggregator#processedWatermarkMs()} (the aggregator's recorded progress, which already deducts the in-flight
+ * margin), so the purge can never drop an event the aggregator has not counted. {@link #ALL_PROCESSED} (no watermark) is
+ * for callers without asynchronous aggregation. Buckets are the aggregated output and are not bounded by the watermark.
  */
 public final class TopicRetention {
  public static final long LONGEST_WINDOW_MS=86_400_000L;

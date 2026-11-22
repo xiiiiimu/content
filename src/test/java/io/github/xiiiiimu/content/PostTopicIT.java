@@ -29,7 +29,7 @@ class PostTopicIT {
   r.add("content.feed.cursor-key",()->"cursor-test-key-32-bytes-minimum-00001");r.add("content.feed.identity-key",()->"identity-test-key-32-bytes-minimum-0001");
  }
  @Autowired JdbcTemplate db;@Autowired PublishService publish;@Autowired InteractionService interactions;@Autowired TrendingService trending;
- @Autowired MockMvc http;@Autowired RelationshipService follows;
+ @Autowired MockMvc http;@Autowired RelationshipService follows;@Autowired TopicAggregator aggregator;
  @BeforeEach void reset(){
   db.update("DELETE FROM trend_risk_events");db.update("DELETE FROM topic_event_ledger");db.update("DELETE FROM topic_minute_buckets");
   db.update("DELETE FROM post_comments");db.update("DELETE FROM post_likes");db.update("DELETE FROM post_stats");
@@ -43,7 +43,9 @@ class PostTopicIT {
   db.update("INSERT INTO posts(id,author_id,status,body,topic) VALUES(?,1001,'DRAFT','t',?)",id,topic);
   publish.publish(1001,id,UUID.randomUUID().toString(),0);
  }
- java.util.List<String> bucketTopics(){return db.queryForList("SELECT DISTINCT topic FROM topic_minute_buckets ORDER BY topic",String.class);}
+
+ /** Hardening B1: buckets and risk events are written by the background aggregator; read them once it has caught up. */
+ java.util.List<String> bucketTopics(){aggregator.drain();return db.queryForList("SELECT DISTINCT topic FROM topic_minute_buckets ORDER BY topic",String.class);}
  java.util.List<String> ledgerTopics(){return db.queryForList("SELECT DISTINCT topic FROM topic_event_ledger ORDER BY topic",String.class);}
 
  @Test void authorSetsChangesAndClearsTheTopicThroughThePostApi()throws Exception{
@@ -98,7 +100,7 @@ class PostTopicIT {
   interactions.comment(2001,120201,"hi","r1-c2","sports");
   assertThat(bucketTopics()).containsExactly("music");
   assertThat(ledgerTopics()).containsExactly("music");
-  assertThat(db.queryForObject("SELECT SUM(net_events) FROM topic_minute_buckets WHERE topic='music'",Long.class)).isEqualTo(3);
+  assertThat(db.queryForObject("SELECT SUM(net_events) FROM topic_minute_buckets WHERE topic='music'",Long.class)).isEqualTo(3);   // bucketTopics() drained
  }
 
  @Test void topicPageListsPostsByTheirOwnTopicAttribute(){

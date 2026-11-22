@@ -26,7 +26,7 @@ class TrendingRetentionIT {
   r.add("content.feed.enabled",()->"true");r.add("content.feed.redis-uri",()->"redis://"+REDIS.getHost()+":"+REDIS.getMappedPort(6379));
   r.add("content.feed.cursor-key",()->"cursor-test-key-32-bytes-minimum-00001");r.add("content.feed.identity-key",()->"identity-test-key-32-bytes-minimum-0001");
  }
- @Autowired JdbcTemplate db;@Autowired TrendingService trending;@Autowired InteractionMapper interactions;@Autowired TransactionTemplate tx;
+ @Autowired JdbcTemplate db;@Autowired TrendingService trending;@Autowired InteractionMapper interactions;@Autowired TransactionTemplate tx;@Autowired TopicAggregator aggregator;
  final StatementDigests digests=new StatementDigests(MYSQL);
  static final long MIN=60_000L,HOUR=3_600_000L;
  @BeforeEach void reset(){
@@ -45,6 +45,7 @@ class TrendingRetentionIT {
   db.batchUpdate("INSERT INTO topic_minute_buckets(topic,bucket_start_ms,net_events,active_interactions) VALUES(?,?,1,1)",rows);
   digests.reset();
   trending.record("r2:spike:"+System.nanoTime(),"r2topic",110101L,1,"LIKE");
+  aggregator.drain();   // B1: the spike check runs when the aggregator folds the event
   var reads=digests.matching("SELECT%`topic_minute_buckets`%");
   assertThat(reads).as("spike check must read topic_minute_buckets").isNotEmpty();
   assertThat(reads).allSatisfy(r->assertThat(r.examinedPerExecution())

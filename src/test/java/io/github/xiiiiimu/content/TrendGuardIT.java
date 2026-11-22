@@ -32,7 +32,7 @@ class TrendGuardIT {
   r.add("content.feed.cursor-key",()->"cursor-test-key-32-bytes-minimum-00001");r.add("content.feed.identity-key",()->"identity-test-key-32-bytes-minimum-0001");
  }
  @Autowired JdbcTemplate db;@Autowired PublishService publish;@Autowired InteractionService interactions;@Autowired TrendingService trending;
- @Autowired MockMvc http;@Autowired VisibilityService visibility;@Autowired RelationshipService follows;@Autowired FeedRedis redis;
+ @Autowired MockMvc http;@Autowired VisibilityService visibility;@Autowired RelationshipService follows;@Autowired FeedRedis redis;@Autowired TopicAggregator aggregator;
  @BeforeEach void reset(){
   db.update("DELETE FROM topic_event_ledger");db.update("DELETE FROM topic_minute_buckets");db.update("DELETE FROM post_comments");db.update("DELETE FROM post_likes");db.update("DELETE FROM post_stats");
   db.update("DELETE FROM follow_history");db.update("DELETE FROM follows");db.update("DELETE FROM follow_graph_version");
@@ -68,6 +68,7 @@ class TrendGuardIT {
   db.update("INSERT INTO posts(id,author_id,status,body,topic) VALUES(100301,1001,'DRAFT','ok','music')");
   publish.publish(1001,100301,UUID.randomUUID().toString(),0);
   interactions.like(2001,100301,"music");
+  aggregator.drain();   // B1: buckets are folded by the background aggregator
   // Poison Redis projection with a phantom topic and a score; must not mint content or bypass MySQL.
   redis.connection().sync().zadd("trend:v1:net:3600000",9999.0,"phantom");
   redis.connection().sync().zadd("trend:v1:posts:phantom",1.0,"100399");

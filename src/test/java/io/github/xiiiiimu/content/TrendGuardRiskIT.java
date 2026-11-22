@@ -34,7 +34,9 @@ class TrendGuardRiskIT {
  }
  @Autowired JdbcTemplate db;@Autowired MockMvc http;@Autowired PublishService publish;
  @Autowired InteractionService interactions;@Autowired RelationshipService follows;@Autowired TrendGuardService trendGuard;
- @Autowired TransactionTemplate tx;
+ @Autowired TransactionTemplate tx;@Autowired TopicAggregator aggregator;
+ /** Hardening B1: risk events are written by the background aggregator; read them once it has caught up. */
+ JdbcTemplate drained(){aggregator.drain();return db;}
  @BeforeEach void reset(){
   db.update("DELETE FROM trend_risk_events");db.update("DELETE FROM topic_event_ledger");db.update("DELETE FROM topic_minute_buckets");
   try{db.update("DELETE FROM trend_topic_serial");}catch(Exception ignored){}
@@ -52,12 +54,12 @@ class TrendGuardRiskIT {
   db.update("INSERT INTO posts(id,author_id,status,body,topic) VALUES(100501,1001,'DRAFT','tg','sports')");
   publish.publish(1001,100501,UUID.randomUUID().toString(),0);
 
-  assertThat(db.queryForObject("SELECT COUNT(*) FROM trend_risk_events",Integer.class)).isZero();
+  assertThat(drained().queryForObject("SELECT COUNT(*) FROM trend_risk_events",Integer.class)).isZero();
   interactions.like(2001,100501,"sports");
-  assertThat(db.queryForObject("SELECT COUNT(*) FROM trend_risk_events",Integer.class)).as("below threshold → no risk yet").isZero();
+  assertThat(drained().queryForObject("SELECT COUNT(*) FROM trend_risk_events",Integer.class)).as("below threshold → no risk yet").isZero();
 
   interactions.like(2002,100501,"sports");
-  assertThat(db.queryForObject("SELECT COUNT(*) FROM trend_risk_events",Integer.class)).as("threshold reached via trending.record emit").isEqualTo(1);
+  assertThat(drained().queryForObject("SELECT COUNT(*) FROM trend_risk_events",Integer.class)).as("threshold reached via trending.record emit").isEqualTo(1);
   var row=db.queryForMap("SELECT event_id,schema_version,kind,topic FROM trend_risk_events");
   assertThat(row.get("schema_version")).isEqualTo(1);
   assertThat(row.get("kind")).isEqualTo("TOPIC_SPIKE");
@@ -67,7 +69,7 @@ class TrendGuardRiskIT {
   assertThat(id.length()).isLessThanOrEqualTo(256);
 
   interactions.like(2003,100501,"sports");
-  assertThat(db.queryForObject("SELECT COUNT(*) FROM trend_risk_events",Integer.class)).as("idempotent same-hour spike").isEqualTo(1);
+  assertThat(drained().queryForObject("SELECT COUNT(*) FROM trend_risk_events",Integer.class)).as("idempotent same-hour spike").isEqualTo(1);
 
   http.perform(get("/api/trendguard/risks").param("window","1h")).andExpect(status().isUnauthorized());
   http.perform(get("/api/trendguard/risks").param("window","1h").param("topic","sports").header("Authorization","Bearer "+bearer(2001,"READER")))
@@ -91,7 +93,7 @@ class TrendGuardRiskIT {
   publish.publish(1001,100601,UUID.randomUUID().toString(),0);publish.publish(1001,100602,UUID.randomUUID().toString(),0);
   interactions.like(2101,100601,topicA);interactions.like(2102,100601,topicA);
   interactions.like(2103,100602,topicB);interactions.like(2104,100602,topicB);
-  assertThat(db.queryForObject("SELECT COUNT(*) FROM trend_risk_events",Integer.class)).isEqualTo(2);
+  assertThat(drained().queryForObject("SELECT COUNT(*) FROM trend_risk_events",Integer.class)).isEqualTo(2);
   var topics=db.queryForList("SELECT topic FROM trend_risk_events ORDER BY topic",String.class);
   assertThat(topics).containsExactly(topicA,topicB);
   var ids=db.queryForList("SELECT event_id FROM trend_risk_events ORDER BY topic",String.class);
@@ -104,10 +106,10 @@ class TrendGuardRiskIT {
   long h1=1_700_000_000_000L;long h2=h1+3_600_000L;
   assertThat(trendGuard.record("tg:1:TOPIC_SPIKE:win:"+h1,"win","TOPIC_SPIKE",h1,null,"w1")).isTrue();
   assertThat(trendGuard.record("tg:1:TOPIC_SPIKE:win:"+h2,"win","TOPIC_SPIKE",h2,null,"w2")).isTrue();
-  assertThat(db.queryForObject("SELECT COUNT(*) FROM trend_risk_events WHERE topic='win'",Integer.class)).isEqualTo(2);
+  assertThat(drained().queryForObject("SELECT COUNT(*) FROM trend_risk_events WHERE topic='win'",Integer.class)).isEqualTo(2);
   // Different event_id string but same business key (kind,topic,window) must not insert a second row.
   assertThat(trendGuard.record("tg:1:TOPIC_SPIKE:win:"+h1+":other","win","TOPIC_SPIKE",h1,null,"dup-window")).isFalse();
-  assertThat(db.queryForObject("SELECT COUNT(*) FROM trend_risk_events WHERE topic='win'",Integer.class)).isEqualTo(2);
+  assertThat(drained().queryForObject("SELECT COUNT(*) FROM trend_risk_events WHERE topic='win'",Integer.class)).isEqualTo(2);
  }
 
  @Test void concurrentThresholdEmitProducesOneEventWithoutFurtherInteraction()throws Exception{
@@ -121,7 +123,7 @@ class TrendGuardRiskIT {
   assertThat(ready.await(30,TimeUnit.SECONDS)).isTrue();go.countDown();
   f1.get(60,TimeUnit.SECONDS);f2.get(60,TimeUnit.SECONDS);pool.shutdownNow();
   assertThat(db.queryForObject("SELECT COUNT(*) FROM post_likes WHERE post_id=100701",Integer.class)).isEqualTo(2);
-  assertThat(db.queryForObject("SELECT COUNT(*) FROM trend_risk_events WHERE topic='race'",Integer.class))
+  assertThat(drained().queryForObject("SELECT COUNT(*) FROM trend_risk_events WHERE topic='race'",Integer.class))
    .as("concurrent cumulative threshold must emit without a third interaction").isEqualTo(1);
  }
 
@@ -130,14 +132,14 @@ class TrendGuardRiskIT {
   db.update("INSERT INTO posts(id,author_id,status,body,topic) VALUES(100801,1001,'DRAFT','rb','rollback')");
   publish.publish(1001,100801,UUID.randomUUID().toString(),0);
   interactions.like(2301,100801,"rollback");
-  assertThat(db.queryForObject("SELECT COUNT(*) FROM trend_risk_events WHERE topic='rollback'",Integer.class)).isZero();
+  assertThat(drained().queryForObject("SELECT COUNT(*) FROM trend_risk_events WHERE topic='rollback'",Integer.class)).isZero();
   tx.executeWithoutResult(status->{
    interactions.like(2302,100801,"rollback");
    status.setRollbackOnly();
   });
   assertThat(db.queryForObject("SELECT COUNT(*) FROM post_likes WHERE post_id=100801",Integer.class))
    .as("threshold like rolled back with outer TX").isEqualTo(1);
-  assertThat(db.queryForObject("SELECT COUNT(*) FROM trend_risk_events WHERE topic='rollback'",Integer.class))
+  assertThat(drained().queryForObject("SELECT COUNT(*) FROM trend_risk_events WHERE topic='rollback'",Integer.class))
    .as("risk emit must roll back with the interaction TX").isZero();
  }
 
@@ -146,6 +148,7 @@ class TrendGuardRiskIT {
   db.update("INSERT INTO posts(id,author_id,status,body,topic) VALUES(100901,1001,'DRAFT','auth','authz')");
   publish.publish(1001,100901,UUID.randomUUID().toString(),0);
   interactions.like(2401,100901,"authz");interactions.like(2402,100901,"authz");
+  aggregator.drain();   // B1: the risk event is written when the aggregator folds the likes
   String ops=bearer(2401,"TRENDGUARD_OPS");String reader=bearer(2401,"READER");
   http.perform(get("/api/trendguard/risks").param("window","1h").header("Authorization","Bearer "+reader)).andExpect(status().isForbidden());
   http.perform(get("/api/trendguard/risks").param("window","1h").header("Authorization","Bearer "+ops.substring(0,ops.length()-2)+"xx")).andExpect(status().isUnauthorized());

@@ -23,7 +23,7 @@ class LikeTopicFlipIT {
   r.add("content.feed.enabled",()->"true");r.add("content.feed.redis-uri",()->"redis://"+REDIS.getHost()+":"+REDIS.getMappedPort(6379));
   r.add("content.feed.cursor-key",()->"cursor-test-key-32-bytes-minimum-00001");r.add("content.feed.identity-key",()->"identity-test-key-32-bytes-minimum-0001");
  }
- @Autowired JdbcTemplate db;@Autowired PublishService publish;@Autowired InteractionService interactions;@Autowired TrendingService trending;@Autowired RelationshipService follows;
+ @Autowired JdbcTemplate db;@Autowired PublishService publish;@Autowired InteractionService interactions;@Autowired TrendingService trending;@Autowired RelationshipService follows;@Autowired TopicAggregator aggregator;
  static final long HOUR=3_600_000L;
  @BeforeEach void reset(){
   db.update("DELETE FROM trend_risk_events");db.update("DELETE FROM topic_event_ledger");db.update("DELETE FROM topic_minute_buckets");
@@ -36,10 +36,12 @@ class LikeTopicFlipIT {
   db.update("INSERT INTO posts(id,author_id,status,body,topic) VALUES(?,1001,'DRAFT','t',?)",id,topic);
   publish.publish(1001,id,UUID.randomUUID().toString(),0);
  }
- long netSince(String topic,long since){Long v=db.queryForObject("SELECT COALESCE(SUM(net_events),0) FROM topic_minute_buckets WHERE topic=? AND bucket_start_ms>=?",Long.class,topic,since);return v==null?0:v;}
+
+ /** Hardening B1: buckets and risk events are written by the background aggregator; read them once it has caught up. */
+ long netSince(String topic,long since){aggregator.drain();Long v=db.queryForObject("SELECT COALESCE(SUM(net_events),0) FROM topic_minute_buckets WHERE topic=? AND bucket_start_ms>=?",Long.class,topic,since);return v==null?0:v;}
  long net(String topic){return netSince(topic,0);}
- long ledgerRows(long post){return db.queryForObject("SELECT COUNT(*) FROM topic_event_ledger WHERE post_id=?",Long.class,post);}
- long hourNet(String topic){return trending.window("net_events",HOUR,1L).stream().filter(e->e.topic().equals(topic)).mapToLong(TrendingService.Entry::score).sum();}
+ long ledgerRows(long post){aggregator.drain();return db.queryForObject("SELECT COUNT(*) FROM topic_event_ledger WHERE post_id=?",Long.class,post);}
+ long hourNet(String topic){aggregator.drain();return trending.window("net_events",HOUR,1L).stream().filter(e->e.topic().equals(topic)).mapToLong(TrendingService.Entry::score).sum();}
 
  @Test void likeUnlikeCyclesNeverDriveTopicNetNegativeAndKeepTheLedgerBounded(){
   follows.change(2001,1001,true);

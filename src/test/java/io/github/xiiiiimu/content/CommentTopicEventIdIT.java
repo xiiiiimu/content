@@ -30,9 +30,11 @@ class CommentTopicEventIdIT {
   r.add("content.feed.enabled",()->"true");r.add("content.feed.redis-uri",()->"redis://"+REDIS.getHost()+":"+REDIS.getMappedPort(6379));
   r.add("content.feed.cursor-key",()->"cursor-test-key-32-bytes-minimum-00001");r.add("content.feed.identity-key",()->"identity-test-key-32-bytes-minimum-0001");
  }
- @Autowired JdbcTemplate db;@Autowired PublishService publish;@Autowired InteractionService interactions;@Autowired RelationshipService follows;
+ @Autowired JdbcTemplate db;@Autowired PublishService publish;@Autowired InteractionService interactions;@Autowired RelationshipService follows;@Autowired TopicAggregator aggregator;
 
- long net(String topic){return db.queryForObject("SELECT COALESCE(SUM(net_events),0) FROM topic_minute_buckets WHERE topic=?",Long.class,topic);}
+
+ /** Hardening B1: buckets and risk events are written by the background aggregator; read them once it has caught up. */
+ long net(String topic){aggregator.drain();return db.queryForObject("SELECT COALESCE(SUM(net_events),0) FROM topic_minute_buckets WHERE topic=?",Long.class,topic);}
 
  @Test void twoUsersWithTheSameIdempotencyKeyEachCountOnce(){
   db.update("INSERT INTO author_feed_mode(author_id,mode) VALUES(1101,'PULL')");

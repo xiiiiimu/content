@@ -80,10 +80,59 @@ public class FeedConfiguration {
  @Bean FeedRecovery feedRecovery(RecoveryMapper recovery,FeedMapper feed,TransactionTemplate tx,FeedRedis redis,PipelineObserver observer,@Value("${content.feed.window-millis:2592000000}")long window){return new FeedRecovery(recovery,feed,tx,redis,observer,window);}
  @Bean FeedTrimmer feedTrimmer(FeedMapper db,FeedRedis redis,@Value("${content.feed.window-millis:2592000000}")long window){return new FeedTrimmer(db,redis,window);}
  @Bean TrendGuardService trendGuardService(TrendGuardMapper risks,TransactionTemplate tx){return new TrendGuardService(risks,tx);}
- @Bean TrendingService trendingService(InteractionMapper interactions,TransactionTemplate tx,FeedRedis redis,VisibilityService visibility,TrendGuardService risks,@Value("${content.trendguard.spike-threshold:3}")int spikeThreshold){return new TrendingService(interactions,tx,redis,visibility,risks,spikeThreshold);}
- @Bean TopicRetention topicRetention(InteractionMapper interactions,TransactionTemplate tx,
+ @Bean TrendingService trendingService(InteractionMapper interactions,TransactionTemplate tx,FeedRedis redis,VisibilityService visibility,TopicAggregator aggregator){return new TrendingService(interactions,tx,redis,visibility,aggregator);}
+ /**
+  * Hardening B1: folds the topic ledger into minute buckets off the interaction path and runs the spike check there.
+  * content.trending.aggregator.*: batch (rows per transaction, 1000), lease-millis (10000; another instance takes over
+  * after the holder stops renewing for this long), inflight-margin-millis (60000; must cover the longest interaction
+  * transaction, so the watermark never passes an event that is written but not yet committed).
+  */
+ @Bean(destroyMethod="release") TopicAggregator topicAggregator(TopicAggregatorMapper mapper,TransactionTemplate tx,TrendGuardService risks,
+   @Value("${content.trendguard.spike-threshold:3}")int spikeThreshold,@Value("${content.trending.aggregator.batch:1000}")int batch,
+   @Value("${content.trending.aggregator.lease-millis:10000}")long lease,@Value("${content.trending.aggregator.inflight-margin-millis:60000}")long margin,
+   @Value("${content.feed.tx-timeout-seconds:15}")int txTimeoutSeconds){
+  if(margin<Math.max(5,txTimeoutSeconds)*1000L)
+   throw new IllegalArgumentException("content.trending.aggregator.inflight-margin-millis ("+margin+") must cover the interaction transaction timeout ("+Math.max(5,txTimeoutSeconds)+"s)");
+  return new TopicAggregator(mapper,tx,risks,spikeThreshold,TopicAggregator.defaultOwner(),lease,batch,margin,System::currentTimeMillis);
+ }
+ /**
+  * content.trending.aggregator.enabled (default true): the background job. interval-millis (1000) is the pause between
+  * drains; max-lag-millis (5000) is the lag budget: the interval must leave room inside it, and a batch whose oldest
+  * event waited longer is logged as a warning. Disabling the job also stops the ledger purge (the watermark stays put).
+  */
+ @Bean(destroyMethod="close") @ConditionalOnProperty(name="content.trending.aggregator.enabled",havingValue="true",matchIfMissing=true)
+ TopicAggregatorJob topicAggregatorJob(TopicAggregator aggregator,@Value("${content.trending.aggregator.interval-millis:1000}")long interval,
+   @Value("${content.trending.aggregator.max-lag-millis:5000}")long maxLag,@Value("${content.trending.aggregator.lease-millis:10000}")long lease){
+  if(interval<10 || interval*2>maxLag)throw new IllegalArgumentException("content.trending.aggregator.interval-millis ("+interval+") must be in [10, max-lag-millis/2] (max-lag-millis="+maxLag+")");
+  if(lease<=maxLag)throw new IllegalArgumentException("content.trending.aggregator.lease-millis ("+lease+") must exceed max-lag-millis ("+maxLag+")");
+  return new TopicAggregatorJob(aggregator,interval,maxLag);
+ }
+ /** Own daemon thread, like {@link TopicRetentionJob}. Each run drains at most {@link #MAX_BATCHES_PER_RUN} batches. */
+ public static final class TopicAggregatorJob implements AutoCloseable {
+  public static final int MAX_BATCHES_PER_RUN=100;
+  private final ScheduledExecutorService scheduler=Executors.newSingleThreadScheduledExecutor(r->{var t=new Thread(r,"topic-aggregator");t.setDaemon(true);return t;});
+  private final java.util.concurrent.atomic.AtomicLong lastWarning=new java.util.concurrent.atomic.AtomicLong();
+  public TopicAggregatorJob(TopicAggregator aggregator,long interval,long maxLag){
+   scheduler.scheduleWithFixedDelay(()->{
+    try{
+     for(int i=0;i<MAX_BATCHES_PER_RUN;i++){
+      var b=aggregator.runBatch();
+      if(b.maxLagMs()>maxLag)warn("Topic aggregation lag {} ms exceeds max-lag-millis {}",b.maxLagMs(),maxLag);
+      if(!b.leader() || !b.full())break;
+     }
+    }catch(Exception e){warn("Topic aggregation failed; will retry: {}",e.toString(),null);}
+   },interval,interval,TimeUnit.MILLISECONDS);
+  }
+  private void warn(String message,Object a,Object b){
+   long now=System.currentTimeMillis(),previous=lastWarning.get();
+   if(now-previous>10_000 && lastWarning.compareAndSet(previous,now))org.slf4j.LoggerFactory.getLogger(TopicAggregator.class).warn(message,a,b);
+  }
+  @Override public void close(){scheduler.shutdownNow();}
+ }
+ @Bean TopicRetention topicRetention(InteractionMapper interactions,TransactionTemplate tx,TopicAggregator aggregator,
    @Value("${content.trending.retention-millis:"+TopicRetention.DEFAULT_RETENTION_MS+"}")long retention,@Value("${content.trending.retention-batch:500}")int batch){
-  return new TopicRetention(interactions,tx,retention,batch);
+  // C-13: the ledger is purged only below the aggregator's recorded watermark, so an unfolded event is never deleted.
+  return new TopicRetention(interactions,tx,retention,batch,aggregator::processedWatermarkMs);
  }
  /** Periodic purge on its own daemon thread (no @EnableScheduling dependency). Disable with content.trending.retention-enabled=false. */
  @Bean(destroyMethod="close") @ConditionalOnProperty(name="content.trending.retention-enabled",havingValue="true",matchIfMissing=true)
