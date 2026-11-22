@@ -1,6 +1,14 @@
 package io.github.xiiiiimu.content;
 
+import io.github.xiiiiimu.content.domain.*;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.test.context.*;
@@ -25,12 +33,25 @@ import static org.assertj.core.api.Assertions.*;
  * <li>settled orders per second.</li>
  * </ul>
  * The idle commit rate itself is the B4 number (empty dispatch claims are transactions too).
+ * <p>Standalone (own containers and properties, same values as {@code CommerceIngressRevisionIT} except the sale settings
+ * above): extending that suite would let its {@code content.sale.scan-enabled=false} win, and nothing would be dispatched.
  */
+@SpringBootTest @Testcontainers
 @EnabledIfEnvironmentVariable(named="CONTENT_REAL_MQ_IT",matches="true")
 @EnabledIfSystemProperty(named="content.b5.perf",matches="true")
-class CommerceSyncPerfIT extends CommerceIngressRevisionIT {
+class CommerceSyncPerfIT {
  static final String TOPIC="content-sale-perf-"+UUID.randomUUID().toString().substring(0,8);
+ @Container static final MySQLContainer<?> MYSQL=new MySQLContainer<>("mysql:8.4");
+ @Container static final GenericContainer<?> REDIS=new GenericContainer<>("redis:7.4").withExposedPorts(6379).withCommand("redis-server","--maxmemory-policy","noeviction");
+ @Container static final GenericContainer<?> S3=new GenericContainer<>("adobe/s3mock:3.12.0").withExposedPorts(9090);
  @DynamicPropertySource static void perf(DynamicPropertyRegistry r){
+  r.add("spring.datasource.url",MYSQL::getJdbcUrl);r.add("spring.datasource.username",MYSQL::getUsername);r.add("spring.datasource.password",MYSQL::getPassword);
+  r.add("content.feed.enabled",()->"true");r.add("content.feed.redis-uri",()->"redis://"+REDIS.getHost()+":"+REDIS.getMappedPort(6379));
+  r.add("content.feed.cursor-key",()->"cursor-test-key-32-bytes-minimum-00001");r.add("content.feed.identity-key",()->"identity-test-key-32-bytes-minimum-0001");
+  r.add("content.media.enabled",()->"true");r.add("content.media.s3-endpoint",()->"http://"+S3.getHost()+":"+S3.getMappedPort(9090));
+  r.add("content.media.bucket",()->"content-media");r.add("content.media.secret-key",()->"media-test-secret-key-not-for-production-01");
+  r.add("content.media.ffmpeg-image",()->"");r.add("content.assistant.python-url",()->"");
+  r.add("content.media.scan-delay-millis",()->"3600000");r.add("content.sale.sync-settle",()->"false");
   r.add("content.sale.producer-enabled",()->"true");r.add("content.sale.consumer-enabled",()->"true");
   r.add("content.sale.namesrv",CommerceMqFixture::namesrv);r.add("content.sale.topic",()->TOPIC);
   r.add("content.sale.consumer-group",()->TOPIC);r.add("content.sale.consume-threads",()->"20");
@@ -40,6 +61,18 @@ class CommerceSyncPerfIT extends CommerceIngressRevisionIT {
   r.add("content.sale.latency-enabled",()->"false");
  }
  @BeforeAll static void topic()throws Exception{CommerceMqFixture.topic(TOPIC,"commerce-sync-perf-topic.log");}
+ @Autowired SaleService sales;@Autowired MaterialService materials;@Autowired PublishService publish;
+ @Autowired AuthService auth;@Autowired JdbcTemplate db;@Autowired SaleIngress ingress;
+ record Material(long author,long post){}
+ /** Published material without a campaign (same steps as CommerceIngressRevisionIT.unsold). */
+ Material material(){
+  String suffix=UUID.randomUUID().toString().replace("-","").substring(0,12);
+  long author=auth.register("jma"+suffix,"test-author-password").userId();
+  var m=materials.createDraft(author,"perf","sale",List.of("test"),"PUBLIC_PREVIEW",null,true,true,new byte[]{1,2,3},"video/mp4","PORTRAIT");
+  for(int i=0;i<8;i++)materials.tick();
+  publish.publish(author,m.postId(),UUID.randomUUID().toString(),0);
+  return new Material(author,m.postId());
+ }
 
  static Path out(){return Path.of(System.getProperty("content.b5.out","target/b5-perf-"+System.currentTimeMillis()));}
  long comCommit(){return Long.parseLong(db.queryForObject("SHOW GLOBAL STATUS LIKE 'Com_commit'",(rs,i)->rs.getString(2)));}
@@ -61,7 +94,7 @@ class CommerceSyncPerfIT extends CommerceIngressRevisionIT {
 
  Map<String,Object> tier(String name,int rate,int seconds)throws Exception{
   int n=rate*seconds;
-  var m=unsold(false,"PUBLIC_PREVIEW");long now=System.currentTimeMillis();
+  var m=material();long now=System.currentTimeMillis();
   var campaign=sales.createCampaign(m.author(),m.post(),100,n,now-1000,now+3600000);
   var ids=buyers(n,"perf"+name+UUID.randomUUID().toString().substring(0,6)+"u");
   var outstanding=new ConcurrentHashMap<String,Pending>();

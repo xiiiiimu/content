@@ -70,6 +70,12 @@ class FanoutMeasureIT {
   return m;
  }
  static double pct(List<Double> sorted,double p){return Math.round(sorted.get(Math.max(0,(int)Math.ceil(p*sorted.size())-1))*100)/100.0;}
+ /** Exception class and the innermost cause (type + first line), e.g. a pool timeout or a lock wait timeout. */
+ static String describe(Throwable e){
+  Throwable root=e;while(root.getCause()!=null && root.getCause()!=root)root=root.getCause();
+  String msg=String.valueOf(root.getMessage()).split("\\R",2)[0];
+  return e.getClass().getSimpleName()+" <- "+root.getClass().getSimpleName()+": "+(msg.length()>160?msg.substring(0,160):msg);
+ }
  static final AtomicLong POST_IDS=new AtomicLong(70_000_000L);
  long publishOne(long author){
   long post=POST_IDS.incrementAndGet();
@@ -87,7 +93,7 @@ class FanoutMeasureIT {
    for(int i=0;i<20;i++){baseline.add(publishOne(author));Thread.sleep(20);}
    long firstReader=1_000_000L*threads;int readers=1000;
    var followNanos=new ConcurrentLinkedQueue<Long>();var publishNanos=new ConcurrentLinkedQueue<Long>();
-   var blocked=new ConcurrentHashMap<String,AtomicLong>();var failures=new AtomicLong();
+   var blocked=new ConcurrentHashMap<String,AtomicLong>();var failures=new AtomicLong();var failureTypes=new ConcurrentHashMap<String,AtomicLong>();
    var done=new AtomicBoolean();var next=new AtomicLong(firstReader);
    long waits0=status("Innodb_row_lock_waits"),time0=status("Innodb_row_lock_time");
    var pool=Executors.newFixedThreadPool(threads+2);
@@ -102,22 +108,23 @@ class FanoutMeasureIT {
     for(int t=0;t<threads;t++)workers.add(pool.submit(()->{start.await();for(;;){
      long reader=next.getAndIncrement();if(reader>=firstReader+readers)return null;
      long t0=System.nanoTime();
-     try{follows.change(reader,author,true);followNanos.add(System.nanoTime()-t0);}catch(RuntimeException e){failures.incrementAndGet();}
+     try{follows.change(reader,author,true);followNanos.add(System.nanoTime()-t0);}catch(RuntimeException e){failures.incrementAndGet();failureTypes.computeIfAbsent(describe(e),k->new AtomicLong()).incrementAndGet();}
     }}));
     long wall0=System.nanoTime();start.countDown();
     for(var f:workers)f.get(10,TimeUnit.MINUTES);
     long wallNanos=System.nanoTime()-wall0;done.set(true);
     pool.shutdown();assertThat(pool.awaitTermination(1,TimeUnit.MINUTES)).isTrue();
     long applied=db.queryForObject("SELECT COUNT(*) FROM follows WHERE followee_id=? AND status='FOLLOWING'",Long.class,author);
-    assertThat(applied).as("every follow applied").isEqualTo(readers);
     Map<String,Object> r=new LinkedHashMap<>();
-    r.put("threads",threads);r.put("readers",readers);r.put("failures",failures.get());
+    r.put("threads",threads);r.put("readers",readers);r.put("applied",applied);r.put("failures",failures.get());r.put("failure_types",new TreeMap<>(failureTypes));
     r.put("wall_ms",wallNanos/1_000_000);r.put("follows_per_sec",Math.round(readers*1e9/wallNanos*10)/10.0);
     r.put("follow_latency",dist(List.copyOf(followNanos)));
     r.put("publish_baseline_no_storm",dist(baseline));r.put("publish_during_storm",dist(List.copyOf(publishNanos)));
     r.put("innodb_row_lock_waits",status("Innodb_row_lock_waits")-waits0);r.put("innodb_row_lock_time_ms",status("Innodb_row_lock_time")-time0);
     r.put("sampled_blocked_locks_by_table_index",new TreeMap<>(blocked));
     write("r6-follow-storm-t"+threads,r);
+    // Written first, then checked: a failed follow is a measured outcome, but every request is either applied or reported.
+    assertThat(applied+failures.get()).as("applied + failed = attempted").isEqualTo(readers);
    }finally{pool.shutdownNow();}
   }
  }
