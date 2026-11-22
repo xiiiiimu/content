@@ -107,13 +107,16 @@ public final class SaleService {
   ingress.prepare();ingress.drain(limit);ingress.syncJobs(limit);
   dispatchPending(limit);
  }
- public void dispatchPending(int limit){
-  if(sender==null)return;
+ /** Serial dispatch; returns the number of rows claimed (B4: 0 means the pass found no work). */
+ public int dispatchPending(int limit){
+  if(sender==null)return 0;
+  int claimed=0;
   for(int i=0;i<Math.min(200,Math.max(1,limit));i++){
    try(var trace=SaleLatency.begin(null,"dispatch",0,0)){
     io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.Dispatch claim;
     try(var phase=SaleLatency.phase("dispatch.claim")){claim=ingress.claim();}
-    if(claim==null)return;
+    if(claim==null)return claimed;
+    claimed++;
     SaleLatency.correlate(null,claim.reservationId());
     try{
      try(var phase=SaleLatency.phase("mq.send")){sender.send(claim.reservationId());}
@@ -123,6 +126,7 @@ public final class SaleService {
     }catch(Exception e){try(var phase=SaleLatency.phase("dispatch.retry")){ingress.failed(claim);}}
    }
   }
+  return claimed;
  }
 
  public PurchaseView getRequest(long userId,String reservationId){

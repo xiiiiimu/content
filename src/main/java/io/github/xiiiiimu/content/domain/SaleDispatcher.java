@@ -65,13 +65,20 @@ public final class SaleDispatcher implements AutoCloseable {
  /** Send failures by exception type (simple class name). */
  public Map<String,Long> sendFailureTypes(){var m=new TreeMap<String,Long>();sendFailureTypes.forEach((k,v)->m.put(k,v.get()));return m;}
 
- /** Background coordinator: keeps idle slots fed until a claim comes back empty or {@code maxClaims} claims were made. */
- public void pump(int maxClaims)throws InterruptedException{
+ /**
+  * Background coordinator: keeps idle slots fed until a claim comes back empty or {@code maxClaims} claims were made.
+  * Returns how much work it saw (B4): the number of claims that took rows, plus one for every time all slots were busy,
+  * so a sender that is still working is never treated as idle. 0 = the first claim came back empty.
+  */
+ public int pump(int maxClaims)throws InterruptedException{
+  int work=0;
   for(int i=0;i<maxClaims;i++){
    var batch=dispatch();
-   if(batch==null){if(!slots.tryAcquire(1,TimeUnit.SECONDS))return;slots.release();continue;}
-   if(batch.isDone()&&batch.getNow(null)!=null&&batch.getNow(null).claimed()==0)return;
+   if(batch==null){work++;if(!slots.tryAcquire(1,TimeUnit.SECONDS))return work;slots.release();continue;}
+   if(batch.isDone()&&batch.getNow(null)!=null&&batch.getNow(null).claimed()==0)return work;
+   work++;
   }
+  return work;
  }
  /** Synchronous single claim for tests and tools; waits for the outcome transactions. */
  public Report dispatchOnce()throws Exception{var f=dispatch();return f==null?null:f.get(2*LEASE_MS,TimeUnit.MILLISECONDS);}

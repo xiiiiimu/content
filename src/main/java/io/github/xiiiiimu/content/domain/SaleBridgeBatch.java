@@ -24,10 +24,13 @@ public final class SaleBridgeBatch {
  public boolean blocked(String id){return "BLOCKED".equals(db.fence(id));}
  public boolean unknownHolds(){return db.unknownHoldCurrent()!=null;} // Locking/current read must not open an early ownership snapshot.
  public int held(long campaign){return db.held(campaign);}
- public void drain(String executor,int limit,long idle){
+ /** Returns the number of Stream entries this pass read and processed (B4: a positive count wakes the sender). */
+ public int drain(String executor,int limit,long idle){
   try(var trace=SaleLatency.begin(null,"bridge-scan",0,0)){
-  var runtime=journal.runtime();if(!"RUNNING".equals(runtime.state()))return;syncIsolations();
-  process(cache.read(executor,Math.min(batchSize,Math.max(1,limit)),idle),null,null);
+  var runtime=journal.runtime();if(!"RUNNING".equals(runtime.state()))return 0;syncIsolations();
+  var messages=cache.read(executor,Math.min(batchSize,Math.max(1,limit)),idle);
+  process(messages,null,null);
+  return messages.size();
   }
  }
  public void recover(String executor,long generation,String owner){

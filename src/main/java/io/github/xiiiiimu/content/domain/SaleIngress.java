@@ -24,9 +24,10 @@ public final class SaleIngress {
  public void prepare(){try(var trace=SaleLatency.begin(null,"bridge-prepare",0,0)){if(healthy())return;recover();if(!healthy())throw new FeedFailure(503,"SALE_RECOVERING");}}
  public static SaleEntryRedis.Request request(SaleIngressMapper.RestoreRequest r){return new SaleEntryRedis.Request(r.reservationId(),r.campaignId(),r.postId(),r.merchantId(),r.userId(),r.clientKey(),r.priceCents(),r.state(),r.rejectReason(),r.orderId(),r.createdAtMs());}
 
- public void drain(int limit){drain(consumer,limit,30000);}
- public void drain(String executor,int limit,long minIdle){
-  bridge.drain(executor,limit,minIdle);
+ /** Returns the number of Stream entries processed, see {@link SaleBridgeBatch#drain}. */
+ public int drain(int limit){return drain(consumer,limit,30000);}
+ public int drain(String executor,int limit,long minIdle){
+  return bridge.drain(executor,limit,minIdle);
  }
  private void persist(SaleEntryRedis.Request r,long generation,String recoveryOwner){
   if(r==null||r.userId()<=0||r.clientKey()==null||r.clientKey().isBlank()||r.clientKey().length()>128||!r.reservationId().matches("[a-f0-9]{32}"))throw new IllegalStateException("Invalid ingress identity");

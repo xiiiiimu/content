@@ -234,4 +234,44 @@ class CommerceDispatchBatchIT extends CommerceIngressRevisionIT {
    assertThat(d.sendFailureTypes()).as("send failure cause is evidence, not swallowed").containsEntry("IllegalStateException",1L);
   }
  }
+
+ // ---- Hardening B4: idle backoff of the sender loop (lease and confirmation semantics are covered above, unchanged) ----
+ static final long IDLE_BASE_MS=100,IDLE_MAX_MS=800;
+ /** One claim transaction plus a stub send: the time a pass needs once it starts, on top of the pause before it. */
+ static final long PASS_ALLOWANCE_MS=300;
+ static final class TimedSender implements SaleMessageSender {
+  final Map<String,Long> sentAt=new ConcurrentHashMap<>();
+  @Override public void send(String id){sentAt.putIfAbsent(id,System.currentTimeMillis());}
+ }
+ IdleBackoffLoop senderLoop(SaleDispatcher d){
+  return new IdleBackoffLoop(()->{try{return d.pump(20);}catch(InterruptedException e){Thread.currentThread().interrupt();return 0;}},IDLE_BASE_MS,IDLE_MAX_MS,null);
+ }
+ /** Rows other tests left PENDING would be real work for the loop; this test needs an idle start. */
+ void noOutstandingDispatch(){db.update("UPDATE material_sale_dispatch SET state='SENT' WHERE state IN ('PENDING','SENDING')");}
+ long sendLatency(TimedSender sender,String id,long enqueuedAt)throws InterruptedException{
+  long deadline=System.currentTimeMillis()+10_000;
+  while(!sender.sentAt.containsKey(id) && System.currentTimeMillis()<deadline)Thread.sleep(5);
+  assertThat(sender.sentAt).as("row was sent").containsKey(id);
+  return sender.sentAt.get(id)-enqueuedAt;
+ }
+ @Test void batchIdleSenderBacksOffAndStillSendsUnsignalledWorkWithinTheCap()throws Exception{
+  noOutstandingDispatch();var sender=new TimedSender();
+  try(var d=dispatcher(sender,20,1);var loop=senderLoop(d).start("b4-idle-loop")){
+   Thread.sleep(3000);
+   assertThat(loop.emptyPasses()).as("empty claims in 3 s idle; fixed %d ms polling would make about 30",IDLE_BASE_MS).isLessThanOrEqualTo(8);
+   var id=ready(1).get(0);                       // committed PENDING, and nobody tells the loop (as if another instance enqueued it)
+   long latency=sendLatency(sender,id,System.currentTimeMillis());
+   assertThat(latency).as("enqueue → send during backoff, cap %d ms + pass %d ms",IDLE_MAX_MS,PASS_ALLOWANCE_MS).isLessThanOrEqualTo(IDLE_MAX_MS+PASS_ALLOWANCE_MS);
+  }
+ }
+ @Test void batchWakeSendsNewWorkWithoutWaitingForTheBackoff()throws Exception{
+  noOutstandingDispatch();var sender=new TimedSender();
+  try(var d=dispatcher(sender,20,1);var loop=senderLoop(d).start("b4-wake-loop")){
+   Thread.sleep(2000);                          // pauses have reached the cap
+   var id=ready(1).get(0);
+   long enqueued=System.currentTimeMillis();
+   loop.wake();                                 // what the bridge cycle does after it persisted entries
+   assertThat(sendLatency(sender,id,enqueued)).as("enqueue → send after wake").isLessThanOrEqualTo(PASS_ALLOWANCE_MS);
+  }
+ }
 }
