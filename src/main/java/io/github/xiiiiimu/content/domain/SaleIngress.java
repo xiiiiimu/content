@@ -42,7 +42,7 @@ public final class SaleIngress {
    var existing=sales.request(r.reservationId());
    if(existing==null){
     try{sales.insertRequest(r.reservationId(),r.campaignId(),r.postId(),r.merchantId(),r.userId(),r.clientKey(),r.priceCents(),r.createdAtMs());}
-    catch(DuplicateKeyException e){var replay=sales.byClient(r.userId(),r.clientKey());if(replay==null||!replay.reservationId().equals(r.reservationId()))throw e;}
+    catch(DuplicateKeyException e){var replay=sales.byClientInCampaign(r.userId(),r.campaignId(),r.clientKey());if(replay==null||!replay.reservationId().equals(r.reservationId()))throw e;}
    }
    db.enqueue(r.reservationId());faults.failIfArmed("stream.beforeCommit");
   });
@@ -129,18 +129,48 @@ public final class SaleIngress {
  private boolean applyJob(SaleIngressMapper.Runtime runtime,SaleIngressMapper.CacheJob job){
   String kind=job.kind(),key=job.entityKey();
   Map<String,String> fields=new LinkedHashMap<>();SaleEntryRedis.Request request=null;Long refund=null;boolean restore=false;long campaignId=0;
+  Long scope=null,ownerPost=null;
   switch(kind){
-   case "CAMPAIGN"->{var c=sales.campaign(Long.parseLong(key));if(c!=null)fields.putAll(SaleEntryRedis.campaignFields(c,db.reserved(c.id()),db.published(c.postId())==1));}
+   case "CAMPAIGN"->{var c=sales.campaign(Long.parseLong(key));
+    if(c!=null){
+     if(archived(c.id()))return skipArchived(job);
+     scope=c.id();
+     fields.putAll(SaleEntryRedis.campaignFields(c,db.reserved(c.id()),db.published(c.postId())==1));
+     // C3: an active campaign brings its post's owners (and pc:<post>) into Redis; RESERVE relies on o: for one order per material.
+     fields.putAll(ownerFields(c.postId()));
+     fields.put("pc:"+c.postId(),joined(db.activeCampaignsOfPost(c.postId())));
+    }}
    case "BLACKLIST"->{var pair=key.split(":");long merchant=Long.parseLong(pair[0]),user=Long.parseLong(pair[1]);fields.put("b:"+key,sales.activeBlacklist(merchant,user)>0?"1":"0");}
-   case "OWNER"->{var pair=key.split(":");long user=Long.parseLong(pair[0]),post=Long.parseLong(pair[1]);var order=sales.orderByUserPost(user,post);fields.put("o:"+key,db.winner(user,post)>0?"GIVEAWAY":order==null?"":order.reservationId());}
-   case "REQUEST"->{var r=db.request(key);if(r!=null)request=request(r);}
-   case "REFUND"->{var r=db.refund(Long.parseLong(key));if(r!=null){refund=r.orderId();restore=r.restoreStock();campaignId=r.campaignId();}}
+   case "OWNER"->{var pair=key.split(":");long user=Long.parseLong(pair[0]),post=Long.parseLong(pair[1]);var order=sales.orderByUserPost(user,post);fields.put("o:"+key,db.winner(user,post)>0?"GIVEAWAY":order==null?"":order.reservationId());ownerPost=post;}
+   case "REQUEST"->{var r=db.request(key);if(r!=null){if(archived(r.campaignId()))return skipArchived(job);request=request(r);scope=r.campaignId();}}
+   case "REFUND"->{var r=db.refund(Long.parseLong(key));if(r!=null){if(archived(r.campaignId()))return skipArchived(job);refund=r.orderId();restore=r.restoreStock();campaignId=r.campaignId();scope=r.campaignId();}}
    default->throw new IllegalStateException("Unknown cache job");
   }
   faults.failIfArmed("controls.beforeApply");
-  if(!cache.apply(runtime.generation(),job,fields,request,refund,restore,campaignId))return false;
+  if(!cache.apply(runtime.generation(),job,fields,request,refund,restore,campaignId,scope,ownerPost))return false;
   db.applied(kind,key,job.revision());return true;
  }
+ private boolean archived(long campaign){return Boolean.TRUE.equals(db.archived(campaign));}
+ /** C3: MySQL is the only state of an archived campaign; its jobs are settled there without writing Redis. */
+ private boolean skipArchived(SaleIngressMapper.CacheJob job){db.applied(job.kind(),job.entityKey(),job.revision());return true;}
+ static String joined(List<Long> ids){return String.join(",",ids.stream().map(String::valueOf).toList());}
+ /** o:<user>:<post> for every sale owner (and giveaway winner) of the post, plus r: of each owner's request. */
+ Map<String,String> ownerFields(long post){
+  Map<String,String> m=new LinkedHashMap<>();
+  for(long winner:db.winners(post))m.put("o:"+winner+":"+post,"GIVEAWAY");
+  for(var o:db.ordersOfPost(post)){
+   var r=db.request(o.reservationId());if(r!=null)m.put("r:"+o.reservationId(),cache.encode(request(r)));
+   m.putIfAbsent("o:"+o.userId()+":"+post,o.reservationId());
+  }
+  return m;
+ }
+ /** C3: the archived-campaign path of the entry (Lua found no campaign): request by (user, campaign, key), V22 legacy rows included. */
+ public SaleMapper.PurchaseRequest archivedRequest(long user,long campaign,String key){
+  var r=sales.byClientInCampaign(user,campaign,key);if(r!=null)return r;
+  for(var l:db.legacyKeys(campaign))if(l.userId()==user&&l.clientKey().equals(key))return sales.request(l.canonicalReservationId());
+  return null;
+ }
+ public boolean campaignArchived(long campaign){return archived(campaign);}
  public void bestEffort(String kind,String key){try{sync(kind,key);}catch(RedisException ignored){/* Durable job retries after reconnect. */}}
  public void afterCommit(String kind,String key){
   if(!org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive()){bestEffort(kind,key);return;}
@@ -166,16 +196,25 @@ public final class SaleIngress {
   bridge.recover("recover-"+owner,generation,owner);
   importLegacy(generation,owner);
   String stage=cache.staging(generation);
-  long after=0;for(;;){renew(generation,owner);var ids=db.campaigns(after);if(ids.isEmpty())break;
-   for(long id:ids){var c=sales.campaign(id);cache.put(stage,SaleEntryRedis.campaignFields(c,db.reserved(id)+bridge.held(id),db.published(c.postId())==1));after=id;}}
-  String cursor="";for(;;){renew(generation,owner);var rows=db.requests(cursor);if(rows.isEmpty())break;
-   for(var r:rows){cache.restoreRequest(stage,request(r));cursor=r.reservationId();}}
-  // Giveaway ownership wins over purchase replay for a NEW clientKey.
-  after=0;for(;;){renew(generation,owner);var ids=db.campaigns(after);if(ids.isEmpty())break;
-   for(long id:ids){var c=sales.campaign(id);for(long user:db.winners(c.postId()))cache.put(stage,Map.of("o:"+user+":"+c.postId(),"GIVEAWAY"));after=id;}}
+  // Hardening C3: only the active set (campaigns not archived) is rebuilt; archived campaigns live in MySQL only.
+  Set<Long> posts=new TreeSet<>();
+  long after=0;for(;;){renew(generation,owner);var ids=db.activeCampaigns(after);if(ids.isEmpty())break;
+   for(long id:ids){var c=sales.campaign(id);cache.put(stage,SaleEntryRedis.campaignFields(c,db.reserved(id)+bridge.held(id),db.published(c.postId())==1));posts.add(c.postId());after=id;}}
+  after=0;for(;;){renew(generation,owner);var ids=db.activeCampaigns(after);if(ids.isEmpty())break;
+   for(long id:ids){
+    String cursor="";for(;;){renew(generation,owner);var rows=db.requestsOfCampaign(id,cursor,500);if(rows.isEmpty())break;
+     for(var r:rows){cache.restoreRequest(stage,request(r));cursor=r.reservationId();}}
+    // V22 legacy replays: a retry inside the legacy campaign keeps getting the canonical request.
+    Map<String,String> legacy=new LinkedHashMap<>();
+    for(var l:db.legacyKeys(id))legacy.put(SaleEntryRedis.client(l.userId(),id,l.clientKey()),l.canonicalReservationId());
+    cache.put(stage,legacy);
+    Map<String,String> refunds=new LinkedHashMap<>();for(long order:db.refundedOrders(id))refunds.put("refund:"+order,"1");cache.put(stage,refunds);
+    after=id;
+   }}
+  // Owners of every post with an active campaign, from any campaign (giveaway ownership wins), and pc:<post>.
+  for(long post:posts){renew(generation,owner);var fields=ownerFields(post);fields.put("pc:"+post,joined(db.activeCampaignsOfPost(post)));cache.put(stage,fields);}
   long merchant=0,user=0;for(;;){renew(generation,owner);var rows=db.blocks(merchant,user);if(rows.isEmpty())break;
    Map<String,String> fields=new LinkedHashMap<>();for(var b:rows){fields.put("b:"+b.merchantId()+":"+b.userId(),"1");merchant=b.merchantId();user=b.userId();}cache.put(stage,fields);}
-  after=0;for(;;){renew(generation,owner);var ids=db.refunds(after);if(ids.isEmpty())break;Map<String,String> fields=new LinkedHashMap<>();for(long id:ids){fields.put("refund:"+id,"1");after=id;}cache.put(stage,fields);}
   bridge.restore(stage,generation,owner);
   renew(generation,owner);faults.failIfArmed("recovery.beforeInstall");cache.install(stage,generation);
   bridge.reconciled(generation,owner);

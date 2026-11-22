@@ -5,7 +5,7 @@
 ## 购买、下载、退款
 
 - POST purchase 的身份仍来自可信登录上下文；所有登录用户可购买，不查询关注图、素材预览或分享授权。未登录 401，黑名单拒绝，活动未开放/未开始/结束、售罄、中奖已拥有明确返回业务码。
-- 账号/clientKey 重放继续返回首次请求；同素材不同 clientKey 不制造第二份订单。同账号素材限购跨活动且退款不重置；只有中奖权益而无购买请求时返回 ALREADY_OWNED。MySQL UNIQUE(user_id,post_id) 最终兜底。
+- 同一活动内账号/clientKey 重放继续返回首次请求（2026-11-22 起 clientKey 按活动区分，见文末“C3”）；同素材不同 clientKey 不制造第二份订单。同账号素材限购跨活动且退款不重置；只有中奖权益而无购买请求时返回 ALREADY_OWNED。MySQL UNIQUE(user_id,post_id) 最终兜底。
 - clientKey 是不透明、精确匹配的字符串，Redis SHA-256 与 MySQL 的唯一键必须一致；新增迁移将请求列改为 utf8mb4_0900_bin（NO PAD），避免数据库默认的不区分大小写/重音排序规则把 Redis 已接受的不同键合并。既有行内容不变，历史已合并的请求不会被拆分或重新创建。
 - 有效 PURCHASE 下载权益只对购买时绑定的版本绕过关注与分享密码/模式；省略 versionId 时解析到购买版本，不随作者默认版本升级。其他版本继续走既有授权，素材下架后禁止签发新链接。既有签名 URL 到期前可用的边界保持不变。
 - 发奖与落单持有同一 account_material_decision_locks 行。发奖保留 PAID，插入中奖权益、通知及权益缓存同步任务；禁止新自动退款。
@@ -46,3 +46,26 @@
 先执行可编译行为 RED，真实 MySQL/Redis 验证事务、Stream pending 接管、提交前/后崩溃、重复消费、释放、缓存同步与全量丢失恢复；真实 RocketMQ 验证提交和 ACK 故障窗口。测试夹具不代替生产 scanner、outbox sender 或消费者。
 
 相关回归与 8–20 单 smoke 通过后，才用原 5000 个测试账号、新独立活动、库存 100、Loops=1、RampSec=1、WarmupThreads=0、超时各 30000ms、BarrierGroupSize=5000/120000ms 复测。ready=5000、timedOut=false、sampler 启动跨度≤5000ms 才是有效同步跑次。按成功受理/SOLD_OUT 分组报告 SQL 次数、应用内/HTTP 耗时、最终订单/库存/权益/回执；无效跑次不宣称性能提高。
+
+## C3：clientKey 按活动区分与旧活动状态归档（2026-11-22）
+
+**客户端可见的行为变化**
+
+- 请求身份由（账号, clientKey）改为（账号, 活动, clientKey）。同一 clientKey 在**不同活动**中视为不同请求：以前第二个活动会拿回第一个活动的请求，现在会按正常流程新建请求（库存、黑名单、同素材限购照常检查）。同一活动内的重放不变。
+- 前端本来就按活动生成 key（`sale-attempt:<读者>:<活动>`），不受影响；自己生成 key 的调用方若跨活动复用同一个 key，需要知道它不再是幂等的。
+- 同账号同素材仍只能有一单：Redis 的 `o:<账号>:<帖子>` 与 MySQL `UNIQUE(user_id,post_id)` 不变，已拥有者在新活动里拿回原请求或 ALREADY_OWNED。
+- 活动停止（结束时间，或关闭时间）超过 24 小时，且没有未终结、未持久化、隔离中的请求后，其状态由后台分批移出 Redis。之后：
+  - 本人查询 `GET /api/purchase-requests/{reservationId}` 照常返回，数据来自 MySQL；
+  - 同一活动内用原 clientKey 重放仍返回原请求（来自 MySQL）；
+  - 新 key 购买已归档活动返回 409 `ENDED` / `CAMPAIGN_CLOSED`，与归档前一致，不变成 404。
+- 未归档活动的入口路径仍不查 MySQL；只有 Redis 回答“活动不存在”时才查一次 MySQL 判断是否为已归档活动。
+
+**实现要点**（详见 `docs/hardening-plan.md` C3）
+
+- V33：`uq_purchase_client` 改为 `uq_purchase_client_campaign(user_id,campaign_id,client_key)`（V21 的二进制排序规则保留）；活动表增加 `cache_archived_at_ms`、`cache_released_at_ms`。
+- Redis：`k:<账号>:<活动>:<sha256(key)>`；`pc:<帖子>` 记录该帖子未归档的活动；`x:<活动>` 为归档墓碑，阻止归档后迟到的缓存任务写回（下次恢复时随新哈希消失）。
+- 归档的活动其缓存任务在 MySQL 中直接标记已应用，不写 Redis；没有未归档活动的帖子，其所有权字段也不在 Redis 中，新活动创建时由活动任务装回（只填空位，不覆盖较新的所有权任务）。
+- 恢复只装载活跃集合：未归档活动的 `c:`、请求、退款标记、V22 遗留重放的 `k:`，以及这些帖子的所有权与 `pc:`。
+- V22 遗留规则保持全局（导入时按账号/clientKey 取最早的持久化请求，现按 `created_at_ms, reservation_id` 确定顺序）；遗留重放的 `k:` 只在遗留活动内生效。
+- 升级：旧版全局 `k:<账号>:<sha>` 在后台分批迁移，迁移完成（控制哈希 `fmt=3`）之前入口仍会查旧字段，即迁移期间跨活动复用 key 仍按旧语义返回旧请求；恢复只写新格式并直接置 `fmt=3`。新旧版本不可混跑写同一 Redis。
+

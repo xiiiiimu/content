@@ -329,8 +329,8 @@ class CommerceIngressRevisionIT {
   var f=fixture(false,"PUBLIC_PREVIEW");var orphan=sales.purchase(f.buyer,f.campaign.id(),"orphan-key");
   var other=fixture(false,"PUBLIC_PREVIEW");
   String canonical="a".repeat(32);long at=System.currentTimeMillis();
-  db.update("INSERT INTO material_purchase_requests(reservation_id,campaign_id,post_id,merchant_id,user_id,client_key,price_cents,state,created_at_ms,updated_at_ms) VALUES(?,?,?,?,?,?,100,'PROCESSING',?,?)",
-   canonical,other.campaign.id(),other.post,other.author,f.buyer,"orphan-key",at,at);
+  db.update("INSERT INTO material_purchase_requests(reservation_id,campaign_id,post_id,merchant_id,user_id,client_key,price_cents,state,reject_reason,created_at_ms,updated_at_ms) VALUES(?,?,?,?,?,?,100,'REJECTED','SOLD_OUT',?,?)",
+   canonical,f.campaign.id(),f.post,f.author,f.buyer,"orphan-key",at,at);
   sales.faults().armFailure("quarantine.afterRelease");
   assertThatThrownBy(()->ingress.drain("release-crash",20,0)).isInstanceOf(IllegalStateException.class);
   assertThat(redis.remainingStock(f.campaign.id())).isEqualTo(2);
@@ -456,7 +456,7 @@ class CommerceIngressRevisionIT {
  @Test void recoveryAfterAuditCommitReconcilesReleaseAndStillFencesLateOrder(){
   var f=fixture(false,"PUBLIC_PREVIEW");var r=sales.purchase(f.buyer,f.campaign.id(),"recover-orphan");var other=fixture(false,"PUBLIC_PREVIEW");
   String canonical="c".repeat(32);long at=System.currentTimeMillis();
-  db.update("INSERT INTO material_purchase_requests(reservation_id,campaign_id,post_id,merchant_id,user_id,client_key,price_cents,state,created_at_ms,updated_at_ms) VALUES(?,?,?,?,?,?,100,'PROCESSING',?,?)",canonical,other.campaign.id(),other.post,other.author,f.buyer,"recover-orphan",at,at);
+  db.update("INSERT INTO material_purchase_requests(reservation_id,campaign_id,post_id,merchant_id,user_id,client_key,price_cents,state,reject_reason,created_at_ms,updated_at_ms) VALUES(?,?,?,?,?,?,100,'REJECTED','SOLD_OUT',?,?)",canonical,f.campaign.id(),f.post,f.author,f.buyer,"recover-orphan",at,at);
   sales.faults().armFailure("quarantine.afterCommit");
   assertThatThrownBy(()->ingress.drain("audit-before-recovery",20,0)).isInstanceOf(IllegalStateException.class);
   assertThat(redis.remainingStock(f.campaign.id())).isEqualTo(1);
@@ -484,7 +484,7 @@ class CommerceIngressRevisionIT {
  }
  @Test void incompleteRedisReleaseProofHoldsInsteadOfCreditingAgain()throws Exception{
   var f=fixture(false,"PUBLIC_PREVIEW");var r=sales.purchase(f.buyer,f.campaign.id(),"partial-release");var other=fixture(false,"PUBLIC_PREVIEW");long at=System.currentTimeMillis();
-  db.update("INSERT INTO material_purchase_requests(reservation_id,campaign_id,post_id,merchant_id,user_id,client_key,price_cents,state,created_at_ms,updated_at_ms) VALUES(?,?,?,?,?,?,100,'PROCESSING',?,?)","d".repeat(32),other.campaign.id(),other.post,other.author,f.buyer,"partial-release",at,at);
+  db.update("INSERT INTO material_purchase_requests(reservation_id,campaign_id,post_id,merchant_id,user_id,client_key,price_cents,state,reject_reason,created_at_ms,updated_at_ms) VALUES(?,?,?,?,?,?,100,'REJECTED','SOLD_OUT',?,?)","d".repeat(32),f.campaign.id(),f.post,f.author,f.buyer,"partial-release",at,at);
   sales.faults().armFailure("quarantine.afterCommit");assertThatThrownBy(()->ingress.drain("partial-before-apply",20,0)).isInstanceOf(IllegalStateException.class);
   // Simulate an interrupted Redis script with an unconfirmed release marker.
   String key=io.github.xiiiiimu.content.infrastructure.SaleEntryRedis.STATE;
@@ -495,7 +495,8 @@ class CommerceIngressRevisionIT {
   assertThat(redis.remainingStock(f.campaign.id())).isEqualTo(1);
   assertThat(db.queryForObject("SELECT disposition FROM material_sale_stream_quarantine WHERE reservation_id=?",String.class,r.reservationId())).isEqualTo("HOLD");
   assertThat(sales.getRequest(f.buyer,r.reservationId()).state()).isEqualTo("PROCESSING");
-  assertThatThrownBy(()->sales.purchase(f.buyer,other.campaign.id(),"partial-release")).isInstanceOfSatisfying(FeedFailure.class,e->assertThat(e.status).isEqualTo(503));
+  // C3 option B: the same key in another campaign is a new request; the quarantined campaign itself stays paused.
+  assertThatThrownBy(()->sales.purchase(f.buyer,f.campaign.id(),"partial-release")).isInstanceOfSatisfying(FeedFailure.class,e->assertThat(e.status).isEqualTo(503));
  }
  @Test void bridgeBatchCommitBeforeAckCrashKeepsTheWholeBatchDurable(){
   var f=fixture(false,"PUBLIC_PREVIEW");

@@ -17,6 +17,12 @@ public final class SaleEntryRedis {
   long priceCents,String state,String rejectReason,Long orderId,long createdAtMs){}
  public record Result(String status,String detail,Request request){}
  public RedisCommands<String,String> commands(){return redis.connection().sync();}
+ /** Hardening C3 (option B): clientKey identity scoped to the campaign, {@code k:<user>:<campaign>:<sha256(key)>}. */
+ public static String client(long user,long campaign,String key){return "k:"+user+":"+campaign+":"+sha(key);}
+ static String sha(String key){
+  try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(key.getBytes(StandardCharsets.UTF_8)));}
+  catch(Exception e){throw new IllegalStateException(e);}
+ }
  public static String client(long user,String key){
   try{return "k:"+user+":"+HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(key.getBytes(StandardCharsets.UTF_8)));}
   catch(Exception e){throw new IllegalStateException(e);}
@@ -44,7 +50,10 @@ public final class SaleEntryRedis {
  if redis.call('HGET',KEYS[1],'run_id')~=instance then return {'UNAVAILABLE','CACHE_INSTANCE_CHANGED'} end
  local gen=redis.call('HGET',KEYS[1],'generation')
  if redis.call('HGET',KEYS[2],'generation')~=gen then return {'UNAVAILABLE','CACHE_GENERATION'} end
+ -- C3 option B: clientKey identity is per campaign (ARGV[4]); ARGV[6] is the pre-C3 global field, consulted only until
+ -- the in-place migration has set fmt=3 (keeps the old answer for requests made before the upgrade).
  local prior=redis.call('HGET',KEYS[2],ARGV[4])
+ if not prior and redis.call('HGET',KEYS[1],'fmt')~='3' then prior=redis.call('HGET',KEYS[2],ARGV[6]) end
  if prior then
   local value=redis.call('HGET',KEYS[2],'r:'..prior)
   if not value then return {'UNAVAILABLE','REQUEST_CACHE_MISSING'} end
@@ -90,7 +99,7 @@ public final class SaleEntryRedis {
  public Result reserve(long campaign,long user,String reservation,String key){
   try(var phase=SaleLatency.phase("redis.reserve.lua")){
    List<?> result=commands().eval(RESERVE,ScriptOutputType.MULTI,new String[]{CONTROL,STATE,STREAM},
-    Long.toString(campaign),Long.toString(user),reservation,client(user,key),key);
+    Long.toString(campaign),Long.toString(user),reservation,client(user,campaign,key),key,client(user,key));
    String status=String.valueOf(result.get(0)),value=String.valueOf(result.get(1));
    if(status.equals("OK")||status.equals("EXISTING"))return new Result(status,null,decode(value));
    if(status.equals("UNAVAILABLE")&&!value.equals("GATEWAY_PAUSED")){try{commands().hset(CONTROL,"repair","1");}catch(RedisException ignored){}}
@@ -169,7 +178,7 @@ public final class SaleEntryRedis {
  public boolean releaseQuarantine(SaleBridgeMapper.Quarantine q,Request canonical){
   Long n=commands().eval(RELEASE_QUARANTINE,ScriptOutputType.INTEGER,new String[]{CONTROL,STATE},
    Long.toString(q.trustedGeneration()),q.streamId(),q.trustedJson(),canonical==null?"":encode(canonical),
-   canonical==null?"":client(canonical.userId(),canonical.clientKey()));return n==1||n==2;
+   canonical==null?"":client(canonical.userId(),canonical.campaignId(),canonical.clientKey()));return n==1||n==2;
  }
  public void quarantineGates(long generation,long revision,boolean unknown,List<Long> campaigns){
   String joined=String.join(",",campaigns.stream().map(String::valueOf).toList());
@@ -183,7 +192,7 @@ public final class SaleEntryRedis {
   if(ok!=1)throw new IllegalStateException("Stale recovery install");
  }
  public void publish(long generation,String runId){
-  Long ok=commands().eval("if redis.call('HGET',KEYS[1],'generation')~=ARGV[1] or redis.call('HGET',KEYS[2],'generation')~=ARGV[1] or string.match(redis.call('INFO','server'),'run_id:([a-z0-9]+)')~=ARGV[2] then return 0 end;redis.call('HSET',KEYS[1],'ready','1','repair','0','run_id',ARGV[2]);return 1",ScriptOutputType.INTEGER,new String[]{CONTROL,STATE},Long.toString(generation),runId);
+  Long ok=commands().eval("if redis.call('HGET',KEYS[1],'generation')~=ARGV[1] or redis.call('HGET',KEYS[2],'generation')~=ARGV[1] or string.match(redis.call('INFO','server'),'run_id:([a-z0-9]+)')~=ARGV[2] then return 0 end;redis.call('HSET',KEYS[1],'ready','1','repair','0','run_id',ARGV[2],'fmt','3');return 1",ScriptOutputType.INTEGER,new String[]{CONTROL,STATE},Long.toString(generation),runId);
   if(ok!=1)throw new IllegalStateException("Stale recovery publish");
  }
  public List<StreamMessage<String,String>> legacy(long campaign,String cursor){
@@ -199,7 +208,7 @@ public final class SaleEntryRedis {
   return m;
  }
  public void restoreRequest(String stage,Request r){
-  Map<String,String> m=new LinkedHashMap<>();m.put("r:"+r.reservationId(),encode(r));m.put(client(r.userId(),r.clientKey()),r.reservationId());
+  Map<String,String> m=new LinkedHashMap<>();m.put("r:"+r.reservationId(),encode(r));m.put(client(r.userId(),r.campaignId(),r.clientKey()),r.reservationId());
   if(r.state().equals("PROCESSING"))m.put("u:"+r.userId()+":"+r.postId(),r.reservationId());
   if(r.orderId()!=null)m.put("o:"+r.userId()+":"+r.postId(),r.reservationId());put(stage,m);
  }
@@ -208,10 +217,16 @@ public final class SaleEntryRedis {
  local version='v:'..ARGV[2]
  local old=redis.call('HGET',KEYS[2],version)
  if old and (#old>#ARGV[3] or (#old==#ARGV[3] and old>ARGV[3])) then return 1 end
+ -- C3: nothing is written back for an archived campaign (tombstone set by the archiver's first delete), and ownership is
+ -- kept only for posts with an active campaign (pc:<post>, written by the campaign job and recovery) once fmt=3.
+ if ARGV[9]~='' and redis.call('HGET',KEYS[2],'x:'..ARGV[9]) then return 1 end
+ if ARGV[10]~='' and redis.call('HGET',KEYS[1],'fmt')=='3' and not redis.call('HGET',KEYS[2],'pc:'..ARGV[10]) then return 1 end
  local fields=cjson.decode(ARGV[4])
  for k,v in pairs(fields) do
   if v=='' then redis.call('HDEL',KEYS[2],k)
   elseif string.sub(k,-6)==':stock' then redis.call('HSETNX',KEYS[2],k,v)
+  -- C3: a campaign job's owner snapshot only fills gaps; OWNER/REQUEST jobs stay authoritative for o: and r:.
+  elseif string.sub(ARGV[2],1,9)=='CAMPAIGN:' and (string.sub(k,1,2)=='o:' or string.sub(k,1,2)=='r:') then redis.call('HSETNX',KEYS[2],k,v)
   else redis.call('HSET',KEYS[2],k,v) end
  end
  if ARGV[5]~='' then
@@ -233,8 +248,13 @@ public final class SaleEntryRedis {
  redis.call('HSET',KEYS[2],version,ARGV[3]);return 1
  """;
  public boolean apply(long generation,SaleIngressMapper.CacheJob job,Map<String,String> fields,Request request,Long refund,boolean restore,long campaign){
+  return apply(generation,job,fields,request,refund,restore,campaign,null,null);
+ }
+ /** @param scope campaign whose tombstone suppresses the write (null: none); @param ownerPost post whose ownership this job writes (null: none). */
+ public boolean apply(long generation,SaleIngressMapper.CacheJob job,Map<String,String> fields,Request request,Long refund,boolean restore,long campaign,Long scope,Long ownerPost){
   try{
-   Long result=commands().eval(APPLY,ScriptOutputType.INTEGER,new String[]{CONTROL,STATE},Long.toString(generation),job.kind()+":"+job.entityKey(),Long.toString(job.revision()),json.writeValueAsString(fields),request==null?"":encode(request),refund==null?"":Long.toString(refund),restore?"1":"0",Long.toString(campaign));
+   Long result=commands().eval(APPLY,ScriptOutputType.INTEGER,new String[]{CONTROL,STATE},Long.toString(generation),job.kind()+":"+job.entityKey(),Long.toString(job.revision()),json.writeValueAsString(fields),request==null?"":encode(request),refund==null?"":Long.toString(refund),restore?"1":"0",Long.toString(campaign),
+    scope==null?"":Long.toString(scope),ownerPost==null?"":Long.toString(ownerPost));
    return result==1;
   }catch(com.fasterxml.jackson.core.JsonProcessingException e){throw new IllegalStateException(e);}
  }
@@ -305,4 +325,105 @@ public final class SaleEntryRedis {
   return out;
  }
  public long dropStage(long generation){return commands().unlink(BASE+"stage:"+generation);}
+ // ---- Hardening C3: archive, post sweep, in-place clientKey migration ----
+ private static final String FENCE_OK="if redis.call('HGET',KEYS[1],'generation')~=ARGV[1] or redis.call('HGET',KEYS[2],'generation')~=ARGV[1] then return -1 end\n";
+ private static final String ARCHIVE=FENCE_OK+"""
+ redis.call('HSET',KEYS[2],'x:'..ARGV[2],'1')
+ local n=0
+ for i=3,#ARGV do n=n+redis.call('HDEL',KEYS[2],ARGV[i]) end
+ return n
+ """;
+ /** Deletes one batch of an archived campaign's fields and sets its tombstone; -1 when the generation moved (recovery). */
+ public long archiveFields(long generation,long campaign,List<String> fields){
+  List<String> args=new ArrayList<>(fields.size()+2);args.add(Long.toString(generation));args.add(Long.toString(campaign));args.addAll(fields);
+  return commands().eval(ARCHIVE,ScriptOutputType.INTEGER,new String[]{CONTROL,STATE},args.toArray(String[]::new));
+ }
+ private static final String POST_SWEEP=FENCE_OK+"""
+ local key='pc:'..ARGV[2]
+ local drop={}
+ for id in string.gmatch(ARGV[3],'[^,]+') do drop[id]=true end
+ local keep={}
+ for id in string.gmatch(redis.call('HGET',KEYS[2],key) or '','[^,]+') do if not drop[id] then table.insert(keep,id) end end
+ if #keep>0 then redis.call('HSET',KEYS[2],key,table.concat(keep,',')) return 0 end
+ redis.call('HDEL',KEYS[2],key)
+ local n=0
+ for i=4,#ARGV do n=n+redis.call('HDEL',KEYS[2],ARGV[i]) end
+ return n+1
+ """;
+ /**
+  * Removes the archived campaigns from {@code pc:<post>}; only when no campaign is left does it delete the post's ownership
+  * fields. Returns 0 when an active campaign keeps them, -1 when the generation moved.
+  */
+ public long sweepPost(long generation,long post,List<Long> archived,List<String> ownerFields){
+  List<String> args=new ArrayList<>(ownerFields.size()+3);args.add(Long.toString(generation));args.add(Long.toString(post));
+  args.add(String.join(",",archived.stream().map(String::valueOf).toList()));args.addAll(ownerFields);
+  return commands().eval(POST_SWEEP,ScriptOutputType.INTEGER,new String[]{CONTROL,STATE},args.toArray(String[]::new));
+ }
+ private static final String MIGRATE=FENCE_OK+"""
+ local n=0
+ local i=2
+ while i+2<=#ARGV do
+  local old,new,value=ARGV[i],ARGV[i+1],ARGV[i+2]
+  if new~='' then redis.call('HSETNX',KEYS[2],new,value) end
+  n=n+redis.call('HDEL',KEYS[2],old)
+  i=i+3
+ end
+ return n
+ """;
+ /** Triples (old global field, new field or "" when the campaign is archived, value); -1 when the generation moved. */
+ public long migrateKeys(long generation,List<String[]> triples){
+  List<String> args=new ArrayList<>(triples.size()*3+1);args.add(Long.toString(generation));
+  for(var t:triples){args.add(t[0]);args.add(t[1]);args.add(t[2]);}
+  return commands().eval(MIGRATE,ScriptOutputType.INTEGER,new String[]{CONTROL,STATE},args.toArray(String[]::new));
+ }
+ public long putFenced(long generation,Map<String,String> fields){
+  if(fields.isEmpty())return 0;
+  List<String> args=new ArrayList<>();args.add(Long.toString(generation));fields.forEach((k,v)->{args.add(k);args.add(v);});
+  return commands().eval(FENCE_OK+"for i=2,#ARGV,2 do redis.call('HSET',KEYS[2],ARGV[i],ARGV[i+1]) end return 1",ScriptOutputType.INTEGER,new String[]{CONTROL,STATE},args.toArray(String[]::new));
+ }
+ public boolean markFormat(long generation){
+  Long n=commands().eval(FENCE_OK+"redis.call('HSET',KEYS[1],'fmt','3') return 1",ScriptOutputType.INTEGER,new String[]{CONTROL,STATE},Long.toString(generation));
+  return n!=null&&n==1;
+ }
+ public String control(String field){return commands().hget(CONTROL,field);}
+ public void setControl(String field,String value){commands().hset(CONTROL,field,value);}
+ /**
+  * Campaign ids of Stream entries not yet acknowledged (pending, or never delivered to the persist group), or empty when
+  * more than {@code limit} such entries exist (the caller then treats every campaign as possibly unpersisted). An entry is
+  * ACKed only after its request is committed to MySQL or quarantined.
+  */
+ public Optional<Set<Long>> unpersistedCampaigns(int limit){
+  var entries=unpersisted(limit);if(entries.isEmpty())return Optional.empty();
+  Set<Long> campaigns=new HashSet<>();
+  for(var m:entries.get()){
+   try{campaigns.add(json.readTree(m.getBody().get("request")).get("campaignId").asLong());}
+   catch(Exception e){return Optional.empty();}   // unreadable entry: be conservative
+  }
+  return Optional.of(campaigns);
+ }
+ /** Millisecond time of the oldest unacknowledged Stream entry (Long.MAX_VALUE when none), empty above {@code limit}. */
+ public Optional<Long> oldestUnpersistedMs(int limit){
+  var entries=unpersisted(limit);if(entries.isEmpty())return Optional.empty();
+  return Optional.of(entries.get().stream().mapToLong(m->Long.parseLong(m.getId().split("-")[0])).min().orElse(Long.MAX_VALUE));
+ }
+ private Optional<List<StreamMessage<String,String>>> unpersisted(int limit){
+  var c=commands();
+  if(!"stream".equals(c.type(STREAM)))return Optional.of(List.of());
+  String lastDelivered=null;
+  for(Object g:c.xinfoGroups(STREAM)){
+   var info=(List<?>)g;String name=null,last=null;
+   for(int i=0;i+1<info.size();i+=2){String k=String.valueOf(info.get(i));if(k.equals("name"))name=String.valueOf(info.get(i+1));if(k.equals("last-delivered-id"))last=String.valueOf(info.get(i+1));}
+   if(GROUP.equals(name))lastDelivered=last;
+  }
+  List<StreamMessage<String,String>> messages=new ArrayList<>();
+  if(lastDelivered==null)messages.addAll(c.xrange(STREAM,io.lettuce.core.Range.create("-","+"),io.lettuce.core.Limit.from(limit+1)));   // no group yet: nothing persisted
+  else{
+   var pending=c.xpending(STREAM,GROUP,io.lettuce.core.Range.create("-","+"),io.lettuce.core.Limit.from(limit+1));
+   if(pending.size()>limit)return Optional.empty();
+   for(var p:pending)messages.addAll(c.xrange(STREAM,io.lettuce.core.Range.create(p.getId(),p.getId())));
+   messages.addAll(c.xrange(STREAM,io.lettuce.core.Range.from(io.lettuce.core.Range.Boundary.excluding(lastDelivered),io.lettuce.core.Range.Boundary.unbounded()),io.lettuce.core.Limit.from(limit+1)));
+  }
+  if(messages.size()>limit)return Optional.empty();
+  return Optional.of(messages);
+ }
 }

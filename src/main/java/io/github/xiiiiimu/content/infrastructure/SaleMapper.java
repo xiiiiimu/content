@@ -87,9 +87,18 @@ public interface SaleMapper {
  @Select("""
   SELECT reservation_id AS reservationId,campaign_id AS campaignId,post_id AS postId,merchant_id AS merchantId,user_id AS userId,
          client_key AS clientKey,price_cents AS priceCents,state,reject_reason AS rejectReason,order_id AS orderId
-  FROM material_purchase_requests WHERE user_id=#{user} AND client_key=#{key} LIMIT 1
+  FROM material_purchase_requests WHERE user_id=#{user} AND client_key=#{key} ORDER BY created_at_ms,reservation_id LIMIT 1
   """)
+ /** Earliest request of this account with this key in any campaign: only the V22 legacy import uses the global rule. */
  PurchaseRequest byClient(@Param("user")long user,@Param("key")String key);
+
+ @Select("""
+  SELECT reservation_id AS reservationId,campaign_id AS campaignId,post_id AS postId,merchant_id AS merchantId,user_id AS userId,
+         client_key AS clientKey,price_cents AS priceCents,state,reject_reason AS rejectReason,order_id AS orderId
+  FROM material_purchase_requests WHERE user_id=#{user} AND campaign_id=#{campaign} AND client_key=#{key}
+  """)
+ /** C3 option B: the request identity (uq_purchase_client_campaign). */
+ PurchaseRequest byClientInCampaign(@Param("user")long user,@Param("campaign")long campaign,@Param("key")String key);
 
  @Update("""
   UPDATE material_purchase_requests SET state=#{state},reject_reason=#{reason},order_id=#{order},updated_at_ms=#{at}

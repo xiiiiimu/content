@@ -86,4 +86,34 @@ public interface SaleIngressMapper {
  int legacyReplay(@Param("legacy")String legacy,@Param("campaign")long campaign,@Param("stream")String stream,
   @Param("canonical")String canonical,@Param("user")long user,@Param("client")String client,@Param("request")String request,@Param("response")String response);
  @Select("SELECT canonical_reservation_id FROM material_sale_legacy_replays WHERE legacy_reservation_id=#{id}") String legacyCanonical(String id);
+
+ // ---- Hardening C3: active set, archive, migration ----
+ record LegacyKey(long userId,String clientKey,String canonicalReservationId){}
+ record Owner(long userId,String reservationId){}
+ record ArchiveCandidate(long id,long postId,boolean archived){}
+ @Select("SELECT id FROM material_sale_campaigns WHERE id>#{after} AND cache_archived_at_ms IS NULL ORDER BY id LIMIT 200") List<Long> activeCampaigns(long after);
+ @Select("SELECT cache_archived_at_ms IS NOT NULL FROM material_sale_campaigns WHERE id=#{id}") Boolean archived(long id);
+ @Select("SELECT id FROM material_sale_campaigns WHERE post_id=#{post} AND cache_archived_at_ms IS NULL ORDER BY id") List<Long> activeCampaignsOfPost(long post);
+ @Select("SELECT id FROM material_sale_campaigns WHERE post_id=#{post} AND cache_archived_at_ms IS NOT NULL ORDER BY id") List<Long> archivedCampaignsOfPost(long post);
+ @Select("SELECT reservation_id AS reservationId,campaign_id AS campaignId,post_id AS postId,merchant_id AS merchantId,user_id AS userId,client_key AS clientKey,price_cents AS priceCents,state,reject_reason AS rejectReason,order_id AS orderId,created_at_ms AS createdAtMs FROM material_purchase_requests WHERE campaign_id=#{campaign} AND reservation_id>#{after} ORDER BY reservation_id LIMIT #{n}")
+ List<RestoreRequest> requestsOfCampaign(@Param("campaign")long campaign,@Param("after")String after,@Param("n")int n);
+ @Select("SELECT reservation_id AS reservationId,campaign_id AS campaignId,post_id AS postId,merchant_id AS merchantId,user_id AS userId,client_key AS clientKey,price_cents AS priceCents,state,reject_reason AS rejectReason,order_id AS orderId,created_at_ms AS createdAtMs FROM material_purchase_requests WHERE reservation_id>#{after} ORDER BY reservation_id LIMIT #{n}")
+ List<RestoreRequest> requestPage(@Param("after")String after,@Param("n")int n);
+ /** Everyone who owns the post through a sale (any order state: one order per account and material for life). */
+ @Select("SELECT user_id AS userId,reservation_id AS reservationId FROM material_orders WHERE post_id=#{post} ORDER BY user_id") List<Owner> ordersOfPost(long post);
+ @Select("SELECT user_id AS userId,client_key AS clientKey,canonical_reservation_id AS canonicalReservationId FROM material_sale_legacy_replays WHERE legacy_campaign_id=#{campaign}")
+ List<LegacyKey> legacyKeys(long campaign);
+ @Select("SELECT id FROM material_orders WHERE campaign_id=#{campaign} AND state='REFUNDED'") List<Long> refundedOrders(long campaign);
+ @Select("SELECT f.id FROM material_refund_requests f JOIN material_orders o ON o.id=f.order_id WHERE o.campaign_id=#{campaign}") List<Long> refundRequests(long campaign);
+ /**
+  * Campaigns whose Redis state may leave: stopped (end time, or close time for a closed campaign) more than the grace period
+  * ago, plus campaigns archived on the MySQL side whose Redis release is unfinished.
+  */
+ @Select("SELECT id,post_id AS postId,cache_archived_at_ms IS NOT NULL AS archived FROM material_sale_campaigns WHERE id>#{after} AND cache_released_at_ms IS NULL"
+  +" AND (cache_archived_at_ms IS NOT NULL OR (CASE WHEN state='CLOSED' THEN LEAST(end_ms,updated_at_ms) ELSE end_ms END)<#{before}) ORDER BY id LIMIT #{n}")
+ List<ArchiveCandidate> archiveCandidates(@Param("before")long before,@Param("after")long after,@Param("n")int n);
+ @Select("SELECT COUNT(*) FROM material_sale_stream_quarantine WHERE campaign_id=#{campaign} AND disposition IN ('HOLD','RELEASE_PENDING')") int unresolvedQuarantine(long campaign);
+ @Select("SELECT COUNT(*) FROM material_sale_stream_quarantine WHERE disposition IN ('HOLD','RELEASE_PENDING') AND campaign_id IS NULL") int unresolvedUnknownQuarantine();
+ @Update("UPDATE material_sale_campaigns SET cache_archived_at_ms="+NOW+" WHERE id=#{id} AND cache_archived_at_ms IS NULL") int markArchived(long id);
+ @Update("UPDATE material_sale_campaigns SET cache_released_at_ms="+NOW+" WHERE id=#{id} AND cache_archived_at_ms IS NOT NULL AND cache_released_at_ms IS NULL") int markReleased(long id);
 }

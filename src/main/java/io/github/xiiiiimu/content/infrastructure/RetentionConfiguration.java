@@ -61,6 +61,15 @@ public class RetentionConfiguration {
   RetentionJob saleRetentionJob(SaleRetention retention,@Value("${content.retention.sale.interval-millis:"+DEFAULT_INTERVAL+"}")long interval){
    return new RetentionJob("sale-retention",interval,retention::purge);
   }
+  @Bean SaleStateArchiver saleStateArchiver(SaleIngressMapper db,SaleMapper sales,SaleRedis redis,TransactionTemplate tx,
+    @Value("${content.retention.sale-state.grace-millis:"+SaleStateArchiver.DEFAULT_GRACE_MS+"}")long grace,
+    @Value("${content.retention.sale-state.batch:"+DEFAULT_BATCH+"}")int batch,@Value("${content.retention.sale-state.max-batches:"+DEFAULT_MAX_BATCHES+"}")int maxBatches){
+   return new SaleStateArchiver(db,sales,redis.entry(),tx,grace,batch,maxBatches);
+  }
+  @Bean(destroyMethod="close") @ConditionalOnProperty(name="content.retention.sale-state.enabled",havingValue="true",matchIfMissing=true)
+  RetentionJob saleStateArchiverJob(SaleStateArchiver archiver,@Value("${content.retention.sale-state.interval-millis:"+DEFAULT_INTERVAL+"}")long interval){
+   return new RetentionJob("sale-state-archiver",interval,()->{archiver.migrate();return archiver.archive();});
+  }
   @Bean SaleStreamRetention saleStreamRetention(RetentionMapper db,SaleRedis redis,
     @Value("${content.retention.sale-stream.retention-millis:"+SaleStreamRetention.DEFAULT_RETENTION_MS+"}")long retention,
     @Value("${content.retention.sale-stream.batch:"+DEFAULT_BATCH+"}")int batch,@Value("${content.retention.sale-stream.max-batches:"+DEFAULT_MAX_BATCHES+"}")int maxBatches){

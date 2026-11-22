@@ -20,7 +20,8 @@ public final class SaleBridgeBatch {
  record Result(List<Item> good,List<Bad> bad,List<String> inserted){}
  private static boolean valid(SaleEntryRedis.Request r){return r!=null&&r.reservationId()!=null&&r.reservationId().matches("[a-f0-9]{32}")&&r.userId()>0&&r.campaignId()>0&&r.postId()>0&&r.merchantId()>0&&r.priceCents()>=0&&r.createdAtMs()>=0&&r.clientKey()!=null&&!r.clientKey().isBlank()&&r.clientKey().length()<=128&&"PROCESSING".equals(r.state())&&r.orderId()==null&&r.rejectReason()==null;}
  private static boolean same(SaleEntryRedis.Request a,SaleEntryRedis.Request b){return a.reservationId().equals(b.reservationId())&&a.campaignId()==b.campaignId()&&a.postId()==b.postId()&&a.merchantId()==b.merchantId()&&a.userId()==b.userId()&&a.priceCents()==b.priceCents()&&a.createdAtMs()==b.createdAtMs()&&a.clientKey().equals(b.clientKey());}
- private static String client(SaleEntryRedis.Request r){return SaleEntryRedis.client(r.userId(),r.clientKey());}
+ // C3 option B: clientKey identity is (user, campaign, key); the same key in another campaign is a different request.
+ private static String client(SaleEntryRedis.Request r){return SaleEntryRedis.client(r.userId(),r.campaignId(),r.clientKey());}
  public boolean blocked(String id){return "BLOCKED".equals(db.fence(id));}
  public boolean unknownHolds(){return db.unknownHoldCurrent()!=null;} // Locking/current read must not open an early ownership snapshot.
  public int held(long campaign){return db.held(campaign);}

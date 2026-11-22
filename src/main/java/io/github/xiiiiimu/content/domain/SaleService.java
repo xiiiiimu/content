@@ -95,11 +95,24 @@ public final class SaleService {
   try{
    var result=redis.entry().reserve(campaignId,userId,UUID.randomUUID().toString().replace("-",""),clientKey);
    if("UNAVAILABLE".equals(result.status()))throw new FeedFailure(503,result.detail());
+   if("REJECT".equals(result.status())&&"CAMPAIGN_NOT_FOUND".equals(result.detail())){var archived=archivedPurchase(userId,campaignId,clientKey);if(archived!=null)return archived;}
    if("REJECT".equals(result.status()))throw new FeedFailure("CAMPAIGN_NOT_FOUND".equals(result.detail())?404:409,result.detail());
    SaleLatency.correlate(clientKey,result.request().reservationId());
    return cacheView(result.request());
   }catch(io.lettuce.core.RedisException e){throw new FeedFailure(503,"SALE_CACHE_UNAVAILABLE");}
   }
+ }
+ /**
+  * Hardening C3: Redis no longer knows an archived campaign. Only on this path (the Lua script found no campaign) MySQL is
+  * read: a replay of this account's key in that campaign returns the original request; anything else keeps the 409 the
+  * campaign had before it was archived. Active campaigns never reach this code, so their entry stays SQL-free.
+  */
+ private PurchaseView archivedPurchase(long userId,long campaignId,String clientKey){
+  if(ingress==null||!ingress.campaignArchived(campaignId))return null;
+  var replay=ingress.archivedRequest(userId,campaignId,clientKey);
+  if(replay!=null)return toPurchase(replay);
+  var c=db.campaign(campaignId);
+  throw new FeedFailure(409,c!=null&&"CLOSED".equals(c.state())?"CAMPAIGN_CLOSED":"ENDED");
  }
  private PurchaseView cacheView(SaleEntryRedis.Request r){return new PurchaseView(r.reservationId(),r.state(),r.rejectReason(),r.orderId(),r.campaignId(),r.postId());}
 
