@@ -1,0 +1,97 @@
+{
+  "idle_commits_per_sec" : 17.4,
+  "warm" : {
+    "tier" : "warm",
+    "rate" : 20,
+    "seconds" : 10,
+    "purchases" : 200,
+    "orders" : 200,
+    "rejected_seen" : 0,
+    "unresolved" : 0,
+    "failures" : { },
+    "submit_ms" : 9955,
+    "elapsed_to_drained_ms" : 10185,
+    "orders_per_sec_settled" : 20.3,
+    "com_commit" : 1044,
+    "purchase_return_to_seen_succeeded" : {
+      "n" : 200,
+      "p50_ms" : 318,
+      "p95_ms" : 481,
+      "p99_ms" : 561,
+      "max_ms" : 615,
+      "avg_ms" : 326.1
+    },
+    "order_commit_to_seen" : {
+      "n" : 200,
+      "p50_ms" : 88,
+      "p95_ms" : 128,
+      "p99_ms" : 143,
+      "max_ms" : 204,
+      "avg_ms" : 87.9
+    }
+  },
+  "r60" : {
+    "tier" : "r60",
+    "rate" : 60,
+    "seconds" : 60,
+    "purchases" : 3600,
+    "orders" : 3600,
+    "rejected_seen" : 0,
+    "unresolved" : 0,
+    "failures" : { },
+    "submit_ms" : 59983,
+    "elapsed_to_drained_ms" : 78200,
+    "orders_per_sec_settled" : 46.2,
+    "com_commit" : 14952,
+    "purchase_return_to_seen_succeeded" : {
+      "n" : 3600,
+      "p50_ms" : 835,
+      "p95_ms" : 52714,
+      "p99_ms" : 65823,
+      "max_ms" : 76000,
+      "avg_ms" : 9570.3
+    },
+    "order_commit_to_seen" : {
+      "n" : 3600,
+      "p50_ms" : 288,
+      "p95_ms" : 810,
+      "p99_ms" : 1007,
+      "max_ms" : 1523,
+      "avg_ms" : 356.3
+    },
+    "commits_attributable" : 13591,
+    "commits_per_order" : 3.775
+  },
+  "r120" : {
+    "tier" : "r120",
+    "rate" : 120,
+    "seconds" : 60,
+    "purchases" : 7200,
+    "orders" : 7200,
+    "rejected_seen" : 0,
+    "unresolved" : 0,
+    "failures" : { },
+    "submit_ms" : 59992,
+    "elapsed_to_drained_ms" : 166739,
+    "orders_per_sec_settled" : 43.2,
+    "com_commit" : 29847,
+    "purchase_return_to_seen_succeeded" : {
+      "n" : 7200,
+      "p50_ms" : 30045,
+      "p95_ms" : 131715,
+      "p99_ms" : 152274,
+      "max_ms" : 163930,
+      "avg_ms" : 52113.0
+    },
+    "order_commit_to_seen" : {
+      "n" : 7200,
+      "p50_ms" : 1044,
+      "p95_ms" : 3522,
+      "p99_ms" : 4321,
+      "max_ms" : 5025,
+      "avg_ms" : 1354.3
+    },
+    "commits_attributable" : 26946,
+    "commits_per_order" : 3.743
+  }
+}

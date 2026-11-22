@@ -1,0 +1,44 @@
+{
+  "threads" : 64,
+  "readers" : 1000,
+  "applied" : 993,
+  "failures" : 7,
+  "failure_types" : {
+    "CannotCreateTransactionException <- SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 5000ms (total=16, active=16, idle=0, waiting=49)" : 1,
+    "CannotCreateTransactionException <- SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 5001ms (total=16, active=16, idle=0, waiting=49)" : 3,
+    "CannotCreateTransactionException <- SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 5002ms (total=16, active=16, idle=0, waiting=49)" : 1,
+    "CannotCreateTransactionException <- SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 5003ms (total=16, active=16, idle=0, waiting=49)" : 1,
+    "CannotCreateTransactionException <- SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 5008ms (total=16, active=16, idle=0, waiting=49)" : 1
+  },
+  "wall_ms" : 32367,
+  "follows_per_sec" : 30.9,
+  "follow_latency" : {
+    "n" : 993,
+    "p50_ms" : 2061.6,
+    "p95_ms" : 3797.85,
+    "p99_ms" : 5165.75,
+    "max_ms" : 5522.3805,
+    "avg_ms" : 1983.56
+  },
+  "publish_baseline_no_storm" : {
+    "n" : 20,
+    "p50_ms" : 16.25,
+    "p95_ms" : 22.02,
+    "p99_ms" : 24.47,
+    "max_ms" : 24.4733,
+    "avg_ms" : 16.98
+  },
+  "publish_during_storm" : {
+    "n" : 7,
+    "p50_ms" : 2182.36,
+    "p95_ms" : 3880.0,
+    "p99_ms" : 3880.0,
+    "max_ms" : 3880.0048,
+    "avg_ms" : 2510.81
+  },
+  "innodb_row_lock_waits" : 1006,
+  "innodb_row_lock_time_ms" : 478661,
+  "sampled_blocked_locks_by_table_index" : {
+    "author_feed_mode/PRIMARY" : 1263
+  }
+}

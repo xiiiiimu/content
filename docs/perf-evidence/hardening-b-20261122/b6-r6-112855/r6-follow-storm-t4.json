@@ -1,0 +1,38 @@
+{
+  "threads" : 4,
+  "readers" : 1000,
+  "applied" : 1000,
+  "failures" : 0,
+  "failure_types" : { },
+  "wall_ms" : 38940,
+  "follows_per_sec" : 25.7,
+  "follow_latency" : {
+    "n" : 1000,
+    "p50_ms" : 143.54,
+    "p95_ms" : 236.09,
+    "p99_ms" : 320.33,
+    "max_ms" : 408.2999,
+    "avg_ms" : 155.57
+  },
+  "publish_baseline_no_storm" : {
+    "n" : 20,
+    "p50_ms" : 26.4,
+    "p95_ms" : 42.25,
+    "p99_ms" : 105.92,
+    "max_ms" : 105.918,
+    "avg_ms" : 32.82
+  },
+  "publish_during_storm" : {
+    "n" : 96,
+    "p50_ms" : 150.8,
+    "p95_ms" : 254.01,
+    "p99_ms" : 391.15,
+    "max_ms" : 391.1526,
+    "avg_ms" : 165.34
+  },
+  "innodb_row_lock_waits" : 1191,
+  "innodb_row_lock_time_ms" : 141184,
+  "sampled_blocked_locks_by_table_index" : {
+    "author_feed_mode/PRIMARY" : 5460
+  }
+}
