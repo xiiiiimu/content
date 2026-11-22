@@ -1,0 +1,1 @@
+    722 post_stats	PRIMARY	X,REC_NOT_GAP	X,REC_NOT_GAP
