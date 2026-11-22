@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import jdk.jfr.Recording;
 import jdk.jfr.consumer.RecordingFile;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import static org.assertj.core.api.Assertions.*;
 
 /**
@@ -273,5 +274,130 @@ class CommerceDispatchBatchIT extends CommerceIngressRevisionIT {
    loop.wake();                                 // what the bridge cycle does after it persisted entries
    assertThat(sendLatency(sender,id,enqueued)).as("enqueue → send after wake").isLessThanOrEqualTo(PASS_ALLOWANCE_MS);
   }
+ }
+
+ // ---- Hardening B5: cache sync after settle. Lives here for the commit counter; the batcher under test is a local instance
+ // (not started unless a test starts it), swapped into SaleService and restored afterwards. ----
+ @Autowired SaleCacheSyncBatcher cacheSyncBean;
+ /** B5: commits made on the calling thread, whatever trace kind (settle and the scanner open their own traces). */
+ long threadCommits(Runnable operation)throws Exception{
+  Path path=Files.createTempFile(Path.of("target"),"b5-commits-",".jfr");long me=Thread.currentThread().getId();
+  try(var recording=new Recording()){
+   recording.enable(SaleLatency.PhaseEvent.class);recording.start();
+   try(var trace=SaleLatency.begin(null,"b5-cache-sync-contract",0,0)){operation.run();}
+   recording.stop();recording.dump(path);
+  }
+  return RecordingFile.readAllEvents(path).stream().filter(e->e.getEventType().getName().equals("content.SalePhase"))
+   .filter(e->e.getString("phase").equals("jdbc.commit")&&e.getThread()!=null&&e.getThread().getJavaThreadId()==me).count();
+ }
+
+ record Sale(Fixture f,List<Long> buyers){}
+ Sale sale(int buyers){
+  var m=unsold(false,"PUBLIC_PREVIEW");long now=System.currentTimeMillis();
+  var c=sales.createCampaign(m.author(),m.post(),100,buyers+2,now-1000,now+3600000);
+  var ids=new ArrayList<Long>();ids.add(m.buyer());
+  for(int i=1;i<buyers;i++){String sfx=UUID.randomUUID().toString().replace("-","").substring(0,12);ids.add(auth.register("jmx"+sfx,"test-buyer-password").userId());}
+  return new Sale(new Fixture(m.author(),m.buyer(),m.post(),c),ids);
+ }
+ String purchased(Sale s,long buyer,String key){var id=sales.purchase(buyer,s.f().campaign().id(),key).reservationId();ingress.drain("b5-"+key,20,0);return id;}
+ String redisState(String id){var r=redis.entry().request(id);return r==null?null:r.state();}
+ String owner(long user,long post){return redis.entry().commands().hget(io.github.xiiiiimu.content.infrastructure.SaleEntryRedis.STATE,"o:"+user+":"+post);}
+ int dirtyJobs(){return db.queryForObject("SELECT COUNT(*) FROM material_sale_cache_jobs WHERE revision>applied_revision",Integer.class);}
+ int ownerJobRows(long user,long post){return db.queryForObject("SELECT COUNT(*) FROM material_sale_cache_jobs WHERE kind='OWNER' AND entity_key=?",Integer.class,user+":"+post);}
+ <T> T withBatcher(SaleCacheSyncBatcher local,java.util.concurrent.Callable<T> body)throws Exception{
+  sales.setCacheSync(local);
+  try{return body.call();}finally{local.close();sales.setCacheSync(cacheSyncBean);}
+ }
+
+ @Test void b5SuccessfulSettleSyncsTheCacheInOneTransaction()throws Exception{
+  var s=sale(1);long buyer=s.buyers().get(0);var id=purchased(s,buyer,"b5-ok");
+  long c=threadCommits(()->sales.settle(id));
+  assertThat(c).as("settle transaction + one cache-sync transaction (REQUEST also writes the owner, no separate OWNER job)").isEqualTo(2);
+  assertThat(redisState(id)).isEqualTo("SUCCEEDED");
+  assertThat(owner(buyer,s.f().post())).isEqualTo(id);
+  assertThat(ownerJobRows(buyer,s.f().post())).as("a successful settle no longer queues an OWNER job").isZero();
+ }
+ @Test void b5RejectedSettleSyncsOnlyTheRequest()throws Exception{
+  var s=sale(1);long buyer=s.buyers().get(0);var id=purchased(s,buyer,"b5-reject");
+  sales.block(s.f().author(),buyer,"b5");
+  long c=threadCommits(()->sales.settle(id));
+  assertThat(redisState(id)).isEqualTo("REJECTED");
+  assertThat(c).as("settle transaction + one REQUEST sync").isEqualTo(2);
+  assertThat(ownerJobRows(buyer,s.f().post())).as("ownership did not change, so no OWNER job").isZero();
+  assertThat(redis.remainingStock(s.f().campaign().id())).as("Redis stock restored by the REQUEST sync").isEqualTo(3);
+ }
+ @Test void b5AlreadyOwnedRejectionStillRepairsAMissingOwner()throws Exception{
+  var s=sale(1);long buyer=s.buyers().get(0);long post=s.f().post();
+  var first=purchased(s,buyer,"b5-first");sales.settle(first);
+  redis.entry().commands().hdel(io.github.xiiiiimu.content.infrastructure.SaleEntryRedis.STATE,"o:"+buyer+":"+post);   // stale Redis owner
+  var second=purchased(s,buyer,"b5-second");sales.settle(second);
+  assertThat(sales.getRequest(buyer,second).rejectReason()).isEqualTo("ALREADY_OWNED");
+  assertThat(owner(buyer,post)).as("OWNER job repairs the missing owner").isEqualTo(first);
+ }
+ @Test void b5QueuedSettlesShareOneCacheSyncTransaction()throws Exception{
+  var s=sale(5);var ids=new ArrayList<String>();
+  for(long b:s.buyers())ids.add(purchased(s,b,"b5-q"+b));
+  var batcher=new SaleCacheSyncBatcher(ingress,1000,200);
+  withBatcher(batcher,()->{
+   long settles=threadCommits(()->ids.forEach(sales::settleQueued));
+   assertThat(settles).as("5 settle transactions, no per-order cache transaction").isEqualTo(5);
+   assertThat(ids).as("cache sync is deferred to the batch").allSatisfy(id->assertThat(redisState(id)).isEqualTo("PROCESSING"));
+   long flush=threadCommits(batcher::flush);
+   assertThat(flush).as("one transaction for all 5 REQUEST jobs").isEqualTo(1);
+   return null;
+  });
+  for(int i=0;i<ids.size();i++){assertThat(redisState(ids.get(i))).isEqualTo("SUCCEEDED");assertThat(owner(s.buyers().get(i),s.f().post())).isEqualTo(ids.get(i));}
+  assertThat(dirtyJobs()).isZero();
+ }
+ @Test void b5BackgroundBatchAppliesWithinTheInterval()throws Exception{
+  var s=sale(1);long buyer=s.buyers().get(0);var id=purchased(s,buyer,"b5-bg");
+  withBatcher(new SaleCacheSyncBatcher(ingress,100,200).start(),()->{
+   sales.settleQueued(id);long settled=System.currentTimeMillis();
+   while(!"SUCCEEDED".equals(redisState(id))&&System.currentTimeMillis()-settled<5000)Thread.sleep(2);
+   assertThat(redisState(id)).isEqualTo("SUCCEEDED");
+   assertThat(System.currentTimeMillis()-settled).as("settle commit -> Redis shows SUCCEEDED, interval 100 ms + one batch").isLessThanOrEqualTo(400);
+   return null;
+  });
+ }
+ @Test void b5ScannerSyncsDirtyJobsInOneTransaction()throws Exception{
+  var s=sale(4);var ids=new ArrayList<String>();
+  for(long b:s.buyers())ids.add(purchased(s,b,"b5-scan"+b));
+  withBatcher(new SaleCacheSyncBatcher(ingress,1000,200),()->{ids.forEach(sales::settleQueued);return null;});   // closed unflushed: jobs stay durable
+  assertThat(dirtyJobs()).isEqualTo(4);
+  assertThat(threadCommits(()->ingress.syncJobs(200))).as("the scanner applies all dirty jobs in one transaction").isEqualTo(1);
+  assertThat(ids).allSatisfy(id->assertThat(redisState(id)).isEqualTo("SUCCEEDED"));
+  assertThat(dirtyJobs()).isZero();
+ }
+ @Test void b5BatchAndScannerRacingConvergeToMySql()throws Exception{
+  var s=sale(10);var ids=new ArrayList<String>();
+  for(long b:s.buyers())ids.add(purchased(s,b,"b5-race"+b));
+  var batcher=new SaleCacheSyncBatcher(ingress,1000,200);
+  withBatcher(batcher,()->{
+   ids.forEach(sales::settleQueued);
+   var start=new CountDownLatch(1);var pool=Executors.newFixedThreadPool(2);
+   try{
+    var a=pool.submit(()->{start.await();return batcher.flush();});
+    var b=pool.submit(()->{start.await();ingress.syncJobs(200);return 0;});
+    start.countDown();a.get(60,TimeUnit.SECONDS);b.get(60,TimeUnit.SECONDS);
+   }finally{pool.shutdownNow();}
+   return null;
+  });
+  assertThat(dirtyJobs()).isZero();
+  assertThat(ids).allSatisfy(id->assertThat(redisState(id)).isEqualTo("SUCCEEDED"));
+  assertThat(redis.remainingStock(s.f().campaign().id())).isEqualTo(2);
+ }
+ @Test void b5BatchNeverOverwritesANewerCacheVersion()throws Exception{
+  var s=sale(1);long buyer=s.buyers().get(0);var id=purchased(s,buyer,"b5-version");
+  var batcher=new SaleCacheSyncBatcher(ingress,1000,200);
+  withBatcher(batcher,()->{
+   sales.settleQueued(id);
+   // A newer version of this job already reached Redis (e.g. applied by another instance): revision 99, PROCESSING.
+   long generation=db.queryForObject("SELECT generation FROM material_sale_runtime WHERE id=1",Long.class);
+   var processing=new io.github.xiiiiimu.content.infrastructure.SaleEntryRedis.Request(id,s.f().campaign().id(),s.f().post(),s.f().author(),buyer,"b5-version",100,"PROCESSING",null,null,0);
+   assertThat(redis.entry().apply(generation,new io.github.xiiiiimu.content.infrastructure.SaleIngressMapper.CacheJob("REQUEST",id,99,0),Map.of(),processing,null,false,0)).isTrue();
+   batcher.flush();
+   return null;
+  });
+  assertThat(redisState(id)).as("older revision skipped by the version check").isEqualTo("PROCESSING");
  }
 }

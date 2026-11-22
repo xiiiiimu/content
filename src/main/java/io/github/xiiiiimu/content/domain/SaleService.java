@@ -158,11 +158,17 @@ public final class SaleService {
   return new OrderView(o.id(),o.postId(),o.merchantId(),o.priceCents(),o.state(),o.paidAtMs(),o.refundedAtMs(),o.refundReason(),"PAID".equals(o.state())&&ingress.winner(o.userId(),o.postId()));
  }
 
- /** Durable settle; idempotent on reservationId. */
- public void settle(String reservationId){
+ private SaleCacheSyncBatcher cacheSync;
+ /** Hardening B5: batched cache sync used by {@link #settleQueued}. */
+ public void setCacheSync(SaleCacheSyncBatcher cacheSync){this.cacheSync=cacheSync;}
+ /** MQ consumer path (hardening B5): settle, then hand the cache jobs to the batcher. */
+ public void settleQueued(String reservationId){settle(reservationId,cacheSync!=null);}
+ /** Durable settle; idempotent on reservationId. The cache is synced before it returns (one transaction). */
+ public void settle(String reservationId){settle(reservationId,false);}
+ private void settle(String reservationId,boolean queued){
   faults.awaitHoldIfArmed(120);
   faults.enterInFlight();
-  try(var trace=SaleLatency.begin("settle-"+reservationId,"settle",0,0)){SaleLatency.correlate(null,reservationId);settleBody(reservationId);SaleLatency.status(200);}
+  try(var trace=SaleLatency.begin("settle-"+reservationId,"settle",0,0)){SaleLatency.correlate(null,reservationId);settleBody(reservationId,queued);SaleLatency.status(200);}
   finally{faults.leaveInFlight();}
  }
 
@@ -171,7 +177,7 @@ public final class SaleService {
   final long at;StockClaimMissed(long at){super(null,null,false,false);this.at=at;}
  }
 
- private void settleBody(String reservationId){
+ private void settleBody(String reservationId,boolean queued){
   for(int attempt=1;;attempt++){
    try{settleOnce(reservationId);break;}
    catch(StockClaimMissed miss){
@@ -182,7 +188,10 @@ public final class SaleService {
   }
   var req=db.request(reservationId);
   if(req==null)return;
-  ingress.bestEffort("REQUEST",reservationId);ingress.bestEffort("OWNER",req.userId()+":"+req.postId());
+  // Hardening B5: the jobs this settle dirtied, applied in one transaction (direct call) or handed to the batcher (MQ).
+  var keys=new ArrayList<SaleCacheSyncBatcher.Key>();keys.add(new SaleCacheSyncBatcher.Key("REQUEST",reservationId));
+  if("REJECTED".equals(req.state())&&"ALREADY_OWNED".equals(req.rejectReason()))keys.add(new SaleCacheSyncBatcher.Key("OWNER",req.userId()+":"+req.postId()));
+  if(queued&&cacheSync!=null)cacheSync.submit(keys);else ingress.bestEffortBatch(keys);
  }
 
  /**
@@ -231,7 +240,9 @@ public final class SaleService {
    ent.kind="PURCHASE";ent.source=order.id;ent.at=at;
    if(db.insertEntitlement(ent)!=1 || db.finishRequest(reservationId,"SUCCEEDED",null,order.id,at)!=1
       || db.insertReceipt(reservationId,"SUCCEEDED",at)!=1)throw new IllegalStateException("Incomplete purchase settlement");
-   ingress.dirty("OWNER",req.userId()+":"+req.postId());ingress.dirty("REQUEST",reservationId);
+   // B5: no OWNER job. The REQUEST job's APPLY writes o:<user>:<post>=reservationId on SUCCEEDED (keeping GIVEAWAY), the value
+   // the OWNER job would compute: one order per account/material, so the owner only moves ""->order<->GIVEAWAY.
+   ingress.dirty("REQUEST",reservationId);
    faults.pauseIfArmed("settle.beforeStockUpdate",60);
    if(db.tryIncrementSold(campaign.id(),at)!=1)throw new StockClaimMissed(at); // rolls back every write above
    faults.failIfArmed("settle.beforeCommit");
@@ -262,7 +273,10 @@ public final class SaleService {
  private void reject(SaleMapper.PurchaseRequest req,String reason,long at){
   db.finishRequest(req.reservationId(),"REJECTED",reason,null,at);
   db.insertReceipt(req.reservationId(),"REJECTED:"+reason,at);
-  ingress.dirty("REQUEST",req.reservationId());ingress.dirty("OWNER",req.userId()+":"+req.postId());
+  ingress.dirty("REQUEST",req.reservationId());
+  // B5: a rejection does not change ownership. ALREADY_OWNED reaching settle means Redis lacked the owner (admission checks
+  // o:), so that OWNER job is kept as a repair.
+  if("ALREADY_OWNED".equals(reason))ingress.dirty("OWNER",req.userId()+":"+req.postId());
  }
 
  public void block(long merchantId,long targetUserId,String reason){

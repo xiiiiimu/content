@@ -48,7 +48,7 @@ import java.util.UUID;
       if(reservationId==null || reservationId.isBlank()){
        var node=new ObjectMapper().readTree(body);reservationId=node.path("reservationId").asText();
       }
-      sales.faults().recordDelivery(reservationId);sales.settle(reservationId);
+      sales.faults().recordDelivery(reservationId);sales.settleQueued(reservationId);
       // After durable commit: optional one-shot failure before ACK to force MQ redelivery.
       sales.faults().maybeFailAfterCommit();
      }

@@ -8,6 +8,7 @@ public interface SaleIngressMapper {
  record Runtime(String state,long generation,String owner,long leaseUntilMs,String redisRunId){}
  record Dispatch(String reservationId,String state,int attempts,long token,long leaseUntilMs){}
  record CacheJob(String kind,String entityKey,long revision,long appliedRevision){}
+ record CacheKey(String kind,String entityKey){}
  record Ownership(long userId,long postId,String reservationId,boolean giveaway){}
  record Block(long merchantId,long userId){}
  record Refund(long id,long orderId,long campaignId,boolean restoreStock){}
@@ -58,6 +59,9 @@ public interface SaleIngressMapper {
  @Select("SELECT kind,entity_key AS entityKey,revision,applied_revision AS appliedRevision FROM material_sale_cache_jobs WHERE revision>applied_revision ORDER BY kind,entity_key LIMIT #{n}") List<CacheJob> jobs(int n);
  @Select("SELECT kind,entity_key AS entityKey,revision,applied_revision AS appliedRevision FROM material_sale_cache_jobs WHERE kind=#{kind} AND entity_key=#{key} FOR UPDATE")
  CacheJob job(@Param("kind")String kind,@Param("key")String key);
+ /** Hardening B5: the given jobs, row-locked in primary-key order (concurrent batches cannot deadlock each other). */
+ @Select("<script>SELECT kind,entity_key AS entityKey,revision,applied_revision AS appliedRevision FROM material_sale_cache_jobs WHERE (kind,entity_key) IN <foreach collection='keys' item='k' open='(' separator=',' close=')'>(#{k.kind},#{k.entityKey})</foreach> ORDER BY kind,entity_key FOR UPDATE</script>")
+ List<CacheJob> jobsForUpdate(@Param("keys")List<CacheKey> keys);
  @Update("UPDATE material_sale_cache_jobs SET applied_revision=#{revision} WHERE kind=#{kind} AND entity_key=#{key} AND revision=#{revision}")
  int applied(@Param("kind")String kind,@Param("key")String key,@Param("revision")long revision);
 

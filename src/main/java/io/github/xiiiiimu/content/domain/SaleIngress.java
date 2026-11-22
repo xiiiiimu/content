@@ -91,10 +91,43 @@ public final class SaleIngress {
  public void sent(SaleIngressMapper.Dispatch d){tx.executeWithoutResult(s->db.sent(d.reservationId(),d.token()));}
  public void failed(SaleIngressMapper.Dispatch d){tx.executeWithoutResult(s->db.retry(d.reservationId(),d.token()));}
 
- public void syncJobs(int limit){try(var trace=SaleLatency.begin(null,"bridge-cache-sync",0,0)){for(var job:db.jobs(Math.max(1,Math.min(limit,200)))){try{sync(job.kind(),job.entityKey());}catch(RedisException e){return;}}}}
+ /** Scanner: all dirty jobs of this pass in one transaction (hardening B5; was one transaction per job). */
+ public void syncJobs(int limit){try(var trace=SaleLatency.begin(null,"bridge-cache-sync",0,0)){
+  var jobs=db.jobs(Math.max(1,Math.min(limit,200)));if(jobs.isEmpty())return;
+  try{syncBatch(jobs.stream().map(j->new SaleCacheSyncBatcher.Key(j.kind(),j.entityKey())).toList());}
+  catch(RedisException e){/* Whole batch rolled back; durable jobs retry next pass. */}
+ }}
  public boolean sync(String kind,String key){return Boolean.TRUE.equals(tx.execute(status->{
   var runtime=db.guard();if(!"RUNNING".equals(runtime.state()))return false;
   var job=db.job(kind,key);if(job==null||job.appliedRevision()==job.revision())return true;
+  return applyJob(runtime,job);
+ }));}
+ /**
+  * Hardening B5: applies the given cache jobs in one transaction. Each job is row-locked (primary-key order), skipped when
+  * already applied, rebuilt from MySQL and applied with the same revision checks as {@link #sync}. A generation change stops
+  * the batch (jobs applied so far commit; the rest wait for recovery). A Redis failure rolls the whole batch back; Redis
+  * writes already made are idempotent re-applies of the same revisions. Returns the number of jobs applied.
+  */
+ public int syncBatch(List<SaleCacheSyncBatcher.Key> keys){
+  if(keys.isEmpty())return 0;
+  var ordered=keys.stream().distinct().sorted(Comparator.comparing(SaleCacheSyncBatcher.Key::kind).thenComparing(SaleCacheSyncBatcher.Key::entityKey))
+   .map(k->new SaleIngressMapper.CacheKey(k.kind(),k.entityKey())).toList();
+  Integer applied=tx.execute(status->{
+   var runtime=db.guard();if(!"RUNNING".equals(runtime.state()))return 0;
+   int n=0;
+   for(var job:db.jobsForUpdate(ordered)){
+    if(job.appliedRevision()==job.revision())continue;
+    if(!applyJob(runtime,job))break;
+    n++;
+   }
+   return n;
+  });
+  return applied==null?0:applied;
+ }
+ /** B5: one-transaction sync after a direct settle; a Redis failure leaves the durable jobs to the scanner. */
+ public void bestEffortBatch(List<SaleCacheSyncBatcher.Key> keys){try{syncBatch(keys);}catch(RedisException ignored){/* Durable jobs retry after reconnect. */}}
+ private boolean applyJob(SaleIngressMapper.Runtime runtime,SaleIngressMapper.CacheJob job){
+  String kind=job.kind(),key=job.entityKey();
   Map<String,String> fields=new LinkedHashMap<>();SaleEntryRedis.Request request=null;Long refund=null;boolean restore=false;long campaignId=0;
   switch(kind){
    case "CAMPAIGN"->{var c=sales.campaign(Long.parseLong(key));if(c!=null)fields.putAll(SaleEntryRedis.campaignFields(c,db.reserved(c.id()),db.published(c.postId())==1));}
@@ -107,7 +140,7 @@ public final class SaleIngress {
   faults.failIfArmed("controls.beforeApply");
   if(!cache.apply(runtime.generation(),job,fields,request,refund,restore,campaignId))return false;
   db.applied(kind,key,job.revision());return true;
- }));}
+ }
  public void bestEffort(String kind,String key){try{sync(kind,key);}catch(RedisException ignored){/* Durable job retries after reconnect. */}}
  public void afterCommit(String kind,String key){
   if(!org.springframework.transaction.support.TransactionSynchronizationManager.isSynchronizationActive()){bestEffort(kind,key);return;}

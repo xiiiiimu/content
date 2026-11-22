@@ -26,6 +26,15 @@ public class SaleConfiguration {
   var service=new SaleService(sales,redis,materials,posts,notifications,visibility,tx,syncSettle,faults);
   service.setIngress(ingress);relationships.setOfflineHandler(service::offlineInTransaction);return service;
  }
+ /**
+  * Hardening B5: cache jobs of MQ-consumer settles are applied in batches, one transaction per batch.
+  * content.sale.cache-sync-batch-millis (100, range 1..1000): longest wait from a settle commit to its batch;
+  * content.sale.cache-sync-batch-max (200): jobs per transaction.
+  */
+ @Bean(initMethod="start",destroyMethod="close") SaleCacheSyncBatcher saleCacheSync(SaleIngress ingress,SaleService sales,
+  @Value("${content.sale.cache-sync-batch-millis:100}")long interval,@Value("${content.sale.cache-sync-batch-max:200}")int batchMax){
+  var batcher=new SaleCacheSyncBatcher(ingress,interval,batchMax);sales.setCacheSync(batcher);return batcher;
+ }
 
  @Bean @ConditionalOnProperty(name="content.sale.producer-enabled",havingValue="true")
  DefaultMQProducer saleProducer(@Value("${content.sale.namesrv:${content.relay.namesrv:127.0.0.1:9876}}")String namesrv){
