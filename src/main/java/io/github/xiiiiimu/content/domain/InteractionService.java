@@ -26,11 +26,11 @@ public final class InteractionService {
   *                    ({@code posts.topic}) and a post without a topic writes no topic statistics.
   */
  public LikeResult like(long user,long post,String clientTopic){
-  visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
+   var view=visible(user,post);
    int undisliked=db.undislike(post,user);
    boolean inserted=db.like(post,user,System.currentTimeMillis())==1;
-   String topic=inserted?db.postTopic(post):null;
+   String topic=inserted?view.topic():null;
    if(topic!=null)trending.recordLike(post,user,topic);
    // Counter last: the hot post_stats row lock is held only for this UPDATE, the read after it and commit (B2b).
    var stats=applyCounts(post,inserted?1:0,-undisliked,0,0);
@@ -39,8 +39,8 @@ public final class InteractionService {
  }
  /** @param clientTopic ignored, see {@link #like}. */
  public LikeResult unlike(long user,long post,String clientTopic){
-  visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
+   visible(user,post);
    boolean removed=db.unlike(post,user)==1;
    // Only a real true→false flip revokes the like's own topic contribution (no separate -1 event).
    if(removed)trending.revokeLike(post,user);
@@ -49,8 +49,8 @@ public final class InteractionService {
   });
  }
  public DislikeResult dislike(long user,long post){
-  visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
+   visible(user,post);
    // Disliking removes an existing like: that is a true→false like flip as well.
    boolean unliked=db.unlike(post,user)==1;
    if(unliked)trending.revokeLike(post,user);
@@ -59,19 +59,19 @@ public final class InteractionService {
   });
  }
  public DislikeResult undislike(long user,long post){
-  visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   return tx.execute(status->{
+   visible(user,post);
    int removed=db.undislike(post,user);
    return new DislikeResult(false,applyCounts(post,0,-removed,0,0).dislikes());
   });
  }
  public ReportResult report(long user,long post,String reason,String detail,String contextJson){
-  visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
-  if(reason==null || reason.isBlank() || reason.length()>64)throw new FeedFailure(400,"INVALID_REQUEST");
-  if(detail!=null && detail.length()>1000)throw new FeedFailure(400,"INVALID_REQUEST");
   // Hardening A3: one report per (post, reporter). A concurrent repeat waits on the unique key until the first commits
   // (READ COMMITTED), then inserts nothing and reads the committed first row; only a new row moves the counter.
   return tx.execute(status->{
+   visible(user,post);   // 404 before 400, as before B3
+   if(reason==null || reason.isBlank() || reason.length()>64)throw new FeedFailure(400,"INVALID_REQUEST");
+   if(detail!=null && detail.length()>1000)throw new FeedFailure(400,"INVALID_REQUEST");
    boolean inserted;
    // A duplicate key fails only this statement (MySQL statement rollback); the transaction continues.
    try{inserted=db.report(post,user,reason,detail==null?"":detail,contextJson,System.currentTimeMillis())==1;}
@@ -87,9 +87,8 @@ public final class InteractionService {
  /** @param clientTopic ignored, see {@link #like}. */
  public CommentResult comment(long user,long post,String body,String key,String clientTopic,Long parentId,Long materialVersionId,Long offsetMs){
   if(body==null || body.isBlank() || body.length()>4000 || key==null || key.isBlank() || key.length()>128)throw new FeedFailure(400,"INVALID_REQUEST");
-  var view=visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
   try{
-   return createComment(user,post,body,key,parentId,materialVersionId,offsetMs,view);
+   return createComment(user,post,body,key,parentId,materialVersionId,offsetMs);
   }catch(org.springframework.dao.DuplicateKeyException conflict){
    // Hardening A5 (same as PublishService): a concurrent request with this key committed first and our insert hit
    // uq_comment_idem. The template rolled back every write of this attempt; read the winner in a new transaction,
@@ -99,8 +98,9 @@ public final class InteractionService {
    return replay;
   }
  }
- private CommentResult createComment(long user,long post,String body,String key,Long parentId,Long materialVersionId,Long offsetMs,VisibilityService.View view){
+ private CommentResult createComment(long user,long post,String body,String key,Long parentId,Long materialVersionId,Long offsetMs){
   return tx.execute(status->{
+   var view=visible(user,post);   // checked before the replay lookup, as before B3
    var existing=db.existingComment(user,key);
    if(existing!=null)return toResult(existing,true);
    Long parentAuthor=null;
@@ -122,7 +122,7 @@ public final class InteractionService {
    }
    if(db.comment(post,user,parentId,version,offset,body,key,System.currentTimeMillis())!=1)throw new IllegalStateException("comment insert failed");
    var created=db.existingComment(user,key);
-   String topic=db.postTopic(post);
+   String topic=view.topic();
    // Hardening A10: one ledger row per created comment. The idempotency key is only unique per user, so it cannot be
    // the event id; a replay returns before this point and records nothing.
    if(topic!=null)trending.record("comment:"+created.id(),topic,post,1,"COMMENT");
@@ -140,13 +140,23 @@ public final class InteractionService {
  }
  public CommentResult accept(long author,long post,long commentId){
   return tx.execute(status->{
-   var view=visibility.read(author,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
+   var view=visible(author,post);
    if(view.authorId()!=author)throw new FeedFailure(403,"POST_FORBIDDEN");
    var comment=db.commentById(commentId);
    if(comment==null || comment.postId()!=post)throw new FeedFailure(404,"COMMENT_NOT_FOUND");
    db.accept(post,commentId,System.currentTimeMillis());
    return toResult(db.commentById(commentId),false);
   });
+ }
+ /**
+  * Hardening B3: the visibility check of a write runs inside the write's transaction, on its connection, so an interaction
+  * borrows one pooled connection instead of three (two autocommit reads before the transaction). The two reads are
+  * plain consistent reads under READ COMMITTED and come first, before any row lock, so lock hold times do not grow.
+  * This is the authoritative check (AuthoritativeVisibility, MySQL only), not the cached PostDetailService.
+  * A rejection throws inside the transaction, which rolls back with nothing written.
+  */
+ private VisibilityService.View visible(long user,long post){
+  return visibility.read(user,post).orElseThrow(()->new FeedFailure(404,"POST_NOT_VISIBLE"));
  }
  public InteractionMapper.Stats stats(long post){
   var s=db.stats(post);return s==null?new InteractionMapper.Stats(post,0,0,0,0):s;
