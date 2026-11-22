@@ -1,171 +1,160 @@
-# Content Platform
+# Content：创作者素材社区
 
-Java 17, Spring Boot 3 and MyBatis modular monolith. The V2.1 system design and the [implementation plan](docs/m0-m3-implementation-plan.md) define the M0–M9 roadmap. Milestones follow dependencies and acceptance criteria.
+创作者在这里发布视频素材，读者关注、点赞、评论、按话题发现内容；作者可以发起素材限量抢购和抽奖，在评论里 @助手 就能用自然语言订阅反馈或发起抽奖。
 
-## Windows setup
+后端是 Java 17 + Spring Boot 3 + MyBatis 的模块化单体，使用 MySQL 8.4、Redis 7.4、RocketMQ 5.3 和 S3 兼容对象存储；前端是 Nuxt；@助手 的意图解析是一个独立的 Python 服务（大模型，规则版兜底）。
 
-Install JDK 17, Maven and Docker Desktop in Linux container mode. Open this directory in PowerShell. Copy the template once, then fill in the two MySQL passwords before starting.
+> 本项目的重点是**高并发下的正确性**和**可复现的工程证据**：每个行为改动先写失败测试再实现，每个性能结论都有原始数据和报告。下面所有数字都来自仓库内的报告，并注明了测试环境。
+
+## 架构
+
+```mermaid
+flowchart LR
+  C["客户端 Nuxt"] --> API["Spring Boot API<br/>身份令牌 · 限流 · 权威可见性"]
+
+  subgraph SALE["限量抢购"]
+    LUA["Redis Lua 原子准入<br/>库存预扣 · clientKey 幂等 · 限购"]
+    STREAM["Redis Stream"]
+    BRIDGE["桥接<br/>批量持久化 · 完成证明 · 隔离"]
+    DISPATCH["派发表<br/>租约 · 指数退避"]
+    SETTLE["落单消费者<br/>订单 · 下载权益 · 缓存同步任务"]
+    LUA --> STREAM --> BRIDGE --> DISPATCH
+  end
+
+  subgraph FEED["发布与 Feed"]
+    OUTBOX["Outbox 事件表"]
+    RELAY["Relay<br/>租约 · 栅栏 · 重放"]
+    INBOX["Inbox 消费 + 投递任务"]
+    RINBOX["Redis 收件箱<br/>PUSH 作者"]
+    MERGE["Feed 读取<br/>Redis + SQL 多源合并 · 逐条授权"]
+    OUTBOX --> RELAY
+    INBOX --> RINBOX --> MERGE
+  end
+
+  subgraph INTER["互动与热度"]
+    LEDGER["点赞 / 评论<br/>账本行 · 计数增量"]
+    AGG["话题聚合器<br/>异步折叠分钟桶"]
+    TREND["热度排行 · TrendGuard 风险事件"]
+    LEDGER --> AGG --> TREND
+  end
+
+  subgraph ASSIST["@助手"]
+    TASK["assistant_tasks"]
+    PY["Python 解析服务<br/>大模型 JSON 输出 · 规则兜底"]
+    CHECK["Java 校验<br/>从数据库独立核实后才执行"]
+    TASK --> PY --> CHECK
+  end
+
+  MQ[("RocketMQ")]
+  DB[("MySQL<br/>唯一真相来源")]
+  S3[("S3 兼容存储<br/>FFmpeg 转码")]
+
+  API -- "购买" --> LUA
+  DISPATCH --> MQ --> SETTLE
+  SETTLE --> DB
+  SETTLE -. "缓存同步" .-> LUA
+  API -- "发布 / 关注" --> OUTBOX
+  RELAY --> MQ --> INBOX
+  API -- "读 Feed" --> MERGE
+  API -- "点赞 / 评论" --> LEDGER
+  LEDGER -- "@助手 评论" --> TASK
+  CHECK --> DB
+  API -- "上传素材" --> S3
+```
+
+`api` 是 HTTP 适配层，`domain` 是业务规则，`infrastructure` 是数据库与中间件适配，`worker` 是异步入口。所有授权（可见性、下载权益、下架）最终都以 MySQL 为准，Redis 和消息只用来加速和解耦。
+
+## 核心设计
+
+- **抢购入口不碰数据库。** 一次 Lua 脚本里完成活动校验、黑名单、限购、clientKey 幂等和库存预扣，并写入 Redis Stream；桥接再批量写入 MySQL，派发后由 RocketMQ 消费者落单。Redis 丢失或数据不一致时，带代际栅栏的恢复流程从 MySQL 重建缓存，期间入口明确返回 503，不会超卖。见 [购买入口契约](docs/commerce-ingress-v2.md)、[Stream 批量桥接](docs/commerce-stream-batch.md)、[MQ 批量派发](docs/commerce-mq-dispatch-batch.md)。
+- **事务内写 Outbox，至少一次投递。** 发布、关注、模式切换和下架在同一事务里写入 Outbox 事件；Relay 用租约和令牌栅栏发送，只有 `SEND_OK` 才算已发送，可审计地重放。消费端按事件身份去重，冲突事件进入冲突表，不会被静默确认。见 [Outbox Relay 协议](docs/m1-story2-outbox-relay.md)。
+- **推拉混合 Feed 与关注代际。** PUSH 作者扇出到 Redis 收件箱，PULL 作者读时用 SQL 拉取，两路有界合并；每条候选再按帖子当前状态和当前关注代际授权。Redis 丢失时退回完整的 SQL 主路径，游标用 HMAC 签名。见 ADR [0001](docs/adr/0001-redis-feed-order.md)、[0002](docs/adr/0002-feed-pagination.md)、[0003](docs/adr/0003-follow-epochs.md)、[0004](docs/adr/0004-offline-visibility.md) 和 [M2/M3 交付记录](docs/m2-m3-batch.md)。
+- **互动热点拆解。** 点赞事务只写账本行和计数增量，热门帖子的计数行锁只覆盖最后一条 UPDATE；话题分钟桶由后台聚合器带租约和水位异步折叠；离线对账任务修正计数漂移。同一用户对同一帖子并发点赞和点踩，原来会死锁，现在每个反应事务先锁该用户自己的行，从根上消除。见 [第 B 轮报告](docs/perf-evidence/hardening-b-20261122/README.md) 和 [加固计划 B1–B10](docs/hardening-plan.md)。
+- **@助手：大模型只负责理解，Java 负责决定。** 解析服务只返回结构化命令（JSON 模式、不提供任何工具、Pydantic 严格校验，不合格就降级到规则版）；Java 在执行前从数据库独立核实目标评论、作者身份、许可范围、奖品版本、人数和时间，解析结果再怎么错都不会被执行。见 [助手说明](docs/v1.1-material-assistant.md)、[Java 端校验评测](docs/perf-evidence/assistant/a11-validation-20261121.md)、[大模型与规则版对比](docs/perf-evidence/assistant/llm-vs-rules-20261121.md)。
+- **TrendGuard 风险事件。** 话题突增按确定性的事件 id 和唯一键只记一次，在聚合时检测，不阻塞互动写入。见 [ADR 0005](docs/adr/0005-trendguard-risk-events.md)、[M9 验收](docs/m9-trendguard.md)。
+- **按轮次加固，留证据。** A 到 D 四轮（安全与正确性、性能热点、数据增长、测试缺口）都有问题、方案、RED/GREEN 和压测记录；指标缺少证据就标“缺证据”，不做推算。见 [加固计划](docs/hardening-plan.md)。
+
+## 关键数据
+
+> **测试环境**：应用、中间件（Docker Desktop，内存上限 4.8 GiB）和压测机**都在同一台 16 GB 内存的笔记本上**（i7-1260P，16 个逻辑核）。所有数字都是单机数字，彼此争抢 CPU，不代表分布式部署的能力；不同报告的方法不同，不能直接互相比较。
+
+| 场景 | 结果 | 来源 |
+|---|---|---|
+| 抢购入口（售罄路径，k6 开放模型） | 阶梯到 3000/s 每级都有效：实际 2989.6/s，P99 45 ms，0 错误；上限没有测到，3000/s 时整机 CPU P95 已达 99% | [入口 QPS 报告](docs/perf-evidence/commerce/ingress-qps-20261120.md) |
+| 抢购落单（单活动，60/s × 60 s） | 全程成交约 28 单/秒（瓶颈是单活动热点行提交）；入口 HTTP P95 14–15 ms；逐笔对账、重放、孤儿引用检查全部通过 | [落单对照报告](docs/perf-evidence/commerce/campaign-lock-v26-clean-20261120.md) |
+| 抢购集中突发（1000 / 5000 人，库存 100） | 正确性通过：恰好 100 笔已付订单、100 份权益，其余都是真实售罄；5000 人时 P95 41 s，**不能算低延迟** | [秒杀验收报告](docs/perf-evidence/commerce/flash-sale-final-20261118-024645.md) |
+| 互动（4 个热门帖子，200 rps 目标） | 加固前达成约 88 rps、伴随 5xx；第 B 轮后 166–180 rps、无 5xx；新上限在热门帖子的计数行 | [第 B 轮报告](docs/perf-evidence/hardening-b-20261122/README.md) |
+| 点赞的计数部分（100 万赞的帖子） | 69.4 ms → 0.07 ms（不再每次 COUNT） | 同上 |
+| 抢购缓存同步（进程内真实 Broker） | 空闲提交 17.4 → 1.1 次/秒；负载下每单提交约 3.76 → 2.42 | 同上 |
+| 推模式扩散 | 约 1000 粉丝/秒，与粉丝数线性（10 万粉丝 95 s 全部可见），优化已立项 | 同上 |
+| 登录（bcrypt 有界线程池） | 200 rps 下：改前丢弃 2079 次迭代、p99 5.0 s；改后无丢弃、无 5xx，p99 1.5 s | [第 A 轮报告](docs/perf-evidence/hardening-a-20261121/README.md) |
+
+**@助手 评测**（281 条人工标注，开发 197 / 测试 84；对外以测试集为准）：
+
+| 指标（测试集） | 大模型版 | 规则版 |
+|---|---|---|
+| 意图准确率 / 宏 F1 | 98.8% / 0.983 | 82.1% / 0.671 |
+| 执行判定准确率 | 97.6% | 60.7% |
+| 抽奖全字段准确率 | 100% | 0%（解析不了自然语言时间） |
+| 端到端非法执行 | 0 | 0 |
+| 注入集（26 条）被执行 | 0 | — |
+| 延迟 P50 / P95 | 1.34 s / 1.72 s | — |
+
+Java 端校验加入前后，全量 281 条的端到端非法执行从 10 降到 0，冒烟集 171 条从 18 降到 0，可正常执行的命令一条没有误伤。数据来源：[大模型与规则版对比](docs/perf-evidence/assistant/llm-vs-rules-20261121.md)、[Java 端校验评测](docs/perf-evidence/assistant/a11-validation-20261121.md)、[评测基线](docs/perf-evidence/assistant/eval-baseline-20261121.md)。
+
+## 测试与 CI
+
+- **测试类型**：
+  - Java 单元测试；
+  - 集成测试：用 Testcontainers 启动真实的 MySQL 8.4、Redis 7.4、RocketMQ 5.3.2 和 S3 替身，覆盖事务、并发竞态、故障注入（独立 JVM 强杀、Broker 暂停、Redis 重启）和恢复流程；
+  - Python 解析服务的 pytest；
+  - 前端的 Vitest 和类型检查。
+- **数量**（CI run `44983220082`）：
+  - Java 单元 68 个；
+  - 集成测试分两个分片：a-l 336 个、m-z 178 个，其中需要真实 Broker 或手动开启的用例在这两个分片里跳过；
+  - 真实 RocketMQ 105 个；
+  - Python 151 个，前端 21 个。
+- **CI 的 5 个并行 job**（`.github/workflows/ci.yml`，每个不超过 35 分钟，超时就拆分，不调大超时）：
+  - `maven (a-l)`、`maven (m-z)`：单元测试加按类名分片的集成测试；
+  - `maven-real-mq`：真实 RocketMQ 的抢购派发与落单；
+  - `frontend`：类型检查加 Vitest；
+  - `assistant-python`：pytest。
+- **不进 CI 的**：压测和测量工具（`PerfHarnessIT`、`FanoutMeasureIT`、`CommerceSyncPerfIT`）、需要真实 MinIO 镜像的 `MediaMinioIT`，以及需要标注数据的 `AssistantEvalE2EIT`。
+- 本地分批运行集成测试：`python infra/test/run_it_batches.py --out <新目录> --per-batch 2`（每批开始前检查可用内存）。
+
+## 本地运行
+
+需要 Windows + PowerShell、JDK 17、Maven（仓库自带 `tools/apache-maven-3.9.6`）、Docker Desktop；前端另需 Node 20+ 和 pnpm，@助手 需要 Python 3。
 
 ```powershell
+# 1. 中间件：MySQL、Redis、RocketMQ（首次先复制 .env 并填好密码）
 Copy-Item infra/docker/.env.example infra/docker/.env
 .\infra\docker\start.ps1
-.\infra\docker\status.ps1
-```
+.\infra\docker\create-relay-topic.ps1; .\infra\docker\create-sale-topic.ps1
 
-The default startup waits for MySQL, Redis, RocketMQ NameServer and Broker health checks. It explicitly targets these four services, including when COMPOSE_PROFILES is set in the calling environment. For the native Java process, set `CONTENT_MYSQL_PASSWORD` to the same value as in the local Compose environment file. If you changed the database user or published port, also set `CONTENT_MYSQL_USER` or `CONTENT_DB_URL` respectively. Docker Compose does not export these settings to the Java process.
-
-```powershell
-$env:CONTENT_MYSQL_PASSWORD = Read-Host 'Content MySQL password' -MaskInput
-mvn spring-boot:run
-```
-
-Use PowerShell 7 for `-MaskInput`. In a second terminal, check `Invoke-RestMethod http://127.0.0.1:28080/actuator/health/readiness`. Flyway migrates the database on application startup. Redis and RocketMQ are part of the default M0 environment. The application will connect to each as its corresponding feature is implemented. MinIO belongs to the optional media profile for M6.
-
-| Service | Host loopback port | Container port | Named data volume |
-| --- | ---: | ---: | --- |
-| MySQL 8.4 | 23306 | 3306 | content_mysql-data |
-| Redis 7.4 | 26379 | 6379 | content_redis-data |
-| RocketMQ NameServer | 29876 | 9876 | — |
-| RocketMQ broker | 30911 | 30911 | content_rocketmq-data |
-| MinIO API and console | 29000 / 29001 | 9000 / 9001 | content_minio-data |
-
-MinIO is retained under `profiles: [media]`, but community MinIO Server archives are unavailable (Docker Hub denied, Quay 401, `dl.min.io` 410 Gone). Do not treat any substitute as official MinIO. M6 media ITs use an S3-compatible stand-in (`adobe/s3mock`) against `content.media.*` / `ObjectStore`. Leave `CONTENT_MINIO_PASSWORD` empty for default stacks. If a maintainable official image returns later, set a password of at least eight characters and use `.\infra\docker\start.ps1 -Profile media`.
-
-`status.ps1` and `stop.ps1` default to all Content profiles so an enabled MinIO container is included. Both accept `-Profile media` explicitly. Stop preserves containers and named volumes. These commands always use project name `content`.
-
-The broker advertises `127.0.0.1:30911` for the native Windows client. If 30911 is occupied, update both the Compose mapping and `listenPort` in `infra/docker/broker.conf` to the same free port. Use the advertised broker port directly when configuring future RocketMQ clients, with the legacy VIP channel disabled. Provision named topics before sending messages. The other middleware host ports can be overridden in `.env`. The Java API defaults to 28080 and accepts `CONTENT_API_PORT`.
-
-Use `.\infra\docker\stop.ps1` for daily shutdown. Services are scoped to project `content` on `content_network` and have restart policy `no`. The named volumes live in the Docker Desktop Linux Engine storage. Inspect the engine-side mountpoint with `docker volume inspect content_mysql-data --format '{{.Mountpoint}}'`. The backing virtual disk location is shown in Docker Desktop settings under Resources and Advanced. `infra/docker` contains the configuration and local environment file. Changing the MySQL environment passwords does not reset users in an already initialized volume.
-
-## Build and tests
-
-- `mvn -B verify` compiles, runs JUnit 5 tests and packages the app.
-- `mvn -B -Pintegration verify` additionally runs migration, publication, Relay and Redis candidate integration tests using disposable Testcontainers MySQL 8.4, RocketMQ 5.3.2 and Redis 7.4 instances. PR CI runs this command. It requires Docker access, including a free host port 30921 for the isolated test Broker, and fails visibly when dependencies are unavailable.
-- Add real MySQL, Redis and RocketMQ integration scenarios as M1–M3 land. Run longer fault injection and performance experiments separately.
-
-## Code boundaries and TDD
-
-`api` contains HTTP adapters, `domain` contains rules and use cases, `infrastructure` contains database and middleware adapters, and `worker` contains asynchronous entry points. At M0 these packages mark the intended boundaries.
-
-For each business story, commit the RED test first. Verify that it compiles, the environment is healthy and the assertion fails for the missing behavior. Commit the smallest GREEN implementation separately and refactor in a follow-up commit when useful. Exercise transaction, retry and concurrency behavior against real services. Use the [acceptance matrix](docs/m0-m3-test-matrix.md) to determine what counts as complete.
-
-## M1 Story 1: publish an existing text draft
-
-`POST /api/posts/{postId}/publish` requires `Idempotency-Key` and `{"expectedVersion":4}`. The author id comes exclusively from the trusted servlet `Principal` name (positive numeric user id). Authentication integration remains outside this Story; without a Principal the endpoint returns 401. Tests supply a Principal directly, never a production author header. The endpoint publishes the stored body and rejects additional body fields.
-
-The [Story protocol and verification record](docs/m1-story1-publish.md) define replay, conflicts and response fields. Publication locks the author mode row, increments the author sequence, and atomically saves the post, `PostPublished` Outbox event and successful request snapshot. Replays return that snapshot. Outbox rows remain `NEW`; Relay is a subsequent Story.
-
-## M1 Story 2: Outbox Relay
-
-The [Relay protocol and evidence](docs/m1-story2-outbox-relay.md) freeze routing, leases, retry limits, fencing, replay and durability boundaries. Relay is disabled by default. With the MySQL credentials from Windows setup already configured, explicitly provision the Topic, then enable the worker in the application process:
-
-```powershell
-.\infra\docker\create-relay-topic.ps1
-$env:CONTENT_RELAY_ENABLED = 'true'
-mvn spring-boot:run
-```
-
-The RocketMQ 5.3.2 remoting client uses NameServer `127.0.0.1:29876`, the advertised Broker `127.0.0.1:30911`, and no VIP channel. Topic `content-post-published-v1` uses Tag `PostPublished`. Only `SEND_OK` permits a fenced transition to `SENT`. The current single Broker uses asynchronous flush and has no replica; ACK does not promise survival of a host power loss or disk loss. Duplicates are expected after ambiguous sends and crashes; consumers need the later Inbox contract.
-
-Defaults: 30-second lease, 3-second client send timeout, no renewal, at most five successful claims, capped exponential retry starting at one second, and a one-second scan interval. Set `content.relay.*` Spring properties for other environments. Each scan reaps exhausted expired leases and claims at most ten events sequentially. Unknown event types remain untouched until a routing contract is implemented.
-
-Replay is a local operator command, with database credentials and OS access as its trust boundary. It accepts only DEAD supported feed events (PostPublished, FollowChanged, FeedModeChanged, PostOfflined), preserves identity/payload, resets the attempt counter, increments the token and atomically inserts OS operator/reason audit data. The command forces both scanning and the MQ producer off, regardless of environment flags. Build the executable JAR and use Java 17 (the script honors `JAVA_HOME`):
-
-```powershell
-.\infra\docker\replay-outbox.ps1 -EventId 123 -Reason 'Incident review approved replay'
-```
-
-`mvn -B -Pintegration verify` now also executes real MySQL/RocketMQ Relay tests, including independent JVM termination at committed-claim and real-ACK barriers. They require Docker access and a free local port 30921. CI runs the same suite and uploads `mysql-rocketmq-test-evidence`, containing JUnit/Failsafe reports and Relay process/Broker logs. Three non-success ACK variants are RPC response fault injections after actual Broker sends; they do not simulate physical disk or replica loss. Broker pause/stop cases use only isolated test containers.
-
-## M2 Story 1: ordered Redis candidates
-
-The [candidate adapter contract](docs/m2-story1-feed-candidates.md) implements ADR-001 on the separate key `feed:v2:{uid}:inbox`. Every score is zero; members are fixed-width ASCII `(UTC milliseconds, post id)` tuples. Reads use `BYLEX REV` with a snapshot upper bound, an exclusive continuation boundary, and `LIMIT 0 n`. Read and write batches are each capped at 200.
-
-`RedisFeedCandidateStore` is a plain adapter over a caller-owned Lettuce connection with a finite command timeout. This Story adds no Redis Spring auto-configuration, Worker, HTTP endpoint, user-follow logic or MQ distribution. Writes require the immutable publication timestamp from the authoritative post. Replaying the same tuple is idempotent.
-
-Wrong key types, nonzero scores and malformed returned members mark the index untrusted and raise an error. Connection/timeout failures also raise an error; neither condition becomes an empty successful read. Normal operations cannot clear the untrusted marker. The M2/M3 composition below supplies authoritative rebuilding and recovery readiness. CI includes the real Redis tests and uploads the Redis log alongside the existing integration evidence.
-
-`CandidateSlice.lastReadBoundary` describes this source read only. It is not a signed client cursor or ADR-002's complete merge/visibility pagination state. An empty Redis read does not prove the entire Feed is exhausted, or that the cache is complete.
-
-## M2 Story 2: bounded multi-source merge
-
-The [merge contract](docs/m2-story2-merge-plan.md) defines `FeedMerger`, a request-local kernel over caller-provided ordered sources and an authoritative tuple/visibility check. `RedisCandidateSource` adapts the existing Redis store; at that Story 2 checkpoint, SQL sources and visibility/follow-epoch decisions were test fixtures. The production composition is provided in the M2/M3 section below.
-
-Prefetch never advances consumed positions. All sources must confirm a head or normal range exhaustion before the greatest candidate can be consumed; equal heads are consumed together. Each new request reconstructs sources below shared global/consumed boundaries and safely rereads unconsumed prefetch. The structured continuation is internal, unsigned, and must not be accepted directly from an HTTP client.
-
-Defaults: at most eight sources, page size 1..100, source batches up to 32, 256 consumed candidates/checks and 64 source reads per request. Each read/check has a two-second maximum wait; this is not a two-second total request deadline. Callers own a bounded executor, finite connection/query timeouts and resource shutdown. The Story 2 checkpoint required source coverage and production authorization; the M2/M3 composition below supplies the primary fallback and current-epoch authority checks.
-
-`HAS_MORE` proves another candidate is known, not that it is visible; `UNKNOWN` means bounded work ended before exhaustion could be established; empty `UNKNOWN` must advance the consumed boundary. `EXHAUSTED` requires normal exhaustion of every configured source and no buffered candidates. Source/authority failures fail the whole request, preserving the caller's input continuation for retry. CI runs the real Redis/MySQL merge suite under `mvn -Pintegration verify` and retains `target/feed-merge-evidence` traces and component logs with the existing integration artifact.
-
-## M2/M3 production pipeline (explicit opt-in)
-
-The batch contract and validation ledger are in [docs/m2-m3-batch.md](docs/m2-m3-batch.md). M0–M9 remains the complete roadmap. This batch adds real MyBatis candidate/authority queries, relationship transactions, signed continuations, HTTP, MQ Inbox and persistent delivery, mode transitions and controlled Redis recovery. Fixtures prepare input data; they do not supply the production authorization or dispatch implementations.
-
-`pipeline` enables the complete composition. Provide `CONTENT_MYSQL_PASSWORD`, two distinct signing secrets `CONTENT_CURSOR_KEY` and `CONTENT_IDENTITY_KEY` (at least 32 UTF-8 bytes each), and optionally `CONTENT_REDIS_URI`. Store secrets outside Git. There is no default signing secret. Existing authors and drafts remain prerequisites; account registration, login and draft creation are outside this batch.
-
-Before starting workers for a new or lost Redis index, build the executable JAR and run the controlled bootstrap:
-
-```powershell
-# Stop incompatible old writers/workers; use the upgraded binary for every writer.
-.\infra\docker\feed-ops.ps1 -Action rebuild -Reason 'Initial or incident-reviewed authoritative rebuild'
+# 2. 后端（端口 28080）。两个签名密钥各至少 32 字节，不要提交到 Git
+$env:CONTENT_MYSQL_PASSWORD = Read-Host 'MySQL password' -MaskInput
+$env:CONTENT_CURSOR_KEY = '<至少 32 字节>'; $env:CONTENT_IDENTITY_KEY = '<另一个至少 32 字节>'
+mvn -DskipTests package
 java -jar target/content-0.1.0-SNAPSHOT.jar --spring.profiles.active=pipeline
+
+# 3. 前端（端口 5314，/api 代理到 28080）
+cd frontend; pnpm install; pnpm dev
 ```
 
-The operator command forces all producers, consumers and scheduled workers off, including when environment flags enable them. Its trust boundary is OS execution plus database/Redis credentials; it records the OS operator and reason. Rebuild first persists maintenance, drains compatible SQL writers, fences old Redis generations, rebuilds and compares the complete retained candidate range, then publishes READY. A crash leaves primary reads active and cache readiness false; an expired recovery lease can be taken over by another reviewed rebuild. It never reconstructs only unfinished jobs: DONE events and current follow history are included. Only the owned `feed:v2:{uid}:inbox` and untrusted keys are cleared; unrelated Redis data is preserved. Local deployment is single-node Redis with `noeviction`, not Redis Cluster.
+- **@助手**：不配置时 Java 使用确定性的替身解析器。要用真实解析服务，在 `assistant-python` 下 `pip install -r requirements.txt` 并启动，然后设置 `CONTENT_ASSISTANT_PYTHON_URL` 和 `CONTENT_ASSISTANT_INTERNAL_TOKEN`；解析模式和大模型供应商见 [助手说明](docs/v1.1-material-assistant.md)。
+- **测试**：`mvn -B verify` 只跑单元测试；`mvn -B -Pintegration verify` 加上集成测试（需要 Docker）。
+- **演示脚本**：`infra/docker/demo-*.ps1`。端口、Redis 恢复、Outbox/任务重放等运维命令见 [开发说明](docs/development.md)。
 
-API and workers can run as separate processes. An API-only process uses `--spring.profiles.active=pipeline --content.pipeline.enabled=false --content.relay.enabled=false`; a worker process adds `--spring.main.web-application-type=none` while retaining the profile's worker flags. A Redis outage does not prevent the lazy Redis adapter from starting the primary-read API. MQ-enabled workers require the Broker/NameServer; metadata RPCs use a configurable 60-second limit (content.pipeline.metadata-timeout-millis, 1..120 seconds) and three cleaned-up startup attempts; this accommodates the observed Windows SDK connection setup and is independent of Relay sends or task leases. The Broker's existing asynchronous flush/single-master ACK durability boundary is unchanged.
+## 已知限制
 
-Mint a short-lived local identity token with `infra/docker/mint-identity.ps1 -UserId <id>` and send `Authorization: Bearer <token>`. The operator holding `CONTENT_IDENTITY_KEY` is the temporary issuer. The filter verifies purpose, MAC, subject, issuance/expiry and lifetime before creating Principal; an ID header cannot authenticate a request. A trusted container Principal is still accepted. This is an identity adapter, not a login system.
-
-| API | Input/behavior |
-| --- | --- |
-| `PUT /api/follows/{author}` | Principal is the reader; repeated following keeps epoch/version unchanged. |
-| `DELETE /api/follows/{author}` | Current relation becomes UNFOLLOWED; reads stop authorizing it immediately. |
-| `GET /api/feed/following?limit=20&cursor=...` | Returns items, nextCursor, pageState and scanned; limit 1..100. |
-| `PUT /api/authors/me/feed-mode` | `{mode: PUSH or PULL, expectedEpoch: integer}`; the author owns the change. |
-| `POST /api/posts/{id}/offline` | `{expectedVersion: integer}`; author-only versioned state change plus Outbox. |
-
-Cursor HMAC binds schema, reader, limit, fixed snapshot/window, returned/consumed boundaries, graph version, recovery generation and 15-minute expiry. Invalid tokens return 400, changed graph/generation returns 409 CURSOR_STALE, and source/authority failures return a retryable 503 without a new continuation. Empty UNKNOWN advances the consumed boundary. HAS_MORE confirms a remaining candidate, not necessarily a visible post. EXHAUSTED requires normal exhaustion of the configured range. Signing/expiry does not upgrade the L1 late-arrival contract to a frozen snapshot.
-
-The primary sources select current followed authors and split by each post's immutable PUSH/PULL mode. A ready inbox is an additional source; the complete PUSH primary fallback is always retained. Old epochs remain covered across either direction of mode change, Redis loss or delayed fanout. Every candidate is checked against the primary post state and the current relation: sequence strictly above cutoff, or membership of the current epoch's fixed whitelist. History defaults to 20 (maximum 100) within a configurable 30-day window. Hiding a historical post does not refill the whitelist. A new follow epoch creates a new fixed set. No blind old-epoch inbox deletion is used.
-
-Source batches default to 32, at most 64 source calls and 256 checks/consumptions per page, with a bounded eight-thread/16-queue executor. Page context adds six SQL calls and, when READY, up to two Redis readiness reads. SQL statements and merge callbacks have two-second limits; connection establishment/pool waits and database network reads are bounded at five seconds, with a ten-second pool initialization failure window. Redis connects lazily with a five-second initialization limit, then uses two-second command timeouts. These are individual limits, not a total request deadline. LIMIT and callback counts do not guarantee a physical database rows-examined bound; the real SQL plans/counters are retained in CI and do not constitute a capacity benchmark. Retained Redis reads have the same lower/upper time window as SQL. Low-priority trimming checks at most 100 readers and removes at most 100 expired members per reader per scan, with generation fencing; its restartable in-memory position is not a delivery watermark.
-
-Relay routing now includes FollowChanged, FeedModeChanged and PostOfflined on the existing Topic with explicit tags, preserving PostPublished identity and payload. Inbox compares the original immutable event, hash and any existing task before acknowledging. PUSH creates a PUBLISH task, PULL records NO_FANOUT, active FollowChanged creates BACKFILL, and cancellation/control events record their durable decision. Conflicts enter `feed_event_conflicts` and are not silently acknowledged.
-
-Delivery claims commit before Redis I/O, increment token/attempt, fix a follower-ID upper bound and use database time. Each follower/history batch is at most 100. Complete Redis success precedes a fenced progress update; only an unexpired owner can advance and renew its 30-second lease. Retries keep event/payload and use capped exponential backoff (1s to 60s), with at most five claims. The final expired claim is reaped DEAD. An old lease can have late immutable Redis side effects; it cannot commit state, and current authoritative permissions still apply. Recovery additionally fences old Redis generations. Controlled task replay preserves event content and committed scan positions, resets attempts, increments the token and audits the operator:
-
-```powershell
-.\infra\docker\feed-ops.ps1 -Action replay -TaskId 123 -Reason 'Reviewed and repaired incident cause'
-```
-
-Outbox replay remains available through the existing replay command and now accepts the supported feed event types. Unknown types remain untouched for an explicit routing contract. Task/Outbox DEAD and conflict records require operational attention; this batch does not silently discard them.
-
-CI uses `mvn -Pintegration verify` against actual MySQL 8.4, Redis 7.4 and RocketMQ 5.3.2. Fault processes run separate Java 17 JVMs; their bounded startup watchdog is separate from leases. Evidence includes transaction/token barriers, force-kill records, real Broker redelivery, Redis generation fencing, per-page traces, query plans/counters, recovery audit timings and component logs. Test ports 30921/30922 are Broker endpoints; 30923 is an explicitly bound volatile Redis used for kill/start fault injection. Recovery timing is fixture evidence, not a production performance claim.
-
-## M4–M6 visibility, interactions and media
-
-Batch ledger: [docs/m4-m6-batch.md](docs/m4-m6-batch.md). Every application read path consults authoritative MySQL visibility; warmed caches cannot authorize after offline. Likes/comments are idempotent with reconciliable `post_stats`. Topic trending uses a deduped event ledger, minute buckets and rebuildable ranking (`net_events` ≠ active like counts). Media tasks use lease fencing, S3-compatible object I/O and signed GET URLs only after visibility checks.
-
-| API | Behavior |
-| --- | --- |
-| `GET /api/posts/{id}` | Authoritative detail; offline → not visible. |
-| `PUT/DELETE /api/posts/{id}/likes` | Idempotent like/unlike; optional `topic` for trending. |
-| `POST /api/posts/{id}/comments` | Requires `Idempotency-Key`; replays return the same comment id. |
-| `GET /api/posts/{id}/stats` | Reconciled like/comment counts. |
-| `GET /api/topics/trending?window=1h\|24h&metric=net_events\|active_interactions` | Minute-bucket window ranking. |
-| `POST /api/posts/{id}/media` | Author upload (`expectedVersion`, base64); creates `media_tasks`. |
-| `POST /api/posts/{id}/media/sign` | Short-lived signed URL after DONE + visibility. |
-
-Enable media with `content.media.enabled=true` and `content.media.s3-endpoint`. Clients receive HMAC gateway URLs under `/api/media/objects` (TTL capped at 15 minutes); raw object-store endpoints are not client-facing. Official MinIO and real FFmpeg decode/cover verification remain open. Local verify includes `VisibilityAndOfflineIT`, `InteractionsAndTrendingIT` and `MediaPipelineIT`.
-
-Remaining beyond M4–M6: M7 broad shutdown/reconciliation, M8 capacity/performance and M9 TrendGuard. L2/L3 and strict publication-time follower snapshots remain later contracts. Official MinIO image health remains blocked.
-
-## Payments and refunds are simulated
-
-There is **no payment provider integration**. Material sales (v1.1) model payment and refund as internal state only; no money moves and no external service is called.
-
-- A purchase is accepted as `PROCESSING`; when the order lands it is inserted directly as `PAID` (`paid_at_ms` = landing time). There is no payment intent, checkout, provider callback or pending-payment state.
-- `price_cents` is a display/record value set by the author; nothing is charged.
-- Refunds (buyer request + merchant approval, giveaway refund, forced refund) flip the order `PAID → REFUNDED`, revoke the purchase entitlement and return the sold slot once. Nothing is paid back.
-- Before connecting a real provider, at least: a pending-payment state with reservation expiry, callback signature verification, provider-side idempotency (transaction/refund ids), refund pending/failed states, and daily reconciliation against provider statements. Details: [docs/v1.1-material-commerce.md § 支付与退款边界](docs/v1.1-material-commerce.md#支付与退款边界模拟实现).
+- **支付和退款是模拟实现**：没有接入任何支付渠道，不发生资金流动。订单落单即为已付；退款只改变订单和权益状态。接入真实支付前需要补齐的内容见 [支付与退款边界](docs/v1.1-material-commerce.md#支付与退款边界模拟实现)。
+- **对象存储没有用官方 MinIO 验收**：官方镜像无法获取，媒体相关集成测试使用 `adobe/s3mock` 作 S3 替身；`MediaMinioIT` 需要本地自建镜像，在 CI 中跳过。
+- **没有部署与高可用**：单机 Redis（非 Cluster）、单 Broker 异步刷盘无副本、单实例应用；没有部署脚本、容量规划落地和监控告警，生产环境的 Redis maxmemory 与告警也需要另行配置。
+- **所有性能数字都是单机数字**，见上文的环境说明。
+- **已知性能边界（已立项，未实现）**，见 [加固计划](docs/hardening-plan.md)：
+  - 一个作者的关注在作者行上串行，约 26–31 次/秒（B7）；
+  - 推模式扩散约 1000 粉丝/秒（B8）；
+  - 热门帖子的计数行约 40–45 次/秒/帖（B9）；
+  - 抢购的 Redis 状态随历史请求总数增长（C3，设计待确认）。
+- FFmpeg 在容器尚未创建时就超时，存在理论上的清理窗口（容器创建后超时或中断都会 `docker rm -f`）。
